@@ -202,3 +202,139 @@ class WorkItem:
 
     def complete(self) -> None:
         self.task_status = TaskStatus.DONE
+
+
+# ---------------------------------------------------------------------------
+# Workflow
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class Workflow:
+    """
+    Reusable delivery path that governs how a WorkItem progresses through
+    software delivery stages.
+
+    Step 2 fields: workflow_id, workflow_name, domain_type, stage_list,
+    allowed_transitions, stage_role_map, default_handoff_points,
+    default_gate_points
+    """
+
+    workflow_name: str
+    domain_type: str
+    stage_list: list[str]  # e.g. ["BA", "SA", "DEV", "QA"]
+    allowed_transitions: dict[str, list[str]]  # from_stage -> [to_stages]
+    workflow_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    stage_role_map: dict[str, list[str]] = field(default_factory=dict)  # stage -> [roles]
+    default_handoff_points: list[str] = field(default_factory=list)
+    default_gate_points: list[str] = field(default_factory=list)
+
+    def __post_init__(self):
+        if not self.workflow_name:
+            raise ValueError("workflow_name is required")
+        if not self.stage_list:
+            raise ValueError("stage_list is required — at least one stage")
+        # stage_role_map defaults: if a stage has no explicit role map, allow all
+        for stage in self.stage_list:
+            if stage not in self.stage_role_map:
+                self.stage_role_map[stage] = [r.value for r in Role]
+
+    def get_valid_next_stages(self, from_stage: str) -> list[str]:
+        """Return list of valid target stages from a given stage."""
+        return self.allowed_transitions.get(from_stage, [])
+
+    def is_valid_transition(self, from_stage: str, to_stage: str) -> bool:
+        return to_stage in self.get_valid_next_stages(from_stage)
+
+
+# ---------------------------------------------------------------------------
+# Handoff
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class Handoff:
+    """
+    Formal governed transfer record of a task from one stage/owner to another,
+    with a concrete deliverable reference.
+
+    Step 2 fields: handoff_id, task_id, from_stage, to_stage, from_owner,
+    to_owner, deliverable_reference, handoff_note, handoff_status, created_at
+    """
+
+    task_id: str
+    from_stage: str
+    to_stage: str
+    from_owner: str
+    to_owner: str
+    deliverable_reference: Optional[str] = None
+    handoff_note: str = ""
+    handoff_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    handoff_status: HandoffStatus = HandoffStatus.PENDING
+    created_at: datetime = field(default_factory=datetime.utcnow)
+
+    def accept(self) -> None:
+        self.handoff_status = HandoffStatus.ACCEPTED
+
+    def reject(self, reason: str = "") -> None:
+        self.handoff_status = HandoffStatus.REJECTED
+        if reason:
+            self.handoff_note = reason
+
+
+# ---------------------------------------------------------------------------
+# Gate
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class Gate:
+    """
+    Formal decision/control object that determines whether a task may proceed,
+    return, hold, or stop at a workflow boundary.
+
+    Step 2 fields: gate_id, task_id, stage, gate_type, decision,
+    decision_by, decision_note, decided_at
+    """
+
+    task_id: str
+    stage: str
+    gate_type: str  # e.g. "stage_advance", "handoff_approve"
+    decision: Optional[GateDecision] = None
+    decision_by: Optional[str] = None
+    decision_note: str = ""
+    gate_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    decided_at: Optional[datetime] = None
+
+    def decide(self, decision: GateDecision, decided_by: str, note: str = "") -> None:
+        self.decision = decision
+        self.decision_by = decided_by
+        self.decision_note = note
+        self.decided_at = datetime.utcnow()
+
+
+# ---------------------------------------------------------------------------
+# Event
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class Event:
+    """
+    Traceable governance-relevant record of meaningful action, change,
+    or condition in project delivery.
+
+    Step 2 fields: event_id, project_id, task_id, event_type, actor,
+    event_summary, related_stage, timestamp
+
+    Note: task_id may be empty for project-level events.
+    """
+
+    project_id: str
+    event_type: str  # e.g. "task_created", "stage_advanced", "gate_approved"
+    event_summary: str
+    actor: str  # Role or agent name that triggered the event
+    event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    task_id: Optional[str] = None
+    related_stage: Optional[str] = None
+    timestamp: datetime = field(default_factory=datetime.utcnow)
