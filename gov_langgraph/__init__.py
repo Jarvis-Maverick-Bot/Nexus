@@ -1,11 +1,11 @@
 """
-platform_model — Platform Core
+gov_langgraph — V1 Platform Core
 
 Source of truth for V1 governance model.
 Exports only public interfaces; internal helpers stay in their modules.
 """
 
-from platform_model.objects import (
+from .objects import (
     Event,
     Gate,
     GateDecision,
