@@ -15,32 +15,7 @@ from typing import Optional
 
 from .objects import Role, TaskState, WorkItem
 from .authority import Action, check_authority
-
-
-# ---------------------------------------------------------------------------
-# Exceptions
-# ---------------------------------------------------------------------------
-
-
-class InvalidTransitionError(Exception):
-    """Raised when a stage transition is not allowed."""
-
-    def __init__(self, from_stage: str, to_stage: str, reason: str = ""):
-        self.from_stage = from_stage
-        self.to_stage = to_stage
-        self.reason = reason
-        msg = f"Transition '{from_stage}' -> '{to_stage}' is not allowed"
-        if reason:
-            msg += f": {reason}"
-        super().__init__(msg)
-
-
-class StageNotFoundError(Exception):
-    """Raised when a stage name is not found in the workflow."""
-
-    def __init__(self, stage: str):
-        self.stage = stage
-        super().__init__(f"Stage '{stage}' not found in workflow")
+from .exceptions import InvalidTransitionError, StageNotFoundError
 
 
 # ---------------------------------------------------------------------------
@@ -112,10 +87,16 @@ class StateMachine:
         current_owner: Optional[str] = None,
     ) -> TransitionRecord:
         """
-        Attempt to advance a WorkItem's stage.
+        Validate, authorize, and execute a WorkItem stage advance.
+
+        This method:
+          1. Validates target_stage exists in the workflow
+          2. Checks the transition is in allowed_transitions
+          3. Checks actor has authority (UPDATE_TASK_STATE action)
+          4. Mutates work_item.current_stage to target_stage
 
         Args:
-            work_item: WorkItem instance
+            work_item: WorkItem instance (will be mutated)
             target_stage: Stage to advance to
             actor_role: Role attempting the advance (from Role enum value)
             current_owner: current_owner of the task (for owner authority check)
@@ -167,14 +148,16 @@ class StateMachine:
             )
             raise
 
-        # Step 4: All checks passed — record and return
+        # Step 4: All checks passed — mutate the WorkItem state
+        work_item.current_stage = target_stage
+
         record = TransitionRecord(
             task_id=work_item.task_id,
             from_stage=from_stage,
             to_stage=target_stage,
             actor_role=actor_role,
             allowed=True,
-            reason=f"Transition '{from_stage}' -> '{target_stage}' authorized",
+            reason=f"Transition '{from_stage}' -> '{target_stage}' authorized and applied",
         )
         return record
 

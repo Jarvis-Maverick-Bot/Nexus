@@ -3,16 +3,32 @@ platform_model — Platform Core
 
 Source of truth for V1 governance model.
 Exports only public interfaces; internal helpers stay in their modules.
+
+Public API:
+    Objects:    Project, WorkItem, TaskState, Workflow, Handoff, Gate, Event
+    Enums:      Role, Tier, Action, ProjectStatus, TaskStatus,
+                HandoffStatus, GateDecision
+    Authority:  check_authority(), AuthorizationRecord
+    State:      StateMachine, TransitionRecord
+    Exceptions: PlatformException, AuthorityViolation, InvalidTransitionError,
+                StageNotFoundError, ObjectNotFoundError, ValidationError
 """
 
-from .authority import (
-    Action,
-    AuthorizationRecord,
+# ---------------------------------------------------------------------------
+# Exceptions (load first — other modules reference these)
+# ---------------------------------------------------------------------------
+from .exceptions import (
     AuthorityViolation,
-    Tier,
-    check_authority,
+    InvalidTransitionError,
+    ObjectNotFoundError,
+    PlatformException,
+    StageNotFoundError,
+    ValidationError,
 )
 
+# ---------------------------------------------------------------------------
+# Objects
+# ---------------------------------------------------------------------------
 from .objects import (
     Event,
     Gate,
@@ -28,14 +44,32 @@ from .objects import (
     Workflow,
 )
 
+# ---------------------------------------------------------------------------
+# Authority
+# ---------------------------------------------------------------------------
+from .authority import (
+    Action,
+    AuthorizationRecord,
+    Tier,
+    check_authority,
+)
+
+# ---------------------------------------------------------------------------
+# State Machine
+# ---------------------------------------------------------------------------
 from .state_machine import (
-    InvalidTransitionError,
-    StageNotFoundError,
     StateMachine,
     TransitionRecord,
 )
 
 __all__ = [
+    # Exceptions
+    "PlatformException",
+    "AuthorityViolation",
+    "InvalidTransitionError",
+    "StageNotFoundError",
+    "ObjectNotFoundError",
+    "ValidationError",
     # Objects
     "Project",
     "WorkItem",
@@ -45,20 +79,17 @@ __all__ = [
     "Gate",
     "Event",
     # Enums
+    "Role",
+    "Tier",
+    "Action",
     "ProjectStatus",
     "TaskStatus",
     "HandoffStatus",
     "GateDecision",
-    "Role",
     # Authority
-    "Tier",
-    "Action",
     "check_authority",
-    "AuthorityViolation",
     "AuthorizationRecord",
     # State Machine
     "StateMachine",
-    "InvalidTransitionError",
-    "StageNotFoundError",
     "TransitionRecord",
 ]

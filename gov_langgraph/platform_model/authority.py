@@ -23,6 +23,7 @@ from enum import Enum
 from typing import Optional, NamedTuple
 
 from .objects import Role
+from .exceptions import AuthorityViolation
 
 
 # ---------------------------------------------------------------------------
@@ -191,19 +192,6 @@ ACTION_RULES: dict[str, ActionRule] = {
 # ---------------------------------------------------------------------------
 # Core Authority Check
 # ---------------------------------------------------------------------------
-
-
-class AuthorityViolation(Exception):
-    """Raised when an action is not authorized."""
-
-    def __init__(self, action: str, actor_role: str, reason: str = ""):
-        self.action = action
-        self.actor_role = actor_role
-        self.reason = reason
-        msg = f"Action '{action}' denied for role '{actor_role}'"
-        if reason:
-            msg += f": {reason}"
-        super().__init__(msg)
 
 
 def check_authority(
