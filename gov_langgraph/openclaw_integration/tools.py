@@ -220,12 +220,9 @@ def advance_stage_tool(input: dict) -> dict:
         h["store"].save_workitem(workitem)
 
         # Update TaskState
-        try:
-            ts = h["store"].load_taskstate(task_id)
-            ts.current_stage = target_stage
-            h["store"].save_taskstate(ts)
-        except Exception:
-            pass
+        ts = h["store"].load_taskstate(task_id)
+        ts.current_stage = target_stage
+        h["store"].save_taskstate(ts)
 
         return {
             "ok": True,
