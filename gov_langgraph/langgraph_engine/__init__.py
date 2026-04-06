@@ -7,6 +7,7 @@ Public API:
     graph:       build_graph()
     nodes:       register_node(), get_node()
     agent:       RoleShapedAgent, make_agent_for_stage, AgentStatus
+    executor:    AgentExecutor
 """
 
 from gov_langgraph.langgraph_engine.state import GovernanceState
@@ -23,6 +24,7 @@ from gov_langgraph.langgraph_engine.agent import (
     make_viper_qa,
     AgentStatus,
 )
+from gov_langgraph.langgraph_engine.executor import AgentExecutor
 
 __all__ = [
     "GovernanceState",
@@ -43,4 +45,6 @@ __all__ = [
     "make_viper_dev",
     "make_viper_qa",
     "AgentStatus",
+    # Executor
+    "AgentExecutor",
 ]

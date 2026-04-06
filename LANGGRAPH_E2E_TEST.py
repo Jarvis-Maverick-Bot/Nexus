@@ -69,11 +69,11 @@ def main():
     ts = TaskState(
         task_id=task_id,
         current_stage='BA',
-        state_status=TaskStatus.ACTIVE,
+        state_status=TaskStatus.IN_PROGRESS,
         current_owner='viper_ba',
     )
     store.save_taskstate(ts)
-    print(f"  TaskState created: stage=BA, status=ACTIVE")
+    print(f"  TaskState created: stage=BA, status=IN_PROGRESS")
 
     # ── 3. Advance BA -> SA ─────────────────────────────────────
     print("\n[3/8] Advance BA -> SA")

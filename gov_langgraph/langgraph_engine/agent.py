@@ -116,14 +116,16 @@ class RoleShapedAgent:
         self.current_project_id = project_id
         self.current_stage = stage
 
-        # Build the handoff document — caller fills in artifact-specific fields
+        # Build the handoff document
+        # Note: artifact_references should be filled by caller with real artifacts.
+        # Stub produces a placeholder reference.
         handoff = HandoffDocument(
             task_id=task_id,
             project_id=project_id,
             from_stage=stage,
             to_stage=_next_stage(stage),
             producer_role=self.role_name,
-            artifact_references=[],
+            artifact_references=[f"{self.produces_artifact_type.lower()}_artifacts"],
             handoff_summary=f"{self.role_name} completed stage {stage}",
             known_limitations="",
             next_expected_action=f"{_next_stage(stage)} to begin",
