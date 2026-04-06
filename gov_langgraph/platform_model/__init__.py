@@ -78,6 +78,16 @@ from .handoff_schema import (
     HandoffDocument,
 )
 
+# Actions (explicit stage actions for authority enforcement)
+# ---------------------------------------------------------------------------
+from .actions import (
+    BAAction,
+    SAAction,
+    DEVAction,
+    QAAction,
+    STAGE_ACTIONS,
+)
+
 __all__ = [
     # Exceptions
     "PlatformException",
@@ -113,4 +123,10 @@ __all__ = [
     "get_v1_pipeline_workflow",
     # Handoff
     "HandoffDocument",
+    # Actions
+    "BAAction",
+    "SAAction",
+    "DEVAction",
+    "QAAction",
+    "STAGE_ACTIONS",
 ]

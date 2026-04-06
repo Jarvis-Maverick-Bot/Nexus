@@ -66,6 +66,7 @@ class RoleShapedAgent:
     current_project_id: Optional[str] = None
     current_stage: Optional[str] = None
     halt_reason: Optional[str] = None
+    last_action: Optional[str] = None  # the specific action this agent just took
 
     def can_act_in_stage(self, stage: str) -> bool:
         """Check if this agent is allowed to operate in the given stage."""
@@ -74,6 +75,10 @@ class RoleShapedAgent:
     def can_take_action(self, action: str) -> bool:
         """Check if this agent is allowed to take the given action."""
         return action in self.allowed_actions
+
+    def record_action(self, action: str) -> None:
+        """Record the specific action this agent is taking. For audit."""
+        self.last_action = action
 
     def is_idle(self) -> bool:
         return self.status == AgentStatus.IDLE
