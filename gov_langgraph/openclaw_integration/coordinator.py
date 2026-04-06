@@ -31,7 +31,7 @@ from .tools import (
 _COMMAND_MAP: dict[str, tuple[Any, list[str]]] = {
     "create_project": (create_project_tool, ["project_name"]),
     "create_task": (create_task_tool, ["task_title", "project_id"]),
-    "advance_stage": (advance_stage_tool, ["task_id", "target_stage", "actor"]),
+    "advance_stage": (advance_stage_tool, ["task_id", "actor"]),
     "submit_handoff": (submit_handoff_tool, ["task_id", "from_owner", "to_owner", "actor"]),
     "approve_gate": (approve_gate_tool, ["task_id", "gate_name", "actor"]),
     "reject_gate": (reject_gate_tool, ["task_id", "gate_name", "actor"]),

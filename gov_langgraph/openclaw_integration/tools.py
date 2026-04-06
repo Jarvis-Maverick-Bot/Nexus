@@ -24,6 +24,7 @@ from gov_langgraph.platform_model import (
 )
 from gov_langgraph.platform_model.state_machine import StateMachine
 from gov_langgraph.platform_model.authority import Action, check_authority
+from gov_langgraph.langgraph_engine import init_runtime, run_workitem as langgraph_run_workitem
 
 
 # ---------------------------------------------------------------------------
@@ -172,51 +173,44 @@ def create_task_tool(input: dict) -> dict:
 
 def advance_stage_tool(input: dict) -> dict:
     """
-    Advance a task to the next stage.
+    Advance a task through the V1 pipeline using the LangGraph.
+
+    Runs the compiled LangGraph pipeline for this workitem.
+    Workitem advances through ALL remaining stages (BA->SA->DEV->QA).
 
     Args:
         input: {
             task_id: str,
-            target_stage: str,
             actor: str (role name),
         }
     Returns:
         {ok: bool, task_id: str, from_stage: str, to_stage: str, message: str}
     """
     try:
-        h = _harness
         task_id = input["task_id"]
-        target_stage = input["target_stage"]
         actor = input.get("actor", "unknown")
 
+        # Load workitem to get project_id and starting stage
+        h = _harness
         workitem = h["store"].load_workitem(task_id)
         from_stage = workitem.current_stage
+        project_id = workitem.project_id
 
-        sm = _sm()
-        record = sm.advance_stage(
-            work_item=workitem,
-            target_stage=target_stage,
-            actor_role=actor,
-            project_id=workitem.project_id,
-        )
+        # Run through the LangGraph pipeline
+        result = langgraph_run_workitem(task_id, project_id)
 
-        # Persist updated workitem
-        h["store"].save_workitem(workitem)
-
-        # Update TaskState
-        try:
-            ts = h["store"].load_taskstate(task_id)
-            ts.current_stage = target_stage
-            h["store"].save_taskstate(ts)
-        except Exception:
-            pass  # TaskState may not exist in all cases
+        # Get the final stage
+        workitem_result = result.get('workitem')
+        to_stage = workitem_result.current_stage if workitem_result else from_stage
 
         return {
             "ok": True,
             "task_id": task_id,
             "from_stage": from_stage,
-            "to_stage": target_stage,
-            "message": f"Advanced from '{from_stage}' to '{target_stage}'",
+            "to_stage": to_stage,
+            "current_action": result.get("current_action"),
+            "halt_reason": result.get("halt_reason"),
+            "message": f"Pipeline advanced from '{from_stage}' to '{to_stage}'",
         }
     except Exception as e:
         return {"ok": False, "error": str(e), "message": f"Failed to advance stage: {e}"}
