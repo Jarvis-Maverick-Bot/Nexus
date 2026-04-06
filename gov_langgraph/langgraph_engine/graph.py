@@ -24,10 +24,11 @@ from __future__ import annotations
 from langgraph.graph import StateGraph, START, END
 
 from gov_langgraph.langgraph_engine.state import GovernanceState
+from gov_langgraph.platform_model import V1_PIPELINE_STAGES
 
 
-# Valid stage sequence
-STAGE_SEQUENCE = ["BA", "SA", "DEV", "QA"]
+# Valid stage sequence — imported from central V1 workflow source
+STAGE_SEQUENCE = V1_PIPELINE_STAGES
 
 
 def _next_stage(current: str) -> str | type[END]:
