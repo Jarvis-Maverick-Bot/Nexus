@@ -11,6 +11,7 @@ Public API:
 from gov_langgraph.langgraph_engine.state import GovernanceState
 from gov_langgraph.langgraph_engine.pipeline import compile, run_workitem, get_pipeline
 from gov_langgraph.langgraph_engine.graph import build_graph
+from gov_langgraph.langgraph_engine.runtime import init_runtime, get_runtime
 from gov_langgraph.langgraph_engine.nodes import register_node, get_node, NODE_REGISTRY
 
 __all__ = [
@@ -18,6 +19,8 @@ __all__ = [
     "compile",
     "run_workitem",
     "get_pipeline",
+    "init_runtime",
+    "get_runtime",
     "build_graph",
     "register_node",
     "get_node",

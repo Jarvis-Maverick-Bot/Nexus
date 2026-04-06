@@ -31,7 +31,7 @@ class NodeFunction(Protocol):
 
     Returns:
         NodeCommand dict with at minimum:
-        - action: str — advance | block | handoff | halt | gate_approved | gate_rejected | done
+        - current_action: str — advance | block | handoff | halt | gate_approved | gate_rejected | done
         - Optionally: halt_reason, blocked, blocker to update state
     """
 

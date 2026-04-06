@@ -15,6 +15,7 @@ from typing import Optional
 
 from gov_langgraph.langgraph_engine.graph import build_graph
 from gov_langgraph.langgraph_engine.state import GovernanceState
+from gov_langgraph.langgraph_engine.runtime import init_runtime, get_runtime
 from gov_langgraph.harness import HarnessConfig, StateStore
 
 
@@ -33,13 +34,11 @@ def run_workitem(task_id: str, project_id: str) -> GovernanceState:
     """
     Run the pipeline for one workitem.
 
-    Args:
-        task_id: ID of the workitem to process
-        project_id: project ID
-
-    Returns:
-        Final GovernanceState after graph execution
+    Initializes runtime context, loads workitem, runs graph.
     """
+    # Initialize runtime (creates harness singletons once)
+    init_runtime()
+
     cfg = HarnessConfig()
     store = StateStore(cfg.state_dir)
 
@@ -68,6 +67,7 @@ _compiled: Optional[any] = None
 def get_pipeline():
     """
     Get the compiled pipeline (singleton, compiled once on first call).
+    Does NOT initialize runtime — call init_runtime() separately first.
     """
     global _compiled
     if _compiled is None:

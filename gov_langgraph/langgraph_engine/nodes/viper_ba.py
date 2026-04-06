@@ -7,7 +7,7 @@ Node contract:
 - Receives GovernanceState
 - Loads workitem from StateStore (if not already in state)
 - Advances workitem from BA to SA via StateMachine
-- Checkpoints + emits event
+- Checkpoints + emits event via harness
 - Returns command: advance (done) or halt (blocked/error)
 """
 
@@ -15,77 +15,51 @@ from __future__ import annotations
 
 from gov_langgraph.langgraph_engine.state import GovernanceState
 from gov_langgraph.langgraph_engine.nodes.base import NodeCommand
+from gov_langgraph.langgraph_engine.runtime import get_runtime
 from gov_langgraph.platform_model import get_v1_pipeline_workflow, TaskStatus
-from gov_langgraph.harness import HarnessConfig, StateStore, Checkpointer, EventJournal
 from gov_langgraph.platform_model.state_machine import StateMachine
 
 
-def make_viper_node(stage: str, next_stage: str, role_owner: str):
+def viper_ba_node(state: GovernanceState) -> NodeCommand:
     """
-    Factory to create a stage node for a given stage.
-
-    Args:
-        stage: current stage (e.g. "BA")
-        next_stage: next stage (e.g. "SA")
-        role_owner: role that owns this stage (e.g. "viper_ba")
+    BA stage node — advances workitem from BA to SA.
     """
+    rt = get_runtime()
 
-    def node(state: GovernanceState) -> NodeCommand:
-        cfg = HarnessConfig()
-        cfg.ensure_dirs()
-        store = StateStore(cfg.state_dir)
-        ckpt = Checkpointer(cfg)
-        journal = EventJournal(cfg.event_dir)
+    workitem = state.workitem
+    if workitem is None:
+        return {
+            "current_action": "halt",
+            "halt_reason": "BA: workitem not in state",
+        }
 
-        # Load workitem if not in state
-        workitem = state.workitem
-        if workitem is None:
-            return {
-                "current_action": "halt",
-                "halt_reason": f"{stage}: workitem not in state",
-            }
+    sm = StateMachine(
+        workflow=get_v1_pipeline_workflow(),
+        checkpointer=rt.checkpointer,
+        event_journal=rt.event_journal,
+    )
 
-        # Create StateMachine wired to harness
-        sm = StateMachine(
-            workflow=get_v1_pipeline_workflow(),
-            checkpointer=ckpt,
-            event_journal=journal,
+    try:
+        sm.advance_stage(
+            work_item=workitem,
+            target_stage="SA",
+            actor_role="viper_ba",
+            project_id=state.project_id,
         )
 
-        # Try to advance
-        try:
-            record = sm.advance_stage(
-                work_item=workitem,
-                target_stage=next_stage,
-                actor_role=role_owner,
-                project_id=state.project_id,
-            )
+        # Persist updated workitem
+        rt.store.save_workitem(workitem)
 
-            # Persist updated workitem
-            store.save_workitem(workitem)
+        # Update task state — propagate error if this fails
+        ts = rt.store.load_taskstate(workitem.task_id)
+        ts.current_stage = "SA"
+        ts.state_status = TaskStatus.IN_PROGRESS
+        rt.store.save_taskstate(ts)
 
-            # Update task state
-            try:
-                ts = store.load_taskstate(workitem.task_id)
-                ts.current_stage = next_stage
-                ts.state_status = TaskStatus.IN_PROGRESS
-                store.save_taskstate(ts)
-            except Exception:
-                pass
+        return {"current_action": "advance"}
 
-            return {
-                "current_action": "advance",
-            }
-
-        except Exception as e:
-            error_msg = str(e)
-            return {
-                "current_action": "halt",
-                "halt_reason": f"{stage}: {error_msg}",
-            }
-
-    return node
-
-
-# Convenience: named BA node
-viper_ba_node = make_viper_node("BA", "SA", "viper_ba")
+    except Exception as e:
+        return {
+            "current_action": "halt",
+            "halt_reason": f"BA: {e}",
+        }
