@@ -41,20 +41,31 @@ def _next_stage(current: str) -> str | type[END]:
 
 def build_graph() -> StateGraph:
     """
-    Build the V1 pipeline StateGraph scaffold.
+    Build the V1 pipeline StateGraph.
 
-    Nodes are stubs in this file — real implementation in Day 2.
+    Uses real stage nodes (viper_ba, viper_sa, viper_dev, viper_qa)
+    wired to StateMachine + Harness.
     """
     graph = StateGraph(state_schema=GovernanceState)
 
     # Import nodes
     from gov_langgraph.langgraph_engine.nodes.maverick import maverick_node
-    from gov_langgraph.langgraph_engine.nodes import register_node
+    from gov_langgraph.langgraph_engine.nodes.viper_ba import viper_ba_node
+    from gov_langgraph.langgraph_engine.nodes.viper_sa import viper_sa_node
+    from gov_langgraph.langgraph_engine.nodes.viper_dev import viper_dev_node
+    from gov_langgraph.langgraph_engine.nodes.viper_qa import viper_qa_node
 
-    # Register real stage nodes (Day 2 will replace these stubs)
-    for stage in STAGE_SEQUENCE:
-        node_name = f"__stage_{stage}__"
-        graph.add_node(node_name, _make_stage_stub(stage))
+    # Stage nodes mapped to graph node names
+    stage_nodes = {
+        "BA": viper_ba_node,
+        "SA": viper_sa_node,
+        "DEV": viper_dev_node,
+        "QA": viper_qa_node,
+    }
+
+    # Register stage nodes
+    for stage, node_fn in stage_nodes.items():
+        graph.add_node(f"__stage_{stage}__", node_fn)
 
     # Entry point: maverick
     graph.add_node("__maverick__", maverick_node)
