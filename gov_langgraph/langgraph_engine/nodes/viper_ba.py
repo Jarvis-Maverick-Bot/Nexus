@@ -43,7 +43,7 @@ def viper_ba_node(state: GovernanceState) -> NodeCommand:
         sm.advance_stage(
             work_item=workitem,
             target_stage="SA",
-            actor_role="viper_ba",
+            actor_role=state.actor or "viper_ba",
             project_id=state.project_id,
         )
 

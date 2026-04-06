@@ -173,14 +173,15 @@ def create_task_tool(input: dict) -> dict:
 
 def advance_stage_tool(input: dict) -> dict:
     """
-    Advance a task through the V1 pipeline using the LangGraph.
+    Advance a task ONE stage at a time via StateMachine.
 
-    Runs the compiled LangGraph pipeline for this workitem.
-    Workitem advances through ALL remaining stages (BA->SA->DEV->QA).
+    Bounded advance: validates target is the next valid stage,
+    checks authority, advances exactly one stage.
 
     Args:
         input: {
             task_id: str,
+            target_stage: str,
             actor: str (role name),
         }
     Returns:
@@ -188,29 +189,51 @@ def advance_stage_tool(input: dict) -> dict:
     """
     try:
         task_id = input["task_id"]
+        target_stage = input["target_stage"]
         actor = input.get("actor", "unknown")
 
-        # Load workitem to get project_id and starting stage
+        # Load workitem
         h = _harness
         workitem = h["store"].load_workitem(task_id)
         from_stage = workitem.current_stage
         project_id = workitem.project_id
 
-        # Run through the LangGraph pipeline
-        result = langgraph_run_workitem(task_id, project_id)
+        # Use StateMachine directly for bounded one-stage advance
+        from gov_langgraph.langgraph_engine.runtime import get_runtime
+        rt = get_runtime()
 
-        # Get the final stage
-        workitem_result = result.get('workitem')
-        to_stage = workitem_result.current_stage if workitem_result else from_stage
+        sm = StateMachine(
+            workflow=get_v1_pipeline_workflow(),
+            checkpointer=rt.checkpointer,
+            event_journal=rt.event_journal,
+        )
+
+        # Advance exactly one stage
+        record = sm.advance_stage(
+            work_item=workitem,
+            target_stage=target_stage,
+            actor_role=actor,
+            project_id=project_id,
+        )
+
+        # Persist updated workitem
+        h["store"].save_workitem(workitem)
+
+        # Update TaskState
+        try:
+            ts = h["store"].load_taskstate(task_id)
+            ts.current_stage = target_stage
+            h["store"].save_taskstate(ts)
+        except Exception:
+            pass
 
         return {
             "ok": True,
             "task_id": task_id,
             "from_stage": from_stage,
-            "to_stage": to_stage,
-            "current_action": result.get("current_action"),
-            "halt_reason": result.get("halt_reason"),
-            "message": f"Pipeline advanced from '{from_stage}' to '{to_stage}'",
+            "to_stage": target_stage,
+            "current_action": "advance",
+            "message": f"Advanced from '{from_stage}' to '{target_stage}'",
         }
     except Exception as e:
         return {"ok": False, "error": str(e), "message": f"Failed to advance stage: {e}"}

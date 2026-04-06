@@ -37,6 +37,7 @@ class GovernanceState:
     # Identity
     project_id: str = ""
     task_id: str = ""
+    actor: str = ""  # Role performing the current action (for authority)
 
     # Core objects (loaded from StateStore by nodes)
     workitem: Optional[WorkItem] = None
