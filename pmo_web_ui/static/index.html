@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PMO Web UI — gov_langgraph</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #f8fafc;
+    }
+    .subtitle {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 2rem;
+    }
+    .section {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+    .form-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    input {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      color: #e2e8f0;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      min-width: 160px;
+      flex: 1;
+    }
+    input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    button {
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    button:hover { background: #2563eb; }
+    button:disabled { background: #334155; cursor: not-allowed; }
+    button.danger { background: #ef4444; }
+    button.danger:hover { background: #dc2626; }
+    button.success { background: #22c55e; }
+    button.success:hover { background: #16a34a; }
+    .output {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      padding: 0.75rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      white-space: pre-wrap;
+      word-break: break-all;
+      min-height: 48px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .output.ok { border-color: #22c55e; }
+    .output.error { border-color: #ef4444; }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 640px) {
+      .two-col { grid-template-columns: 1fr; }
+      input { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>PMO Web UI</h1>
+  <p class="subtitle">gov_langgraph — non-authoritative mirror (source of truth)</p>
+
+  <!-- ── VIEW STATUS ── -->
+  <div class="section">
+    <div class="section-title">View Status</div>
+    <div class="form-row">
+      <input id="status-task-id" placeholder="Task ID" />
+      <button onclick="doStatus()">Get Status</button>
+    </div>
+    <div class="output" id="status-output">Response will appear here…</div>
+  </div>
+
+  <!-- ── APPROVE / REJECT GATE ── -->
+  <div class="two-col">
+    <div class="section">
+      <div class="section-title">Approve Gate</div>
+      <div class="form-row">
+        <input id="approve-task-id" placeholder="Task ID" />
+        <input id="approve-gate-name" placeholder="Gate name" value="DEFAULT" />
+      </div>
+      <div class="form-row">
+        <input id="approve-actor" placeholder="Actor (role)" />
+        <input id="approve-notes" placeholder="Notes (optional)" />
+      </div>
+      <button class="success" onclick="doApprove()">Approve</button>
+      <div class="output" id="approve-output">Response will appear here…</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Reject Gate</div>
+      <div class="form-row">
+        <input id="reject-task-id" placeholder="Task ID" />
+        <input id="reject-gate-name" placeholder="Gate name" value="DEFAULT" />
+      </div>
+      <div class="form-row">
+        <input id="reject-actor" placeholder="Actor (role)" />
+        <input id="reject-notes" placeholder="Notes (optional)" />
+      </div>
+      <button class="danger" onclick="doReject()">Reject</button>
+      <div class="output" id="reject-output">Response will appear here…</div>
+    </div>
+  </div>
+
+  <!-- ── KICKOFF ── -->
+  <div class="section">
+    <div class="section-title">Kickoff (Create Task)</div>
+    <div class="form-row">
+      <input id="kickoff-title" placeholder="Task title" />
+      <input id="kickoff-project" placeholder="Project ID" />
+    </div>
+    <div class="form-row">
+      <input id="kickoff-owner" placeholder="Current owner" />
+      <input id="kickoff-stage" placeholder="Current stage (e.g. BA)" value="BA" />
+      <input id="kickoff-priority" placeholder="Priority (1-5)" type="number" min="1" max="5" value="3" style="max-width:120px" />
+    </div>
+    <div class="form-row">
+      <input id="kickoff-actor" placeholder="Actor (role)" />
+      <button onclick="doKickoff()">Create Task</button>
+    </div>
+    <div class="output" id="kickoff-output">Response will appear here…</div>
+  </div>
+
+  <!-- ── LIST TASKS ── -->
+  <div class="section">
+    <div class="section-title">List Tasks</div>
+    <div class="form-row">
+      <input id="list-project" placeholder="Project ID" />
+      <button onclick="doList()">List</button>
+    </div>
+    <div class="output" id="list-output">Response will appear here…</div>
+  </div>
+
+<script>
+  const BASE = '';
+
+  function show(elId, data, ok) {
+    const el = document.getElementById(elId);
+    el.textContent = JSON.stringify(data, null, 2);
+    el.className = 'output ' + (ok ? 'ok' : 'error');
+  }
+
+  async function doStatus() {
+    const taskId = document.getElementById('status-task-id').value.trim();
+    if (!taskId) { alert('Task ID required'); return; }
+    try {
+      const r = await fetch(`${BASE}/status/${encodeURIComponent(taskId)}`);
+      const d = await r.json();
+      show('status-output', d, d.ok);
+    } catch(e) {
+      show('status-output', {error: e.message}, false);
+    }
+  }
+
+  async function doApprove() {
+    const body = {
+      task_id: document.getElementById('approve-task-id').value.trim(),
+      gate_name: document.getElementById('approve-gate-name').value.trim() || 'DEFAULT',
+      actor: document.getElementById('approve-actor').value.trim(),
+      notes: document.getElementById('approve-notes').value.trim(),
+    };
+    if (!body.task_id || !body.actor) { alert('Task ID and Actor required'); return; }
+    try {
+      const r = await fetch(`${BASE}/gate/approve`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(body),
+      });
+      const d = await r.json();
+      show('approve-output', d, d.ok);
+    } catch(e) {
+      show('approve-output', {error: e.message}, false);
+    }
+  }
+
+  async function doReject() {
+    const body = {
+      task_id: document.getElementById('reject-task-id').value.trim(),
+      gate_name: document.getElementById('reject-gate-name').value.trim() || 'DEFAULT',
+      actor: document.getElementById('reject-actor').value.trim(),
+      notes: document.getElementById('reject-notes').value.trim(),
+    };
+    if (!body.task_id || !body.actor) { alert('Task ID and Actor required'); return; }
+    try {
+      const r = await fetch(`${BASE}/gate/reject`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(body),
+      });
+      const d = await r.json();
+      show('reject-output', d, d.ok);
+    } catch(e) {
+      show('reject-output', {error: e.message}, false);
+    }
+  }
+
+  async function doKickoff() {
+    const body = {
+      task_title: document.getElementById('kickoff-title').value.trim(),
+      project_id: document.getElementById('kickoff-project').value.trim(),
+      current_owner: document.getElementById('kickoff-owner').value.trim(),
+      current_stage: document.getElementById('kickoff-stage').value.trim() || 'BA',
+      priority: parseInt(document.getElementById('kickoff-priority').value) || 3,
+      actor: document.getElementById('kickoff-actor').value.trim(),
+    };
+    if (!body.task_title || !body.project_id || !body.current_owner || !body.actor) {
+      alert('Title, Project ID, Owner, and Actor required'); return;
+    }
+    try {
+      const r = await fetch(`${BASE}/kickoff`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(body),
+      });
+      const d = await r.json();
+      show('kickoff-output', d, d.ok);
+    } catch(e) {
+      show('kickoff-output', {error: e.message}, false);
+    }
+  }
+
+  async function doList() {
+    const projectId = document.getElementById('list-project').value.trim();
+    if (!projectId) { alert('Project ID required'); return; }
+    try {
+      const r = await fetch(`${BASE}/tasks/${encodeURIComponent(projectId)}`);
+      const d = await r.json();
+      show('list-output', d, d.ok);
+    } catch(e) {
+      show('list-output', {error: e.message}, false);
+    }
+  }
+</script>
+</body>
+</html>
