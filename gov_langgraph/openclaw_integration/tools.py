@@ -713,3 +713,162 @@ def _gate_message(status: str, stage: str) -> str:
     elif status == "rejected":
         return f"Gate at '{stage}' was rejected."
     return f"No gate configured for stage '{stage}'."
+
+
+# ---------------------------------------------------------------------------
+# Project tools
+# ---------------------------------------------------------------------------
+
+
+def get_project_tool(input: dict) -> dict:
+    """
+    Get details of a specific project.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, project_id, project_name, project_status, ...}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        return {
+            "ok": True,
+            "project_id": project.project_id,
+            "project_name": project.project_name,
+            "project_goal": project.project_goal,
+            "domain_type": project.domain_type,
+            "project_owner": project.project_owner,
+            "project_status": project.project_status.value,
+            "created_at": project.created_at.isoformat(),
+            "message": f"Project: {project.project_name} ({project.project_status.value})",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to get project: {e}")
+
+
+def list_projects_tool(input: dict) -> dict:
+    """
+    List all projects, optionally filtered by status.
+
+    Args:
+        input: {status: str | None}  # active, on_hold, closed, shutdown
+    Returns:
+        {ok: bool, projects: list[dict], count: int}
+    """
+    try:
+        h = _harness
+        status_filter = input.get("status")
+
+        project_ids = h["store"].list_projects()
+        projects = []
+        for pid in project_ids:
+            try:
+                proj = h["store"].load_project(pid)
+                if status_filter is None or proj.project_status.value == status_filter:
+                    projects.append({
+                        "project_id": proj.project_id,
+                        "project_name": proj.project_name,
+                        "project_status": proj.project_status.value,
+                        "project_owner": proj.project_owner,
+                        "created_at": proj.created_at.isoformat(),
+                    })
+            except Exception:
+                pass  # Skip corrupted project records
+
+        return {
+            "ok": True,
+            "projects": projects,
+            "count": len(projects),
+            "message": f"{len(projects)} project(s) found",
+        }
+    except Exception as e:
+        return _error_response("unknown", f"Failed to list projects: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Maverick spawn tools
+# ---------------------------------------------------------------------------
+
+_maverick_spawner = None
+
+
+def _get_maverick_spawner():
+    """Get or create MaverickSpawner singleton."""
+    global _maverick_spawner
+    if _maverick_spawner is None:
+        from gov_langgraph.openclaw_integration.maverick_spawner import MaverickSpawner
+        _maverick_spawner = MaverickSpawner()
+    return _maverick_spawner
+
+
+def spawn_agent_tool(input: dict) -> dict:
+    """
+    Spawn a known agent for a task via MaverickSpawner.
+
+    Agent and workflow definitions are loaded from config/agents.yaml.
+    No hardcoded agent IDs or sequences.
+
+    Args:
+        input: {
+            project_id: str,
+            task_id: str,
+            role: str (optional — defaults to current_stage),
+        }
+    Returns:
+        {ok: bool, session_key: str, status: str, error: str | None}
+    """
+    try:
+        h = _harness
+
+        project_id = input["project_id"]
+        task_id = input["task_id"]
+        role = input.get("role")
+
+        # Load project and task for context
+        try:
+            project = h["store"].load_project(project_id)
+        except ObjectNotFoundError:
+            return _error_response("project_not_found", f"Project '{project_id}' not found")
+
+        try:
+            task = h["store"].load_workitem(task_id)
+        except ObjectNotFoundError:
+            return _error_response("task_not_found", f"Task '{task_id}' not found")
+
+        spawner = _get_maverick_spawner()
+        result = spawner.schedule(
+            project_name=project.project_name,
+            project_id=project.project_id,
+            task_title=task.task_title,
+            task_id=task.task_id,
+            current_stage=task.current_stage,
+            role=role,
+        )
+
+        if result.ok:
+            h["journal"].append_raw(
+                project_id=project_id,
+                event_type="agent_spawned",
+                event_summary=f"Agent '{role or task.current_stage}' spawned for task '{task.task_title}'",
+                actor="maverick",
+                task_id=task_id,
+            )
+
+        return {
+            "ok": result.ok,
+            "session_key": result.session_key,
+            "status": result.status,
+            "error": result.error,
+            "message": (
+                f"Agent spawned: {role or task.current_stage}"
+                if result.ok
+                else f"Spawn failed: {result.error}"
+            ),
+        }
+    except Exception as e:
+        return _error_response("unknown", f"Failed to spawn agent: {e}")

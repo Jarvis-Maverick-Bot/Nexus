@@ -1,0 +1,32 @@
+# V1.5 Agent and Workflow Configuration
+# All agent and workflow definitions live here — no hardcoding allowed.
+# For V2.0: add new agents and workflows by editing this file.
+#
+# IMPORTANT: Match actual registered agentIds in OpenClaw config exactly.
+# Do NOT guess or normalize — check openclaw.json agents.list[] for truth.
+
+agents:
+  # Primary delivery agent — handles BA, SA, DEV, QA roles internally
+  viper:
+    agent_id: "viper"
+    role: "Viper Delivery Agent"
+    description: "Full-stack delivery: BA, SA, DEV, QA — role determined by task context"
+    # V1.5: single agent handles all stages via internal routing
+    # V2.0: separate agent entries when multi-agent spawn is needed
+
+  # PMO / scheduling agent
+  maverick:
+    agent_id: "maverick"
+    role: "PMO Coordinator"
+    description: "Flexible scheduler — routes work to known agents based on context"
+
+workflows:
+  # V1.5: BA→SA→DEV→QA governed reference path
+  standard_delivery:
+    stages: ["BA", "SA", "DEV", "QA"]
+    description: "Standard governed delivery path"
+
+  # V2.0 — fast track
+  fast_track:
+    stages: ["QA"]
+    description: "QA-only fast track"

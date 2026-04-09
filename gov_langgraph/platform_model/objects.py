@@ -26,6 +26,7 @@ class ProjectStatus(str, Enum):
     ACTIVE = "active"
     ON_HOLD = "on_hold"
     CLOSED = "closed"
+    SHUTDOWN = "shutdown"
 
 
 class TaskStatus(str, Enum):

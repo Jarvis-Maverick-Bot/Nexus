@@ -27,6 +27,10 @@ from gov_langgraph.openclaw_integration.tools import (
     reject_gate_tool,
     kickoff_task_tool,
     list_tasks_tool,
+    create_project_tool,
+    get_project_tool,
+    list_projects_tool,
+    spawn_agent_tool,
 )
 
 PORT = int(os.getenv("PMO_PORT", "8000"))
@@ -149,6 +153,65 @@ def tasks(project_id: str):
 def gate_panel(task_id: str):
     """Get gate panel for a task — PMO gate confirmation surface."""
     result = get_gate_panel_tool({"task_id": task_id})
+    if not result.get("ok", False):
+        return _tool_error(result)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Project endpoints
+# ---------------------------------------------------------------------------
+
+@app.post("/projects")
+def create_project(body: dict):
+    """Create a new project."""
+    required = ["project_name", "project_goal", "project_owner"]
+    for field in required:
+        if field not in body:
+            return JSONResponse(
+                content={"ok": False, "error_type": "validation_error",
+                         "message": f"Missing field: {field}"},
+                status_code=422,
+            )
+    result = create_project_tool(body)
+    if not result.get("ok", False):
+        return _tool_error(result)
+    return result
+
+
+@app.get("/projects")
+def list_projects(status: str | None = None):
+    """List all projects, optionally filtered by status."""
+    result = list_projects_tool({"status": status})
+    if not result.get("ok", False):
+        return _tool_error(result)
+    return result
+
+
+@app.get("/projects/{project_id}")
+def get_project(project_id: str):
+    """Get details of a specific project."""
+    result = get_project_tool({"project_id": project_id})
+    if not result.get("ok", False):
+        return _tool_error(result)
+    return result
+
+
+@app.post("/agents/spawn")
+def spawn_agent(body: dict):
+    """Spawn a known agent for a task via MaverickSpawner.
+
+    Agent definitions are loaded from config/agents.yaml — no hardcoding.
+    """
+    required = ["project_id", "task_id"]
+    for field in required:
+        if field not in body:
+            return JSONResponse(
+                content={"ok": False, "error_type": "validation_error",
+                         "message": f"Missing field: {field}"},
+                status_code=422,
+            )
+    result = spawn_agent_tool(body)
     if not result.get("ok", False):
         return _tool_error(result)
     return result
