@@ -2,7 +2,9 @@
 
 **Author:** Jarvis (Tech Lead)
 **Date:** 2026-04-08
-**Status:** ACTIVE — Reflects built implementation (2026-04-08)
+**Updated:** 2026-04-09
+**Status:** V1 COMPLETE — frozen at v1.0.0
+**Nova review:** ✅ ACCEPTED — 2026-04-08
 **Nova review:** ✅ ACCEPTED — 2026-04-08
 
 ---
@@ -32,10 +34,11 @@ PMO V1 Web UI is a **standalone web application** providing the primary human in
 │               FastAPI Server (port 8000)                 │
 │                                                         │
 │   GET  /status/{task_id}   → get_status_tool           │
-│   POST /gate/approve       → approve_gate_tool         │
+│   GET  /gate/{task_id}     → get_gate_panel_tool       │
+│   POST /gate/approve       → approve_gate_tool        │
 │   POST /gate/reject        → reject_gate_tool          │
-│   POST /kickoff             → create_task_tool          │
-│   GET  /tasks/{project_id} → list_tasks_tool           │
+│   POST /kickoff             → kickoff_task_tool         │
+│   GET  /tasks/{project_id} → list_tasks_tool          │
 └─────────────────────┬───────────────────────────────────┘
                       │ Direct function calls
                       ▼
@@ -72,14 +75,38 @@ Returns full status for a single task.
 }
 ```
 
+### `GET /gate/{task_id}`
+Returns the current gate decision for a task's active stage.
+
+**Response:**
+```json
+{
+  "ok": true,
+  "task_id": "...",
+  "task_title": "...",
+  "current_stage": "BA",
+  "current_owner": "viper_ba",
+  "gate_status": "pending",
+  "gate_stage": "BA",
+  "gate_type": "stage_advance",
+  "gate_decision": null,
+  "gate_decision_by": null,
+  "gate_decision_note": "",
+  "gate_decided_at": null,
+  "message": "..."
+}
+```
+
+**`gate_status` values:** `pending` | `approved` | `rejected` | `no_gate`
+
 ### `POST /gate/approve`
-Approve a governance gate.
+Approve a governance gate. **Double-decision prevention** — returns error if gate is already decided.
 
 **Request:**
 ```json
 {
   "task_id": "...",
-  "gate_name": "DEFAULT",
+  "gate_name": "BA_GATE",
   "actor": "alex",
   "notes": "Evidence looks good"
 }
@@ -92,20 +119,21 @@ Approve a governance gate.
   "gate_id": "...",
   "stage": "BA",
   "task_id": "...",
+  "gate_status": "approved",
   "message": "Gate approved at stage 'BA'"
 }
 ```
 
 ### `POST /gate/reject`
-Reject a governance gate.
+Reject a governance gate. **Rejection reason is required.**
 
 **Request:**
 ```json
 {
   "task_id": "...",
-  "gate_name": "DEFAULT",
+  "gate_name": "BA_GATE",
   "actor": "alex",
-  "notes": "Evidence incomplete"
+  "notes": "Evidence incomplete — please revise"
 }
 ```
 
@@ -116,21 +144,23 @@ Reject a governance gate.
   "gate_id": "...",
   "stage": "BA",
   "task_id": "...",
+  "gate_status": "rejected",
   "message": "Gate rejected at stage 'BA'"
 }
 ```
 
 ### `POST /kickoff`
-Announce a new project kickoff — creates a new workitem at INTAKE stage.
+Announce a new project kickoff — creates a workitem at INTAKE stage.
+
+**Product-shaped interface.** Assignee is optional (blank = unassigned). Backend sets stage to INTAKE and assigns the default project automatically.
 
 **Request:**
 ```json
 {
-  "task_title": "New Feature X",
-  "project_id": "...",
-  "current_owner": "BA",
-  "current_stage": "BA",
-  "priority": 3,
+  "title": "New Feature X",
+  "description": "Build a dashboard for PMO to view project status",
+  "priority": 1,
+  "assignee": "viper_ba",
   "actor": "alex"
 }
 ```
@@ -140,11 +170,14 @@ Announce a new project kickoff — creates a new workitem at INTAKE stage.
 {
   "ok": true,
   "task_id": "...",
-  "task_title": "...",
-  "current_stage": "BA",
-  "message": "Task '...' created"
+  "task_title": "New Feature X",
+  "current_stage": "INTAKE",
+  "assignee": "viper_ba",
+  "message": "Kickoff announced: 'New Feature X' entered pipeline at INTAKE, assigned to viper_ba."
 }
 ```
+
+**Priority values:** 0=P0, 1=P1, 2=P2, 3=P3
 
 ### `GET /tasks/{project_id}`
 List all workitems for a project.
@@ -170,14 +203,17 @@ pmo_web_ui/
     └── index.html       # Standalone frontend — vanilla HTML/JS/CSS
 ```
 
-**index.html features:**
-- View Status: task_id input → JSON response
-- Approve Gate: task_id + gate_name + actor + notes → JSON response
-- Reject Gate: same fields → JSON response
-- Kickoff: title + project_id + owner + stage + priority + actor → JSON response
-- List Tasks: project_id → task list
-- Color-coded output: green = ok, red = error
-- No external dependencies
+**index.html sections:**
+- **Gate Confirmation:** Load gate by task ID → product-shaped gate panel (stage, status badge, evidence, approve/reject buttons)
+- **View Status:** task_id input → JSON response
+- **Announce Kickoff:** title + description + priority selector (P0–P3) + assignee (optional) + actor → JSON response
+- **List Tasks:** project_id → task list
+- Color-coded output: green = ok, red = error, amber = warning
+
+**Design principles:**
+- Gate panel shows only decision-relevant fields (no raw backend state)
+- Kickoff form uses product model — no `project_id`, `current_stage`, or `current_owner` fields exposed
+- Double-decision prevention: already-approved/rejected gates show status badge, not action buttons
 
 ---
 
@@ -185,24 +221,26 @@ pmo_web_ui/
 
 | File | Location | Purpose |
 |------|----------|---------|
-| main.py | `pmo_web_ui/main.py` | FastAPI server, 5 endpoints, harness init |
+| main.py | `pmo_web_ui/main.py` | FastAPI server, 6 endpoints, harness init |
 | index.html | `pmo_web_ui/static/index.html` | Vanilla HTML/JS/CSS frontend |
 
 ---
 
-## E2E Verification (7/7 ✅)
+## E2E Verification
 
 | # | Action | Result |
 |---|--------|--------|
-| 1 | GET /status/{task_id} | 200 — correct stage/owner/status |
-| 2 | POST /gate/approve | 200 — gate saved, event written |
-| 3 | POST /gate/reject | 200 — gate saved, rejection logged |
-| 4 | POST /kickoff | 200 — workitem created |
-| 5 | GET /tasks/{project_id} | 200 — task list returned |
-| 6 | Static HTML served | 200 — all sections present |
-| 7 | GET / → index.html | 200 — frontend loads |
+| 1 | GET /status/{task_id} | ✅ 200 — correct stage/owner/status |
+| 2 | GET /gate/{task_id} | ✅ 200 — gate panel loads correctly |
+| 3 | POST /gate/approve | ✅ 200 — gate saved, event written |
+| 4 | POST /gate/reject | ✅ 200 — gate saved, rejection logged |
+| 5 | POST /kickoff (with assignee) | ✅ 200 — workitem created at INTAKE |
+| 6 | POST /kickoff (without assignee) | ✅ 200 — assignee = unassigned |
+| 7 | POST /kickoff (missing fields) | ✅ 422 — validation error |
+| 8 | GET /tasks/{project_id} | ✅ 200 — task list returned |
+| 9 | Static HTML served | ✅ 200 — all sections present |
 
-**Committed:** `eadc080` — feat(pmo_web_ui): add PMO Web UI — FastAPI + vanilla HTML/JS dashboard
+**Committed:** `c026c49` — feat(Sprint3): product-shaped kickoff — no backend fields in UI
 
 ---
 
@@ -210,8 +248,8 @@ pmo_web_ui/
 
 **In scope for PMO V1 Web UI:**
 - ✅ View Status
-- ✅ Confirm Gate (approve/reject)
-- ✅ Announce Kickoff
+- ✅ Confirm Gate (approve/reject with double-decision prevention)
+- ✅ Announce Kickoff (product-shaped, no backend fields)
 - ✅ Error handling (platform unreachable, double confirm, reject without reason)
 
 **NOT in scope (future phases):**
@@ -226,13 +264,13 @@ pmo_web_ui/
 
 ## Sprint Status
 
-| Sprint | Target | Status |
-|--------|--------|--------|
-| M1 | Scaffold + Status View | ✅ COMPLETE |
-| M2 | Gate Confirmation | 🔲 |
-| M3 | Kickoff Announcement | 🔲 |
-| M4 | Edge Cases + Integration | 🔲 |
-| M5 | V1 Complete | 🔲 |
+| Sprint | Target | Status | Commit |
+|--------|--------|--------|--------|
+| M1 | Scaffold + Status View | ✅ COMPLETE | `eadc080` |
+| M2 | Gate Confirmation | ✅ ACCEPTED | `6bcec5d` + `2b8458a` |
+| M3 | Kickoff Announcement | ✅ ACCEPTED | `c026c49` |
+| M4 | Edge Cases + Integration | 🔲 | |
+| M5 | V1 Complete | 🔲 | |
 
 ---
 
@@ -242,11 +280,12 @@ pmo_web_ui/
 |------|------|---------|------|
 | Nova (CAO) | Nova | ✅ APPROVED — architecture direction | 2026-04-08 |
 
----
-
 ## Open Items
 
 | Item | Owner | Status |
 |------|-------|--------|
-| Sprint 1 close | Alex + Nova | 🔲 PENDING |
-| Sprint 2 start | Jarvis | 🔲 PENDING |
+| M2 Sprint 2 close | Alex + Nova | ✅ ACCEPTED — 2026-04-09 |
+| M3 Sprint 3 close | Alex + Nova | ✅ ACCEPTED — 2026-04-09 |
+| M4 Edge Cases + Integration | Alex + Nova | ✅ ACCEPTED — 2026-04-09 (`530b72f`) |
+| DEFAULT_PROJECT_ID hardcoded | Jarvis | ⚠️ NOTE — V1 shortcut, not doctrine (Nova 2026-04-09) |
+| Evidence pending = gate_decision_note emptiness | Jarvis | ⚠️ NOTE — V1 simplification, not long-term evidence model (Nova 2026-04-09) |
