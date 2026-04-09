@@ -185,13 +185,16 @@
     <div class="section-title">Projects</div>
     <div class="form-row">
       <input id="proj-name" placeholder="Project name" style="flex:2" />
+      <input id="proj-owner" placeholder="Owner" style="max-width:140px" />
       <select id="proj-status" style="max-width:130px">
         <option value="active">Active</option>
         <option value="on_hold">On Hold</option>
         <option value="closed">Closed</option>
         <option value="shutdown">Shutdown</option>
       </select>
-      <input id="proj-owner" placeholder="Owner" style="max-width:140px" />
+    </div>
+    <div class="form-row">
+      <input id="proj-goal" placeholder="Project goal / purpose (optional)" style="flex:2" />
       <button class="success" onclick="doCreateProject()">Create Project</button>
     </div>
     <div class="output" id="proj-output">Response will appear here…</div>
@@ -326,13 +329,14 @@
 
   // ── Projects ──
   async function doCreateProject() {
-    const name = document.getElementById('proj-name').value.trim();
-    const status = document.getElementById('proj-status').value.trim();
-    const owner = document.getElementById('proj-owner').value.trim();
-    if (!name) { alert('Project name is required'); return; }
-    const body = { name };
-    if (status) body.status = status;
-    if (owner) body.owner = owner;
+    const project_name = document.getElementById('proj-name').value.trim();
+    const project_owner = document.getElementById('proj-owner').value.trim();
+    const project_status = document.getElementById('proj-status').value.trim() || 'active';
+    const project_goal = document.getElementById('proj-goal').value.trim();
+    if (!project_name) { alert('Project name is required'); return; }
+    if (!project_owner) { alert('Owner is required'); return; }
+    const body = { project_name, project_owner, project_status };
+    if (project_goal) body.project_goal = project_goal;
     const out = document.getElementById('proj-output');
     try {
       const r = await fetch(`${BASE}/projects`, {
@@ -345,6 +349,7 @@
       if (d.ok) {
         document.getElementById('proj-name').value = '';
         document.getElementById('proj-owner').value = '';
+        document.getElementById('proj-goal').value = '';
         loadProjects();
       }
     } catch(e) {
