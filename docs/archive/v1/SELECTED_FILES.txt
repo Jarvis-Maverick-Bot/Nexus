@@ -1,0 +1,22 @@
+/Users/alex/Nova-Jarvis-Shared/working/gov_langgraph/PMO_SMART_AGENT_V1_PRD_V0_3.md
+/Users/alex/Nova-Jarvis-Shared/working/gov_langgraph/V1_IMPLEMENTATION_PLAN_V0_6.md
+/Users/alex/Nova-Jarvis-Shared/working/gov_langgraph/PMO_V1_WEB_UI_ARCH.md
+/Users/alex/Nova-Jarvis-Shared/working/gov_langgraph/V1_FINAL_STATUS.md
+/Users/alex/Nova-Jarvis-Shared/approved/gov_langgraph/V1_SOCPE SPEC/STEP_1_V1_SCOPE_BOUNDARY_V0_1.md
+/Users/alex/Nova-Jarvis-Shared/approved/gov_langgraph/V1_SOCPE SPEC/STEP_2_V1_MINIMAL_OBJECT_MODEL_V0_1.md
+/Users/alex/Nova-Jarvis-Shared/approved/gov_langgraph/V1_SOCPE SPEC/STEP_3_V1_MINIMAL_ACTION_SET_V0_1.md
+/Users/alex/Nova-Jarvis-Shared/approved/gov_langgraph/V1_SOCPE SPEC/STEP_4_V1_AUTHORITY_RULES_V0_1.md
+/Users/alex/Nova-Jarvis-Shared/approved/gov_langgraph/V1_SOCPE SPEC/STEP_5_PLATFORM_CORE_VS_PMO_SMART_AGENT_BOUNDARY_V0_1.md
+/Users/alex/Nova-Jarvis-Shared/approved/gov_langgraph/V1_SOCPE SPEC/STEP_6_V1_ACCEPTANCE_CRITERIA_V0_1.md
+/Users/alex/Nova-Jarvis-Shared/approved/gov_langgraph/V1_SOCPE SPEC/STEP_7_V1_TECHNICAL_CONSTRAINTS_V0_1.md
+/Users/alex/Nova-Jarvis-Shared/approved/gov_langgraph/V1_PHASE_1_WEEK_1_EXECUTION_PLAN.md
+/Users/alex/Nova-Jarvis-Shared/approved/gov_langgraph/V1_PHASE_2_WEEK_2_EXECUTION_PLAN.md
+/Users/alex/Nova-Jarvis-Shared/approved/gov_langgraph/V1_PHASE_3_WEEK_3_EXECUTION_PLAN.md
+/Users/alex/Nova-Jarvis-Shared/working/gov_langgraph/V1_PHASE_3_WEEK_4_EXECUTION_PLAN.md
+/Users/alex/Nova-Jarvis-Shared/working/gov_langgraph/WEEK5_EXECUTION_PLAN.md
+
+# === Jarvis-added archive supplements (bfdfd5d, 2026-04-09) ===
+D:\\Projects\\gov_langgraph\\V1_FREEZE_DOCS_REVIEW\\V1_ARCHITECTURE_OVERVIEW.md
+D:\\Projects\\gov_langgraph\\V1_FREEZE_DOCS_REVIEW\\HARNESS_INTEGRATION_PLAN.md
+D:\\Projects\\gov_langgraph\\V1_FREEZE_DOCS_REVIEW\\LANGGRAPH_INTEGRATION_PLAN.md
+D:\Projects\gov_langgraph\V1_FREEZE_DOCS_REVIEW\V1_SETUP_MACOS_V0_1.md
