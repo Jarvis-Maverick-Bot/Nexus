@@ -127,7 +127,8 @@ def gate_reject(body: dict):
 
 @app.post("/kickoff")
 def kickoff(body: dict):
-    required = ["title", "description", "priority", "actor"]
+    """Announce kickoff — requires project_id (V1.5: explicit project required)."""
+    required = ["title", "project_id", "description", "priority", "actor"]
     for field in required:
         if field not in body:
             return JSONResponse(
@@ -215,6 +216,45 @@ def spawn_agent(body: dict):
     if not result.get("ok", False):
         return _tool_error(result)
     return result
+
+
+@app.get("/test-spawn")
+def test_spawn():
+    """Runtime verification: test sessions_spawn import + call from FastAPI process.
+
+    Returns: {ok, sessions_spawn_imported, spawned, session_key, error}
+    """
+    try:
+        from openclaw import sessions_spawn
+        import_result = {"ok": True, "imported": True}
+    except ImportError as e:
+        return {
+            "ok": False,
+            "sessions_spawn_imported": False,
+            "error": f"ImportError: {e}",
+        }
+
+    try:
+        result = sessions_spawn(
+            task="You are a test agent. Reply with the word 'ping' only.",
+            runtime="subagent",
+            agentId="viper",
+            mode="run",
+        )
+        return {
+            "ok": True,
+            "sessions_spawn_imported": True,
+            "spawned": True,
+            "session_key": result.get("sessionKey"),
+            "agentId": "viper",
+        }
+    except Exception as e:
+        return {
+            "ok": True,
+            "sessions_spawn_imported": True,
+            "spawned": False,
+            "error": str(e),
+        }
 
 
 # ---------------------------------------------------------------------------

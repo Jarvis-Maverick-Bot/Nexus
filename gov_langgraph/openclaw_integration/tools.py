@@ -186,20 +186,17 @@ def create_task_tool(input: dict) -> dict:
         return {"ok": False, "error": str(e), "message": f"Failed to create task: {e}"}
 
 
-# Default project ID for kickoff — all kickoff tasks go here unless configured otherwise
-DEFAULT_PROJECT_ID = "pmo-kickoff"
-
-
 def kickoff_task_tool(input: dict) -> dict:
     """
     Announce a new project kickoff — creates a workitem at INTAKE stage.
 
-    Product-shaped interface. Alex provides title, description, priority, and optional assignee.
-    Backend handles project assignment and stage setting automatically.
+    V1.5: project_id is required. Every task must belong to an explicit project.
+    No DEFAULT_PROJECT_ID fallback — use create_project_tool first if needed.
 
     Args:
         input: {
             title: str (required) — task title,
+            project_id: str (required) — UUID of the project to create task under,
             description: str (required) — what this work is,
             priority: int (required) — 0=P0, 1=P1, 2=P2, 3=P3,
             assignee: str (optional) — initial owner, blank = unassigned,
@@ -212,15 +209,29 @@ def kickoff_task_tool(input: dict) -> dict:
         h = _harness
 
         title = input["title"]
+        project_id = input.get("project_id", "").strip()
+        if not project_id:
+            return _error_response(
+                "validation_error",
+                "project_id is required. Create a project first via POST /projects."
+            )
+
         description = input.get("description", "")
         priority = input.get("priority", 3)
         assignee = input.get("assignee", "").strip() or "unassigned"
         actor = input.get("actor", "unknown")
 
+        # Validate project exists
+        if not h["store"].exists("project", project_id):
+            return _error_response(
+                "project_not_found",
+                f"Project '{project_id}' not found. Create it first via POST /projects."
+            )
+
         workitem = WorkItem(
             task_title=title,
             task_description=description,
-            project_id=DEFAULT_PROJECT_ID,
+            project_id=project_id,
             current_owner=assignee,
             current_stage="INTAKE",
             priority=priority,
@@ -236,7 +247,7 @@ def kickoff_task_tool(input: dict) -> dict:
         h["store"].save_taskstate(task_state)
 
         h["journal"].append_raw(
-            project_id=DEFAULT_PROJECT_ID,
+            project_id=project_id,
             event_type="task_kickoff",
             event_summary=f"Kickoff announced: '{title}' — assigned to {assignee}",
             actor=actor,
@@ -248,9 +259,10 @@ def kickoff_task_tool(input: dict) -> dict:
             "ok": True,
             "task_id": workitem.task_id,
             "task_title": workitem.task_title,
+            "project_id": project_id,
             "current_stage": "INTAKE",
             "assignee": assignee,
-            "message": f"Kickoff announced: '{title}' entered pipeline at INTAKE, assigned to {assignee}.",
+            "message": f"Kickoff announced: '{title}' entered pipeline at INTAKE under project {project_id}, assigned to {assignee}.",
         }
     except PlatformException as e:
         return _error_response("platform_unavailable", str(e))

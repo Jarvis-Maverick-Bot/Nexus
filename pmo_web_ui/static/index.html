@@ -204,6 +204,12 @@
   <div class="section">
     <div class="section-title">Announce Kickoff</div>
     <div class="form-row">
+      <select id="kickoff-project" style="flex:2">
+        <option value="">(loading projects…)</option>
+      </select>
+      <button onclick="loadProjects()" style="max-width:80px">Refresh</button>
+    </div>
+    <div class="form-row">
       <input id="kickoff-title" placeholder="Task title" style="flex:2" />
     </div>
     <div class="form-row">
@@ -237,6 +243,40 @@
 
 <script>
   const BASE = '';
+  let _projects = [];  // cached project list
+
+  async function loadProjects() {
+    try {
+      const r = await fetch(BASE + '/projects');
+      const d = await r.json();
+      if (d.ok) {
+        _projects = (d.projects || []).filter(p => p.project_status === 'active');
+      }
+    } catch(e) { _projects = []; }
+    _populateProjectSelect();
+  }
+
+  function _populateProjectSelect() {
+    const sel = document.getElementById('kickoff-project');
+    if (!sel) return;
+    sel.innerHTML = '';
+    if (_projects.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = ''; opt.textContent = '(no active projects — create one first)';
+      sel.appendChild(opt);
+      sel.disabled = true;
+    } else {
+      sel.disabled = false;
+      _projects.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.project_id; opt.textContent = p.project_name;
+        sel.appendChild(opt);
+      });
+    }
+  }
+
+  // Load projects on page start
+  loadProjects();
 
   function show(elId, data, ok, warn) {
     const el = document.getElementById(elId);
@@ -421,8 +461,11 @@
 
   // ── Kickoff ──
   async function doKickoff() {
+    const projectId = document.getElementById('kickoff-project').value.trim();
+    if (!projectId) { alert('Project must be selected — create one first if none exist'); return; }
     const body = {
       title: document.getElementById('kickoff-title').value.trim(),
+      project_id: projectId,
       description: document.getElementById('kickoff-description').value.trim(),
       priority: parseInt(document.getElementById('kickoff-priority').value) || 2,
       assignee: document.getElementById('kickoff-assignee').value.trim(),
