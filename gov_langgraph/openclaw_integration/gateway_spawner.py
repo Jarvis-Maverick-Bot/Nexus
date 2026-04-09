@@ -1,6 +1,10 @@
 """
 gateway_spawner — Spawn agents via OpenClaw gateway WebSocket API.
 
+EXPERIMENTAL — not yet verified as production-ready.
+HMAC auth challenge works; auth response currently rejected by gateway (1008).
+Do not treat as stable V1.5 product path.
+
 Alternative to sessions_spawn when the openclaw Python package is unavailable.
 Connects directly to the OpenClaw gateway at ws://127:0.0.1:18789/gateway
 and sends JSON-RPC messages over WebSocket.

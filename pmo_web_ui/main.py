@@ -220,9 +220,10 @@ def spawn_agent(body: dict):
 
 @app.get("/test-spawn")
 def test_spawn():
-    """Runtime verification: test sessions_spawn import + call from FastAPI process.
+    """EXPERIMENTAL runtime verification endpoint — remove or protect before production.
 
-    Returns: {ok, sessions_spawn_imported, spawned, session_key, error}
+    Tests sessions_spawn import + call from FastAPI process.
+    Not part of V1.5 product surface.
     """
     try:
         from openclaw import sessions_spawn
