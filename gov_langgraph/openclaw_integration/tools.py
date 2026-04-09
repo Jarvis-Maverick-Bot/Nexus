@@ -24,7 +24,22 @@ from gov_langgraph.platform_model import (
 )
 from gov_langgraph.platform_model.state_machine import StateMachine
 from gov_langgraph.platform_model.authority import Action, check_authority
+from gov_langgraph.platform_model.exceptions import ObjectNotFoundError, PlatformException
 from gov_langgraph.langgraph_engine import init_runtime, run_workitem as langgraph_run_workitem
+
+
+# Terminal stages — tasks in these states have no actionable gates
+_TERMINAL_STATUSES = {TaskStatus.DONE, TaskStatus.CANCELLED}
+
+
+def _error_response(error_type: str, message: str, **kwargs) -> dict:
+    """Build a structured error response with error_type classification."""
+    return {"ok": False, "error_type": error_type, "message": message, **kwargs}
+
+
+def _is_terminal(workitem: WorkItem) -> bool:
+    """Check if a workitem is at a terminal state."""
+    return workitem.task_status in _TERMINAL_STATUSES
 
 
 # ---------------------------------------------------------------------------
@@ -237,8 +252,10 @@ def kickoff_task_tool(input: dict) -> dict:
             "assignee": assignee,
             "message": f"Kickoff announced: '{title}' entered pipeline at INTAKE, assigned to {assignee}.",
         }
+    except PlatformException as e:
+        return _error_response("platform_unavailable", str(e))
     except Exception as e:
-        return {"ok": False, "error": str(e), "message": f"Failed to announce kickoff: {e}"}
+        return _error_response("unknown", f"Failed to announce kickoff: {e}")
 
 
 def advance_stage_tool(input: dict) -> dict:
@@ -363,14 +380,14 @@ def submit_handoff_tool(input: dict) -> dict:
 
 def approve_gate_tool(input: dict) -> dict:
     """
-    Approve a gate for a task. Idempotent — returns existing gate if already decided.
+    Approve a gate for a task. Double-decision prevention — returns error if already decided.
 
     Args:
         input: {
             task_id: str,
             gate_name: str,
             actor: str,
-            notes: str (optional — annotation only, not governance evidence),
+            notes: str (optional),
         }
     Returns:
         {ok: bool, gate_id: str, gate_status: str, message: str}
@@ -388,13 +405,21 @@ def approve_gate_tool(input: dict) -> dict:
         # Check if already decided
         existing = h["store"].get_gate_decision_for_stage(task_id, stage)
         if existing is not None:
-            return {
-                "ok": False,
-                "gate_id": existing.gate_id,
-                "gate_status": existing.decision.value if existing.decision else "pending",
-                "task_id": task_id,
-                "message": f"Gate at '{stage}' already has a decision: {existing.decision.value}",
-            }
+            return _error_response(
+                "already_decided",
+                f"Gate at '{stage}' already has a decision: {existing.decision.value}",
+                gate_id=existing.gate_id,
+                gate_status=existing.decision.value if existing.decision else "pending",
+                task_id=task_id,
+            )
+
+        # Terminal state — no gate action available
+        if _is_terminal(workitem):
+            return _error_response(
+                "terminal_state",
+                f"Task is at terminal stage ('{stage}') — no gate action available.",
+                task_id=task_id,
+            )
 
         gate = Gate(
             task_id=task_id,
@@ -424,8 +449,12 @@ def approve_gate_tool(input: dict) -> dict:
             "task_id": task_id,
             "message": f"Gate approved at stage '{stage}'.",
         }
+    except ObjectNotFoundError:
+        return _error_response("task_not_found", f"Task '{task_id}' not found")
+    except PlatformException as e:
+        return _error_response("platform_unavailable", str(e))
     except Exception as e:
-        return {"ok": False, "error": str(e), "message": f"Failed to approve gate: {e}"}
+        return _error_response("unknown", f"Failed to approve gate: {e}")
 
 
 def reject_gate_tool(input: dict) -> dict:
@@ -498,8 +527,13 @@ def reject_gate_tool(input: dict) -> dict:
             "task_id": task_id,
             "message": f"Gate rejected at stage '{stage}'. Reason: {notes}",
         }
+    except ObjectNotFoundError:
+        return _error_response("task_not_found", f"Task '{task_id}' not found")
+    except PlatformException as e:
+        return _error_response("platform_unavailable", str(e))
     except Exception as e:
-        return {"ok": False, "error": str(e), "message": f"Failed to reject gate: {e}"}
+        return _error_response("unknown", f"Failed to reject gate: {e}")
+
 
 
 def get_status_tool(input: dict) -> dict:
@@ -536,8 +570,12 @@ def get_status_tool(input: dict) -> dict:
             "current_blocker": blocker,
             "message": f"Status: {workitem.task_title} is in '{workitem.current_stage}'",
         }
+    except ObjectNotFoundError:
+        return _error_response("task_not_found", f"Task '{task_id}' not found")
+    except PlatformException as e:
+        return _error_response("platform_unavailable", str(e))
     except Exception as e:
-        return {"ok": False, "error": str(e), "message": f"Failed to get status: {e}"}
+        return _error_response("unknown", f"Failed to get status: {e}")
 
 
 def list_tasks_tool(input: dict) -> dict:
@@ -572,8 +610,10 @@ def list_tasks_tool(input: dict) -> dict:
             "count": len(tasks),
             "message": f"{len(tasks)} task(s) found",
         }
+    except PlatformException as e:
+        return _error_response("platform_unavailable", str(e))
     except Exception as e:
-        return {"ok": False, "error": str(e), "message": f"Failed to list tasks: {e}"}
+        return _error_response("unknown", f"Failed to list tasks: {e}")
 
 
 def get_gate_panel_tool(input: dict) -> dict:
@@ -602,6 +642,24 @@ def get_gate_panel_tool(input: dict) -> dict:
 
         workitem = h["store"].load_workitem(task_id)
         current_stage = workitem.current_stage
+
+        # Terminal state — no gate action available
+        if _is_terminal(workitem):
+            return {
+                "ok": True,
+                "task_id": task_id,
+                "task_title": workitem.task_title,
+                "current_stage": current_stage,
+                "current_owner": workitem.current_owner,
+                "gate_stage": current_stage,
+                "gate_type": "stage_advance",
+                "gate_status": "no_gate",
+                "gate_decision": None,
+                "gate_decision_by": None,
+                "gate_decision_note": None,
+                "gate_decided_at": None,
+                "message": f"Task is at terminal stage ('{current_stage}') — no gate action available.",
+            }
 
         # Check if a gate decision exists for this task+stage
         gate = h["store"].get_gate_decision_for_stage(task_id, current_stage)
@@ -639,8 +697,12 @@ def get_gate_panel_tool(input: dict) -> dict:
             "gate_decided_at": gate_decided_at,
             "message": _gate_message(gate_status, current_stage),
         }
+    except ObjectNotFoundError:
+        return _error_response("task_not_found", f"Task '{input['task_id']}' not found")
+    except PlatformException as e:
+        return _error_response("platform_unavailable", str(e))
     except Exception as e:
-        return {"ok": False, "error": str(e), "message": f"Failed to get gate panel: {e}"}
+        return _error_response("unknown", f"Failed to get gate panel: {e}")
 
 
 def _gate_message(status: str, stage: str) -> str:

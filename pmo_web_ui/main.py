@@ -11,7 +11,6 @@ import os
 import sys
 from contextlib import asynccontextmanager
 
-# Ensure gov_langgraph is on path
 _ROOT = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(_ROOT, ".."))
 
@@ -30,20 +29,17 @@ from gov_langgraph.openclaw_integration.tools import (
     list_tasks_tool,
 )
 
-# ---------------------------------------------------------------------------
-# App init
-# ---------------------------------------------------------------------------
-
 PORT = int(os.getenv("PMO_PORT", "8000"))
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_harness()
     yield
 
+
 app = FastAPI(title="PMO Web UI", version="1.0.0", lifespan=lifespan)
 
-# CORS — allow local browser access
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -51,10 +47,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# ---------------------------------------------------------------------------
-# Static files
-# ---------------------------------------------------------------------------
 
 app.mount("/static", StaticFiles(directory=os.path.join(_ROOT, "static")), name="static")
 
@@ -65,6 +57,27 @@ def root():
 
 
 # ---------------------------------------------------------------------------
+# Error helpers
+# ---------------------------------------------------------------------------
+
+_ERROR_TYPE_STATUS = {
+    "platform_unavailable": 503,
+    "task_not_found": 404,
+    "validation_error": 422,
+    "already_decided": 409,
+    "terminal_state": 409,
+    "unknown": 500,
+}
+
+
+def _tool_error(result: dict) -> JSONResponse:
+    """Convert a tool error dict to a JSONResponse with HTTP status mapped from error_type."""
+    error_type = result.get("error_type", "unknown")
+    status_code = _ERROR_TYPE_STATUS.get(error_type, 500)
+    return JSONResponse(content=result, status_code=status_code)
+
+
+# ---------------------------------------------------------------------------
 # Tool endpoints
 # ---------------------------------------------------------------------------
 
@@ -72,7 +85,7 @@ def root():
 def status(task_id: str):
     result = get_status_tool({"task_id": task_id})
     if not result.get("ok", False):
-        raise HTTPException(status_code=404, detail=result.get("message", "Task not found"))
+        return _tool_error(result)
     return result
 
 
@@ -81,10 +94,14 @@ def gate_approve(body: dict):
     required = ["task_id", "gate_name", "actor"]
     for field in required:
         if field not in body:
-            raise HTTPException(status_code=422, detail=f"Missing field: {field}")
+            return JSONResponse(
+                content={"ok": False, "error_type": "validation_error",
+                         "message": f"Missing field: {field}"},
+                status_code=422,
+            )
     result = approve_gate_tool(body)
     if not result.get("ok", False):
-        return JSONResponse(content=result, status_code=400)
+        return _tool_error(result)
     return result
 
 
@@ -93,10 +110,14 @@ def gate_reject(body: dict):
     required = ["task_id", "gate_name", "actor"]
     for field in required:
         if field not in body:
-            raise HTTPException(status_code=422, detail=f"Missing field: {field}")
+            return JSONResponse(
+                content={"ok": False, "error_type": "validation_error",
+                         "message": f"Missing field: {field}"},
+                status_code=422,
+            )
     result = reject_gate_tool(body)
     if not result.get("ok", False):
-        return JSONResponse(content=result, status_code=400)
+        return _tool_error(result)
     return result
 
 
@@ -105,10 +126,14 @@ def kickoff(body: dict):
     required = ["title", "description", "priority", "actor"]
     for field in required:
         if field not in body:
-            raise HTTPException(status_code=422, detail=f"Missing field: {field}")
+            return JSONResponse(
+                content={"ok": False, "error_type": "validation_error",
+                         "message": f"Missing field: {field}"},
+                status_code=422,
+            )
     result = kickoff_task_tool(body)
     if not result.get("ok", False):
-        raise HTTPException(status_code=400, detail=result.get("message", "Kickoff failed"))
+        return _tool_error(result)
     return result
 
 
@@ -116,7 +141,7 @@ def kickoff(body: dict):
 def tasks(project_id: str):
     result = list_tasks_tool({"project_id": project_id})
     if not result.get("ok", False):
-        raise HTTPException(status_code=400, detail=result.get("message", "Failed to list tasks"))
+        return _tool_error(result)
     return result
 
 
@@ -125,7 +150,7 @@ def gate_panel(task_id: str):
     """Get gate panel for a task — PMO gate confirmation surface."""
     result = get_gate_panel_tool({"task_id": task_id})
     if not result.get("ok", False):
-        raise HTTPException(status_code=404, detail=result.get("message", "Task not found"))
+        return _tool_error(result)
     return result
 
 

@@ -244,21 +244,45 @@
     el.className = 'output ' + (warn ? 'warn' : (ok ? 'ok' : 'error'));
   }
 
+  // ── Error rendering ──
+  const _ERROR_LABELS = {
+    platform_unavailable: 'Platform Unavailable',
+    task_not_found: 'Task Not Found',
+    validation_error: 'Validation Error',
+    already_decided: 'Already Decided',
+    terminal_state: 'Terminal State',
+    unknown: 'Error',
+  };
+
+  function _esc(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function renderError(el, errorType, message) {
+    const label = _ERROR_LABELS[errorType] || 'Error';
+    el.innerHTML = `<div class="output error"><strong>${label}</strong><br>${_esc(message)}</div>`;
+  }
+
   // ── Gate Panel ──
   async function doLoadGate() {
     const taskId = document.getElementById('gate-task-id').value.trim();
     if (!taskId) { alert('Task ID required'); return; }
     const panel = document.getElementById('gate-panel');
+    panel.innerHTML = ''; // clear stale state
     try {
       const r = await fetch(`${BASE}/gate/${encodeURIComponent(taskId)}`);
       const d = await r.json();
       if (!d.ok) {
-        panel.innerHTML = `<div class="output error">${d.message || 'Failed to load gate'}</div>`;
+        renderError(panel, d.error_type || 'unknown', d.message || 'Failed to load gate');
         return;
       }
       renderGatePanel(d);
     } catch(e) {
-      panel.innerHTML = `<div class="output error">${e.message}</div>`;
+      renderError(panel, 'platform_unavailable', 'Cannot reach PMO backend — platform may be unavailable.');
     }
   }
 
@@ -266,18 +290,21 @@
     const panel = document.getElementById('gate-panel');
     const badgeClass = d.gate_status === 'approved' ? 'badge-approved'
                      : d.gate_status === 'rejected' ? 'badge-rejected'
+                     : d.gate_status === 'no_gate' ? 'badge-rejected'
                      : 'badge-pending';
     const badgeLabel = d.gate_status === 'approved' ? 'Already approved'
                      : d.gate_status === 'rejected' ? 'Already rejected'
+                     : d.gate_status === 'no_gate' ? 'No gate'
                      : 'Pending decision';
 
-    // Gate type label
     const gateLabel = d.gate_type && d.gate_type !== 'stage_advance'
       ? d.gate_type.replace(/_/g, ' ')
       : `${d.gate_stage} Gate`;
 
     let decisionHTML = '';
-    if (d.gate_status === 'pending') {
+    if (d.gate_status === 'no_gate') {
+      decisionHTML = `<div class="gate-already-decided" style="background:#64748b20;color:#94a3b8;border-color:#64748b40">${_esc(d.message || 'No gate action available at this stage.')}</div>`;
+    } else if (d.gate_status === 'pending') {
       decisionHTML = `
         <div class="gate-decision-area">
           <div class="form-row">
@@ -288,22 +315,25 @@
             <button class="success" onclick="doGateApprove('${d.task_id}', '${d.gate_stage}')">Approve</button>
             <button class="danger" onclick="doGateReject('${d.task_id}', '${d.gate_stage}')">Reject</button>
           </div>
-          <p class="rejection-required" id="reject-error" style="display:none"></p>
         </div>`;
     } else {
       const decidedClass = d.gate_status === 'approved' ? 'already-approved' : 'already-rejected';
       const decidedLabel = d.gate_status === 'approved' ? 'Already approved' : 'Already rejected';
       const decidedBy = d.gate_decision_by ? ` by ${d.gate_decision_by}` : '';
       const decidedAt = d.gate_decided_at ? `<br>${new Date(d.gate_decided_at).toLocaleString()}` : '';
-      const decidedNote = d.gate_decision_note ? `<br>Note: ${d.gate_decision_note}` : '';
+      const decidedNote = d.gate_decision_note ? `<br>Note: ${_esc(d.gate_decision_note)}` : '';
       decisionHTML = `<div class="gate-already-decided ${decidedClass}">${decidedLabel}${decidedBy}${decidedAt}${decidedNote}</div>`;
     }
+
+    const evidenceNote = d.gate_decision_note
+      ? `<div class="gate-evidence-note">${_esc(d.gate_decision_note)}</div>`
+      : '<div class="gate-evidence-note">Evidence pending — does not block your decision.</div>';
 
     panel.innerHTML = `
       <div class="gate-panel">
         <div class="gate-header">
           <div>
-            <div class="gate-title">${d.task_title}</div>
+            <div class="gate-title">${_esc(d.task_title)}</div>
             <div class="gate-task-id">${d.task_id}</div>
           </div>
           <span class="gate-badge ${badgeClass}">${badgeLabel}</span>
@@ -316,7 +346,7 @@
         <div class="gate-evidence">
           <div class="gate-evidence-title">Evidence summary</div>
           <div>Evidence is drafted by BA/Jarvis. PMO displays only.</div>
-          <div class="gate-evidence-note">Evidence pending — does not block your decision.</div>
+          ${evidenceNote}
         </div>
         ${decisionHTML}
       </div>`;
@@ -326,6 +356,7 @@
     const actor = document.getElementById('gate-actor').value.trim();
     const notes = document.getElementById('gate-notes').value.trim();
     if (!actor) { alert('Your name/role is required'); return; }
+    const panel = document.getElementById('gate-panel');
     try {
       const r = await fetch(`${BASE}/gate/approve`, {
         method: 'POST',
@@ -334,26 +365,22 @@
       });
       const d = await r.json();
       if (d.ok) {
-        // Reload panel to show updated state
-        document.getElementById('gate-panel').innerHTML +=
-          `<div class="output ok" style="margin-top:0.5rem">${d.message}</div>`;
+        panel.innerHTML += `<div class="output ok" style="margin-top:0.5rem">${d.message}</div>`;
         setTimeout(() => doLoadGate(), 800);
       } else {
-        document.getElementById('gate-panel').querySelector('.gate-panel').insertAdjacentHTML('beforeend',
-          `<div class="output error" style="margin-top:0.5rem">${d.message}</div>`);
+        renderError(panel, d.error_type || 'unknown', d.message || 'Approve failed');
       }
     } catch(e) {
-      alert('Error: ' + e.message);
+      renderError(panel, 'platform_unavailable', 'Cannot reach PMO backend.');
     }
   }
 
   async function doGateReject(taskId, stage) {
     const actor = document.getElementById('gate-actor').value.trim();
     const notes = document.getElementById('gate-notes').value.trim();
-    const errEl = document.getElementById('reject-error');
-    if (!actor) { errEl.textContent = 'Your name/role is required'; errEl.style.display = 'block'; return; }
-    if (!notes) { errEl.textContent = 'Rejection reason is required'; errEl.style.display = 'block'; return; }
-    errEl.style.display = 'none';
+    if (!actor) { alert('Your name/role is required'); return; }
+    if (!notes) { alert('Rejection reason is required'); return; }
+    const panel = document.getElementById('gate-panel');
     try {
       const r = await fetch(`${BASE}/gate/reject`, {
         method: 'POST',
@@ -362,15 +389,13 @@
       });
       const d = await r.json();
       if (d.ok) {
-        document.getElementById('gate-panel').innerHTML +=
-          `<div class="output ok" style="margin-top:0.5rem">${d.message}</div>`;
+        panel.innerHTML += `<div class="output ok" style="margin-top:0.5rem">${d.message}</div>`;
         setTimeout(() => doLoadGate(), 800);
       } else {
-        errEl.textContent = d.message || 'Rejection failed';
-        errEl.style.display = 'block';
+        renderError(panel, d.error_type || 'unknown', d.message || 'Reject failed');
       }
     } catch(e) {
-      alert('Error: ' + e.message);
+      renderError(panel, 'platform_unavailable', 'Cannot reach PMO backend.');
     }
   }
 
@@ -378,12 +403,19 @@
   async function doStatus() {
     const taskId = document.getElementById('status-task-id').value.trim();
     if (!taskId) { alert('Task ID required'); return; }
+    const outEl = document.getElementById('status-output');
+    outEl.textContent = 'Loading...';
+    outEl.className = 'output';
     try {
       const r = await fetch(`${BASE}/status/${encodeURIComponent(taskId)}`);
       const d = await r.json();
-      show('status-output', d, d.ok);
+      if (d.ok) {
+        show('status-output', d, true);
+      } else {
+        renderError(outEl, d.error_type || 'unknown', d.message || 'Failed to load status');
+      }
     } catch(e) {
-      show('status-output', {error: e.message}, false, false);
+      renderError(outEl, 'platform_unavailable', 'Cannot reach PMO backend.');
     }
   }
 
@@ -399,6 +431,9 @@
     if (!body.title || !body.description || !body.actor) {
       alert('Title, Description, and Your name are required'); return;
     }
+    const outEl = document.getElementById('kickoff-output');
+    outEl.textContent = 'Loading...';
+    outEl.className = 'output';
     try {
       const r = await fetch(`${BASE}/kickoff`, {
         method: 'POST',
@@ -406,9 +441,13 @@
         body: JSON.stringify(body),
       });
       const d = await r.json();
-      show('kickoff-output', d, d.ok);
+      if (d.ok) {
+        show('kickoff-output', d, true);
+      } else {
+        renderError(outEl, d.error_type || 'unknown', d.message || 'Kickoff failed');
+      }
     } catch(e) {
-      show('kickoff-output', {error: e.message}, false, false);
+      renderError(outEl, 'platform_unavailable', 'Cannot reach PMO backend.');
     }
   }
 
@@ -416,12 +455,19 @@
   async function doList() {
     const projectId = document.getElementById('list-project').value.trim();
     if (!projectId) { alert('Project ID required'); return; }
+    const outEl = document.getElementById('list-output');
+    outEl.textContent = 'Loading...';
+    outEl.className = 'output';
     try {
       const r = await fetch(`${BASE}/tasks/${encodeURIComponent(projectId)}`);
       const d = await r.json();
-      show('list-output', d, d.ok);
+      if (d.ok) {
+        show('list-output', d, true);
+      } else {
+        renderError(outEl, d.error_type || 'unknown', d.message || 'Failed to list tasks');
+      }
     } catch(e) {
-      show('list-output', {error: e.message}, false, false);
+      renderError(outEl, 'platform_unavailable', 'Cannot reach PMO backend.');
     }
   }
 </script>
