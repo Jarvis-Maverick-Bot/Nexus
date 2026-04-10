@@ -1048,8 +1048,47 @@ function applyTranslations() {
       .topbar { padding: 0 1rem; }
       :root { --sidebar-w: 0px; }
       .cockpit-grid { grid-template-columns: 1fr; }
-    }
+   
+  /* ── INTAKE SUMMARY ── */
+  .intake-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .intake-field.full-width { grid-column: 1 / -1; }
+  .intake-field-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+    margin-bottom: 0.25rem;
+  }
+  .intake-field-value {
+    font-size: 0.875rem;
+    color: var(--text-main);
+    line-height: 1.5;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    min-height: 2.5rem;
+  }
+  .pipeline-note { font-style: italic; }
+  .intake-badge {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.1rem 0.4rem;
+    color: var(--text-dim);
+    vertical-align: middle;
+    margin-left: 0.5rem;
+  }
+ }
   </style>
+  <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
 </head>
 <body>
 
@@ -1113,7 +1152,7 @@ function applyTranslations() {
     <!-- ═══════════════════════════════════════════════════════════ -->
     <!-- SURFACE: PROJECT WORKSPACE / COCKPIT                        -->
     <!-- ═══════════════════════════════════════════════════════════ -->
-    <div class="page active" id="page-workspace">
+    <div class="page active" id="page-workspace" x-data="workspaceShell()">
       <div class="surface-header">
         <div class="surface-breadcrumb">
           <a onclick="navigateTo('intake')">Workspace</a>
@@ -1163,9 +1202,37 @@ function applyTranslations() {
           <div id="ws-proj-goal" style="font-size:0.875rem;color:var(--text-dim);line-height:1.6">—</div>
         </div>
 
+        <!-- Intake Summary — labeled as submitted info, NOT project truth -->
+        <div class="card" id="ws-intake-summary">
+          <div class="section-header">
+            <div class="section-title">Intake Summary <span style="font-size:0.75rem;color:var(--text-dim);font-weight:normal">(submitted at intake — governance record)</span></div>
+          </div>
+          <div class="intake-summary-grid">
+            <div class="intake-field">
+              <div class="intake-field-label">Project Summary</div>
+              <div class="intake-field-value" id="ws-intake-summary-val">—</div>
+            </div>
+            <div class="intake-field">
+              <div class="intake-field-label">Deliverable Description</div>
+              <div class="intake-field-value" id="ws-intake-deliverable-val">—</div>
+            </div>
+            <div class="intake-field full-width">
+              <div class="intake-field-label">Business Context</div>
+              <div class="intake-field-value" id="ws-intake-context-val">—</div>
+            </div>
+          </div>
+        </div>
+
         <!-- Pipeline + Task Progress row -->
         <div class="cockpit-grid">
-          <!-- Pipeline -->
+          <!-- Pipeline — HONEST: only shows real pipeline state -->
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">Delivery Pipeline</div>
+            </div>
+            <div class="pipeline" id="ws-pipeline"></div>
+            <div id="ws-pipeline-note" class="pipeline-note" style="display:none;font-size:0.75rem;color:var(--text-dim);margin-top:0.5rem;font-style:italic">No active pipeline. Project has not been kicked off.</div>
+          </div>
           <div class="card">
             <div class="section-header">
               <div class="section-title">Delivery Pipeline</div>
@@ -1605,6 +1672,9 @@ function applyTranslations() {
       const sel = document.getElementById(selId);
       if (sel) sel.value = pid;
     });
+    // Reload Alpine workspace data
+    const ws = document.getElementById('page-workspace');
+    if (ws && ws.__x) ws.__x.$data.loadProjectData();
     loadWorkspaceData();
   }
 
@@ -2398,7 +2468,116 @@ function applyTranslations() {
     else alert(d.message || 'Failed');
   }
 
+  
+  /* ── WORKSPACE SHELL (Alpine.js) ── */
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('workspaceShell', () => ({
+      projectName: '', projectOwner: '', projectGoal: '', projectStatus: '',
+      projectCreated: '', projectId: '',
+      intakeSummary: '', intakeDeliverable: '', intakeContext: '',
+      pipelineActive: false, currentStage: null,
+      taskTotal: 0, taskDone: 0, taskBlocked: 0,
+      lang: localStorage.getItem('pmo_lang') || 'en',
+      T: {},
+
+      init() {
+        this.loadTranslations();
+      },
+
+      async loadTranslations() {
+        if (window.T && window.T[this.lang]) {
+          this.T = window.T[this.lang];
+        }
+      },
+
+      t(key) { return this.T[key] || key; },
+
+      async loadProjectData() {
+        const pid = document.getElementById('global-project-select')?.value;
+        if (!pid) return;
+        this.projectId = pid;
+        try {
+          const projRes = await fetch(BASE + '/projects/' + encodeURIComponent(pid));
+          const proj = await projRes.json();
+          if (!proj.ok) return;
+          this.projectName = proj.project_name || '';
+          this.projectOwner = proj.project_owner || '';
+          this.projectGoal = proj.project_goal || '';
+          this.projectStatus = proj.project_status || '';
+          this.projectCreated = proj.created_at || '';
+          // Intake fields — clearly from submitted intake, NOT project state
+          this.intakeSummary = proj.intake_summary || '';
+          this.intakeDeliverable = proj.intake_deliverable || '';
+          this.intakeContext = proj.intake_business_context || '';
+          // Update DOM for manual rendering
+          document.getElementById('ws-proj-name').textContent = this.projectName;
+          document.getElementById('ws-proj-owner').textContent = this.projectOwner;
+          document.getElementById('ws-proj-goal').textContent = this.projectGoal || '—';
+          document.getElementById('ws-proj-status').innerHTML = '<span class="badge ' + this.badgeClass(this.projectStatus) + '">' + this.projectStatus + '</span>';
+          document.getElementById('ws-proj-created').textContent = this.projectCreated ? new Date(this.projectCreated).toLocaleString() : '—';
+          // Intake summary fields
+          document.getElementById('ws-intake-summary-val').textContent = this.intakeSummary || '—';
+          document.getElementById('ws-intake-deliverable-val').textContent = this.intakeDeliverable || '—';
+          document.getElementById('ws-intake-context-val').textContent = this.intakeContext || '—';
+          // Tasks for pipeline stage
+          const tasksRes = await fetch(BASE + '/projects/' + encodeURIComponent(pid) + '/tasks');
+          const tasksData = await tasksRes.json();
+          if (tasksData.ok && tasksData.tasks && tasksData.tasks.length > 0) {
+            this.taskTotal = tasksData.tasks.length;
+            this.taskDone = tasksData.tasks.filter(t => t.task_status === 'done' || t.task_status === 'complete').length;
+            this.taskBlocked = tasksData.tasks.filter(t => t.task_status === 'blocked').length;
+            const activeTask = tasksData.tasks.find(t => t.task_status === 'in_progress');
+            this.currentStage = activeTask?.current_stage || tasksData.tasks[0]?.current_stage || null;
+            this.pipelineActive = !!this.currentStage;
+            this.renderPipeline();
+          } else {
+            this.pipelineActive = false;
+            this.renderPipeline();
+          }
+        } catch(e) {
+          console.error('workspace load error', e);
+        }
+      },
+
+      renderPipeline() {
+        const el = document.getElementById('ws-pipeline');
+        const note = document.getElementById('ws-pipeline-note');
+        if (!el) return;
+        if (!this.pipelineActive || !this.currentStage) {
+          el.innerHTML = '<div class="pipeline-none">No active pipeline — project not yet started</div>';
+          if (note) note.style.display = 'block';
+          return;
+        }
+        if (note) note.style.display = 'none';
+        const stages = [
+          {k:'INTAKE', label:'Intake'}, {k:'BA', label:'BA'},
+          {k:'SA', label:'SA'}, {k:'DEV', label:'Dev'},
+          {k:'QA', label:'QA'}, {k:'DONE', label:'Done'},
+        ];
+        const currentIdx = stages.findIndex(s => s.k === this.currentStage);
+        el.innerHTML = stages.map((s, i) => {
+          let cls = '';
+          if (i < currentIdx) cls = 'done';
+          else if (i === currentIdx) cls = 'current';
+          const icon = i < currentIdx ? '✓' : i === currentIdx ? '→' : '';
+          return '<div class="pipeline-stage ' + cls + '">' +
+            '<div class="pipeline-icon ' + cls + '">' + icon + '</div>' +
+            '<div class="pipeline-label">' + s.label + '</div></div>' +
+            (i < stages.length - 1 ? '<div class="pipeline-connector ' + (i < currentIdx ? 'done' : '') + '"></div>' : '');
+        }).join('');
+      },
+
+      badgeClass(status) {
+        const map = {active:'badge-active', on_hold:'badge-hold', closed:'badge-closed', shutdown:'badge-shutdown'};
+        return map[status] || 'badge-closed';
+      }
+    }));
+  });
+
   /* ── INIT ── */
+  loadGlobalProjects();
+  intakeValidate();
+/* ── INIT ── */
   loadGlobalProjects();
   intakeValidate();
   // Set nav active
