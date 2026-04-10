@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PMO — gov_langgraph</title>
+  <script src="/static/translations.js"></script>
   <style>
     :root {
       --bg: #0a0e1a;
@@ -409,6 +410,7 @@
       <option value="">Select project…</option>
     </select>
   </div>
+  <button class="secondary sm" onclick="toggleLang()" style="font-size:0.72rem;padding:0.25rem 0.5rem" data-i18n="lang_toggle">EN / 中文</button>
   <div class="topbar-version">v1.5</div>
 </div>
 
@@ -419,32 +421,24 @@
   <nav class="sidebar">
     <div class="sidebar-label">Navigation</div>
     <div class="nav-item active" onclick="navigateTo('projects')">
-      <span class="nav-icon">📁</span> Projects
+      <span class="nav-icon">📁</span> <span data-i18n="nav_projects">Projects</span>
     </div>
     <div class="nav-item" onclick="navigateTo('detail')">
-      <span class="nav-icon">📋</span> Detail View
+      <span class="nav-icon">📋</span> <span data-i18n="nav_detail">Detail View</span>
     </div>
     <div class="nav-item" onclick="navigateTo('gate')">
-      <span class="nav-icon">🚦</span> Gate Panel
+      <span class="nav-icon">🚦</span> <span data-i18n="nav_gate">Gate Panel</span>
     </div>
     <div class="nav-item" onclick="navigateTo('status')">
-      <span class="nav-icon">📊</span> Status
+      <span class="nav-icon">📊</span> <span data-i18n="nav_status">Status</span>
     </div>
     <div class="nav-item" onclick="navigateTo('advisories')">
-      <span class="nav-icon">⚠️</span> Advisories
+      <span class="nav-icon">⚠️</span> <span data-i18n="nav_advisories">Advisories</span>
     </div>
     <div class="nav-item" onclick="navigateTo('kickoff')">
-      <span class="nav-icon">🚀</span> Kickoff
+      <span class="nav-icon">🚀</span> <span data-i18n="nav_kickoff">Kickoff</span>
     </div>
 
-    <div class="sidebar-label" style="margin-top:1rem">Sprints</div>
-    <div style="padding: 0.25rem 1rem;">
-      <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.3rem">V1.5 Progress</div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;height:6px;overflow:hidden">
-        <div style="background:var(--accent);height:100%;width:83%;border-radius:4px"></div>
-      </div>
-      <div style="font-size:0.7rem;color:var(--text-dim);margin-top:0.2rem">5 / 6 sprints</div>
-    </div>
   </nav>
 
   <!-- MAIN CONTENT -->
@@ -683,6 +677,7 @@
     if (page === 'detail') { loadDetailProjects(); }
     if (page === 'advisories') loadAdvProjects();
     if (page === 'kickoff') loadDetailProjects();
+    applyTranslations();
   }
 
   // ── UTILITIES ──
@@ -1158,6 +1153,7 @@
   loadAllProjects();
   loadDetailProjects();
   loadAdvProjects();
+  applyTranslations();
 </script>
 </body>
 </html>
