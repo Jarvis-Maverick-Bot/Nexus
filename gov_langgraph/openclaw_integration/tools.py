@@ -98,19 +98,40 @@ def create_project_tool(input: dict) -> dict:
     """
     Create a new project.
 
+    V1.6: Accepts structured intake fields at creation.
+    Required: project_name, project_goal, domain_type, project_owner
+    Required intake fields: intake_summary, intake_deliverable, intake_business_context
+    (intake_complete is set automatically if all required intake fields are present)
+
     Args:
-        input: {project_name: str, project_goal: str, domain_type: str, project_owner: str}
+        input: {
+            project_name: str, project_goal: str, domain_type: str, project_owner: str,
+            intake_summary: str, intake_deliverable: str, intake_business_context: str,
+            actor: str,
+        }
     Returns:
-        {ok: bool, project_id: str, message: str}
+        {ok: bool, project_id: str, message: str, intake_complete: bool}
     """
     try:
         h = _harness
+        intake_summary = input.get("intake_summary", "")
+        intake_deliverable = input.get("intake_deliverable", "")
+        intake_business_context = input.get("intake_business_context", "")
+
         project = Project(
             project_name=input["project_name"],
             project_goal=input.get("project_goal", ""),
             domain_type=input.get("domain_type", "internal"),
             project_owner=input.get("project_owner", ""),
+            intake_summary=intake_summary,
+            intake_deliverable=intake_deliverable,
+            intake_business_context=intake_business_context,
         )
+
+        # Auto-mark intake complete if all required fields are present
+        if project.validate_intake():
+            project.complete_intake()
+
         h["store"].save_project(project)
 
         h["journal"].append_raw(
@@ -124,6 +145,7 @@ def create_project_tool(input: dict) -> dict:
             "ok": True,
             "project_id": project.project_id,
             "project_name": project.project_name,
+            "intake_complete": project.intake_complete,
             "message": f"Project '{project.project_name}' created",
         }
     except Exception as e:
@@ -822,6 +844,114 @@ def list_projects_tool(input: dict) -> dict:
         }
     except Exception as e:
         return _error_response("unknown", f"Failed to list projects: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Intake tools (V1.6)
+# ---------------------------------------------------------------------------
+
+def validate_intake_tool(input: dict) -> dict:
+    """
+    Validate whether a project has all required intake fields present.
+
+    Required intake fields: intake_summary, intake_deliverable, intake_business_context.
+    Arch is optional at intake.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, project_id: str, intake_complete: bool,
+         missing_fields: list[str], message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        missing = []
+        if not project.intake_summary.strip():
+            missing.append("intake_summary")
+        if not project.intake_deliverable.strip():
+            missing.append("intake_deliverable")
+        if not project.intake_business_context.strip():
+            missing.append("intake_business_context")
+
+        is_valid = len(missing) == 0
+
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "intake_complete": is_valid,
+            "missing_fields": missing,
+            "message": (
+                "Intake validation passed — all required fields present"
+                if is_valid
+                else f"Intake incomplete — missing: {', '.join(missing)}"
+            ),
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to validate intake: {e}")
+
+
+def complete_intake_tool(input: dict) -> dict:
+    """
+    Mark a project's structured intake as complete.
+    Validates all required intake fields are present before marking complete.
+
+    Required intake fields: intake_summary, intake_deliverable, intake_business_context.
+    Arch is optional at intake (downstream delivery artifact).
+    Once complete, enables kickoff.
+
+    Args:
+        input: {project_id: str, actor: str}
+    Returns:
+        {ok: bool, project_id: str, intake_complete: bool, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        actor = input.get("actor", "unknown")
+
+        project = h["store"].load_project(project_id)
+
+        # Validate first
+        if not project.validate_intake():
+            missing = []
+            if not project.intake_summary.strip():
+                missing.append("intake_summary")
+            if not project.intake_deliverable.strip():
+                missing.append("intake_deliverable")
+            if not project.intake_business_context.strip():
+                missing.append("intake_business_context")
+            return _error_response(
+                "intake_incomplete",
+                f"Cannot complete intake — missing required fields: {', '.join(missing)}",
+                project_id=project_id,
+                missing_fields=missing,
+            )
+
+        project.complete_intake()
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="intake_completed",
+            event_summary=f"Structured intake completed for project '{project.project_name}'",
+            actor=actor,
+        )
+
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "intake_complete": True,
+            "message": f"Structured intake completed — kickoff enabled for project '{project.project_name}'",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to complete intake: {e}")
 
 
 # ---------------------------------------------------------------------------

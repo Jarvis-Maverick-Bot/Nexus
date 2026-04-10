@@ -9,9 +9,21 @@ const T = {
     nav_advisories: 'Advisories',
     nav_kickoff: 'Kickoff',
 
+    nav_workspace: 'Workspace',
+    nav_intake: 'New Project',
+    nav_deliverables: 'Deliverables',
+    nav_acceptance: 'Acceptance',
+
+    nav_workspace: 'Workspace',
+    nav_intake: 'New Project',
+    nav_deliverables: 'Deliverables',
+    nav_acceptance: 'Acceptance',
+
     // Topbar
     topbar_select_project: 'Select project…',
     topbar_version: 'v1.5',
+    lang_toggle: 'EN / 中文',
+    lang_toggle: 'EN / 中文',
 
     // Projects page
     proj_create: 'Create Project',
@@ -127,9 +139,16 @@ const T = {
     nav_advisories: '预警信息',
     nav_kickoff: '任务发起',
 
+    nav_workspace: '工作区',
+    nav_intake: '新建项目',
+    nav_deliverables: '交付物',
+    nav_acceptance: '验收',
+
+
     // Topbar
     topbar_select_project: '选择项目…',
     topbar_version: 'v1.5',
+    lang_toggle: 'EN / 中文',
 
     // Projects page
     proj_create: '创建项目',

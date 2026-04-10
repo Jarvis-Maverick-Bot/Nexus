@@ -43,6 +43,8 @@ from gov_langgraph.openclaw_integration.tools import (
     get_blockers_tool,
     raise_blocker_tool,
     resolve_blocker_tool,
+    validate_intake_tool,
+    complete_intake_tool,
 )
 
 PORT = int(os.getenv("PMO_PORT", "8000"))
@@ -368,8 +370,59 @@ def resolve_blocker(project_id: str, blocker_id: str, body: dict):
 
 
 # ---------------------------------------------------------------------------
+# Intake endpoints (V1.6)
+# ---------------------------------------------------------------------------
+
+@app.post("/intake/validate")
+def intake_validate(body: dict):
+    """
+    Validate whether a project has all required intake fields present.
+
+    Required: project_id
+    Returns: {ok, project_id, intake_complete, missing_fields, message}
+    """
+    required = ["project_id"]
+    for field in required:
+        if field not in body:
+            return JSONResponse(
+                content={"ok": False, "error_type": "validation_error",
+                         "message": f"Missing field: {field}"},
+                status_code=422,
+            )
+    result = validate_intake_tool(body)
+    if not result.get("ok", False):
+        return _tool_error(result)
+    return result
+
+
+@app.post("/intake/complete")
+def intake_complete(body: dict):
+    """
+    Mark a project's structured intake as complete.
+    Validates all required fields are present before marking complete.
+    Once complete, enables kickoff.
+
+    Required: project_id, actor
+    Returns: {ok, project_id, intake_complete, message}
+    """
+    required = ["project_id", "actor"]
+    for field in required:
+        if field not in body:
+            return JSONResponse(
+                content={"ok": False, "error_type": "validation_error",
+                         "message": f"Missing field: {field}"},
+                status_code=422,
+            )
+    result = complete_intake_tool(body)
+    if not result.get("ok", False):
+        return _tool_error(result)
+    return result
+
+
+# ---------------------------------------------------------------------------
 # Agent spawn endpoint
 # ---------------------------------------------------------------------------
+
 
 @app.post("/agents/spawn")
 def spawn_agent(body: dict):

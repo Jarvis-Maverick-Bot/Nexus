@@ -350,6 +350,12 @@ def _dict_to_project(data: dict) -> Project:
         acceptance_package=acceptance_package,
         advisories=advisories,
         blockers=blockers,
+        # V1.6 intake fields
+        intake_complete=data.get("intake_complete", False),
+        intake_summary=data.get("intake_summary", ""),
+        intake_deliverable=data.get("intake_deliverable", ""),
+        intake_business_context=data.get("intake_business_context", ""),
+        output_package=data.get("output_package", {}),
     )
 
 

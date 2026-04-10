@@ -119,6 +119,46 @@ class Project:
     # V1.5: blockers — blocker_id -> Blocker
     blockers: dict[str, Blocker] = field(default_factory=dict)
 
+    # V1.6: Structured intake fields
+    # Required at creation: intake_summary, intake_deliverable, intake_business_context
+    # Arch is optional at intake (downstream delivery artifact)
+    intake_complete: bool = False
+    intake_summary: str = ""
+    intake_deliverable: str = ""
+    intake_business_context: str = ""
+    # V1.6: Output package — added at acceptance/closure
+    output_package: dict = field(default_factory=dict)
+
+    # --- Intake helpers ---
+
+    def validate_intake(self) -> bool:
+        """
+        Returns True if all required intake fields are present.
+        Required: intake_summary, intake_deliverable, intake_business_context
+        Arch is optional at intake.
+        """
+        return (
+            bool(self.intake_summary and self.intake_summary.strip())
+            and bool(self.intake_deliverable and self.intake_deliverable.strip())
+            and bool(self.intake_business_context and self.intake_business_context.strip())
+        )
+
+    def complete_intake(self) -> None:
+        """
+        Marks intake as complete if all required fields are present.
+        Raises ValueError if required fields are missing.
+        """
+        if not self.validate_intake():
+            missing = []
+            if not self.intake_summary.strip():
+                missing.append("intake_summary")
+            if not self.intake_deliverable.strip():
+                missing.append("intake_deliverable")
+            if not self.intake_business_context.strip():
+                missing.append("intake_business_context")
+            raise ValueError(f"Cannot complete intake — missing required fields: {', '.join(missing)}")
+        self.intake_complete = True
+
     def __post_init__(self):
         if not self.project_name:
             raise ValueError("project_name is required")
