@@ -200,6 +200,48 @@
     <div class="output" id="proj-output">Response will appear here…</div>
   </div>
 
+  <!-- ── PROJECT DETAIL / ARTIFACTS & ACCEPTANCE ── -->
+  <div class="section">
+    <div class="section-title">Project Detail — Artifacts &amp; Acceptance</div>
+    <div class="form-row">
+      <select id="detail-project" style="flex:2">
+        <option value="">(select a project…)</option>
+      </select>
+      <button onclick="loadDetailProjects();loadProjectDetail()" style="max-width:80px">Refresh</button>
+      <button onclick="loadProjectDetail()">Load</button>
+    </div>
+
+    <!-- Project summary -->
+    <div id="detail-summary" style="display:none;margin-bottom:1rem"></div>
+
+    <!-- Artifact completeness grid -->
+    <div id="artifact-panel" style="display:none;margin-bottom:1rem"></div>
+
+    <!-- Artifact upsert -->
+    <div id="artifact-upsert" style="display:none;margin-bottom:1rem">
+      <div style="font-size:0.8rem;color:#64748b;margin-bottom:0.5rem">Add / update artifact</div>
+      <div class="form-row">
+        <select id="artifact-type" style="max-width:160px">
+          <option value="scope">Scope</option>
+          <option value="spec">Specification (SPEC)</option>
+          <option value="arch">Architecture (Arch)</option>
+          <option value="testcase">Test Case</option>
+          <option value="testreport">Test Report</option>
+          <option value="guideline">Guideline</option>
+        </select>
+        <input id="artifact-produced-by" placeholder="Produced by (e.g. alex, BA Agent)" style="max-width:220px" />
+      </div>
+      <textarea id="artifact-content" placeholder="Artifact content…" style="min-height:80px;flex:2"></textarea>
+      <div class="form-row" style="margin-top:0.5rem">
+        <button class="success" onclick="doUpsertArtifact()">Save Artifact</button>
+      </div>
+      <div class="output" id="artifact-output" style="margin-top:0.5rem">Artifact saved or cleared…</div>
+    </div>
+
+    <!-- Acceptance package -->
+    <div id="acceptance-panel" style="display:none"></div>
+  </div>
+
   <!-- ── GATE PANEL ── -->
   <div class="section">
     <div class="section-title">Gate Confirmation</div>
@@ -563,6 +605,277 @@
       renderError(outEl, 'platform_unavailable', 'Cannot reach PMO backend.');
     }
   }
+
+  // ── Project Detail / Artifacts ──
+  async function loadDetailProjects() {
+    const sel = document.getElementById('detail-project');
+    if (!sel) return;
+    try {
+      const r = await fetch(BASE + '/projects');
+      const d = await r.json();
+      if (!d.ok) return;
+      sel.innerHTML = '<option value="">(select a project…)</option>';
+      (d.projects || []).forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.project_id;
+        opt.textContent = `${p.project_name} (${p.project_status}) — ${p.project_owner}`;
+        sel.appendChild(opt);
+      });
+    } catch(e) {}
+  }
+
+  async function loadProjectDetail() {
+    const projectId = document.getElementById('detail-project').value.trim();
+    if (!projectId) { alert('Select a project first'); return; }
+
+    const summaryEl = document.getElementById('detail-summary');
+    const artifactPanel = document.getElementById('artifact-panel');
+    const artifactUpsert = document.getElementById('artifact-upsert');
+    const acceptancePanel = document.getElementById('acceptance-panel');
+
+    // Load project + artifacts in parallel
+    const [projRes, artifactsRes] = await Promise.all([
+      fetch(BASE + '/projects/' + encodeURIComponent(projectId)),
+      fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/artifacts'),
+    ]);
+    const proj = await projRes.json();
+    const arts = await artifactsRes.json();
+
+    if (!proj.ok) {
+      summaryEl.style.display = 'block';
+      summaryEl.innerHTML = renderErrorStr(proj.error_type || 'unknown', proj.message || 'Failed');
+      return;
+    }
+
+    // Summary
+    summaryEl.style.display = 'block';
+    summaryEl.innerHTML = `
+      <div style="background:#0f172a;border:1px solid #334155;border-radius:6px;padding:1rem">
+        <div style="font-size:1rem;font-weight:600;color:#f8fafc;margin-bottom:0.25rem">${_esc(proj.project_name)}</div>
+        <div style="font-size:0.8rem;color:#64748b">
+          ${proj.project_goal ? _esc(proj.project_goal) + ' · ' : ''}
+          Owner: ${_esc(proj.project_owner)} ·
+          Status: <span style="color:#f59e0b">${proj.project_status}</span> ·
+          Created: ${new Date(proj.created_at).toLocaleDateString()}
+        </div>
+      </div>`;
+
+    // Artifact completeness grid
+    const completeness = proj.artifact_completeness || {};
+    const missing = proj.missing_artifacts || [];
+    const allPresent = proj.all_artifacts_present;
+
+    const rows = [
+      ['scope', 'Scope', 'Alex (on creation)'],
+      ['spec', 'Specification', 'BA Agent'],
+      ['arch', 'Architecture', 'SA Agent'],
+      ['testcase', 'Test Case', 'QA Agent'],
+      ['testreport', 'Test Report', 'Alex (UAT)'],
+      ['guideline', 'Guideline', 'Maverick'],
+    ];
+
+    let gridHTML = `
+      <div style="font-size:0.85rem;font-weight:600;color:#94a3b8;margin-bottom:0.5rem">
+        Artifacts — ${allPresent ? '<span style="color:#22c55e">✓ All present</span>' : '<span style="color:#f59e0b">✗ ' + missing.length + ' missing</span>'}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.5rem">`;
+    for (const [type, label, generatedBy] of rows) {
+      const info = completeness[type] || {};
+      const present = info.has_content;
+      const producedBy = info.produced_by || generatedBy;
+      gridHTML += `
+        <div style="background:#0f172a;border:1px solid ${present ? '#22c55e40' : '#334155'};border-radius:4px;padding:0.6rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem">
+            <span style="font-weight:600;color:${present ? '#22c55e' : '#64748b'}">${present ? '✓' : '○'} ${label}</span>
+          </div>
+          <div style="font-size:0.7rem;color:#64748b">${present ? 'By: ' + _esc(producedBy) : 'By: ' + generatedBy}</div>
+          ${present && info.produced_at ? '<div style="font-size:0.65rem;color:#475569;margin-top:0.1rem">' + new Date(info.produced_at).toLocaleDateString() + '</div>' : ''}
+        </div>`;
+    }
+    gridHTML += '</div>';
+    artifactPanel.style.display = 'block';
+    artifactPanel.innerHTML = gridHTML;
+
+    // Show upsert form
+    artifactUpsert.style.display = 'block';
+    document.getElementById('artifact-output').textContent = 'Artifact saved or cleared…';
+    document.getElementById('artifact-output').className = 'output';
+
+    // Acceptance panel
+    await loadAcceptancePanel(projectId);
+  }
+
+  async function loadAcceptancePanel(projectId) {
+    const panel = document.getElementById('acceptance-panel');
+    panel.innerHTML = '<div style="font-size:0.85rem;color:#64748b">Loading acceptance…</div>';
+    panel.style.display = 'block';
+
+    try {
+      const r = await fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/acceptance-package');
+      const d = await r.json();
+
+      if (!d.ok) {
+        panel.innerHTML = renderErrorStr(d.error_type || 'unknown', d.message);
+        return;
+      }
+
+      const pkg = d.acceptance_package;
+      const allPresent = d.all_artifacts_present;
+      const missing = d.missing_artifacts || [];
+
+      let inner = `
+        <div style="font-size:0.85rem;font-weight:600;color:#94a3b8;margin-bottom:0.5rem">Acceptance Package</div>`;
+
+      if (!allPresent) {
+        inner += `
+          <div style="background:#f59e0b10;border:1px solid #f59e0b40;border-radius:4px;padding:0.75rem;font-size:0.8rem;color:#f59e0b;margin-bottom:0.75rem">
+            Cannot finalize — missing ${missing.length} artifact(s): ${missing.join(', ')}
+          </div>`;
+      }
+
+      if (!pkg) {
+        inner += `
+          <div style="font-size:0.8rem;color:#64748b;margin-bottom:0.75rem">No acceptance package created yet.</div>
+          <div class="form-row">
+            <input id="pkg-task-id" placeholder="Task ID (optional)" style="max-width:200px" />
+            <input id="pkg-actor" placeholder="Your name" style="max-width:160px" />
+            <button class="success" onclick="doCreateAcceptance('${projectId}')" ${!allPresent ? 'disabled' : ''}>Create Package</button>
+          </div>
+          <div style="font-size:0.75rem;color:#64748b;margin-top:0.25rem">
+            ${!allPresent ? 'Create all artifacts first before finalizing acceptance.' : 'All 6 artifacts present — ready to create acceptance package.'}
+          </div>`;
+      } else {
+        const decision = pkg.acceptance_decision;
+        const decidedClass = decision === 'approved' ? 'already-approved'
+                          : decision === 'rejected' ? 'already-rejected'
+                          : 'badge-pending';
+        const decidedLabel = decision === 'approved' ? '✓ Approved'
+                          : decision === 'rejected' ? '✗ Rejected'
+                          : 'Pending decision';
+
+        inner += `
+          <div style="background:#0f172a;border:1px solid #334155;border-radius:4px;padding:0.75rem;margin-bottom:0.75rem">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
+              <span style="font-size:0.8rem;font-weight:600;color:#94a3b8">Package: ${pkg.package_id.slice(0,8)}</span>
+              <span class="gate-badge ${decision ? (decision === 'approved' ? 'badge-approved' : 'badge-rejected') : 'badge-pending'}">${decidedLabel}</span>
+            </div>
+            <div style="font-size:0.75rem;color:#64748b">
+              ${pkg.task_id ? 'Task: ' + _esc(pkg.task_id) + ' · ' : ''}
+              Created: ${new Date(pkg.created_at).toLocaleString()}
+            </div>
+            ${pkg.decided_at ? `<div style="font-size:0.75rem;color:#64748b;margin-top:0.2rem">Decided: ${new Date(pkg.decided_at).toLocaleString()} by ${_esc(pkg.decision_by || '')}</div>` : ''}
+            ${pkg.decision_note ? `<div style="font-size:0.75rem;color:#94a3b8;margin-top:0.2rem">Note: ${_esc(pkg.decision_note)}</div>` : ''}
+          </div>`;
+
+        if (!decision) {
+          inner += `
+            <div class="form-row">
+              <input id="pkg-actor" placeholder="Your name" style="max-width:160px" />
+              <button class="success" onclick="doApproveAcceptance('${projectId}')">Approve</button>
+              <button class="danger" onclick="doRejectAcceptance('${projectId}')">Reject</button>
+            </div>
+            <textarea id="pkg-note" placeholder="Decision note (optional for approve, required for reject)" style="min-height:50px;flex:2;margin-top:0.25rem"></textarea>`;
+        }
+      }
+
+      panel.innerHTML = inner;
+    } catch(e) {
+      panel.innerHTML = renderErrorStr('platform_unavailable', 'Cannot reach PMO backend.');
+    }
+  }
+
+  function renderErrorStr(errorType, message) {
+    const label = _ERROR_LABELS[errorType] || 'Error';
+    return `<div class="output error"><strong>${label}</strong><br>${_esc(message)}</div>`;
+  }
+
+  async function doUpsertArtifact() {
+    const projectId = document.getElementById('detail-project').value.trim();
+    const artifactType = document.getElementById('artifact-type').value;
+    const producedBy = document.getElementById('artifact-produced-by').value.trim();
+    const content = document.getElementById('artifact-content').value.trim();
+    const outEl = document.getElementById('artifact-output');
+
+    if (!producedBy) { alert('Produced by is required'); return; }
+
+    outEl.textContent = 'Saving…';
+    outEl.className = 'output';
+    try {
+      const r = await fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/artifacts', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({artifact_type: artifactType, content, produced_by: producedBy}),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        outEl.textContent = d.message;
+        outEl.className = 'output ok';
+        document.getElementById('artifact-content').value = '';
+        await loadProjectDetail();
+      } else {
+        outEl.textContent = d.message || 'Save failed';
+        outEl.className = 'output error';
+      }
+    } catch(e) {
+      outEl.textContent = e.message;
+      outEl.className = 'output error';
+    }
+  }
+
+  async function doCreateAcceptance(projectId) {
+    const taskId = document.getElementById('pkg-task-id')?.value.trim() || '';
+    const actor = document.getElementById('pkg-actor')?.value.trim() || '';
+    if (!actor) { alert('Your name is required'); return; }
+    try {
+      const r = await fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/acceptance-package', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({task_id: taskId, actor}),
+      });
+      const d = await r.json();
+      if (d.ok) {
+        await loadAcceptancePanel(projectId);
+      } else {
+        alert(d.message || 'Failed');
+      }
+    } catch(e) { alert(e.message); }
+  }
+
+  async function doApproveAcceptance(projectId) {
+    const actor = document.getElementById('pkg-actor')?.value.trim();
+    const note = document.getElementById('pkg-note')?.value.trim() || '';
+    if (!actor) { alert('Your name is required'); return; }
+    try {
+      const r = await fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/acceptance-package/approve', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({actor, note}),
+      });
+      const d = await r.json();
+      if (d.ok) await loadAcceptancePanel(projectId);
+      else alert(d.message || 'Failed');
+    } catch(e) { alert(e.message); }
+  }
+
+  async function doRejectAcceptance(projectId) {
+    const actor = document.getElementById('pkg-actor')?.value.trim();
+    const reason = document.getElementById('pkg-note')?.value.trim();
+    if (!actor) { alert('Your name is required'); return; }
+    if (!reason) { alert('Rejection reason is required'); return; }
+    try {
+      const r = await fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/acceptance-package/reject', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({actor, reason}),
+      });
+      const d = await r.json();
+      if (d.ok) await loadAcceptancePanel(projectId);
+      else alert(d.message || 'Failed');
+    } catch(e) { alert(e.message); }
+  }
+
+  // Load detail project list on page start
+  loadDetailProjects();
 </script>
 </body>
 </html>
