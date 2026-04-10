@@ -183,18 +183,17 @@ def gate_panel(task_id: str):
 @app.post("/projects")
 def create_project(body: dict):
     """
-    Create a new project with structured intake.
-    
-    Enforces that intake_summary, intake_deliverable, intake_business_context
-    are present and non-empty at creation time (governed intake contract).
+    Create a new project in DRAFT state.
+
+    V1.6: Required = project_name, project_goal, project_owner.
+    Prerequisite package is initialized separately via POST /projects/{id}/prerequisites.
     """
-    required = ["project_name", "project_goal", "project_owner",
-                "intake_summary", "intake_deliverable", "intake_business_context"]
+    required = ["project_name", "project_goal", "project_owner"]
     for field in required:
         if field not in body or not str(body[field]).strip():
             return JSONResponse(
                 content={"ok": False, "error_type": "validation_error",
-                         "message": f"Missing required intake field: {field}"},
+                         "message": f"Missing required field: {field}"},
                 status_code=422,
             )
     result = create_project_tool(body)
