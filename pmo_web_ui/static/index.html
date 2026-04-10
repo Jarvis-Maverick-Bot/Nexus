@@ -3,918 +3,1060 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PMO Web UI — gov_langgraph</title>
+  <title>PMO — gov_langgraph</title>
   <style>
+    :root {
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --card: #1a2235;
+      --card-hover: #1f2a40;
+      --border: #1e2d45;
+      --border-light: #253350;
+      --text: #e2e8f0;
+      --text-dim: #64748b;
+      --text-muted: #3d5068;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-glow: #3b82f630;
+      --green: #22c55e;
+      --green-bg: #22c55e15;
+      --amber: #f59e0b;
+      --amber-bg: #f59e0b15;
+      --red: #ef4444;
+      --red-bg: #ef444415;
+      --purple: #a855f7;
+      --purple-bg: #a855f715;
+      --sidebar-w: 220px;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 14px; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f1117;
-      color: #e2e8f0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      padding: 2rem;
+      display: flex;
+      flex-direction: column;
     }
-    h1 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
+
+    /* ── HEADER ── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .topbar-logo {
+      font-size: 0.95rem;
+      font-weight: 700;
       color: #f8fafc;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
     }
-    .subtitle {
+    .topbar-logo span { color: var(--accent); }
+    .topbar-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border-light);
+    }
+    .topbar-project {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1;
+    }
+    .topbar-project select {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 0.3rem 0.6rem;
       font-size: 0.85rem;
-      color: #64748b;
-      margin-bottom: 2rem;
+      cursor: pointer;
+      max-width: 280px;
     }
-    .section {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 1.25rem;
+    .topbar-project select:focus { outline: none; border-color: var(--accent); }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      flex-shrink: 0;
+    }
+    .topbar-version {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: flex;
+      flex: 1;
+      min-height: calc(100vh - 52px);
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 1rem 0;
+      flex-shrink: 0;
+    }
+    .sidebar-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 0 1rem 0.4rem;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      color: var(--text-dim);
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .nav-item:hover { color: var(--text); background: var(--card); }
+    .nav-item.active {
+      color: var(--accent);
+      background: var(--accent-glow);
+      border-left-color: var(--accent);
+    }
+    .nav-item .nav-icon { font-size: 1rem; width: 18px; text-align: center; }
+
+    /* ── MAIN ── */
+    .main {
+      flex: 1;
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+    }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+      transition: border-color 0.15s;
+    }
+    .card:hover { border-color: var(--border-light); }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       margin-bottom: 1rem;
     }
-    .section-title {
-      font-size: 0.9rem;
+    .card-title {
+      font-size: 0.875rem;
       font-weight: 600;
       color: #94a3b8;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.75rem;
+      letter-spacing: 0.06em;
     }
+    .card-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-active { background: var(--green-bg); color: var(--green); border: 1px solid #22c55e30; }
+    .badge-hold { background: var(--amber-bg); color: var(--amber); border: 1px solid #f59e0b30; }
+    .badge-closed { background: #64748b20; color: var(--text-dim); border: 1px solid #64748b30; }
+    .badge-shutdown { background: var(--red-bg); color: var(--red); border: 1px solid #ef444430; }
+
+    /* ── FORMS ── */
     .form-row {
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
       margin-bottom: 0.75rem;
+      align-items: flex-end;
     }
-    input, textarea {
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 4px;
-      color: #e2e8f0;
+    .form-row:last-child { margin-bottom: 0; }
+    .field { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; min-width: 140px; }
+    .field label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    input, textarea, select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
       padding: 0.5rem 0.75rem;
       font-size: 0.875rem;
-      min-width: 160px;
-      flex: 1;
       font-family: inherit;
+      transition: border-color 0.15s;
+      width: 100%;
     }
-    textarea { min-height: 60px; resize: vertical; }
-    input:focus, textarea:focus { outline: none; border-color: #3b82f6; }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    input::placeholder, textarea::placeholder { color: var(--text-muted); }
+    textarea { resize: vertical; min-height: 80px; }
+    select { cursor: pointer; }
     button {
-      background: #3b82f6;
+      background: var(--accent);
       color: #fff;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       padding: 0.5rem 1rem;
       font-size: 0.875rem;
       cursor: pointer;
       font-weight: 500;
+      font-family: inherit;
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
     }
-    button:hover { background: #2563eb; }
-    button:disabled { background: #334155; cursor: not-allowed; }
-    button.danger { background: #ef4444; }
+    button:hover { background: var(--accent-hover); }
+    button:active { transform: scale(0.98); }
+    button:disabled { background: var(--border-light); color: var(--text-muted); cursor: not-allowed; transform: none; }
+    button.danger { background: var(--red); }
     button.danger:hover { background: #dc2626; }
-    button.success { background: #22c55e; }
+    button.success { background: var(--green); }
     button.success:hover { background: #16a34a; }
-    button.secondary { background: #475569; }
-    button.secondary:hover { background: #64748b; }
+    button.secondary { background: var(--border-light); color: var(--text); }
+    button.secondary:hover { background: #334155; }
+    button.sm { padding: 0.3rem 0.7rem; font-size: 0.78rem; }
+
+    /* ── OUTPUT ── */
     .output {
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
       padding: 0.75rem;
       font-family: 'Courier New', monospace;
-      font-size: 0.8rem;
-      color: #94a3b8;
+      font-size: 0.78rem;
+      color: var(--text-dim);
       white-space: pre-wrap;
       word-break: break-all;
-      min-height: 48px;
-      max-height: 200px;
+      min-height: 44px;
+      max-height: 160px;
       overflow-y: auto;
+      margin-top: 0.75rem;
     }
-    .output.ok { border-color: #22c55e; }
-    .output.error { border-color: #ef4444; }
-    .output.warn { border-color: #f59e0b; }
-    .two-col {
+    .output.ok { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+    .output.error { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+    .output.warn { border-color: var(--amber); background: var(--amber-bg); color: var(--amber); }
+
+    /* ── ARTIFACT GRID ── */
+    .artifact-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    /* Gate panel */
-    .gate-panel {
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      padding: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.6rem;
       margin-bottom: 1rem;
     }
-    .gate-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 0.75rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 1px solid #334155;
-    }
-    .gate-title { font-size: 1rem; font-weight: 600; color: #f8fafc; }
-    .gate-task-id { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
-    .gate-badge {
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      padding: 3px 8px;
-      border-radius: 3px;
-      letter-spacing: 0.05em;
-    }
-    .badge-pending { background: #f59e0b20; color: #f59e0b; border: 1px solid #f59e0b40; }
-    .badge-approved { background: #22c55e20; color: #22c55e; border: 1px solid #22c55e40; }
-    .badge-rejected { background: #ef444420; color: #ef4444; border: 1px solid #ef444440; }
-    .gate-meta {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 0.25rem 1rem;
-      font-size: 0.8rem;
-      margin-bottom: 0.75rem;
-    }
-    .gate-meta dt { color: #64748b; }
-    .gate-meta dd { color: #cbd5e1; }
-    .gate-evidence {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 4px;
+    .artifact-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
       padding: 0.75rem;
-      font-size: 0.8rem;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .artifact-card.done { border-color: #22c55e40; background: var(--green-bg); }
+    .artifact-card.missing { border-color: var(--border-light); }
+    .artifact-icon { font-size: 1.4rem; margin-bottom: 0.25rem; }
+    .artifact-name { font-size: 0.75rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
+    .artifact-card.done .artifact-name { color: var(--green); }
+    .artifact-status { font-size: 0.7rem; margin-top: 0.2rem; }
+    .artifact-card.done .artifact-status { color: var(--green); }
+    .artifact-card.missing .artifact-status { color: var(--text-muted); }
+
+    /* ── GATE ── */
+    .gate-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.6rem;
       margin-bottom: 1rem;
     }
-    .gate-evidence-title { font-weight: 600; color: #94a3b8; margin-bottom: 0.25rem; }
-    .gate-evidence-note { font-style: italic; color: #64748b; font-size: 0.75rem; margin-top: 0.25rem; }
-    .gate-decision-area { }
-    .gate-already-decided {
-      font-size: 0.875rem;
-      font-weight: 600;
+    .gate-stage {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
       padding: 0.75rem;
-      border-radius: 4px;
       text-align: center;
     }
-    .already-approved { background: #22c55e20; color: #22c55e; border: 1px solid #22c55e40; }
-    .already-rejected { background: #ef444420; color: #ef4444; border: 1px solid #ef444440; }
-    .decision-note-hint {
-      font-size: 0.75rem;
-      color: #64748b;
-      margin-top: 0.25rem;
-    }
-    .rejection-required { color: #ef4444; font-size: 0.8rem; margin-top: 0.25rem; }
-    .gate-actor-row {
+    .gate-stage.completed { border-color: #22c55e40; background: var(--green-bg); }
+    .gate-stage.current { border-color: var(--accent); background: var(--accent-glow); }
+    .gate-stage-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
+    .gate-stage.completed .gate-stage-label { color: var(--green); }
+    .gate-stage.current .gate-stage-label { color: var(--accent); }
+    .gate-stage-name { font-size: 0.875rem; font-weight: 600; margin-top: 0.2rem; color: var(--text); }
+    .gate-stage.completed .gate-stage-name { color: var(--green); }
+
+    /* ── ADVISORY/BLOCKER ── */
+    .signal-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .signal-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
       display: flex;
-      gap: 0.5rem;
-      align-items: center;
+      gap: 0.75rem;
+      align-items: flex-start;
     }
-    .gate-actor-row input { min-width: 200px; }
-    @media (max-width: 640px) {
-      .two-col { grid-template-columns: 1fr; }
-      input, textarea { min-width: 100%; }
-      .gate-actor-row { flex-direction: column; }
+    .signal-item.blocker { border-color: #ef444440; background: var(--red-bg); }
+    .signal-item.warn { border-color: #f59e0b40; background: var(--amber-bg); }
+    .signal-icon { font-size: 1rem; flex-shrink: 0; width: 20px; text-align: center; margin-top: 1px; }
+    .signal-body { flex: 1; min-width: 0; }
+    .signal-msg { font-size: 0.85rem; color: var(--text); word-break: break-word; }
+    .signal-meta { font-size: 0.72rem; color: var(--text-dim); margin-top: 0.2rem; }
+    .signal-sev {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .sev-critical { background: #ef444440; color: var(--red); }
+    .sev-high { background: #f9731640; color: #f97316; }
+    .sev-medium { background: #f59e0b40; color: var(--amber); }
+    .sev-low { background: #64748b40; color: var(--text-dim); }
+    .sev-info { background: #3b82f620; color: var(--accent); }
+    .sev-warn { background: #f59e0b40; color: var(--amber); }
+
+    /* ── DETAIL SUMMARY ── */
+    .detail-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .meta-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; }
+    .meta-label { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.25rem; }
+    .meta-value { font-size: 0.9rem; font-weight: 500; color: var(--text); }
+
+    /* ── PROJECT LIST ── */
+    .project-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .project-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .project-row:hover { border-color: var(--accent); background: var(--card-hover); }
+    .project-row-name { flex: 1; font-size: 0.875rem; font-weight: 500; color: var(--text); }
+    .project-row-owner { font-size: 0.78rem; color: var(--text-dim); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    /* ── UTILS ── */
+    .text-green { color: var(--green); }
+    .text-red { color: var(--red); }
+    .text-amber { color: var(--amber); }
+    .text-dim { color: var(--text-dim); }
+    .text-muted { color: var(--text-muted); }
+    .mt-1 { margin-top: 1rem; }
+    .flex { display: flex; }
+    .gap-05 { gap: 0.5rem; }
+    .items-center { align-items: center; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { padding: 1rem; }
+      .topbar { padding: 0 1rem; }
+      :root { --sidebar-w: 0px; }
     }
   </style>
 </head>
 <body>
 
-  <h1>PMO Web UI</h1>
-  <p class="subtitle">gov_langgraph — non-authoritative shell</p>
-
-  <!-- ── PROJECTS ── -->
-  <div class="section">
-    <div class="section-title">Projects</div>
-    <div class="form-row">
-      <input id="proj-name" placeholder="Project name" style="flex:2" />
-      <input id="proj-owner" placeholder="Owner" style="max-width:140px" />
-      <select id="proj-status" style="max-width:130px">
-        <option value="active">Active</option>
-        <option value="on_hold">On Hold</option>
-        <option value="closed">Closed</option>
-        <option value="shutdown">Shutdown</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <input id="proj-goal" placeholder="Project goal / purpose (optional)" style="flex:2" />
-      <button class="success" onclick="doCreateProject()">Create Project</button>
-    </div>
-    <div class="output" id="proj-output">Response will appear here…</div>
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="topbar-logo">PMO <span>●</span></div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-project">
+    <div class="status-dot"></div>
+    <select id="quick-project" onchange="if(this.value) navigateTo('detail'); loadProjectDetail();">
+      <option value="">Select project…</option>
+    </select>
   </div>
+  <div class="topbar-version">v1.5</div>
+</div>
 
-  <!-- ── PROJECT DETAIL / ARTIFACTS & ACCEPTANCE ── -->
-  <div class="section">
-    <div class="section-title">Project Detail — Artifacts &amp; Acceptance</div>
-    <div class="form-row">
-      <select id="detail-project" style="flex:2">
-        <option value="">(select a project…)</option>
-      </select>
-      <button onclick="loadDetailProjects();loadProjectDetail()" style="max-width:80px">Refresh</button>
-      <button onclick="loadProjectDetail()">Load</button>
+<!-- ── LAYOUT ── -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-label">Navigation</div>
+    <div class="nav-item active" onclick="navigateTo('projects')">
+      <span class="nav-icon">📁</span> Projects
+    </div>
+    <div class="nav-item" onclick="navigateTo('detail')">
+      <span class="nav-icon">📋</span> Detail View
+    </div>
+    <div class="nav-item" onclick="navigateTo('gate')">
+      <span class="nav-icon">🚦</span> Gate Panel
+    </div>
+    <div class="nav-item" onclick="navigateTo('status')">
+      <span class="nav-icon">📊</span> Status
+    </div>
+    <div class="nav-item" onclick="navigateTo('advisories')">
+      <span class="nav-icon">⚠️</span> Advisories
+    </div>
+    <div class="nav-item" onclick="navigateTo('kickoff')">
+      <span class="nav-icon">🚀</span> Kickoff
     </div>
 
-    <!-- Project summary -->
-    <div id="detail-summary" style="display:none;margin-bottom:1rem"></div>
-
-    <!-- Artifact completeness grid -->
-    <div id="artifact-panel" style="display:none;margin-bottom:1rem"></div>
-
-    <!-- Artifact upsert -->
-    <div id="artifact-upsert" style="display:none;margin-bottom:1rem">
-      <div style="font-size:0.8rem;color:#64748b;margin-bottom:0.5rem">Add / update artifact</div>
-      <div class="form-row">
-        <select id="artifact-type" style="max-width:160px">
-          <option value="scope">Scope</option>
-          <option value="spec">Specification (SPEC)</option>
-          <option value="arch">Architecture (Arch)</option>
-          <option value="testcase">Test Case</option>
-          <option value="testreport">Test Report</option>
-          <option value="guideline">Guideline</option>
-        </select>
-        <input id="artifact-produced-by" placeholder="Produced by (e.g. alex, BA Agent)" style="max-width:220px" />
+    <div class="sidebar-label" style="margin-top:1rem">Sprints</div>
+    <div style="padding: 0.25rem 1rem;">
+      <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:0.3rem">V1.5 Progress</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;height:6px;overflow:hidden">
+        <div style="background:var(--accent);height:100%;width:83%;border-radius:4px"></div>
       </div>
-      <textarea id="artifact-content" placeholder="Artifact content…" style="min-height:80px;flex:2"></textarea>
-      <div class="form-row" style="margin-top:0.5rem">
-        <button class="success" onclick="doUpsertArtifact()">Save Artifact</button>
+      <div style="font-size:0.7rem;color:var(--text-dim);margin-top:0.2rem">5 / 6 sprints</div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ── PAGE: PROJECTS ── -->
+    <div class="page active" id="page-projects">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Create Project</div>
+        </div>
+        <div class="form-row">
+          <div class="field" style="flex:2">
+            <label>Project Name</label>
+            <input id="proj-name" placeholder="e.g. Alpha, Beta, Production" />
+          </div>
+          <div class="field">
+            <label>Owner</label>
+            <input id="proj-owner" placeholder="Your name" />
+          </div>
+          <div class="field">
+            <label>Status</label>
+            <select id="proj-status">
+              <option value="active">Active</option>
+              <option value="on_hold">On Hold</option>
+              <option value="closed">Closed</option>
+              <option value="shutdown">Shutdown</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field" style="flex:2">
+            <label>Goal</label>
+            <input id="proj-goal" placeholder="Project goal or purpose (optional)" />
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="success" onclick="doCreateProject()">+ Create Project</button>
+          </div>
+        </div>
+        <div class="output" id="proj-output">Ready. Enter project details above.</div>
       </div>
-      <div class="output" id="artifact-output" style="margin-top:0.5rem">Artifact saved or cleared…</div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">All Projects</div>
+          <button class="secondary sm" onclick="loadAllProjects()">↻ Refresh</button>
+        </div>
+        <div id="all-projects-list"></div>
+      </div>
     </div>
 
-    <!-- Acceptance package -->
-    <div id="acceptance-panel" style="display:none"></div>
-  </div>
+    <!-- ── PAGE: DETAIL ── -->
+    <div class="page" id="page-detail">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Project Detail</div>
+          <div class="flex gap-05">
+            <select id="detail-project" onchange="loadProjectDetail()">
+              <option value="">(select project…)</option>
+            </select>
+            <button class="secondary sm" onclick="loadProjectDetail()">Load</button>
+          </div>
+        </div>
+        <div id="detail-meta" class="detail-meta" style="display:none"></div>
+        <div id="detail-summary" style="display:none;margin-bottom:1rem"></div>
 
-  <!-- ── GATE PANEL ── -->
-  <div class="section">
-    <div class="section-title">Gate Confirmation</div>
-    <div class="form-row">
-      <input id="gate-task-id" placeholder="Task ID" style="max-width:320px" />
-      <button onclick="doLoadGate()">Load Gate</button>
-    </div>
-    <div id="gate-panel"></div>
-  </div>
+        <!-- Artifact completeness -->
+        <div style="font-size:0.8rem;font-weight:600;color:var(--text-dim);margin-bottom:0.6rem;text-transform:uppercase;letter-spacing:0.05em">
+          Artifacts
+        </div>
+        <div id="artifact-grid" class="artifact-grid" style="display:none"></div>
 
-  <!-- ── VIEW STATUS ── -->
-  <div class="section">
-    <div class="section-title">View Status</div>
-    <div class="form-row">
-      <input id="status-task-id" placeholder="Task ID" />
-      <button onclick="doStatus()">Get Status</button>
-    </div>
-    <div class="output" id="status-output">Response will appear here…</div>
-  </div>
+        <!-- Artifact upsert -->
+        <div id="artifact-upsert" style="display:none">
+          <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:0.5rem;font-weight:500">Add / Update Artifact</div>
+          <div class="form-row">
+            <div class="field">
+              <label>Type</label>
+              <select id="artifact-type">
+                <option value="scope">Scope</option>
+                <option value="spec">Specification</option>
+                <option value="arch">Architecture</option>
+                <option value="testcase">Test Case</option>
+                <option value="testreport">Test Report</option>
+                <option value="guideline">Guideline</option>
+              </select>
+            </div>
+            <div class="field" style="flex:2">
+              <label>Produced By</label>
+              <input id="artifact-produced-by" placeholder="e.g. alex, BA Agent" />
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0.75rem">
+            <label>Content</label>
+            <textarea id="artifact-content" placeholder="Artifact content…"></textarea>
+          </div>
+          <button class="success" onclick="doUpsertArtifact()">Save Artifact</button>
+          <div class="output" id="artifact-output">Artifact saved or cleared…</div>
+        </div>
 
-  <!-- ── KICKOFF ── -->
-  <div class="section">
-    <div class="section-title">Announce Kickoff</div>
-    <div class="form-row">
-      <select id="kickoff-project" style="flex:2">
-        <option value="">(loading projects…)</option>
-      </select>
-      <button onclick="loadProjects()" style="max-width:80px">Refresh</button>
+        <!-- Acceptance -->
+        <div id="acceptance-panel" style="display:none;margin-top:1rem"></div>
+      </div>
     </div>
-    <div class="form-row">
-      <input id="kickoff-title" placeholder="Task title" style="flex:2" />
-    </div>
-    <div class="form-row">
-      <textarea id="kickoff-description" placeholder="Description — what is this work?" style="min-height:60px;flex:2"></textarea>
-    </div>
-    <div class="form-row">
-      <select id="kickoff-priority" style="max-width:100px">
-        <option value="0">P0</option>
-        <option value="1">P1</option>
-        <option value="2" selected>P2</option>
-        <option value="3">P3</option>
-      </select>
-      <input id="kickoff-assignee" placeholder="Assignee (optional — leave blank for unassigned)" style="flex:2" />
-      <input id="kickoff-actor" placeholder="Your name" style="max-width:160px" />
-    </div>
-    <div class="form-row">
-      <button class="success" onclick="doKickoff()">Announce Kickoff</button>
-    </div>
-    <div class="output" id="kickoff-output">Response will appear here…</div>
-  </div>
 
-  <!-- ── LIST TASKS ── -->
-  <div class="section">
-    <div class="section-title">List Tasks</div>
-    <div class="form-row">
-      <input id="list-project" placeholder="Project ID" />
-      <button onclick="doList()">List</button>
+    <!-- ── PAGE: GATE ── -->
+    <div class="page" id="page-gate">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Gate Confirmation</div>
+        </div>
+        <div class="form-row">
+          <div class="field" style="flex:2">
+            <label>Task ID</label>
+            <input id="gate-task-id" placeholder="Paste task ID from status view" />
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button onclick="doLoadGate()">Load Gate</button>
+          </div>
+        </div>
+        <div id="gate-output"></div>
+      </div>
     </div>
-    <div class="output" id="list-output">Response will appear here…</div>
-  </div>
 
-  <!-- ── ADVISORIES & BLOCKERS ── -->
-  <div class="section">
-    <div class="section-title">Advisories &amp; Blockers</div>
-    <div class="form-row">
-      <select id="adv-project" style="flex:2">
-        <option value="">(select a project…)</option>
-      </select>
-      <button onclick="loadAdvProjects();loadAdvisories()" style="max-width:80px">Refresh</button>
-      <button onclick="loadAdvisories()">Load</button>
+    <!-- ── PAGE: STATUS ── -->
+    <div class="page" id="page-status">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">View Status</div>
+        </div>
+        <div class="form-row">
+          <div class="field" style="flex:2">
+            <label>Task ID</label>
+            <input id="status-task-id" placeholder="Paste task ID" />
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button onclick="doStatus()">Get Status</button>
+          </div>
+        </div>
+        <div class="output" id="status-output">Response will appear here…</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">List Tasks</div>
+          <div class="flex gap-05">
+            <input id="list-project" placeholder="Project ID" style="max-width:280px" />
+            <button class="secondary sm" onclick="doList()">List</button>
+          </div>
+        </div>
+        <div class="output" id="list-output">Response will appear here…</div>
+      </div>
     </div>
-    <div id="advisory-blocker-panel" style="display:none"></div>
-  </div>
+
+    <!-- ── PAGE: ADVISORIES ── -->
+    <div class="page" id="page-advisories">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Advisories &amp; Blockers</div>
+          <div class="flex gap-05">
+            <select id="adv-project" onchange="loadAdvisories()">
+              <option value="">(select project…)</option>
+            </select>
+            <button class="secondary sm" onclick="loadAdvisories()">Refresh</button>
+          </div>
+        </div>
+        <div id="advisory-blocker-panel">
+          <div class="empty-state">Select a project to view advisories.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PAGE: KICKOFF ── -->
+    <div class="page" id="page-kickoff">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Announce Kickoff</div>
+        </div>
+        <div class="form-row">
+          <div class="field" style="flex:2">
+            <label>Task Title</label>
+            <input id="kickoff-title" placeholder="e.g. Alpha BA, Production API" />
+          </div>
+          <div class="field">
+            <label>Project</label>
+            <select id="kickoff-project">
+              <option value="">(select project…)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field" style="flex:2">
+            <label>Description</label>
+            <input id="kickoff-description" placeholder="What is this task about?" />
+          </div>
+          <div class="field">
+            <label>Priority</label>
+            <select id="kickoff-priority">
+              <option value="0">P0 — Critical</option>
+              <option value="1" selected>P1 — High</option>
+              <option value="2">P2 — Medium</option>
+              <option value="3">P3 — Low</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Assignee</label>
+            <input id="kickoff-assignee" placeholder="e.g. ba_agent" />
+          </div>
+          <div class="field">
+            <label>Your Name</label>
+            <input id="kickoff-actor" placeholder="e.g. alex" />
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="success" onclick="doKickoff()">🚀 Announce Kickoff</button>
+          </div>
+        </div>
+        <div class="output" id="kickoff-output">Response will appear here…</div>
+      </div>
+    </div>
+
+  </main>
+</div>
 
 <script>
   const BASE = '';
-  let _projects = [];  // cached project list
 
-  async function loadProjects() {
-    try {
-      const r = await fetch(BASE + '/projects');
-      const d = await r.json();
-      if (d.ok) {
-        _projects = (d.projects || []).filter(p => p.project_status === 'active');
-      }
-    } catch(e) { _projects = []; }
-    _populateProjectSelect();
+  // ── NAVIGATION ──
+  function navigateTo(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    event.currentTarget.classList.add('active');
+    if (page === 'projects') loadAllProjects();
+    if (page === 'detail') { loadDetailProjects(); }
+    if (page === 'advisories') loadAdvProjects();
+    if (page === 'kickoff') loadDetailProjects();
   }
 
-  function _populateProjectSelect() {
-    const sel = document.getElementById('kickoff-project');
-    if (!sel) return;
-    sel.innerHTML = '';
-    if (_projects.length === 0) {
-      const opt = document.createElement('option');
-      opt.value = ''; opt.textContent = '(no active projects — create one first)';
-      sel.appendChild(opt);
-      sel.disabled = true;
-    } else {
-      sel.disabled = false;
-      _projects.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.project_id; opt.textContent = p.project_name;
-        sel.appendChild(opt);
-      });
-    }
-  }
-
-  // Load projects on page start
-  loadProjects();
-
-  function show(elId, data, ok, warn) {
-    const el = document.getElementById(elId);
-    el.textContent = JSON.stringify(data, null, 2);
-    el.className = 'output ' + (warn ? 'warn' : (ok ? 'ok' : 'error'));
-  }
-
-  // ── Error rendering ──
-  const _ERROR_LABELS = {
-    platform_unavailable: 'Platform Unavailable',
-    task_not_found: 'Task Not Found',
-    validation_error: 'Validation Error',
-    already_decided: 'Already Decided',
-    terminal_state: 'Terminal State',
-    unknown: 'Error',
-  };
-
+  // ── UTILITIES ──
   function _esc(s) {
-    return String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+    if (s == null) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  function renderError(el, errorType, message) {
-    const label = _ERROR_LABELS[errorType] || 'Error';
-    el.innerHTML = `<div class="output error"><strong>${label}</strong><br>${_esc(message)}</div>`;
+  function _ts(o) {
+    if (!o) return '—';
+    return new Date(o).toLocaleString();
   }
 
-  // ── Projects ──
-  async function doCreateProject() {
-    const project_name = document.getElementById('proj-name').value.trim();
-    const project_owner = document.getElementById('proj-owner').value.trim();
-    const project_status = document.getElementById('proj-status').value.trim() || 'active';
-    const project_goal = document.getElementById('proj-goal').value.trim();
-    if (!project_name) { alert('Project name is required'); return; }
-    if (!project_owner) { alert('Owner is required'); return; }
-    const body = { project_name, project_owner, project_status };
-    if (project_goal) body.project_goal = project_goal;
-    const out = document.getElementById('proj-output');
+  function _fmt(o) {
+    if (o == null) return '—';
+    if (typeof o === 'object') return JSON.stringify(o, null, 2);
+    return String(o);
+  }
+
+  function _ok(el, msg) {
+    el.className = 'output ok';
+    el.textContent = msg;
+  }
+  function _err(el, msg) {
+    el.className = 'output error';
+    el.textContent = msg;
+  }
+  function _warn(el, msg) {
+    el.className = 'output warn';
+    el.textContent = msg;
+  }
+  function _neutral(el, msg) {
+    el.className = 'output';
+    el.textContent = msg;
+  }
+
+  async function _api(method, url, body) {
+    const opts = { method, headers: {'Content-Type':'application/json'} };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(BASE + url, opts);
+    return r.json();
+  }
+
+  // ── PROJECTS ──
+  async function loadAllProjects() {
+    const list = document.getElementById('all-projects-list');
+    const sel = document.getElementById('quick-project');
+    list.innerHTML = '<div class="empty-state">Loading…</div>';
     try {
-      const r = await fetch(`${BASE}/projects`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const d = await r.json();
-      show('proj-output', d, d.ok, false);
-      if (d.ok) {
-        document.getElementById('proj-name').value = '';
-        document.getElementById('proj-owner').value = '';
-        document.getElementById('proj-goal').value = '';
-        loadProjects();
-      }
-    } catch(e) {
-      show('proj-output', { error: e.message }, false, false);
-    }
-  }
-
-  // ── Gate Panel ──
-  async function doLoadGate() {
-    const taskId = document.getElementById('gate-task-id').value.trim();
-    if (!taskId) { alert('Task ID required'); return; }
-    const panel = document.getElementById('gate-panel');
-    panel.innerHTML = ''; // clear stale state
-    try {
-      const r = await fetch(`${BASE}/gate/${encodeURIComponent(taskId)}`);
-      const d = await r.json();
-      if (!d.ok) {
-        renderError(panel, d.error_type || 'unknown', d.message || 'Failed to load gate');
+      const d = await _api('GET', '/projects');
+      if (!d.ok) { list.innerHTML = '<div class="empty-state">Failed to load projects.</div>'; return; }
+      const projects = d.projects || [];
+      if (projects.length === 0) {
+        list.innerHTML = '<div class="empty-state">No projects yet. Create one above.</div>';
+        sel.innerHTML = '<option value="">Select project…</option>';
         return;
       }
-      renderGatePanel(d);
-    } catch(e) {
-      renderError(panel, 'platform_unavailable', 'Cannot reach PMO backend — platform may be unavailable.');
-    }
-  }
-
-  function renderGatePanel(d) {
-    const panel = document.getElementById('gate-panel');
-    const badgeClass = d.gate_status === 'approved' ? 'badge-approved'
-                     : d.gate_status === 'rejected' ? 'badge-rejected'
-                     : d.gate_status === 'no_gate' ? 'badge-rejected'
-                     : 'badge-pending';
-    const badgeLabel = d.gate_status === 'approved' ? 'Already approved'
-                     : d.gate_status === 'rejected' ? 'Already rejected'
-                     : d.gate_status === 'no_gate' ? 'No gate'
-                     : 'Pending decision';
-
-    const gateLabel = d.gate_type && d.gate_type !== 'stage_advance'
-      ? d.gate_type.replace(/_/g, ' ')
-      : `${d.gate_stage} Gate`;
-
-    let decisionHTML = '';
-    if (d.gate_status === 'no_gate') {
-      decisionHTML = `<div class="gate-already-decided" style="background:#64748b20;color:#94a3b8;border-color:#64748b40">${_esc(d.message || 'No gate action available at this stage.')}</div>`;
-    } else if (d.gate_status === 'pending') {
-      decisionHTML = `
-        <div class="gate-decision-area">
-          <div class="form-row">
-            <textarea id="gate-notes" placeholder="Decision note (optional — annotation only, not governance evidence)"></textarea>
-          </div>
-          <div class="form-row">
-            <input id="gate-actor" placeholder="Your name / role" style="max-width:200px" />
-            <button class="success" onclick="doGateApprove('${d.task_id}', '${d.gate_stage}')">Approve</button>
-            <button class="danger" onclick="doGateReject('${d.task_id}', '${d.gate_stage}')">Reject</button>
-          </div>
-        </div>`;
-    } else {
-      const decidedClass = d.gate_status === 'approved' ? 'already-approved' : 'already-rejected';
-      const decidedLabel = d.gate_status === 'approved' ? 'Already approved' : 'Already rejected';
-      const decidedBy = d.gate_decision_by ? ` by ${d.gate_decision_by}` : '';
-      const decidedAt = d.gate_decided_at ? `<br>${new Date(d.gate_decided_at).toLocaleString()}` : '';
-      const decidedNote = d.gate_decision_note ? `<br>Note: ${_esc(d.gate_decision_note)}` : '';
-      decisionHTML = `<div class="gate-already-decided ${decidedClass}">${decidedLabel}${decidedBy}${decidedAt}${decidedNote}</div>`;
-    }
-
-    const evidenceNote = d.gate_decision_note
-      ? `<div class="gate-evidence-note">${_esc(d.gate_decision_note)}</div>`
-      : '<div class="gate-evidence-note">Evidence pending — does not block your decision.</div>';
-
-    panel.innerHTML = `
-      <div class="gate-panel">
-        <div class="gate-header">
-          <div>
-            <div class="gate-title">${_esc(d.task_title)}</div>
-            <div class="gate-task-id">${d.task_id}</div>
-          </div>
-          <span class="gate-badge ${badgeClass}">${badgeLabel}</span>
+      sel.innerHTML = '<option value="">Select project…</option>';
+      list.innerHTML = '<div class="project-list">' + projects.map(p => `
+        <div class="project-row" onclick="selectProject('${p.project_id}')">
+          <span class="project-row-name">${_esc(p.project_name)}</span>
+          <span class="project-row-owner">${_esc(p.project_owner)} · ${_ts(p.created_at).split(' ')[0]}</span>
+          <span class="card-badge badge-${p.project_status.replace('_','-')}">${p.project_status}</span>
         </div>
-        <dl class="gate-meta">
-          <dt>Stage</dt><dd>${d.current_stage}</dd>
-          <dt>Gate</dt><dd>${gateLabel}</dd>
-          <dt>Owner</dt><dd>${d.current_owner || '—'}</dd>
-        </dl>
-        <div class="gate-evidence">
-          <div class="gate-evidence-title">Evidence summary</div>
-          <div>Evidence is drafted by BA/Jarvis. PMO displays only.</div>
-          ${evidenceNote}
-        </div>
-        ${decisionHTML}
-      </div>`;
-  }
-
-  async function doGateApprove(taskId, stage) {
-    const actor = document.getElementById('gate-actor').value.trim();
-    const notes = document.getElementById('gate-notes').value.trim();
-    if (!actor) { alert('Your name/role is required'); return; }
-    const panel = document.getElementById('gate-panel');
-    try {
-      const r = await fetch(`${BASE}/gate/approve`, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({task_id: taskId, gate_name: stage + '_GATE', actor, notes}),
-      });
-      const d = await r.json();
-      if (d.ok) {
-        panel.innerHTML += `<div class="output ok" style="margin-top:0.5rem">${d.message}</div>`;
-        setTimeout(() => doLoadGate(), 800);
-      } else {
-        renderError(panel, d.error_type || 'unknown', d.message || 'Approve failed');
-      }
+      `).join('') + '</div>';
+      sel.innerHTML = '<option value="">Select project…</option>' + projects.map(p =>
+        `<option value="${p.project_id}">${_esc(p.project_name)}</option>`
+      ).join('');
     } catch(e) {
-      renderError(panel, 'platform_unavailable', 'Cannot reach PMO backend.');
+      list.innerHTML = '<div class="empty-state">Cannot reach PMO backend.</div>';
     }
   }
 
-  async function doGateReject(taskId, stage) {
-    const actor = document.getElementById('gate-actor').value.trim();
-    const notes = document.getElementById('gate-notes').value.trim();
-    if (!actor) { alert('Your name/role is required'); return; }
-    if (!notes) { alert('Rejection reason is required'); return; }
-    const panel = document.getElementById('gate-panel');
+  function selectProject(pid) {
+    const sel = document.getElementById('detail-project');
+    if (sel) { sel.value = pid; }
+    const qsel = document.getElementById('quick-project');
+    if (qsel) qsel.value = pid;
+    navigateTo('detail');
+    loadProjectDetail();
+  }
+
+  async function doCreateProject() {
+    const name = document.getElementById('proj-name').value.trim();
+    const owner = document.getElementById('proj-owner').value.trim();
+    const goal = document.getElementById('proj-goal').value.trim();
+    const status = document.getElementById('proj-status').value;
+    const out = document.getElementById('proj-output');
+    if (!name || !owner) { _warn(out, 'Name and Owner are required.'); return; }
+    _neutral(out, 'Creating…');
     try {
-      const r = await fetch(`${BASE}/gate/reject`, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({task_id: taskId, gate_name: stage + '_GATE', actor, notes}),
-      });
-      const d = await r.json();
+      const d = await _api('POST', '/projects', {project_name:name, project_goal:goal, project_owner:owner, project_status:status});
       if (d.ok) {
-        panel.innerHTML += `<div class="output ok" style="margin-top:0.5rem">${d.message}</div>`;
-        setTimeout(() => doLoadGate(), 800);
+        _ok(out, `Created: ${d.project_id}\n${d.message || ''}`);
+        document.getElementById('proj-name').value = '';
+        document.getElementById('proj-goal').value = '';
+        loadAllProjects();
       } else {
-        renderError(panel, d.error_type || 'unknown', d.message || 'Reject failed');
+        _err(out, d.message || 'Failed');
       }
-    } catch(e) {
-      renderError(panel, 'platform_unavailable', 'Cannot reach PMO backend.');
-    }
+    } catch(e) { _err(out, e.message); }
   }
 
-  // ── Status ──
-  async function doStatus() {
-    const taskId = document.getElementById('status-task-id').value.trim();
-    if (!taskId) { alert('Task ID required'); return; }
-    const outEl = document.getElementById('status-output');
-    outEl.textContent = 'Loading...';
-    outEl.className = 'output';
-    try {
-      const r = await fetch(`${BASE}/status/${encodeURIComponent(taskId)}`);
-      const d = await r.json();
-      if (d.ok) {
-        show('status-output', d, true);
-      } else {
-        renderError(outEl, d.error_type || 'unknown', d.message || 'Failed to load status');
-      }
-    } catch(e) {
-      renderError(outEl, 'platform_unavailable', 'Cannot reach PMO backend.');
-    }
-  }
-
-  // ── Kickoff ──
-  async function doKickoff() {
-    const projectId = document.getElementById('kickoff-project').value.trim();
-    if (!projectId) { alert('Project must be selected — create one first if none exist'); return; }
-    const body = {
-      title: document.getElementById('kickoff-title').value.trim(),
-      project_id: projectId,
-      description: document.getElementById('kickoff-description').value.trim(),
-      priority: parseInt(document.getElementById('kickoff-priority').value) || 2,
-      assignee: document.getElementById('kickoff-assignee').value.trim(),
-      actor: document.getElementById('kickoff-actor').value.trim(),
-    };
-    if (!body.title || !body.description || !body.actor) {
-      alert('Title, Description, and Your name are required'); return;
-    }
-    const outEl = document.getElementById('kickoff-output');
-    outEl.textContent = 'Loading...';
-    outEl.className = 'output';
-    try {
-      const r = await fetch(`${BASE}/kickoff`, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(body),
-      });
-      const d = await r.json();
-      if (d.ok) {
-        show('kickoff-output', d, true);
-      } else {
-        renderError(outEl, d.error_type || 'unknown', d.message || 'Kickoff failed');
-      }
-    } catch(e) {
-      renderError(outEl, 'platform_unavailable', 'Cannot reach PMO backend.');
-    }
-  }
-
-  // ── List ──
-  async function doList() {
-    const projectId = document.getElementById('list-project').value.trim();
-    if (!projectId) { alert('Project ID required'); return; }
-    const outEl = document.getElementById('list-output');
-    outEl.textContent = 'Loading...';
-    outEl.className = 'output';
-    try {
-      const r = await fetch(`${BASE}/tasks/${encodeURIComponent(projectId)}`);
-      const d = await r.json();
-      if (d.ok) {
-        show('list-output', d, true);
-      } else {
-        renderError(outEl, d.error_type || 'unknown', d.message || 'Failed to list tasks');
-      }
-    } catch(e) {
-      renderError(outEl, 'platform_unavailable', 'Cannot reach PMO backend.');
-    }
-  }
-
-  // ── Project Detail / Artifacts ──
+  // ── PROJECT DETAIL ──
   async function loadDetailProjects() {
     const sel = document.getElementById('detail-project');
-    if (!sel) return;
+    const qsel = document.getElementById('quick-project');
     try {
-      const r = await fetch(BASE + '/projects');
-      const d = await r.json();
+      const d = await _api('GET', '/projects');
       if (!d.ok) return;
-      sel.innerHTML = '<option value="">(select a project…)</option>';
-      (d.projects || []).forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.project_id;
-        opt.textContent = `${p.project_name} (${p.project_status}) — ${p.project_owner}`;
-        sel.appendChild(opt);
-      });
+      const opts = (d.projects || []).map(p => `<option value="${p.project_id}">${_esc(p.project_name)}</option>`).join('');
+      sel.innerHTML = '<option value="">(select project…)</option>' + opts;
+      qsel.innerHTML = '<option value="">Select project…</option>' + opts;
     } catch(e) {}
   }
 
   async function loadProjectDetail() {
     const projectId = document.getElementById('detail-project').value.trim();
-    if (!projectId) { alert('Select a project first'); return; }
+    const qsel = document.getElementById('quick-project');
+    if (!projectId && qsel) { qsel.value = ''; }
+    if (!projectId) { return; }
 
     const summaryEl = document.getElementById('detail-summary');
-    const artifactPanel = document.getElementById('artifact-panel');
+    const metaEl = document.getElementById('detail-meta');
+    const artifactGrid = document.getElementById('artifact-grid');
     const artifactUpsert = document.getElementById('artifact-upsert');
     const acceptancePanel = document.getElementById('acceptance-panel');
 
-    // Load project + artifacts in parallel
-    const [projRes, artifactsRes] = await Promise.all([
+    // Load project + artifacts + acceptance in parallel
+    const [projRes, artsRes] = await Promise.all([
       fetch(BASE + '/projects/' + encodeURIComponent(projectId)),
       fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/artifacts'),
     ]);
     const proj = await projRes.json();
-    const arts = await artifactsRes.json();
+    const arts = await artsRes.json();
 
     if (!proj.ok) {
       summaryEl.style.display = 'block';
-      summaryEl.innerHTML = renderErrorStr(proj.error_type || 'unknown', proj.message || 'Failed');
+      summaryEl.innerHTML = `<div class="output error">${_esc(proj.message || 'Failed')}</div>`;
       return;
     }
 
+    // Meta
+    metaEl.style.display = 'grid';
+    metaEl.innerHTML = `
+      <div class="meta-item"><div class="meta-label">Project</div><div class="meta-value">${_esc(proj.project_name)}</div></div>
+      <div class="meta-item"><div class="meta-label">Owner</div><div class="meta-value">${_esc(proj.project_owner)}</div></div>
+      <div class="meta-item"><div class="meta-label">Status</div><div class="meta-value"><span class="card-badge badge-${proj.project_status.replace('_','-')}">${proj.project_status}</span></div></div>
+      <div class="meta-item"><div class="meta-label">Created</div><div class="meta-value text-dim">${_ts(proj.created_at)}</div></div>
+      <div class="meta-item"><div class="meta-label">Goal</div><div class="meta-value text-dim" style="font-size:0.8rem">${_esc(proj.project_goal) || '—'}</div></div>
+      <div class="meta-item"><div class="meta-label">Completeness</div><div class="meta-value ${proj.all_artifacts_present ? 'text-green' : 'text-amber'}">${proj.all_artifacts_present ? '✓ Complete' : '○ Incomplete'}</div></div>
+    `;
+
     // Summary
     summaryEl.style.display = 'block';
-    summaryEl.innerHTML = `
-      <div style="background:#0f172a;border:1px solid #334155;border-radius:6px;padding:1rem">
-        <div style="font-size:1rem;font-weight:600;color:#f8fafc;margin-bottom:0.25rem">${_esc(proj.project_name)}</div>
-        <div style="font-size:0.8rem;color:#64748b">
-          ${proj.project_goal ? _esc(proj.project_goal) + ' · ' : ''}
-          Owner: ${_esc(proj.project_owner)} ·
-          Status: <span style="color:#f59e0b">${proj.project_status}</span> ·
-          Created: ${new Date(proj.created_at).toLocaleDateString()}
-        </div>
+    summaryEl.innerHTML = proj.project_summary
+      ? `<div style="font-size:0.85rem;color:var(--text-dim);padding:0.5rem 0">${_esc(proj.project_summary)}</div>`
+      : '';
+
+    // Artifact grid
+    artifactGrid.style.display = 'grid';
+    const complete = proj.artifact_completeness || {};
+    const types = ['scope','spec','arch','testcase','testreport','guideline'];
+    const icons = {scope:'📐',spec:'📄',arch:'🏗️',testcase:'🧪',testreport:'📋',guideline:'📏'};
+    const labels = {scope:'Scope',spec:'Spec',arch:'Arch',testcase:'Test Case',testreport:'Test Report',guideline:'Guideline'};
+    artifactGrid.innerHTML = types.map(t => {
+      const art = complete[t];
+      const done = art && art.has_content;
+      return `<div class="artifact-card ${done ? 'done' : 'missing'}" onclick="selectArtifactType('${t}')">
+        <div class="artifact-icon">${done ? '✓' : '○'}</div>
+        <div class="artifact-name">${icons[t]} ${labels[t]}</div>
+        <div class="artifact-status">${done ? 'Complete' : 'Missing'}</div>
       </div>`;
+    }).join('');
 
-    // Artifact completeness grid
-    const completeness = proj.artifact_completeness || {};
-    const missing = proj.missing_artifacts || [];
-    const allPresent = proj.all_artifacts_present;
-
-    const rows = [
-      ['scope', 'Scope', 'Alex (on creation)'],
-      ['spec', 'Specification', 'BA Agent'],
-      ['arch', 'Architecture', 'SA Agent'],
-      ['testcase', 'Test Case', 'QA Agent'],
-      ['testreport', 'Test Report', 'Alex (UAT)'],
-      ['guideline', 'Guideline', 'Maverick'],
-    ];
-
-    let gridHTML = `
-      <div style="font-size:0.85rem;font-weight:600;color:#94a3b8;margin-bottom:0.5rem">
-        Artifacts — ${allPresent ? '<span style="color:#22c55e">✓ All present</span>' : '<span style="color:#f59e0b">✗ ' + missing.length + ' missing</span>'}
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.5rem">`;
-    for (const [type, label, generatedBy] of rows) {
-      const info = completeness[type] || {};
-      const present = info.has_content;
-      const producedBy = info.produced_by || generatedBy;
-      gridHTML += `
-        <div style="background:#0f172a;border:1px solid ${present ? '#22c55e40' : '#334155'};border-radius:4px;padding:0.6rem;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem">
-            <span style="font-weight:600;color:${present ? '#22c55e' : '#64748b'}">${present ? '✓' : '○'} ${label}</span>
-          </div>
-          <div style="font-size:0.7rem;color:#64748b">${present ? 'By: ' + _esc(producedBy) : 'By: ' + generatedBy}</div>
-          ${present && info.produced_at ? '<div style="font-size:0.65rem;color:#475569;margin-top:0.1rem">' + new Date(info.produced_at).toLocaleDateString() + '</div>' : ''}
-        </div>`;
-    }
-    gridHTML += '</div>';
-    artifactPanel.style.display = 'block';
-    artifactPanel.innerHTML = gridHTML;
-
-    // Show upsert form
+    // Artifact upsert
     artifactUpsert.style.display = 'block';
-    document.getElementById('artifact-output').textContent = 'Artifact saved or cleared…';
-    document.getElementById('artifact-output').className = 'output';
+    document.getElementById('artifact-output').textContent = 'Select a type above to edit.';
 
-    // Acceptance panel
+    // Acceptance
     await loadAcceptancePanel(projectId);
+  }
+
+  function selectArtifactType(type) {
+    document.getElementById('artifact-type').value = type;
+    document.getElementById('artifact-content').value = '';
+    document.getElementById('artifact-produced-by').value = '';
+    document.getElementById('artifact-output').textContent = 'Loading existing artifact…';
+    const projectId = document.getElementById('detail-project').value;
+    _api('GET', '/projects/' + encodeURIComponent(projectId) + '/artifacts').then(d => {
+      if (d.ok) {
+        const art = (d.artifacts || []).find(a => a.artifact_type === type);
+        if (art) {
+          document.getElementById('artifact-content').value = art.content || '';
+          document.getElementById('artifact-produced-by').value = art.produced_by || '';
+        }
+        document.getElementById('artifact-output').textContent = art ? `Loaded: ${type}` : `No ${type} artifact yet.`;
+      }
+    });
+  }
+
+  async function doUpsertArtifact() {
+    const projectId = document.getElementById('detail-project').value;
+    const type = document.getElementById('artifact-type').value;
+    const content = document.getElementById('artifact-content').value.trim();
+    const produced_by = document.getElementById('artifact-produced-by').value.trim();
+    const out = document.getElementById('artifact-output');
+    if (!projectId) { _warn(out, 'Select a project first.'); return; }
+    _neutral(out, 'Saving…');
+    const d = await _api('POST', '/projects/' + encodeURIComponent(projectId) + '/artifacts', {
+      artifact_type: type, content, produced_by
+    });
+    if (d.ok) {
+      _ok(out, d.message || 'Saved.');
+      setTimeout(() => loadProjectDetail(), 300);
+    } else {
+      _err(out, d.message || 'Failed');
+    }
   }
 
   async function loadAcceptancePanel(projectId) {
     const panel = document.getElementById('acceptance-panel');
-    panel.innerHTML = '<div style="font-size:0.85rem;color:#64748b">Loading acceptance…</div>';
-    panel.style.display = 'block';
-
-    try {
-      const r = await fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/acceptance-package');
-      const d = await r.json();
-
-      if (!d.ok) {
-        panel.innerHTML = renderErrorStr(d.error_type || 'unknown', d.message);
-        return;
+    const d = await _api('GET', '/projects/' + encodeURIComponent(projectId) + '/acceptance-package');
+    panel.innerHTML = `
+      <div style="font-size:0.8rem;font-weight:600;color:var(--text-dim);margin-bottom:0.6rem;text-transform:uppercase;letter-spacing:0.05em">Acceptance</div>
+      ${d.ok && d.acceptance_package
+        ? renderAcceptance(d.acceptance_package, projectId)
+        : '<div class="output warn">No acceptance package yet.</div>'
       }
+    `;
+  }
 
-      const pkg = d.acceptance_package;
-      const allPresent = d.all_artifacts_present;
-      const missing = d.missing_artifacts || [];
-
-      let inner = `
-        <div style="font-size:0.85rem;font-weight:600;color:#94a3b8;margin-bottom:0.5rem">Acceptance Package</div>`;
-
-      if (!allPresent) {
-        inner += `
-          <div style="background:#f59e0b10;border:1px solid #f59e0b40;border-radius:4px;padding:0.75rem;font-size:0.8rem;color:#f59e0b;margin-bottom:0.75rem">
-            Cannot finalize — missing ${missing.length} artifact(s): ${missing.join(', ')}
-          </div>`;
-      }
-
-      if (!pkg) {
-        inner += `
-          <div style="font-size:0.8rem;color:#64748b;margin-bottom:0.75rem">No acceptance package created yet.</div>
+  function renderAcceptance(pkg, projectId) {
+    const badgeClass = pkg.acceptance_decision === 'APPROVED' ? 'badge-active' : pkg.acceptance_decision === 'REJECTED' ? 'badge-shutdown' : 'badge-hold';
+    return `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+          <div style="font-size:0.8rem;font-weight:600">Acceptance Package</div>
+          <span class="card-badge ${badgeClass}">${pkg.acceptance_decision || 'PENDING'}</span>
+        </div>
+        ${pkg.verification_notes ? `<div style="font-size:0.82rem;color:var(--text-dim);margin-bottom:0.5rem">${_esc(pkg.verification_notes)}</div>` : ''}
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.75rem">
+          ${pkg.decision_by ? `By: ${_esc(pkg.decision_by)} · ` : ''}
+          ${pkg.decided_at ? _ts(pkg.decided_at) : 'Not yet decided'}
+        </div>
+        ${!pkg.acceptance_decision ? `
           <div class="form-row">
-            <input id="pkg-task-id" placeholder="Task ID (optional)" style="max-width:200px" />
-            <input id="pkg-actor" placeholder="Your name" style="max-width:160px" />
-            <button class="success" onclick="doCreateAcceptance('${projectId}')" ${!allPresent ? 'disabled' : ''}>Create Package</button>
+            <div class="field" style="flex:2">
+              <label>Your decision note</label>
+              <input id="accept-note" placeholder="Approval note or rejection reason" />
+            </div>
           </div>
-          <div style="font-size:0.75rem;color:#64748b;margin-top:0.25rem">
-            ${!allPresent ? 'Create all artifacts first before finalizing acceptance.' : 'All 6 artifacts present — ready to create acceptance package.'}
-          </div>`;
-      } else {
-        const decision = pkg.acceptance_decision;
-        const decidedClass = decision === 'approved' ? 'already-approved'
-                          : decision === 'rejected' ? 'already-rejected'
-                          : 'badge-pending';
-        const decidedLabel = decision === 'approved' ? '✓ Approved'
-                          : decision === 'rejected' ? '✗ Rejected'
-                          : 'Pending decision';
-
-        inner += `
-          <div style="background:#0f172a;border:1px solid #334155;border-radius:4px;padding:0.75rem;margin-bottom:0.75rem">
-            <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
-              <span style="font-size:0.8rem;font-weight:600;color:#94a3b8">Package: ${pkg.package_id.slice(0,8)}</span>
-              <span class="gate-badge ${decision ? (decision === 'approved' ? 'badge-approved' : 'badge-rejected') : 'badge-pending'}">${decidedLabel}</span>
-            </div>
-            <div style="font-size:0.75rem;color:#64748b">
-              ${pkg.task_id ? 'Task: ' + _esc(pkg.task_id) + ' · ' : ''}
-              Created: ${new Date(pkg.created_at).toLocaleString()}
-            </div>
-            ${pkg.decided_at ? `<div style="font-size:0.75rem;color:#64748b;margin-top:0.2rem">Decided: ${new Date(pkg.decided_at).toLocaleString()} by ${_esc(pkg.decision_by || '')}</div>` : ''}
-            ${pkg.decision_note ? `<div style="font-size:0.75rem;color:#94a3b8;margin-top:0.2rem">Note: ${_esc(pkg.decision_note)}</div>` : ''}
-          </div>`;
-
-        if (!decision) {
-          inner += `
-            <div class="form-row">
-              <input id="pkg-actor" placeholder="Your name" style="max-width:160px" />
-              <button class="success" onclick="doApproveAcceptance('${projectId}')">Approve</button>
-              <button class="danger" onclick="doRejectAcceptance('${projectId}')">Reject</button>
-            </div>
-            <textarea id="pkg-note" placeholder="Decision note (optional for approve, required for reject)" style="min-height:50px;flex:2;margin-top:0.25rem"></textarea>`;
-        }
-      }
-
-      panel.innerHTML = inner;
-    } catch(e) {
-      panel.innerHTML = renderErrorStr('platform_unavailable', 'Cannot reach PMO backend.');
-    }
-  }
-
-  function renderErrorStr(errorType, message) {
-    const label = _ERROR_LABELS[errorType] || 'Error';
-    return `<div class="output error"><strong>${label}</strong><br>${_esc(message)}</div>`;
-  }
-
-  async function doUpsertArtifact() {
-    const projectId = document.getElementById('detail-project').value.trim();
-    const artifactType = document.getElementById('artifact-type').value;
-    const producedBy = document.getElementById('artifact-produced-by').value.trim();
-    const content = document.getElementById('artifact-content').value.trim();
-    const outEl = document.getElementById('artifact-output');
-
-    if (!producedBy) { alert('Produced by is required'); return; }
-
-    outEl.textContent = 'Saving…';
-    outEl.className = 'output';
-    try {
-      const r = await fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/artifacts', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({artifact_type: artifactType, content, produced_by: producedBy}),
-      });
-      const d = await r.json();
-      if (d.ok) {
-        outEl.textContent = d.message;
-        outEl.className = 'output ok';
-        document.getElementById('artifact-content').value = '';
-        await loadProjectDetail();
-      } else {
-        outEl.textContent = d.message || 'Save failed';
-        outEl.className = 'output error';
-      }
-    } catch(e) {
-      outEl.textContent = e.message;
-      outEl.className = 'output error';
-    }
-  }
-
-  async function doCreateAcceptance(projectId) {
-    const taskId = document.getElementById('pkg-task-id')?.value.trim() || '';
-    const actor = document.getElementById('pkg-actor')?.value.trim() || '';
-    if (!actor) { alert('Your name is required'); return; }
-    try {
-      const r = await fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/acceptance-package', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({task_id: taskId, actor}),
-      });
-      const d = await r.json();
-      if (d.ok) {
-        await loadAcceptancePanel(projectId);
-      } else {
-        alert(d.message || 'Failed');
-      }
-    } catch(e) { alert(e.message); }
+          <div class="flex gap-05">
+            <button class="success" onclick="doApproveAcceptance('${projectId}')">✓ Approve</button>
+            <button class="danger" onclick="doRejectAcceptance('${projectId}')">✗ Request Revision</button>
+          </div>
+        ` : ''}
+      </div>
+    `;
   }
 
   async function doApproveAcceptance(projectId) {
-    const actor = document.getElementById('pkg-actor')?.value.trim();
-    const note = document.getElementById('pkg-note')?.value.trim() || '';
-    if (!actor) { alert('Your name is required'); return; }
-    try {
-      const r = await fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/acceptance-package/approve', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({actor, note}),
-      });
-      const d = await r.json();
-      if (d.ok) await loadAcceptancePanel(projectId);
-      else alert(d.message || 'Failed');
-    } catch(e) { alert(e.message); }
+    const note = document.getElementById('accept-note')?.value.trim() || '';
+    const actor = prompt('Your name:');
+    if (!actor) return;
+    const d = await _api('POST', '/projects/' + encodeURIComponent(projectId) + '/acceptance-package/approve', {actor, note});
+    if (d.ok) { await loadAcceptancePanel(projectId); } else { alert(d.message || 'Failed'); }
   }
 
   async function doRejectAcceptance(projectId) {
-    const actor = document.getElementById('pkg-actor')?.value.trim();
-    const reason = document.getElementById('pkg-note')?.value.trim();
-    if (!actor) { alert('Your name is required'); return; }
-    if (!reason) { alert('Rejection reason is required'); return; }
-    try {
-      const r = await fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/acceptance-package/reject', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({actor, reason}),
-      });
-      const d = await r.json();
-      if (d.ok) await loadAcceptancePanel(projectId);
-      else alert(d.message || 'Failed');
-    } catch(e) { alert(e.message); }
+    const reason = document.getElementById('accept-note')?.value.trim();
+    if (!reason) { alert('Rejection reason is required.'); return; }
+    const actor = prompt('Your name:');
+    if (!actor) return;
+    const d = await _api('POST', '/projects/' + encodeURIComponent(projectId) + '/acceptance-package/reject', {actor, reason});
+    if (d.ok) { await loadAcceptancePanel(projectId); } else { alert(d.message || 'Failed'); }
   }
 
-  // Load detail project list on page start
-  loadDetailProjects();
+  // ── GATE PANEL ──
+  async function doLoadGate() {
+    const taskId = document.getElementById('gate-task-id').value.trim();
+    const out = document.getElementById('gate-output');
+    if (!taskId) { _warn(out, 'Enter a task ID first.'); return; }
+    _neutral(out, 'Loading…');
+    const d = await _api('GET', '/gate/' + encodeURIComponent(taskId));
+    if (!d.ok) { _err(out, d.message || 'Failed'); return; }
+    const stages = ['INTAKE','BA','SA','DEV','QA','DONE'];
+    const stageIdx = stages.indexOf(d.current_stage);
+    out.innerHTML = `
+      <div style="margin-bottom:0.75rem">
+        <div style="font-size:0.95rem;font-weight:600;color:var(--text)">${_esc(d.task_title)}</div>
+        <div style="font-size:0.75rem;color:var(--text-dim);margin-top:0.1rem">${_esc(d.task_id)}</div>
+      </div>
+      <div class="gate-grid">
+        ${stages.map((s, i) => {
+          const done = i < stageIdx;
+          const cur = i === stageIdx;
+          return `<div class="gate-stage ${done ? 'completed' : cur ? 'current' : ''}">
+            <div class="gate-stage-label">${done ? '✓' : cur ? '→' : ''} ${s}</div>
+            <div class="gate-stage-name">${s}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      ${d.gate_status === 'pending' ? `
+        <div style="margin-top:0.75rem">
+          <div class="form-row">
+            <div class="field" style="flex:2">
+              <label>Your decision</label>
+              <input id="gate-decision-note" placeholder="Note" />
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:0.4rem">
+              <button class="success sm" onclick="doApproveGate('${taskId}')">✓ Approve</button>
+              <button class="danger sm" onclick="doRejectGate('${taskId}')">✗ Reject</button>
+            </div>
+          </div>
+        </div>
+      ` : `<div class="output ${d.gate_status === 'APPROVED' ? 'ok' : 'error'}">Gate: ${d.gate_status}${d.decision_note ? ' — ' + _esc(d.decision_note) : ''}</div>`}
+    `;
+  }
 
-  // ── Advisories & Blockers ──
+  async function doApproveGate(taskId) {
+    const note = document.getElementById('gate-decision-note')?.value.trim() || '';
+    const actor = prompt('Your name:');
+    if (!actor) return;
+    const d = await _api('POST', '/gate/' + encodeURIComponent(taskId) + '/approve', {actor, note});
+    if (d.ok) { doLoadGate(); } else { alert(d.message || 'Failed'); }
+  }
+
+  async function doRejectGate(taskId) {
+    const note = document.getElementById('gate-decision-note')?.value.trim();
+    if (!note) { alert('Rejection note is required.'); return; }
+    const actor = prompt('Your name:');
+    if (!actor) return;
+    const d = await _api('POST', '/gate/' + encodeURIComponent(taskId) + '/reject', {actor, reason: note});
+    if (d.ok) { doLoadGate(); } else { alert(d.message || 'Failed'); }
+  }
+
+  // ── STATUS ──
+  async function doStatus() {
+    const taskId = document.getElementById('status-task-id').value.trim();
+    const out = document.getElementById('status-output');
+    if (!taskId) { _warn(out, 'Enter a task ID.'); return; }
+    _neutral(out, 'Loading…');
+    const d = await _api('GET', '/status/' + encodeURIComponent(taskId));
+    if (d.ok) { _ok(out, JSON.stringify(d, null, 2)); }
+    else { _err(out, d.message || 'Failed'); }
+  }
+
+  async function doList() {
+    const projectId = document.getElementById('list-project').value.trim();
+    const out = document.getElementById('list-output');
+    if (!projectId) { _warn(out, 'Enter a project ID.'); return; }
+    _neutral(out, 'Loading…');
+    const d = await _api('GET', '/projects/' + encodeURIComponent(projectId) + '/tasks');
+    if (d.ok) { _ok(out, JSON.stringify(d, null, 2)); }
+    else { _err(out, d.message || 'Failed'); }
+  }
+
+  // ── ADVISORIES ──
   async function loadAdvProjects() {
     const sel = document.getElementById('adv-project');
-    if (!sel) return;
     try {
-      const r = await fetch(BASE + '/projects');
-      const d = await r.json();
+      const d = await _api('GET', '/projects');
       if (!d.ok) return;
-      sel.innerHTML = '<option value="">(select a project…)</option>';
-      (d.projects || []).forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.project_id;
-        opt.textContent = `${p.project_name} (${p.project_status})`;
-        sel.appendChild(opt);
-      });
+      sel.innerHTML = '<option value="">(select project…)</option>' +
+        (d.projects || []).map(p => `<option value="${p.project_id}">${_esc(p.project_name)}</option>`).join('');
     } catch(e) {}
   }
 
   async function loadAdvisories() {
-    const projectId = document.getElementById('adv-project').value.trim();
-    if (!projectId) { alert('Select a project first'); return; }
+    const projectId = document.getElementById('adv-project').value;
     const panel = document.getElementById('advisory-blocker-panel');
-    panel.style.display = 'block';
-    panel.innerHTML = '<div style="font-size:0.8rem;color:#64748b">Loading…</div>';
-
+    if (!projectId) { panel.innerHTML = '<div class="empty-state">Select a project to view advisories.</div>'; return; }
+    panel.innerHTML = '<div class="empty-state">Loading…</div>';
     try {
       const [advRes, blkRes] = await Promise.all([
         fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/advisories'),
@@ -922,89 +1064,99 @@
       ]);
       const advs = await advRes.json();
       const blks = await blkRes.json();
-
+      const blockers = blks.blockers || [];
+      const advisories = (advs.advisories || []).filter(a => !a.acknowledged);
       let html = '';
 
-      // Blockers section
-      const blockers = blks.blockers || [];
       if (blockers.length > 0) {
         html += `<div style="margin-bottom:1rem">
-          <div style="font-size:0.85rem;font-weight:600;color:#ef4444;margin-bottom:0.5rem">⚠ Blockers (${blockers.length})</div>`;
-        blockers.forEach(b => {
-          const sevColor = b.severity === 'critical' ? '#ef4444' : b.severity === 'high' ? '#f97316' : '#f59e0b';
-          html += `<div style="background:#0f172a;border:1px solid ${sevColor}40;border-radius:4px;padding:0.6rem;margin-bottom:0.4rem">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-size:0.8rem;font-weight:600;color:#ef4444">${_esc(b.reason)}</span>
-              <span style="font-size:0.7rem;padding:2px 6px;border-radius:3px;background:${sevColor}20;color:${sevColor}">${b.severity}</span>
-            </div>
-            <div style="font-size:0.7rem;color:#64748b;margin-top:0.2rem">
-              Task: ${_esc(b.task_id)} · ${b.age_hours}h old · Detected: ${new Date(b.detected_at).toLocaleString()}
-            </div>
-            <button onclick="doResolveBlocker('${projectId}','${b.blocker_id}')" style="margin-top:0.4rem;background:#475569;font-size:0.7rem;padding:3px 8px">Resolve</button>
-          </div>`;
-        });
-        html += '</div>';
+          <div style="font-size:0.75rem;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">⚠ Blockers (${blockers.length})</div>
+          <div class="signal-list">
+            ${blockers.map(b => `
+              <div class="signal-item blocker">
+                <div class="signal-icon" style="color:var(--red)">⚠</div>
+                <div class="signal-body">
+                  <div class="signal-msg">${_esc(b.reason)}</div>
+                  <div class="signal-meta">Task: ${_esc(b.task_id)} · ${b.age_hours}h old · ${_ts(b.detected_at)}</div>
+                </div>
+                <span class="signal-sev sev-${b.severity}">${b.severity}</span>
+                <button class="secondary sm" onclick="doResolveBlocker('${projectId}','${b.blocker_id}')" style="flex-shrink:0">Resolve</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>`;
       }
 
-      // Advisories section
-      const advisories = advs.advisories || [];
       if (advisories.length > 0) {
         html += `<div>
-          <div style="font-size:0.85rem;font-weight:600;color:#94a3b8;margin-bottom:0.5rem">📋 Advisories (${advisories.length})</div>`;
-        advisories.forEach(a => {
-          const sevIcon = a.severity === 'critical' ? '🔴' : a.severity === 'warn' ? '⚠️' : 'ℹ️';
-          const sevColor = a.severity === 'critical' ? '#ef4444' : a.severity === 'warn' ? '#f59e0b' : '#3b82f6';
-          html += `<div style="background:#0f172a;border:1px solid ${sevColor}40;border-radius:4px;padding:0.6rem;margin-bottom:0.4rem">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-size:0.8rem;color:${sevColor}">${sevIcon} [${a.advisory_type}] ${_esc(a.message)}</span>
-              <span style="font-size:0.65rem;color:#64748b">${new Date(a.created_at).toLocaleTimeString()}</span>
-            </div>
-            <div style="font-size:0.7rem;color:#475569;margin-top:0.2rem">
-              ${a.task_id ? 'Task: ' + _esc(a.task_id) + ' · ' : ''}Stage: ${a.stage || '—'} · From: ${a.actor}
-            </div>
-            <button onclick="doAckAdvisory('${projectId}','${a.advisory_id}')" style="margin-top:0.4rem;background:#1e293b;border:1px solid #334155;font-size:0.7rem;padding:3px 8px;color:#94a3b8">Dismiss</button>
-          </div>`;
-        });
-        html += '</div>';
+          <div style="font-size:0.75rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem">📋 Advisories (${advisories.length})</div>
+          <div class="signal-list">
+            ${advisories.map(a => {
+              const icon = a.advisory_type === 'risk' ? '⚠️' : a.advisory_type === 'schedule' ? '⏱' : a.advisory_type === 'stage' ? '→' : a.advisory_type === 'blocker' ? '🚧' : 'ℹ️';
+              const sevClass = a.severity === 'critical' ? 'sev-critical' : a.severity === 'warn' ? 'sev-warn' : 'sev-info';
+              return `<div class="signal-item ${a.severity === 'critical' ? 'blocker' : a.severity === 'warn' ? 'warn' : ''}">
+                <div class="signal-icon">${icon}</div>
+                <div class="signal-body">
+                  <div class="signal-msg">[${a.advisory_type}] ${_esc(a.message)}</div>
+                  <div class="signal-meta">${a.task_id ? 'Task: ' + _esc(a.task_id) + ' · ' : ''}Stage: ${a.stage || '—'} · ${_ts(a.created_at)}</div>
+                </div>
+                <span class="signal-sev ${sevClass}">${a.severity}</span>
+                <button class="secondary sm" onclick="doAckAdvisory('${projectId}','${a.advisory_id}')" style="flex-shrink:0">Dismiss</button>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
       }
 
-      if (!html) {
-        html = '<div style="font-size:0.8rem;color:#64748b;text-align:center;padding:1rem">No active advisories or blockers.</div>';
-      }
-
+      if (!html) html = '<div class="empty-state">No active advisories or blockers. ✓</div>';
       panel.innerHTML = html;
     } catch(e) {
-      panel.innerHTML = renderErrorStr('platform_unavailable', 'Cannot reach PMO backend.');
+      panel.innerHTML = '<div class="empty-state">Cannot reach PMO backend.</div>';
     }
   }
 
   async function doResolveBlocker(projectId, blockerId) {
     const actor = prompt('Your name:');
     if (!actor) return;
-    try {
-      const r = await fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/blockers/' + blockerId + '/resolve', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({resolved_by: actor}),
-      });
-      const d = await r.json();
-      if (d.ok) await loadAdvisories();
-      else alert(d.message || 'Failed');
-    } catch(e) { alert(e.message); }
+    const d = await _api('POST', '/projects/' + encodeURIComponent(projectId) + '/blockers/' + blockerId + '/resolve', {resolved_by: actor});
+    if (d.ok) await loadAdvisories();
+    else alert(d.message || 'Failed');
   }
 
   async function doAckAdvisory(projectId, advisoryId) {
-    try {
-      const r = await fetch(BASE + '/projects/' + encodeURIComponent(projectId) + '/advisories/' + advisoryId + '/acknowledge', {
-        method: 'POST',
-      });
-      const d = await r.json();
-      if (d.ok) await loadAdvisories();
-      else alert(d.message || 'Failed');
-    } catch(e) { alert(e.message); }
+    const d = await _api('POST', '/projects/' + encodeURIComponent(projectId) + '/advisories/' + advisoryId + '/acknowledge');
+    if (d.ok) await loadAdvisories();
+    else alert(d.message || 'Failed');
   }
 
-  // Load advisory project list on page start
+  // ── KICKOFF ──
+  async function doKickoff() {
+    const projectId = document.getElementById('kickoff-project').value;
+    const title = document.getElementById('kickoff-title').value.trim();
+    const description = document.getElementById('kickoff-description').value.trim();
+    const priority = parseInt(document.getElementById('kickoff-priority').value) || 1;
+    const assignee = document.getElementById('kickoff-assignee').value.trim();
+    const actor = document.getElementById('kickoff-actor').value.trim();
+    const out = document.getElementById('kickoff-output');
+    if (!projectId || !title || !description || !actor) {
+      _warn(out, 'Project, title, description, and your name are required.'); return;
+    }
+    _neutral(out, 'Announcing…');
+    try {
+      const d = await _api('POST', '/kickoff', {title, project_id: projectId, description, priority, assignee, actor});
+      if (d.ok) {
+        _ok(out, `Kickoff announced!\nTask ID: ${d.task_id}\nStage: ${d.current_stage}\n${d.message || ''}`);
+        document.getElementById('kickoff-title').value = '';
+        document.getElementById('kickoff-description').value = '';
+      } else {
+        _err(out, d.message || 'Failed');
+      }
+    } catch(e) { _err(out, e.message); }
+  }
+
+  // ── INIT ──
+  loadAllProjects();
+  loadDetailProjects();
   loadAdvProjects();
 </script>
 </body>
