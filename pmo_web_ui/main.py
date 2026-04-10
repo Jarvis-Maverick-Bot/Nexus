@@ -31,6 +31,12 @@ from gov_langgraph.openclaw_integration.tools import (
     get_project_tool,
     list_projects_tool,
     spawn_agent_tool,
+    upsert_artifact_tool,
+    get_artifacts_tool,
+    create_acceptance_package_tool,
+    get_acceptance_package_tool,
+    approve_acceptance_tool,
+    reject_acceptance_tool,
 )
 
 PORT = int(os.getenv("PMO_PORT", "8000"))
@@ -197,6 +203,100 @@ def get_project(project_id: str):
         return _tool_error(result)
     return result
 
+
+# ---------------------------------------------------------------------------
+# Artifact endpoints
+# ---------------------------------------------------------------------------
+
+@app.get("/projects/{project_id}/artifacts")
+def get_project_artifacts(project_id: str):
+    """Get all artifacts for a project with completeness status."""
+    result = get_artifacts_tool({"project_id": project_id})
+    if not result.get("ok", False):
+        return _tool_error(result)
+    return result
+
+
+@app.post("/projects/{project_id}/artifacts")
+def upsert_artifact(project_id: str, body: dict):
+    """Add or update an artifact for a project."""
+    required = ["artifact_type", "produced_by"]
+    for field in required:
+        if field not in body:
+            return JSONResponse(
+                content={"ok": False, "error_type": "validation_error",
+                         "message": f"Missing field: {field}"},
+                status_code=422,
+            )
+    body["project_id"] = project_id
+    result = upsert_artifact_tool(body)
+    if not result.get("ok", False):
+        return _tool_error(result)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Acceptance endpoints
+# ---------------------------------------------------------------------------
+
+@app.get("/projects/{project_id}/acceptance-package")
+def get_acceptance_package(project_id: str):
+    """Get acceptance package for a project."""
+    result = get_acceptance_package_tool({"project_id": project_id})
+    if not result.get("ok", False):
+        return _tool_error(result)
+    return result
+
+
+@app.post("/projects/{project_id}/acceptance-package")
+def create_acceptance_package(project_id: str, body: dict):
+    """Create or update acceptance package for a project."""
+    body["project_id"] = project_id
+    result = create_acceptance_package_tool(body)
+    if not result.get("ok", False):
+        return _tool_error(result)
+    return result
+
+
+@app.post("/projects/{project_id}/acceptance-package/approve")
+def approve_acceptance(project_id: str, body: dict):
+    """Approve an acceptance package."""
+    required = ["actor"]
+    for field in required:
+        if field not in body:
+            return JSONResponse(
+                content={"ok": False, "error_type": "validation_error",
+                         "message": f"Missing field: {field}"},
+                status_code=422,
+            )
+    body["project_id"] = project_id
+    result = approve_acceptance_tool(body)
+    if not result.get("ok", False):
+        return _tool_error(result)
+    return result
+
+
+@app.post("/projects/{project_id}/acceptance-package/reject")
+def reject_acceptance(project_id: str, body: dict):
+    """Reject an acceptance package and request revision."""
+    required = ["actor", "reason"]
+    for field in required:
+        if field not in body:
+            return JSONResponse(
+                content={"ok": False, "error_type": "validation_error",
+                         "message": f"Missing field: {field}"},
+                status_code=422,
+            )
+    body["project_id"] = project_id
+    result = reject_acceptance_tool(body)
+    if not result.get("ok", False):
+        return _tool_error(result)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Agent spawn endpoint
+# ---------------------------------------------------------------------------
 
 @app.post("/agents/spawn")
 def spawn_agent(body: dict):

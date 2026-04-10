@@ -34,6 +34,8 @@ class TaskStatus(str, Enum):
     IN_PROGRESS = "in_progress"
     BLOCKED = "blocked"
     REVIEW = "review"
+    READY_FOR_ACCEPTANCE = "ready_for_acceptance"
+    REVISION_REQUESTED = "revision_requested"
     DONE = "done"
     CANCELLED = "cancelled"
 
@@ -108,6 +110,11 @@ class Project:
     # Optional fields
     closed_at: Optional[datetime] = None
 
+    # V1.5: artifact registry — artifact_id -> Artifact
+    artifacts: dict[str, Artifact] = field(default_factory=dict)
+    # V1.5: latest acceptance package for this project
+    acceptance_package: Optional[AcceptancePackage] = None
+
     def __post_init__(self):
         if not self.project_name:
             raise ValueError("project_name is required")
@@ -117,6 +124,40 @@ class Project:
     def close(self) -> None:
         self.project_status = ProjectStatus.CLOSED
         self.closed_at = datetime.utcnow()
+
+    def get_artifact(self, artifact_type: ArtifactType) -> Optional[Artifact]:
+        """Get artifact by type for this project."""
+        for artifact in self.artifacts.values():
+            if artifact.artifact_type == artifact_type:
+                return artifact
+        return None
+
+    def add_artifact(self, artifact: Artifact) -> None:
+        """Add or replace an artifact for this project."""
+        self.artifacts[artifact.artifact_id] = artifact
+
+    def get_artifacts_by_type(self) -> dict[ArtifactType, Artifact]:
+        """Return artifacts keyed by type."""
+        result: dict[ArtifactType, Artifact] = {}
+        for artifact in self.artifacts.values():
+            result[artifact.artifact_type] = artifact
+        return result
+
+    def is_artifact_complete(self) -> bool:
+        """All 6 required artifacts are non-empty."""
+        type_map = self.get_artifacts_by_type()
+        return all(
+            at in type_map and not type_map[at].is_empty()
+            for at in ArtifactType.all()
+        )
+
+    def get_missing_artifacts(self) -> list[ArtifactType]:
+        """Return list of missing or empty artifact types."""
+        type_map = self.get_artifacts_by_type()
+        return [
+            at for at in ArtifactType.all()
+            if at not in type_map or type_map[at].is_empty()
+        ]
 
 
 # ---------------------------------------------------------------------------
@@ -315,8 +356,127 @@ class Gate:
 
 
 # ---------------------------------------------------------------------------
+# Artifact
+# ---------------------------------------------------------------------------
+
+
+class ArtifactType(str, Enum):
+    """6 mandatory artifacts required for V1.5 project completion."""
+
+    SCOPE = "scope"  # Alex defines on project creation
+    SPEC = "spec"  # BA agent outputs after BA stage
+    ARCH = "arch"  # SA agent outputs after SA stage
+    TESTCASE = "testcase"  # QA prep outputs before QA stage
+    TESTREPORT = "testreport"  # Alex UAT results after QA
+    GUIDELINE = "guideline"  # Maverick drafts after project reaches COMPLETE
+
+    @classmethod
+    def all(cls) -> list["ArtifactType"]:
+        return [cls.SCOPE, cls.SPEC, cls.ARCH, cls.TESTCASE, cls.TESTREPORT, cls.GUIDELINE]
+
+    @property
+    def display_name(self) -> str:
+        return {
+            "scope": "Scope",
+            "spec": "Specification",
+            "arch": "Architecture",
+            "testcase": "Test Case",
+            "testreport": "Test Report",
+            "guideline": "Guideline",
+        }[self.value]
+
+    @property
+    def generated_by(self) -> str:
+        return {
+            "scope": "Alex",
+            "spec": "BA Agent",
+            "arch": "SA Agent",
+            "testcase": "QA Agent",
+            "testreport": "Alex (UAT)",
+            "guideline": "Maverick",
+        }[self.value]
+
+    @property
+    def stage_hint(self) -> str:
+        return {
+            "scope": "Project Creation",
+            "spec": "After BA",
+            "arch": "After SA",
+            "testcase": "Before QA",
+            "testreport": "After QA",
+            "guideline": "On Completion",
+        }[self.value]
+
+
+@dataclass
+class Artifact:
+    """
+    A named, typed output artifact produced during project delivery.
+    One artifact exists per ArtifactType per project.
+    """
+
+    artifact_type: ArtifactType
+    project_id: str
+    content: str = ""
+    file_path: Optional[str] = None
+    produced_by: str = ""
+    produced_at: datetime = field(default_factory=datetime.utcnow)
+    artifact_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+
+    def is_empty(self) -> bool:
+        return not self.content and not self.file_path
+
+
+@dataclass
+class AcceptancePackage:
+    """
+    Formal acceptance package presented to Alex when a task reaches
+    READY_FOR_ACCEPTANCE.
+    """
+
+    task_id: str
+    project_id: str
+    artifacts: dict[ArtifactType, Artifact] = field(default_factory=dict)
+    verification_notes: str = ""
+    approval_signatures: dict[str, str] = field(default_factory=dict)  # role -> signature
+    acceptance_decision: Optional[GateDecision] = None
+    decision_by: Optional[str] = None
+    decision_note: str = ""
+    decided_at: Optional[datetime] = None
+    package_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    created_at: datetime = field(default_factory=datetime.utcnow)
+
+    def is_complete(self) -> bool:
+        """All 6 required artifacts are non-empty."""
+        return all(
+            not artifact.is_empty()
+            for artifact in self.artifacts.values()
+        )
+
+    def get_missing_artifacts(self) -> list[ArtifactType]:
+        """Return list of artifact types that are missing or empty."""
+        return [
+            at for at in ArtifactType.all()
+            if at not in self.artifacts or self.artifacts[at].is_empty()
+        ]
+
+    def approve(self, decided_by: str, note: str = "") -> None:
+        self.acceptance_decision = GateDecision.APPROVED
+        self.decision_by = decided_by
+        self.decision_note = note
+        self.decided_at = datetime.utcnow()
+
+    def reject(self, decided_by: str, note: str) -> None:
+        self.acceptance_decision = GateDecision.REJECTED
+        self.decision_by = decided_by
+        self.decision_note = note
+        self.decided_at = datetime.utcnow()
+
+
+# ---------------------------------------------------------------------------
 # Event
 # ---------------------------------------------------------------------------
+
 
 
 @dataclass

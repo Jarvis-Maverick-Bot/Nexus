@@ -20,6 +20,7 @@ from gov_langgraph.harness import HarnessConfig, StateStore, Checkpointer, Event
 from gov_langgraph.platform_model import (
     Project, WorkItem, TaskState, Workflow,
     Role, TaskStatus, Handoff, Gate, GateDecision, Event,
+    Artifact, ArtifactType, AcceptancePackage,
     get_v1_pipeline_workflow,
 )
 from gov_langgraph.platform_model.state_machine import StateMachine
@@ -734,17 +735,33 @@ def _gate_message(status: str, stage: str) -> str:
 
 def get_project_tool(input: dict) -> dict:
     """
-    Get details of a specific project.
+    Get details of a specific project including artifact completeness.
 
     Args:
         input: {project_id: str}
     Returns:
-        {ok: bool, project_id, project_name, project_status, ...}
+        {ok: bool, project_id, project_name, project_status, artifact_completeness, missing_artifacts, ...}
     """
     try:
         h = _harness
         project_id = input["project_id"]
         project = h["store"].load_project(project_id)
+
+        # Build artifact completeness map
+        artifact_map = project.get_artifacts_by_type()
+        artifact_completeness = {}
+        for at in ArtifactType.all():
+            if at in artifact_map and not artifact_map[at].is_empty():
+                artifact_completeness[at.value] = {
+                    "artifact_id": artifact_map[at].artifact_id,
+                    "produced_by": artifact_map[at].produced_by,
+                    "produced_at": artifact_map[at].produced_at.isoformat(),
+                    "has_content": True,
+                }
+            else:
+                artifact_completeness[at.value] = {"has_content": False}
+
+        missing = project.get_missing_artifacts()
 
         return {
             "ok": True,
@@ -755,6 +772,9 @@ def get_project_tool(input: dict) -> dict:
             "project_owner": project.project_owner,
             "project_status": project.project_status.value,
             "created_at": project.created_at.isoformat(),
+            "artifact_completeness": artifact_completeness,
+            "missing_artifacts": [at.value for at in missing],
+            "all_artifacts_present": len(missing) == 0,
             "message": f"Project: {project.project_name} ({project.project_status.value})",
         }
     except ObjectNotFoundError:
@@ -800,6 +820,307 @@ def list_projects_tool(input: dict) -> dict:
         }
     except Exception as e:
         return _error_response("unknown", f"Failed to list projects: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Artifact tools
+# ---------------------------------------------------------------------------
+
+def upsert_artifact_tool(input: dict) -> dict:
+    """
+    Add or update an artifact for a project.
+
+    Args:
+        input: {
+            project_id: str,
+            artifact_type: str,  # scope|spec|arch|testcase|testreport|guideline
+            content: str,
+            produced_by: str,
+        }
+    Returns:
+        {ok: bool, artifact_id: str, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        artifact_type_str = input["artifact_type"]
+        content = input.get("content", "")
+        produced_by = input.get("produced_by", "")
+
+        # Validate artifact type
+        try:
+            artifact_type = ArtifactType(artifact_type_str)
+        except ValueError:
+            return _error_response(
+                "validation_error",
+                f"Invalid artifact_type: {artifact_type_str}. Must be one of: {[e.value for e in ArtifactType.all()]}",
+            )
+
+        project = h["store"].load_project(project_id)
+
+        # Create artifact
+        artifact = Artifact(
+            artifact_type=artifact_type,
+            project_id=project_id,
+            content=content,
+            produced_by=produced_by,
+        )
+        project.add_artifact(artifact)
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="artifact_updated",
+            event_summary=f"Artifact '{artifact_type.value}' updated by {produced_by}",
+            actor=produced_by,
+        )
+
+        return {
+            "ok": True,
+            "artifact_id": artifact.artifact_id,
+            "artifact_type": artifact_type.value,
+            "message": f"Artifact '{artifact_type.display_name}' saved",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to upsert artifact: {e}")
+
+
+def get_artifacts_tool(input: dict) -> dict:
+    """
+    Get all artifacts for a project.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, artifacts: list[dict], missing: list[str]}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        type_map = project.get_artifacts_by_type()
+        artifacts = []
+        for at in ArtifactType.all():
+            if at in type_map and not type_map[at].is_empty():
+                artifacts.append({
+                    "artifact_id": type_map[at].artifact_id,
+                    "artifact_type": at.value,
+                    "display_name": at.display_name,
+                    "produced_by": type_map[at].produced_by,
+                    "produced_at": type_map[at].produced_at.isoformat(),
+                    "content_preview": type_map[at].content[:200] if type_map[at].content else "",
+                    "has_content": True,
+                })
+            else:
+                artifacts.append({
+                    "artifact_type": at.value,
+                    "display_name": at.display_name,
+                    "generated_by": at.generated_by,
+                    "stage_hint": at.stage_hint,
+                    "has_content": False,
+                })
+
+        missing = project.get_missing_artifacts()
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "artifacts": artifacts,
+            "missing": [at.value for at in missing],
+            "all_present": len(missing) == 0,
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to get artifacts: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Acceptance tools
+# ---------------------------------------------------------------------------
+
+def get_acceptance_package_tool(input: dict) -> dict:
+    """
+    Get acceptance package for a project.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, acceptance_package: dict | None, artifact_summary: dict}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        pkg = project.acceptance_package
+        if pkg is None:
+            return {
+                "ok": True,
+                "project_id": project_id,
+                "acceptance_package": None,
+                "all_artifacts_present": project.is_artifact_complete(),
+                "missing_artifacts": [at.value for at in project.get_missing_artifacts()],
+                "message": "No acceptance package created yet",
+            }
+
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "acceptance_package": {
+                "package_id": pkg.package_id,
+                "task_id": pkg.task_id,
+                "is_complete": pkg.is_complete(),
+                "verification_notes": pkg.verification_notes,
+                "acceptance_decision": pkg.acceptance_decision.value if pkg.acceptance_decision else None,
+                "decision_by": pkg.decision_by,
+                "decision_note": pkg.decision_note,
+                "decided_at": pkg.decided_at.isoformat() if pkg.decided_at else None,
+                "created_at": pkg.created_at.isoformat(),
+            },
+            "all_artifacts_present": project.is_artifact_complete(),
+            "missing_artifacts": [at.value for at in project.get_missing_artifacts()],
+            "message": f"Acceptance package: {pkg.acceptance_decision.value if pkg.acceptance_decision else 'pending'}",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to get acceptance package: {e}")
+
+
+def create_acceptance_package_tool(input: dict) -> dict:
+    """
+    Create or update acceptance package for a project.
+
+    Args:
+        input: {project_id: str, task_id: str, verification_notes: str}
+    Returns:
+        {ok: bool, package_id: str, is_complete: bool, missing_artifacts: list[str]}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        task_id = input.get("task_id", "")
+        verification_notes = input.get("verification_notes", "")
+
+        project = h["store"].load_project(project_id)
+
+        pkg = AcceptancePackage(
+            task_id=task_id,
+            project_id=project_id,
+            verification_notes=verification_notes,
+        )
+        # Link existing artifacts
+        type_map = project.get_artifacts_by_type()
+        for at, artifact in type_map.items():
+            pkg.artifacts[at] = artifact
+
+        project.acceptance_package = pkg
+        h["store"].save_project(project)
+
+        missing = project.get_missing_artifacts()
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="acceptance_package_created",
+            event_summary=f"Acceptance package created for task {task_id}",
+            actor=input.get("actor", "system"),
+        )
+
+        return {
+            "ok": True,
+            "package_id": pkg.package_id,
+            "task_id": task_id,
+            "is_complete": pkg.is_complete(),
+            "missing_artifacts": [at.value for at in missing],
+            "message": f"Acceptance package created — {len(missing)} artifact(s) missing",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to create acceptance package: {e}")
+
+
+def approve_acceptance_tool(input: dict) -> dict:
+    """
+    Approve an acceptance package (Alex/governance decision).
+
+    Args:
+        input: {project_id: str, actor: str, note: str}
+    Returns:
+        {ok: bool, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        actor = input.get("actor", "")
+        note = input.get("note", "")
+
+        project = h["store"].load_project(project_id)
+        if project.acceptance_package is None:
+            return _error_response("validation_error", "No acceptance package to approve")
+
+        project.acceptance_package.approve(decided_by=actor, note=note)
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="acceptance_approved",
+            event_summary=f"Acceptance approved by {actor}: {note}",
+            actor=actor,
+        )
+
+        return {
+            "ok": True,
+            "message": f"Acceptance approved by {actor}",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to approve acceptance: {e}")
+
+
+def reject_acceptance_tool(input: dict) -> dict:
+    """
+    Reject an acceptance package and request revision.
+
+    Args:
+        input: {project_id: str, actor: str, reason: str}
+    Returns:
+        {ok: bool, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        actor = input.get("actor", "")
+        reason = input.get("reason", "")
+
+        if not reason:
+            return _error_response("validation_error", "Rejection reason is required")
+
+        project = h["store"].load_project(project_id)
+        if project.acceptance_package is None:
+            return _error_response("validation_error", "No acceptance package to reject")
+
+        project.acceptance_package.reject(decided_by=actor, note=reason)
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="acceptance_rejected",
+            event_summary=f"Acceptance rejected by {actor}: {reason}",
+            actor=actor,
+        )
+
+        return {
+            "ok": True,
+            "message": f"Acceptance rejected — revision requested: {reason}",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to reject acceptance: {e}")
 
 
 # ---------------------------------------------------------------------------

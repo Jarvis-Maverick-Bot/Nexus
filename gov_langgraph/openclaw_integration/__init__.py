@@ -15,6 +15,12 @@ from .tools import (
     reject_gate_tool,
     get_status_tool,
     list_tasks_tool,
+    upsert_artifact_tool,
+    get_artifacts_tool,
+    create_acceptance_package_tool,
+    get_acceptance_package_tool,
+    approve_acceptance_tool,
+    reject_acceptance_tool,
 )
 from .coordinator import Coordinator
 
@@ -28,5 +34,11 @@ __all__ = [
     "reject_gate_tool",
     "get_status_tool",
     "list_tasks_tool",
+    "upsert_artifact_tool",
+    "get_artifacts_tool",
+    "create_acceptance_package_tool",
+    "get_acceptance_package_tool",
+    "approve_acceptance_tool",
+    "reject_acceptance_tool",
     "Coordinator",
 ]

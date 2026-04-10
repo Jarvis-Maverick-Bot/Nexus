@@ -259,6 +259,49 @@ def _parse_datetime(value: str | None) -> datetime | None:
 
 
 def _dict_to_project(data: dict) -> Project:
+    from gov_langgraph.platform_model import Artifact, ArtifactType, AcceptancePackage  # local to avoid circular
+
+    # Reconstruct artifacts dict
+    artifacts: dict[str, Artifact] = {}
+    for artifact_id, artifact_data in data.get("artifacts", {}).items():
+        at = ArtifactType(artifact_data["artifact_type"])
+        artifacts[artifact_id] = Artifact(
+            artifact_id=artifact_data.get("artifact_id", artifact_id),
+            artifact_type=at,
+            project_id=artifact_data["project_id"],
+            content=artifact_data.get("content", ""),
+            produced_by=artifact_data.get("produced_by", ""),
+            produced_at=_parse_datetime(artifact_data.get("produced_at")) or datetime.utcnow(),
+        )
+
+    # Reconstruct acceptance package
+    acceptance_package: AcceptancePackage | None = None
+    pkg_data = data.get("acceptance_package")
+    if pkg_data:
+        # Reconstruct artifacts
+        pkg_artifacts: dict[ArtifactType, Artifact] = {}
+        for at_str, art_data in pkg_data.get("artifacts", {}).items():
+            at = ArtifactType(at_str)
+            pkg_artifacts[at] = Artifact(
+                artifact_type=at,
+                project_id=art_data["project_id"],
+                content=art_data.get("content", ""),
+                produced_by=art_data.get("produced_by", ""),
+                produced_at=_parse_datetime(art_data.get("produced_at")) or datetime.utcnow(),
+            )
+        acceptance_package = AcceptancePackage(
+            package_id=pkg_data.get("package_id", ""),
+            task_id=pkg_data.get("task_id", ""),
+            project_id=pkg_data.get("project_id", ""),
+            artifacts=pkg_artifacts,
+            verification_notes=pkg_data.get("verification_notes", ""),
+            acceptance_decision=GateDecision(pkg_data["acceptance_decision"]) if pkg_data.get("acceptance_decision") else None,
+            decision_by=pkg_data.get("decision_by"),
+            decision_note=pkg_data.get("decision_note", ""),
+            decided_at=_parse_datetime(pkg_data.get("decided_at")),
+            created_at=_parse_datetime(pkg_data.get("created_at")) or datetime.utcnow(),
+        )
+
     return Project(
         project_id=data["project_id"],
         project_name=data["project_name"],
@@ -270,6 +313,8 @@ def _dict_to_project(data: dict) -> Project:
         project_owner=data["project_owner"],
         created_at=_parse_datetime(data.get("created_at")) or datetime.utcnow(),
         closed_at=_parse_datetime(data.get("closed_at")),
+        artifacts=artifacts,
+        acceptance_package=acceptance_package,
     )
 
 

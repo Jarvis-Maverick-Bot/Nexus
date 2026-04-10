@@ -31,6 +31,9 @@ from .exceptions import (
 # Objects
 # ---------------------------------------------------------------------------
 from .objects import (
+    AcceptancePackage,
+    Artifact,
+    ArtifactType,
     Event,
     Gate,
     GateDecision,
@@ -104,6 +107,9 @@ __all__ = [
     "Handoff",
     "Gate",
     "Event",
+    "Artifact",
+    "ArtifactType",
+    "AcceptancePackage",
     # Enums
     "Role",
     "Tier",
