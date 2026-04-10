@@ -99,8 +99,9 @@ def create_project_tool(input: dict) -> dict:
     Create a new project.
 
     V1.6: Accepts structured intake fields at creation.
-    Required: project_name, project_goal, domain_type, project_owner
-    Required intake fields: intake_summary, intake_deliverable, intake_business_context
+    Required: project_name, project_goal, project_owner
+    Required intake fields (at creation): intake_summary, intake_deliverable, intake_business_context
+    Note: intake_complete is auto-set to True if all intake fields are present and non-empty
     (intake_complete is set automatically if all required intake fields are present)
 
     Args:

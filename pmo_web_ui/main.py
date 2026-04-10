@@ -180,13 +180,19 @@ def gate_panel(task_id: str):
 
 @app.post("/projects")
 def create_project(body: dict):
-    """Create a new project."""
-    required = ["project_name", "project_goal", "project_owner"]
+    """
+    Create a new project with structured intake.
+    
+    Enforces that intake_summary, intake_deliverable, intake_business_context
+    are present and non-empty at creation time (governed intake contract).
+    """
+    required = ["project_name", "project_goal", "project_owner",
+                "intake_summary", "intake_deliverable", "intake_business_context"]
     for field in required:
-        if field not in body:
+        if field not in body or not str(body[field]).strip():
             return JSONResponse(
                 content={"ok": False, "error_type": "validation_error",
-                         "message": f"Missing field: {field}"},
+                         "message": f"Missing required intake field: {field}"},
                 status_code=422,
             )
     result = create_project_tool(body)

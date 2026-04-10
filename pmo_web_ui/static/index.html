@@ -1280,7 +1280,7 @@ function applyTranslations() {
             <div class="field-state missing" id="int-goal-state">⚠ Required — not provided</div>
           </div>
           <div class="field narrow">
-            <label>Requested Deliverable <span class="req-mark">*</span></label>
+            <label>Deliverable Type <span class="req-mark">*</span></label>
             <select id="int-deliverable" onchange="intakeValidate()">
               <option value="">— Select type —</option>
               <option value="scope">Scope</option>
@@ -1291,6 +1291,11 @@ function applyTranslations() {
               <option value="guideline">Guideline</option>
             </select>
             <div class="field-state missing" id="int-deliverable-state">⚠ Required — not provided</div>
+          </div>
+          <div class="field wide">
+            <label>Deliverable Description <span class="req-mark">*</span></label>
+            <textarea id="int-deliverable-desc" rows="2" placeholder="What specifically will be delivered (e.g. Full system spec, Test plan with 50 cases)..." oninput="intakeValidate()"></textarea>
+            <div class="field-state missing" id="int-deliverable-desc-state">⚠ Required — not provided</div>
           </div>
         </div>
 
@@ -1304,7 +1309,7 @@ function applyTranslations() {
 
         <div class="form-row">
           <div class="field wide">
-            <label>Business Context <span class="opt-mark">(optional)</span></label>
+            <label>Business Context <span class="req-mark">*</span></label>
             <textarea id="int-context" rows="2" placeholder="Background, constraints, dependencies, or references..."></textarea>
           </div>
         </div>
@@ -1767,8 +1772,8 @@ function applyTranslations() {
   }
 
   /* ── INTAKE ── */
-  const INTAKE_FIELDS = ['int-name','int-owner','int-goal','int-summary','int-deliverable'];
-  const INTAKE_OPTIONAL = ['int-context','int-scope-seed'];
+  const INTAKE_FIELDS = ['int-name','int-owner','int-goal','int-summary','int-deliverable','int-context'];
+  const INTAKE_OPTIONAL = ['int-scope-seed'];
 
   function intakeValidate() {
     const filled = INTAKE_FIELDS.filter(id => {
@@ -1816,12 +1821,13 @@ function applyTranslations() {
     const owner = document.getElementById('int-owner').value.trim();
     const goal = document.getElementById('int-goal').value.trim();
     const summary = document.getElementById('int-summary').value.trim();
-    const deliverable = document.getElementById('int-deliverable').value;
+    const deliverableType = document.getElementById('int-deliverable').value;
+    const deliverableDesc = document.getElementById('int-deliverable-desc').value.trim();
     const context = document.getElementById('int-context').value.trim();
     const scopeSeed = document.getElementById('int-scope-seed').value.trim();
     const out = document.getElementById('int-output');
 
-    if (!name || !owner || !goal || !summary || !deliverable) {
+    if (!name || !owner || !goal || !summary || !deliverableDesc || !context) {
       _warn(out, 'All required fields must be filled before creating a project.');
       return;
     }
@@ -1832,9 +1838,9 @@ function applyTranslations() {
         project_name: name,
         project_owner: owner,
         project_goal: goal,
-        project_summary: summary,
-        requested_deliverable: deliverable,
-        business_context: context,
+        intake_summary: summary,
+        intake_deliverable: deliverableDesc,
+        intake_business_context: context,
         scope_seed: scopeSeed,
         project_status: 'active',
       });
