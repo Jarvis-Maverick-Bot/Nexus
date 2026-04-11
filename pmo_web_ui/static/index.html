@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <script>
-// translations.js — EN / ZH string resources
+// translations.js ??EN / ZH string resources
 const T = {
   en: {
     // Nav
@@ -16,106 +16,47 @@ const T = {
     nav_workspace: 'Workspace',
     nav_intake: 'New Project',
     nav_deliverables: 'Deliverables',
-    // Sprint 2R: Review
     nav_review: 'Review',
     // Sprint 2R: Pre-Kickoff Review
     review_title: 'Pre-Kickoff Review',
     review_subtitle: 'BA / SA / QA parallel review + Maverick recommendation',
+    review_project: 'Project',
     review_load: 'Load Review Status',
     review_select_project: '(select project)',
     review_no_project: 'Select a project first.',
-    review_project: 'Project',
     review_load_err: 'Failed to load review status.',
-    review_requester: 'Requested By',
-    review_decided: 'Decided',
-    review_note: 'Note',
+    review_reviewer_ba: 'Business Analyst',
+    review_reviewer_sa: 'Systems Analyst',
+    review_reviewer_qa: 'Quality Assurance',
     review_pending: 'pending',
     review_approved: 'approved',
     review_revision_needed: 'revision needed',
-    review_btn_request: 'Request Review',
-    review_btn_approve: 'Approve',
-    review_btn_revision: 'Request Revision',
-    review_status_pending: 'Pending',
     review_no_requester: '—',
     review_no_decided: '—',
-    // Maverick
+    review_btn_request: 'Request',
+    review_btn_approve: 'Approve',
+    review_btn_revision: 'Revision',
     review_maverick_title: 'Maverick Recommendation',
     review_maverick_pending: 'Pending — awaiting all reviewer decisions',
-    review_maverick_ready: 'Ready to recommend',
+    review_maverick_ready: 'Waiting for all reviews to complete',
+    review_maverick_blocked: 'Complete all reviews with no revision needed first',
     review_maverick_kickoff: 'Recommend Kickoff',
     review_maverick_revision: 'Recommend Revision',
     review_maverick_note_placeholder: 'Recommendation note (optional)',
     review_maverick_success: 'Recommendation recorded',
-    review_maverick_blocked: 'Complete all reviews with no revision needed before recommending kickoff.',
-    // Kickoff decision
-    review_kickoff_title: 'Kickoff Decision',
-    review_kickoff_approved: 'Kickoff Approved',
-    review_kickoff_rejected: 'Kickoff Rejected',
-    review_kickoff_note_placeholder: 'Decision note (optional)',
-    review_kickoff_approve: 'Approve Kickoff',
-    review_kickoff_reject: 'Reject & Return',
-    // Reviewer labels
-    review_reviewer_ba: 'Business Analyst',
-    review_reviewer_sa: 'Systems Analyst',
-    review_reviewer_qa: 'Quality Assurance',
-
 
     nav_acceptance: 'Acceptance',
 
     nav_workspace: 'Workspace',
     nav_intake: 'New Project',
     nav_deliverables: 'Deliverables',
-    // Sprint 2R: Review
-    nav_review: 'Review',
-    // Sprint 2R: Pre-Kickoff Review
-    review_title: 'Pre-Kickoff Review',
-    review_subtitle: 'BA / SA / QA parallel review + Maverick recommendation',
-    review_load: 'Load Review Status',
-    review_select_project: '(select project)',
-    review_no_project: 'Select a project first.',
-    review_project: 'Project',
-    review_load_err: 'Failed to load review status.',
-    review_requester: 'Requested By',
-    review_decided: 'Decided',
-    review_note: 'Note',
-    review_pending: 'pending',
-    review_approved: 'approved',
-    review_revision_needed: 'revision needed',
-    review_btn_request: 'Request Review',
-    review_btn_approve: 'Approve',
-    review_btn_revision: 'Request Revision',
-    review_status_pending: 'Pending',
-    review_no_requester: '—',
-    review_no_decided: '—',
-    // Maverick
-    review_maverick_title: 'Maverick Recommendation',
-    review_maverick_pending: 'Pending — awaiting all reviewer decisions',
-    review_maverick_ready: 'Ready to recommend',
-    review_maverick_kickoff: 'Recommend Kickoff',
-    review_maverick_revision: 'Recommend Revision',
-    review_maverick_note_placeholder: 'Recommendation note (optional)',
-    review_maverick_success: 'Recommendation recorded',
-    review_maverick_blocked: 'Complete all reviews with no revision needed before recommending kickoff.',
-    // Kickoff decision
-    review_kickoff_title: 'Kickoff Decision',
-    review_kickoff_approved: 'Kickoff Approved',
-    review_kickoff_rejected: 'Kickoff Rejected',
-    review_kickoff_note_placeholder: 'Decision note (optional)',
-    review_kickoff_approve: 'Approve Kickoff',
-    review_kickoff_reject: 'Reject & Return',
-    // Reviewer labels
-    review_reviewer_ba: 'Business Analyst',
-    review_reviewer_sa: 'Systems Analyst',
-    review_reviewer_qa: 'Quality Assurance',
-
-
     nav_acceptance: 'Acceptance',
 
     // Topbar
-    topbar_select_project: 'Select project…',
+    topbar_select_project: 'Select project??,
     topbar_version: 'v1.5',
-    lang_toggle: 'EN / 中文',
-    lang_toggle: 'EN / 中文',
+    lang_toggle: 'EN / ???',
+    lang_toggle: 'EN / ???',
 
     // Projects page
     proj_create: 'Create Project',
@@ -125,7 +66,7 @@ const T = {
     proj_goal: 'Goal',
     proj_btn_create: '+ Create Project',
     proj_all: 'All Projects',
-    proj_btn_refresh: '↻ Refresh',
+    proj_btn_refresh: '??Refresh',
     proj_ready: 'Ready. Enter project details above.',
     proj_no_projects: 'No projects yet. Create one above.',
     proj_err_name_owner: 'Name and Owner are required.',
@@ -135,15 +76,15 @@ const T = {
     detail_title: 'Project Detail',
     detail_load: 'Load',
     detail_refresh: 'Refresh',
-    detail_select: '(select project…)',
+    detail_select: '(select project??',
     detail_artifacts: 'Artifacts',
     detail_add_artifact: 'Add / Update Artifact',
     detail_type: 'Type',
     detail_produced_by: 'Produced By',
     detail_content: 'Content',
     detail_btn_save: 'Save Artifact',
-    detail_btn_approve: '✓ Approve',
-    detail_btn_reject: '✗ Request Revision',
+    detail_btn_approve: '??Approve',
+    detail_btn_reject: '??Request Revision',
     detail_no_package: 'No acceptance package yet.',
     detail_accept_note: 'Your decision note',
     detail_artifact_select_type: 'Select a type above to edit.',
@@ -170,7 +111,7 @@ const T = {
 
     // Advisories page
     adv_title: 'Advisories & Blockers',
-    adv_select: '(select project…)',
+    adv_select: '(select project??',
     adv_refresh: 'Refresh',
     adv_blockers: 'Blockers',
     adv_advisories: 'Advisories',
@@ -178,22 +119,22 @@ const T = {
     adv_dismiss: 'Dismiss',
     adv_empty: 'Select a project to view advisories.',
     adv_err_backend: 'Cannot reach PMO backend.',
-    adv_no_active: 'No active advisories or blockers. ✓',
+    adv_no_active: 'No active advisories or blockers. ??,
 
     // Kickoff page
     kick_title: 'Announce Kickoff',
     kick_task_title: 'Task Title',
     kick_project: 'Project',
-    kick_select: '(select project…)',
+    kick_select: '(select project??',
     kick_desc: 'Description',
     kick_priority: 'Priority',
-    kick_priority_0: 'P0 — Critical',
-    kick_priority_1: 'P1 — High',
-    kick_priority_2: 'P2 — Medium',
-    kick_priority_3: 'P3 — Low',
+    kick_priority_0: 'P0 ??Critical',
+    kick_priority_1: 'P1 ??High',
+    kick_priority_2: 'P2 ??Medium',
+    kick_priority_3: 'P3 ??Low',
     kick_assignee: 'Assignee',
     kick_actor: 'Your Name',
-    kick_btn: '🚀 Announce Kickoff',
+    kick_btn: '?? Announce Kickoff',
     kick_err_fields: 'Project, title, description, and your name are required.',
 
     // Status labels
@@ -213,138 +154,138 @@ const T = {
     artifact_missing: 'Missing',
 
     // Output messages
-    out_creating: 'Creating…',
-    out_saving: 'Saving…',
-    out_loading: 'Loading…',
-    out_announcing: 'Announcing…',
+    out_creating: 'Creating??,
+    out_saving: 'Saving??,
+    out_loading: 'Loading??,
+    out_announcing: 'Announcing??,
 
     // Language
-    lang_toggle: 'EN / 中文',
+    lang_toggle: 'EN / ???',
   },
 
   zh: {
     // Nav
-    nav_projects: '项目管理',
-    nav_detail: '详情视图',
-    nav_gate: '关卡面板',
-    nav_status: '状态查询',
-    nav_advisories: '预警信息',
-    nav_kickoff: '任务发起',
+    nav_projects: '??????',
+    nav_detail: '??????',
+    nav_gate: '??????',
+    nav_status: '???????,
+    nav_advisories: '??????',
+    nav_kickoff: '??????',
 
-    nav_workspace: '工作区',
-    nav_intake: '新建项目',
-    nav_deliverables: '交付物',
-    nav_acceptance: '验收',
+    nav_workspace: '?????,
+    nav_intake: '??????',
+    nav_deliverables: '?????,
+    nav_acceptance: '???',
 
 
     // Topbar
-    topbar_select_project: '选择项目…',
+    topbar_select_project: '????????,
     topbar_version: 'v1.5',
-    lang_toggle: 'EN / 中文',
+    lang_toggle: 'EN / ???',
 
     // Projects page
-    proj_create: '创建项目',
-    proj_name: '项目名称',
-    proj_owner: '负责人',
-    proj_status: '状态',
-    proj_goal: '项目目标',
-    proj_btn_create: '+ 创建项目',
-    proj_all: '全部项目',
-    proj_btn_refresh: '↻ 刷新',
-    proj_ready: '请填写上方项目信息。',
-    proj_no_projects: '暂无项目，请在上方创建。',
-    proj_err_name_owner: '名称和负责人为必填项。',
-    proj_err_load: '加载项目失败。',
+    proj_create: '??????',
+    proj_name: '??????',
+    proj_owner: '?????,
+    proj_status: '????,
+    proj_goal: '??????',
+    proj_btn_create: '+ ??????',
+    proj_all: '??????',
+    proj_btn_refresh: '?????',
+    proj_ready: '????????????????,
+    proj_no_projects: '???????????????????,
+    proj_err_name_owner: '?????????????????,
+    proj_err_load: '???????????,
 
     // Detail page
-    detail_title: '项目详情',
-    detail_load: '加载',
-    detail_refresh: '刷新',
-    detail_select: '（选择项目…）',
-    detail_artifacts: '制品',
-    detail_add_artifact: '添加 / 更新制品',
-    detail_type: '类型',
-    detail_produced_by: '产出者',
-    detail_content: '内容',
-    detail_btn_save: '保存制品',
-    detail_btn_approve: '✓ 批准',
-    detail_btn_reject: '✗ 请求修订',
-    detail_no_package: '暂无验收包。',
-    detail_accept_note: '决策备注',
-    detail_artifact_select_type: '选择上方类型进行编辑。',
-    detail_no_project: '请先选择一个项目。',
-    detail_complete: '已完成',
-    detail_incomplete: '未完成',
+    detail_title: '??????',
+    detail_load: '???',
+    detail_refresh: '???',
+    detail_select: '???????????',
+    detail_artifacts: '???',
+    detail_add_artifact: '??? / ??????',
+    detail_type: '???',
+    detail_produced_by: '?????,
+    detail_content: '???',
+    detail_btn_save: '??????',
+    detail_btn_approve: '?????',
+    detail_btn_reject: '????????',
+    detail_no_package: '??????????,
+    detail_accept_note: '??????',
+    detail_artifact_select_type: '?????????????????,
+    detail_no_project: '???????????????,
+    detail_complete: '?????,
+    detail_incomplete: '?????,
 
     // Gate page
-    gate_title: '关卡审批',
-    gate_task_id: '任务 ID',
-    gate_load: '加载关卡',
-    gate_err_task: '请输入任务 ID。',
-    gate_pending: '关卡状态：待审批',
-    gate_decision_note: '决策备注',
+    gate_title: '??????',
+    gate_task_id: '??? ID',
+    gate_load: '??????',
+    gate_err_task: '????????ID??,
+    gate_pending: '?????????????,
+    gate_decision_note: '??????',
 
     // Status page
-    status_title: '状态查询',
-    status_task_id: '任务 ID',
-    status_btn: '查询状态',
-    status_list_project: '项目 ID',
-    status_list_btn: '列出任务',
-    status_err_task: '请输入任务 ID。',
-    status_err_project: '请输入项目 ID。',
+    status_title: '???????,
+    status_task_id: '??? ID',
+    status_btn: '???????,
+    status_list_project: '??? ID',
+    status_list_btn: '??????',
+    status_err_task: '????????ID??,
+    status_err_project: '????????ID??,
 
     // Advisories page
-    adv_title: '预警与阻塞',
-    adv_select: '（选择项目…）',
-    adv_refresh: '刷新',
-    adv_blockers: '阻塞项',
-    adv_advisories: '预警信息',
-    adv_resolve: '解决',
-    adv_dismiss: '关闭',
-    adv_empty: '请选择一个项目查看预警。',
-    adv_err_backend: '无法连接 PMO 后端。',
-    adv_no_active: '暂无活跃预警或阻塞项。✓',
+    adv_title: '????????,
+    adv_select: '???????????',
+    adv_refresh: '???',
+    adv_blockers: '?????,
+    adv_advisories: '??????',
+    adv_resolve: '???',
+    adv_dismiss: '???',
+    adv_empty: '????????????????????,
+    adv_err_backend: '?????? PMO ?????,
+    adv_no_active: '??????????????????',
 
     // Kickoff page
-    kick_title: '发起任务',
-    kick_task_title: '任务名称',
-    kick_project: '所属项目',
-    kick_select: '（选择项目…）',
-    kick_desc: '任务描述',
-    kick_priority: '优先级',
-    kick_priority_0: 'P0 — 紧急',
-    kick_priority_1: 'P1 — 高',
-    kick_priority_2: 'P2 — 中',
-    kick_priority_3: 'P3 — 低',
-    kick_assignee: '指派给',
-    kick_actor: '您的姓名',
-    kick_btn: '🚀 发起任务',
-    kick_err_fields: '项目、名称、描述和您的姓名为必填项。',
+    kick_title: '??????',
+    kick_task_title: '??????',
+    kick_project: '???????,
+    kick_select: '???????????',
+    kick_desc: '??????',
+    kick_priority: '?????,
+    kick_priority_0: 'P0 ??????,
+    kick_priority_1: 'P1 ????,
+    kick_priority_2: 'P2 ????,
+    kick_priority_3: 'P3 ????,
+    kick_assignee: '?????,
+    kick_actor: '??????',
+    kick_btn: '?? ??????',
+    kick_err_fields: '????????????????????????????,
 
     // Status labels
-    status_active: '进行中',
-    status_on_hold: '暂停',
-    status_closed: '已关闭',
-    status_shutdown: '已终止',
+    status_active: '?????,
+    status_on_hold: '???',
+    status_closed: '?????,
+    status_shutdown: '?????,
 
     // Artifact types
-    artifact_scope: '范围',
-    artifact_spec: '规格说明',
-    artifact_arch: '架构设计',
-    artifact_testcase: '测试用例',
-    artifact_testreport: '测试报告',
-    artifact_guideline: '操作指南',
-    artifact_complete: '已完成',
-    artifact_missing: '未完成',
+    artifact_scope: '???',
+    artifact_spec: '??????',
+    artifact_arch: '??????',
+    artifact_testcase: '??????',
+    artifact_testreport: '??????',
+    artifact_guideline: '??????',
+    artifact_complete: '?????,
+    artifact_missing: '?????,
 
     // Output messages
-    out_creating: '创建中…',
-    out_saving: '保存中…',
-    out_loading: '加载中…',
-    out_announcing: '发布中…',
+    out_creating: '???????,
+    out_saving: '???????,
+    out_loading: '???????,
+    out_announcing: '???????,
 
     // Language
-    lang_toggle: 'EN / 中文',
+    lang_toggle: 'EN / ???',
   }
 };
 
@@ -368,7 +309,7 @@ function toggleLang() {
 }
 
 function applyTranslations() {
-  // Apply data-i18n attributes — elements with this attr get their text replaced
+  // Apply data-i18n attributes ??elements with this attr get their text replaced
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     el.textContent = t(key);
@@ -384,10 +325,10 @@ function applyTranslations() {
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PMO — V1.6</title>
+  <title>PMO ??V1.6</title>
   <style>
     :root {
-      /* ── BRIGHT HIGH-TECH PALETTE ── */
+      /* ???? BRIGHT HIGH-TECH PALETTE ???? */
       --bg: #eef2f7;
       --surface: #ffffff;
       --card: #ffffff;
@@ -426,7 +367,7 @@ function applyTranslations() {
       flex-direction: column;
     }
 
-    /* ── TOPBAR ── */
+    /* ???? TOPBAR ???? */
     .topbar {
       position: sticky;
       top: 0;
@@ -494,10 +435,10 @@ function applyTranslations() {
     }
     .lang-btn:hover { border-color: var(--accent); color: var(--text); }
 
-    /* ── LAYOUT ── */
+    /* ???? LAYOUT ???? */
     .layout { display: flex; flex: 1; min-height: calc(100vh - 52px); }
 
-    /* ── SIDEBAR ── */
+    /* ???? SIDEBAR ???? */
     .sidebar {
       width: var(--sidebar-w);
       background: #f1f5f9;
@@ -546,12 +487,12 @@ function applyTranslations() {
     .nav-badge.amber { background: var(--amber-bg); color: var(--amber); border-color: #f59e0b30; }
     .nav-badge.green { background: var(--green-bg); color: var(--green); border-color: #22c55e30; }
 
-    /* ── MAIN ── */
+    /* ???? MAIN ???? */
     .main { flex: 1; padding: 1.5rem 2rem; overflow-y: auto; }
     .page { display: none; }
     .page.active { display: block; }
 
-    /* ── SURFACE HEADER ── */
+    /* ???? SURFACE HEADER ???? */
     .surface-header {
       margin-bottom: 1.5rem;
     }
@@ -581,7 +522,7 @@ function applyTranslations() {
     }
     .surface-breadcrumb a:hover { color: var(--accent); }
 
-    /* ── CARDS ── */
+    /* ???? CARDS ???? */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -607,7 +548,7 @@ function applyTranslations() {
     .card-action { font-size: 0.78rem; color: var(--accent); cursor: pointer; }
     .card-action:hover { color: var(--accent-hover); }
 
-    /* ── SECTION HEADERS ── */
+    /* ???? SECTION HEADERS ???? */
     .section-header {
       display: flex;
       align-items: center;
@@ -624,7 +565,7 @@ function applyTranslations() {
     .section-action { font-size: 0.75rem; color: var(--accent); cursor: pointer; }
     .section-action:hover { text-decoration: underline; }
 
-    /* ── BADGES ── */
+    /* ???? BADGES ???? */
     .badge {
       font-size: 0.68rem;
       font-weight: 700;
@@ -641,7 +582,7 @@ function applyTranslations() {
     .badge-complete { background: var(--green-bg); color: var(--green); border: 1px solid rgba(22,163,74,0.3); }
     .badge-missing { background: rgba(71,85,105,0.08); color: var(--text-dim); border: 1px solid rgba(71,85,105,0.2); }
 
-    /* ── SEVERITY TAGS ── */
+    /* ???? SEVERITY TAGS ???? */
     .sev-tag {
       font-size: 0.62rem;
       font-weight: 700;
@@ -656,7 +597,7 @@ function applyTranslations() {
     .sev-info { background: var(--accent-glow); color: var(--accent); }
     .sev-warn { background: var(--amber-bg); color: var(--amber); }
 
-    /* ── FORMS ── */
+    /* ???? FORMS ???? */
     .form-row {
       display: flex;
       gap: 0.6rem;
@@ -740,7 +681,7 @@ function applyTranslations() {
     button.sm { padding: 0.3rem 0.7rem; font-size: 0.78rem; }
     button.lg { padding: 0.65rem 1.5rem; font-size: 0.9rem; }
 
-    /* ── PROGRESS BAR ── */
+    /* ???? PROGRESS BAR ???? */
     .progress-bar {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -757,7 +698,7 @@ function applyTranslations() {
     .progress-fill.partial { background: var(--amber); }
     .progress-fill.empty { background: var(--border); }
 
-    /* ── PIPELINE ── */
+    /* ???? PIPELINE ???? */
     .pipeline {
       display: flex;
       align-items: center;
@@ -806,7 +747,7 @@ function applyTranslations() {
     }
     .pipeline-connector.done { background: var(--green); }
 
-    /* ── DELIVERABLE CARDS ── */
+    /* ???? DELIVERABLE CARDS ???? */
     .deliverable-list { display: flex; flex-direction: column; gap: 0.6rem; }
     .deliverable-card {
       background: var(--surface);
@@ -857,7 +798,7 @@ function applyTranslations() {
       margin-top: 0.5rem;
     }
 
-    /* ── ARTIFACT GRID ── */
+    /* ???? ARTIFACT GRID ???? */
     .artifact-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -882,7 +823,7 @@ function applyTranslations() {
     .artifact-chip.done .artifact-chip-status { color: var(--green); }
     .artifact-chip.missing .artifact-chip-status { color: var(--text-muted); }
 
-    /* ── SIGNAL / ADVISORY LIST ── */
+    /* ???? SIGNAL / ADVISORY LIST ???? */
     .signal-list { display: flex; flex-direction: column; gap: 0.5rem; }
     .signal-item {
       background: var(--surface);
@@ -901,7 +842,7 @@ function applyTranslations() {
     .signal-meta { font-size: 0.72rem; color: var(--text-dim); margin-top: 0.2rem; }
     .signal-right { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
 
-    /* ── META GRID ── */
+    /* ???? META GRID ???? */
     .meta-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -925,7 +866,7 @@ function applyTranslations() {
     .meta-value { font-size: 0.9rem; font-weight: 500; color: var(--text); }
     .meta-value.small { font-size: 0.8rem; }
 
-    /* ── CLOSURE CHECKLIST ── */
+    /* ???? CLOSURE CHECKLIST ???? */
     .checklist { display: flex; flex-direction: column; gap: 0.5rem; }
     .checklist-item {
       display: flex;
@@ -939,7 +880,7 @@ function applyTranslations() {
     .checklist-text { color: var(--text); }
     .checklist-item.pending .checklist-text { color: var(--text-dim); }
 
-    /* ── OUTPUT PACKAGE ── */
+    /* ???? OUTPUT PACKAGE ???? */
     .output-package {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -955,7 +896,7 @@ function applyTranslations() {
     .output-package-meta { font-size: 0.75rem; color: var(--text-dim); margin-top: 0.15rem; }
     .output-package-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
 
-    /* ── DECISION HISTORY ── */
+    /* ???? DECISION HISTORY ???? */
     .history-list { display: flex; flex-direction: column; gap: 0.4rem; }
     .history-item {
       display: flex;
@@ -970,7 +911,7 @@ function applyTranslations() {
     .history-text { flex: 1; }
     .history-actor { color: var(--accent); font-weight: 500; }
 
-    /* ── MODAL ── */
+    /* ???? MODAL ???? */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -1028,7 +969,7 @@ function applyTranslations() {
       border-top: 1px solid var(--border);
     }
 
-    /* ── EMPTY STATE ── */
+    /* ???? EMPTY STATE ???? */
     .empty-state {
       text-align: center;
       padding: 2rem;
@@ -1037,7 +978,7 @@ function applyTranslations() {
     }
     .empty-state-icon { font-size: 2rem; margin-bottom: 0.5rem; }
 
-    /* ── OUTPUT ── */
+    /* ???? OUTPUT ???? */
     .output {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -1057,7 +998,7 @@ function applyTranslations() {
     .output.error { border-color: var(--red); background: var(--red-bg); color: var(--red); }
     .output.warn { border-color: var(--amber); background: var(--amber-bg); color: var(--amber); }
 
-    /* ── INTAKE FORM ── */
+    /* ???? INTAKE FORM ???? */
     .intake-section {
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -1098,7 +1039,7 @@ function applyTranslations() {
       margin-top: 1rem;
     }
 
-    /* ── COCKPIT LAYOUT ── */
+    /* ???? COCKPIT LAYOUT ???? */
     .cockpit-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1109,7 +1050,7 @@ function applyTranslations() {
       .cockpit-grid { grid-template-columns: 1fr; }
     }
 
-    /* ── UTILS ── */
+    /* ???? UTILS ???? */
     .text-green { color: var(--green); }
     .text-red { color: var(--red); }
     .text-amber { color: var(--amber); }
@@ -1137,7 +1078,7 @@ function applyTranslations() {
       :root { --sidebar-w: 0px; }
       .cockpit-grid { grid-template-columns: 1fr; }
    
-  /* ── INTAKE SUMMARY ── */
+  /* ???? INTAKE SUMMARY ???? */
   .intake-summary-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1175,7 +1116,7 @@ function applyTranslations() {
     margin-left: 0.5rem;
   }
 
-  /* ── PREREQUISITE CARDS ── */
+  /* ???? PREREQUISITE CARDS ???? */
   .prereq-card {
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -1250,23 +1191,23 @@ function applyTranslations() {
 </head>
 <body>
 
-<!-- ── TOPBAR ── -->
+<!-- ???? TOPBAR ???? -->
 <div class="topbar">
-  <div class="topbar-logo">PMO <span class="dot">●</span></div>
+  <div class="topbar-logo">PMO <span class="dot">??/span></div>
   <div class="topbar-divider"></div>
   <div class="topbar-project">
     <div class="status-dot" id="global-status-dot"></div>
     <select class="topbar-select" id="global-project-select" onchange="onGlobalProjectChange()">
-      <option value="">Select project…</option>
+      <option value="">Select project??/option>
     </select>
   </div>
   <div class="topbar-right">
-    <button class="lang-btn" onclick="toggleLang()" data-i18n="lang_toggle">EN / 中文</button>
+    <button class="lang-btn" onclick="toggleLang()" data-i18n="lang_toggle">EN / ???</button>
     <div class="topbar-version">v1.6</div>
   </div>
 </div>
 
-<!-- ── LAYOUT ── -->
+<!-- ???? LAYOUT ???? -->
 <div class="layout">
 
   <!-- SIDEBAR -->
@@ -1275,20 +1216,20 @@ function applyTranslations() {
     <div class="sidebar-section">
       <div class="sidebar-label">Workspace</div>
       <div class="nav-item" onclick="navigateTo('workspace')" id="nav-workspace">
-        <span class="nav-icon">🚀</span> <span data-i18n="nav_workspace">Workspace</span>
+        <span class="nav-icon">??</span> <span data-i18n="nav_workspace">Workspace</span>
       </div>
       <div class="nav-item" onclick="navigateTo('intake')" id="nav-intake">
-        <span class="nav-icon">＋</span> <span data-i18n="nav_intake">New Project</span>
+        <span class="nav-icon">??/span> <span data-i18n="nav_intake">New Project</span>
       </div>
       <div class="nav-item" onclick="navigateTo('deliverables')" id="nav-deliverables">
       <div class="nav-item" onclick="navigateTo('review')" id="nav-review">
-        <span class="nav-icon">🔍</span> <span data-i18n="nav_review">Review</span>
+        <span class="nav-icon">&#128269;</span> <span data-i18n="nav_review">Review</span>
       </div>
 
-        <span class="nav-icon">📦</span> <span data-i18n="nav_deliverables">Deliverables</span>
+        <span class="nav-icon">??</span> <span data-i18n="nav_deliverables">Deliverables</span>
       </div>
       <div class="nav-item" onclick="navigateTo('acceptance')" id="nav-acceptance">
-        <span class="nav-icon">✓</span> <span data-i18n="nav_acceptance">Acceptance</span>
+        <span class="nav-icon">??/span> <span data-i18n="nav_acceptance">Acceptance</span>
       </div>
     </div>
 
@@ -1296,14 +1237,14 @@ function applyTranslations() {
     <div class="sidebar-section">
       <div class="sidebar-label">Utilities</div>
       <div class="nav-item" onclick="navigateTo('status')" id="nav-status">
-        <span class="nav-icon">📊</span> <span data-i18n="nav_status">Status</span>
+        <span class="nav-icon">??</span> <span data-i18n="nav_status">Status</span>
       </div>
       <div class="nav-item" onclick="navigateTo('advisories')" id="nav-advisories">
-        <span class="nav-icon">⚠️</span> <span data-i18n="nav_advisories">Advisories</span>
+        <span class="nav-icon">???</span> <span data-i18n="nav_advisories">Advisories</span>
         <span class="nav-badge hidden" id="advisory-badge"></span>
       </div>
       <div class="nav-item" onclick="navigateTo('gate')" id="nav-gate">
-        <span class="nav-icon">🚦</span> <span data-i18n="nav_gate">Gate Panel</span>
+        <span class="nav-icon">??</span> <span data-i18n="nav_gate">Gate Panel</span>
       </div>
     </div>
   </nav>
@@ -1311,24 +1252,24 @@ function applyTranslations() {
   <!-- MAIN CONTENT -->
   <main class="main">
 
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ?????????????????????????????????????????????????????????????????????????????????????????-->
     <!-- SURFACE: PROJECT WORKSPACE / COCKPIT                        -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ?????????????????????????????????????????????????????????????????????????????????????????-->
     <div class="page active" id="page-workspace" x-data="workspaceShell()">
       <div class="surface-header">
         <div class="surface-breadcrumb">
           <a onclick="navigateTo('intake')">Workspace</a>
-          <span>›</span>
+          <span>??/span>
           <span id="ws-project-name">Select a project</span>
         </div>
         <div class="surface-title" id="ws-title">Project Workspace</div>
-        <div class="surface-subtitle">Delivery cockpit — overview, progress, and blockers at a glance</div>
+        <div class="surface-subtitle">Delivery cockpit ??overview, progress, and blockers at a glance</div>
       </div>
 
       <!-- No project selected state -->
       <div id="ws-empty" class="card">
         <div class="empty-state">
-          <div class="empty-state-icon">🚀</div>
+          <div class="empty-state-icon">??</div>
           <div>Select a project from the top bar to view its workspace.</div>
           <div class="mt-1"><button class="secondary sm" onclick="navigateTo('intake')">+ Create New Project</button></div>
         </div>
@@ -1340,19 +1281,19 @@ function applyTranslations() {
         <div class="meta-grid mb-1" style="margin-bottom:0.75rem">
           <div class="meta-item">
             <div class="meta-label">Project</div>
-            <div class="meta-value" id="ws-proj-name">—</div>
+            <div class="meta-value" id="ws-proj-name">??/div>
           </div>
           <div class="meta-item">
             <div class="meta-label">Owner</div>
-            <div class="meta-value" id="ws-proj-owner">—</div>
+            <div class="meta-value" id="ws-proj-owner">??/div>
           </div>
           <div class="meta-item">
             <div class="meta-label">Status</div>
-            <div class="meta-value" id="ws-proj-status">—</div>
+            <div class="meta-value" id="ws-proj-status">??/div>
           </div>
           <div class="meta-item">
             <div class="meta-label">Created</div>
-            <div class="meta-value text-dim" id="ws-proj-created">—</div>
+            <div class="meta-value text-dim" id="ws-proj-created">??/div>
           </div>
         </div>
 
@@ -1361,33 +1302,33 @@ function applyTranslations() {
           <div class="section-header">
             <div class="section-title">Project Goal</div>
           </div>
-          <div id="ws-proj-goal" style="font-size:0.875rem;color:var(--text-dim);line-height:1.6">—</div>
+          <div id="ws-proj-goal" style="font-size:0.875rem;color:var(--text-dim);line-height:1.6">??/div>
         </div>
 
-        <!-- Intake Summary — labeled as submitted info, NOT project truth -->
+        <!-- Intake Summary ??labeled as submitted info, NOT project truth -->
         <div class="card" id="ws-intake-summary">
           <div class="section-header">
-            <div class="section-title">Intake Summary <span style="font-size:0.75rem;color:var(--text-dim);font-weight:normal">(submitted at intake — governance record)</span></div>
+            <div class="section-title">Intake Summary <span style="font-size:0.75rem;color:var(--text-dim);font-weight:normal">(submitted at intake ??governance record)</span></div>
           </div>
           <div class="intake-summary-grid">
             <div class="intake-field">
               <div class="intake-field-label">Project Summary</div>
-              <div class="intake-field-value" id="ws-intake-summary-val">—</div>
+              <div class="intake-field-value" id="ws-intake-summary-val">??/div>
             </div>
             <div class="intake-field">
               <div class="intake-field-label">Deliverable Description</div>
-              <div class="intake-field-value" id="ws-intake-deliverable-val">—</div>
+              <div class="intake-field-value" id="ws-intake-deliverable-val">??/div>
             </div>
             <div class="intake-field full-width">
               <div class="intake-field-label">Business Context</div>
-              <div class="intake-field-value" id="ws-intake-context-val">—</div>
+              <div class="intake-field-value" id="ws-intake-context-val">??/div>
             </div>
           </div>
         </div>
 
         <!-- Pipeline + Task Progress row -->
         <div class="cockpit-grid">
-          <!-- Pipeline — HONEST: only shows real pipeline state -->
+          <!-- Pipeline ??HONEST: only shows real pipeline state -->
           <div class="card">
             <div class="section-header">
               <div class="section-title">Delivery Pipeline</div>
@@ -1409,15 +1350,15 @@ function applyTranslations() {
             <div id="ws-task-progress" class="flex-col gap-05">
               <div class="flex justify-between items-center">
                 <span class="text-dim" style="font-size:0.82rem">Total tasks</span>
-                <span id="ws-task-total" class="text-accent" style="font-weight:600">—</span>
+                <span id="ws-task-total" class="text-accent" style="font-weight:600">??/span>
               </div>
               <div class="flex justify-between items-center">
                 <span class="text-dim" style="font-size:0.82rem">Complete</span>
-                <span id="ws-task-done" class="text-green" style="font-weight:600">—</span>
+                <span id="ws-task-done" class="text-green" style="font-weight:600">??/span>
               </div>
               <div class="flex justify-between items-center">
                 <span class="text-dim" style="font-size:0.82rem">Blocked</span>
-                <span id="ws-task-blocked" class="text-red" style="font-weight:600">—</span>
+                <span id="ws-task-blocked" class="text-red" style="font-weight:600">??/span>
               </div>
             </div>
           </div>
@@ -1429,7 +1370,7 @@ function applyTranslations() {
           <div class="card">
             <div class="section-header">
               <div class="section-title">Deliverables</div>
-              <span class="section-action" onclick="navigateTo('deliverables')">View all →</span>
+              <span class="section-action" onclick="navigateTo('deliverables')">View all ??/span>
             </div>
             <div class="artifact-grid" id="ws-artifact-grid"></div>
           </div>
@@ -1438,10 +1379,10 @@ function applyTranslations() {
           <div class="card">
             <div class="section-header">
               <div class="section-title">Blockers</div>
-              <span class="section-action" onclick="navigateTo('advisories')">View all →</span>
+              <span class="section-action" onclick="navigateTo('advisories')">View all ??/span>
             </div>
             <div id="ws-blockers-list">
-              <div class="empty-state" style="padding:1rem">No active blockers. ✓</div>
+              <div class="empty-state" style="padding:1rem">No active blockers. ??/div>
             </div>
           </div>
         </div>
@@ -1450,7 +1391,7 @@ function applyTranslations() {
         <div class="card mt-1">
           <div class="section-header">
             <div class="section-title">Acceptance State</div>
-            <span class="section-action" onclick="navigateTo('acceptance')">Review →</span>
+            <span class="section-action" onclick="navigateTo('acceptance')">Review ??/span>
           </div>
           <div id="ws-acceptance-summary" class="flex items-center gap-1">
             <div class="text-dim" style="font-size:0.85rem">Select a project to see acceptance state.</div>
@@ -1469,21 +1410,21 @@ function applyTranslations() {
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ?????????????????????????????????????????????????????????????????????????????????????????-->
     <!-- SURFACE: STRUCTURED INTAKE / PREREQUISITE PACKAGE         -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ?????????????????????????????????????????????????????????????????????????????????????????-->
     <div class="page" id="page-intake">
       <div class="surface-header">
         <div class="surface-breadcrumb">
           <a onclick="navigateTo('workspace')">Workspace</a>
-          <span>›</span>
+          <span>??/span>
           <span>New Project</span>
         </div>
-        <div class="surface-title">New Project — Structured Initialization</div>
+        <div class="surface-title">New Project ??Structured Initialization</div>
         <div class="surface-subtitle">Create the project first, then submit the prerequisite document package.</div>
       </div>
 
-      <!-- ─── PHASE 1: PROJECT CREATION ─── -->
+      <!-- ?????? PHASE 1: PROJECT CREATION ?????? -->
       <div class="intake-section" id="int-phase1">
         <div class="intake-section-header">
           <div class="intake-section-title required">Project Information</div>
@@ -1493,12 +1434,12 @@ function applyTranslations() {
           <div class="field wide">
             <label>Project Name <span class="req-mark">*</span></label>
             <input id="int-name" placeholder="e.g. Alpha, Production API, Beta Launch" oninput="intakeValidate()" />
-            <div class="field-state missing" id="int-name-state">⚠ Required — not provided</div>
+            <div class="field-state missing" id="int-name-state">??Required ??not provided</div>
           </div>
           <div class="field narrow">
             <label>Requester / Owner <span class="req-mark">*</span></label>
             <input id="int-owner" placeholder="e.g. alex" oninput="intakeValidate()" />
-            <div class="field-state missing" id="int-owner-state">⚠ Required — not provided</div>
+            <div class="field-state missing" id="int-owner-state">??Required ??not provided</div>
           </div>
         </div>
 
@@ -1506,12 +1447,12 @@ function applyTranslations() {
           <div class="field wide">
             <label>Project Goal <span class="req-mark">*</span></label>
             <input id="int-goal" placeholder="What is this project trying to achieve?" oninput="intakeValidate()" />
-            <div class="field-state missing" id="int-goal-state">⚠ Required — not provided</div>
+            <div class="field-state missing" id="int-goal-state">??Required ??not provided</div>
           </div>
           <div class="field narrow">
             <label>Deliverable Type <span class="opt-mark">(metadata)</span></label>
             <select id="int-deliverable-type" onchange="intakeValidate()">
-              <option value="">— Select type —</option>
+              <option value="">??Select type ??/option>
               <option value="scope">Scope</option>
               <option value="spec">Specification</option>
               <option value="arch">Architecture</option>
@@ -1535,12 +1476,12 @@ function applyTranslations() {
       <!-- Actions -->
       <div class="intake-actions">
         <button class="secondary" onclick="intakeReset()">Clear</button>
-        <button class="success lg" id="int-create-btn" disabled onclick="doIntakeCreate()">＋ Create Project</button>
+        <button class="success lg" id="int-create-btn" disabled onclick="doIntakeCreate()">??Create Project</button>
       </div>
 
       <div class="output" id="int-output">Fill in all required fields to create a project.</div>
 
-      <!-- ─── PHASE 2: PREREQUISITE PACKAGE (shown after creation) ─── -->
+      <!-- ?????? PHASE 2: PREREQUISITE PACKAGE (shown after creation) ?????? -->
       <div id="int-phase2" style="display:none">
         <div class="surface-header" style="margin-top:2rem">
           <div class="surface-title">Prerequisite Document Package</div>
@@ -1564,24 +1505,24 @@ function applyTranslations() {
           <div class="card" style="border-color:var(--green);background:var(--green-bg)">
             <div style="display:flex;align-items:center;justify-content:space-between">
               <div>
-                <div style="font-weight:600;color:var(--green)">✓ All 6 prerequisites submitted</div>
+                <div style="font-weight:600;color:var(--green)">??All 6 prerequisites submitted</div>
                 <div style="font-size:0.85rem;color:var(--text-dim);margin-top:0.25rem">Project is ready for pre-kickoff review.</div>
               </div>
-              <button class="success lg" onclick="doProceedToReview()">Proceed to Pre-Kickoff Review →</button>
+              <button class="success lg" onclick="doProceedToReview()">Proceed to Pre-Kickoff Review ??/button>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ?????????????????????????????????????????????????????????????????????????????????????????-->
     <!-- SURFACE: DELIVERABLES BROWSER                             -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ?????????????????????????????????????????????????????????????????????????????????????????-->
     <div class="page" id="page-deliverables">
       <div class="surface-header">
         <div class="surface-breadcrumb">
           <a onclick="navigateTo('workspace')">Workspace</a>
-          <span>›</span>
+          <span>??/span>
           <span>Deliverables</span>
         </div>
         <div class="surface-title">Deliverables Browser</div>
@@ -1594,7 +1535,7 @@ function applyTranslations() {
           <div class="field wide">
             <label>Project</label>
             <select id="del-project-select" onchange="loadDeliverables()">
-              <option value="">— Select project —</option>
+              <option value="">??Select project ??/option>
             </select>
           </div>
           <div class="field narrow">
@@ -1607,7 +1548,7 @@ function applyTranslations() {
           </div>
           <div class="field narrow">
             <label>Search</label>
-            <input id="del-search" placeholder="Search content…" oninput="renderDeliverableList()" />
+            <input id="del-search" placeholder="Search content?? oninput="renderDeliverableList()" />
           </div>
         </div>
       </div>
@@ -1618,14 +1559,14 @@ function applyTranslations() {
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ?????????????????????????????????????????????????????????????????????????????????????????-->
     <!-- SURFACE: ACCEPTANCE / CLOSURE                             -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ?????????????????????????????????????????????????????????????????????????????????????????-->
     <div class="page" id="page-acceptance">
       <div class="surface-header">
         <div class="surface-breadcrumb">
           <a onclick="navigateTo('workspace')">Workspace</a>
-          <span>›</span>
+          <span>??/span>
           <span>Acceptance &amp; Closure</span>
         </div>
         <div class="surface-title">Acceptance &amp; Closure</div>
@@ -1638,7 +1579,7 @@ function applyTranslations() {
           <div class="field wide">
             <label>Project</label>
             <select id="acc-project-select" onchange="loadAcceptance()">
-              <option value="">— Select project —</option>
+              <option value="">??Select project ??/option>
             </select>
           </div>
         </div>
@@ -1650,9 +1591,9 @@ function applyTranslations() {
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ?????????????????????????????????????????????????????????????????????????????????????????-->
     <!-- UTILITY: STATUS VIEW                                      -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ?????????????????????????????????????????????????????????????????????????????????????????-->
     <div class="page" id="page-status">
       <div class="surface-header">
         <div class="surface-title">Status</div>
@@ -1666,13 +1607,13 @@ function applyTranslations() {
         <div class="form-row">
           <div class="field" style="flex:2">
             <label>Task ID</label>
-            <input id="status-task-id" placeholder="Paste task ID here…" />
+            <input id="status-task-id" placeholder="Paste task ID here?? />
           </div>
           <div style="display:flex;align-items:flex-end">
             <button onclick="doStatus()">Get Status</button>
           </div>
         </div>
-        <div class="output" id="status-output">Response will appear here…</div>
+        <div class="output" id="status-output">Response will appear here??/div>
       </div>
 
       <div class="card">
@@ -1688,13 +1629,13 @@ function applyTranslations() {
             <button class="secondary" onclick="doListTasks()">List Tasks</button>
           </div>
         </div>
-        <div class="output" id="list-output">Response will appear here…</div>
+        <div class="output" id="list-output">Response will appear here??/div>
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ?????????????????????????????????????????????????????????????????????????????????????????-->
     <!-- UTILITY: ADVISORIES                                       -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ?????????????????????????????????????????????????????????????????????????????????????????-->
     <div class="page" id="page-advisories">
       <div class="surface-header">
         <div class="surface-title">Advisories &amp; Blockers</div>
@@ -1706,9 +1647,9 @@ function applyTranslations() {
           <div class="card-title">Active Signals</div>
           <div class="flex gap-05 items-center">
             <select id="adv-project-select" onchange="loadAdvisories()">
-              <option value="">— Select project —</option>
+              <option value="">??Select project ??/option>
             </select>
-            <button class="secondary sm" onclick="loadAdvisories()">↻ Refresh</button>
+            <button class="secondary sm" onclick="loadAdvisories()">??Refresh</button>
           </div>
         </div>
         <div id="adv-list">
@@ -1717,9 +1658,9 @@ function applyTranslations() {
       </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ?????????????????????????????????????????????????????????????????????????????????????????-->
     <!-- UTILITY: GATE PANEL                                       -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ?????????????????????????????????????????????????????????????????????????????????????????-->
     <div class="page" id="page-gate">
       <div class="surface-header">
         <div class="surface-title">Gate Panel</div>
@@ -1744,14 +1685,12 @@ function applyTranslations() {
     </div>
 
   
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- SURFACE: PRE-KICKOFF REVIEW (Sprint 2R)                  -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- SURFACE: PRE-KICKOFF REVIEW (Sprint 2R) -->
     <div class="page" id="page-review">
       <div class="surface-header">
         <div class="surface-breadcrumb">
           <a onclick="navigateTo('workspace')">Workspace</a>
-          <span>›</span>
+          <span>&#8250;</span>
           <span>Pre-Kickoff Review</span>
         </div>
         <div class="surface-title" data-i18n="review_title">Pre-Kickoff Review</div>
@@ -1778,7 +1717,6 @@ function applyTranslations() {
 
       <!-- Reviewer status cards -->
       <div id="review-cards" style="display:none">
-        <!-- BA / SA / QA cards side by side -->
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem">
           <div class="card" id="review-card-ba">
             <div class="card-header">
@@ -1806,22 +1744,13 @@ function applyTranslations() {
           </div>
         </div>
 
-        <!-- Maverick Recommendation card -->
-        <div class="card" id="review-maverick-card" style="border-color:var(--accent);margin-bottom:1.5rem">
+        <!-- Maverick Recommendation -->
+        <div class="card" id="review-maverick-card" style="border-color:var(--accent)">
           <div class="card-header">
             <div class="card-title">Maverick Recommendation</div>
           </div>
           <div id="review-maverick-status" style="margin:0.75rem 0"></div>
           <div id="review-maverick-actions"></div>
-        </div>
-
-        <!-- Kickoff Decision card (shown after Maverick recommends kickoff) -->
-        <div class="card" id="review-kickoff-card" style="display:none;border-color:var(--green)">
-          <div class="card-header">
-            <div class="card-title">Kickoff Decision</div>
-          </div>
-          <div id="review-kickoff-status" style="margin:0.75rem 0"></div>
-          <div id="review-kickoff-actions"></div>
         </div>
       </div>
     </div>
@@ -1830,12 +1759,12 @@ function applyTranslations() {
   </main>
 </div>
 
-<!-- ── MODAL: ARTIFACT VIEWER ── -->
+<!-- ???? MODAL: ARTIFACT VIEWER ???? -->
 <div class="modal-overlay hidden" id="artifact-modal" onclick="if(event.target===this)closeArtifactModal()">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="modal-artifact-title">Artifact</div>
-      <button class="modal-close" onclick="closeArtifactModal()">×</button>
+      <button class="modal-close" onclick="closeArtifactModal()">?</button>
     </div>
     <div class="modal-body" id="modal-artifact-body"></div>
     <div class="modal-footer">
@@ -1849,7 +1778,7 @@ function applyTranslations() {
   const BASE = '';
   let _currentArtifactModal = null;
 
-  /* ── NAVIGATION ── */
+  /* ???? NAVIGATION ???? */
   function navigateTo(page) {
     applyTranslations();
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1868,17 +1797,17 @@ function applyTranslations() {
     if (page === 'gate') { /* manual query */ }
   }
 
-  /* ── UTILITIES ── */
+  /* ???? UTILITIES ???? */
   function _esc(s) {
     if (s == null) return '';
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
   function _ts(o) {
-    if (!o) return '—';
+    if (!o) return '??;
     return new Date(o).toLocaleString();
   }
   function _fmt(o) {
-    if (o == null) return '—';
+    if (o == null) return '??;
     if (typeof o === 'object') return JSON.stringify(o, null, 2);
     return String(o);
   }
@@ -1899,7 +1828,7 @@ function applyTranslations() {
     return map[status] || 'badge-closed';
   }
 
-  /* ── GLOBAL PROJECT SELECT ── */
+  /* ???? GLOBAL PROJECT SELECT ???? */
   async function loadGlobalProjects() {
     const sel = document.getElementById('global-project-select');
     try {
@@ -1908,7 +1837,7 @@ function applyTranslations() {
       const opts = (d.projects || []).map(p =>
         `<option value="${p.project_id}">${_esc(p.project_name)}</option>`
       ).join('');
-      sel.innerHTML = '<option value="">Select project…</option>' + opts;
+      sel.innerHTML = '<option value="">Select project??/option>' + opts;
     } catch(e) {}
   }
 
@@ -1926,7 +1855,7 @@ function applyTranslations() {
     loadWorkspaceData();
   }
 
-  /* ── WORKSPACE ── */
+  /* ???? WORKSPACE ???? */
   async function loadWorkspaceData() {
     const pid = document.getElementById('global-project-select').value;
     const empty = document.getElementById('ws-empty');
@@ -1963,8 +1892,8 @@ function applyTranslations() {
       document.getElementById('ws-proj-status').innerHTML = `<span class="badge ${_badgeClass(proj.project_status)}">${proj.project_status}</span>`;
       document.getElementById('ws-proj-created').textContent = _ts(proj.created_at);
       document.getElementById('ws-project-name').textContent = _esc(proj.project_name);
-      document.getElementById('ws-title').textContent = _esc(proj.project_name) + ' — Workspace';
-      document.getElementById('ws-proj-goal').textContent = _esc(proj.project_goal) || '—';
+      document.getElementById('ws-title').textContent = _esc(proj.project_name) + ' ??Workspace';
+      document.getElementById('ws-proj-goal').textContent = _esc(proj.project_goal) || '??;
 
       // Pipeline (fake stages since we don't have task stage data here)
       renderPipeline('ws-pipeline', 'current');
@@ -1986,18 +1915,18 @@ function applyTranslations() {
       // Artifact grid
       const complete = proj.artifact_completeness || {};
       const types = [
-        {k:'scope', label:'Scope', icon:'📐'},
-        {k:'spec', label:'Spec', icon:'📄'},
-        {k:'arch', label:'Arch', icon:'🏗️'},
-        {k:'testcase', label:'Test Case', icon:'🧪'},
-        {k:'testreport', label:'Test Report', icon:'📋'},
-        {k:'guideline', label:'Guideline', icon:'📏'},
+        {k:'scope', label:'Scope', icon:'??'},
+        {k:'spec', label:'Spec', icon:'??'},
+        {k:'arch', label:'Arch', icon:'????},
+        {k:'testcase', label:'Test Case', icon:'??'},
+        {k:'testreport', label:'Test Report', icon:'??'},
+        {k:'guideline', label:'Guideline', icon:'??'},
       ];
       document.getElementById('ws-artifact-grid').innerHTML = types.map(t => {
         const art = complete[t.k];
         const done = art && art.has_content;
         return `<div class="artifact-chip ${done ? 'done' : 'missing'}" onclick="openArtifactModal('${t.k}')">
-          <div class="artifact-chip-icon">${done ? '✓' : '○'}</div>
+          <div class="artifact-chip-icon">${done ? '?? : '??}</div>
           <div class="artifact-chip-name">${t.icon} ${t.label}</div>
           <div class="artifact-chip-status">${done ? 'Complete' : 'Missing'}</div>
         </div>`;
@@ -2008,14 +1937,14 @@ function applyTranslations() {
         const b = await blks;
         const blockers = b.blockers || [];
         if (blockers.length === 0) {
-          document.getElementById('ws-blockers-list').innerHTML = '<div class="empty-state" style="padding:1rem">No active blockers. ✓</div>';
+          document.getElementById('ws-blockers-list').innerHTML = '<div class="empty-state" style="padding:1rem">No active blockers. ??/div>';
         } else {
           document.getElementById('ws-blockers-list').innerHTML = blockers.slice(0,3).map(blk => `
             <div class="signal-item blocker" style="padding:0.5rem 0.75rem">
-              <div class="signal-icon" style="color:var(--red)">⚠</div>
+              <div class="signal-icon" style="color:var(--red)">??/div>
               <div class="signal-body">
                 <div class="signal-msg" style="font-size:0.82rem">${_esc(blk.reason)}</div>
-                <div class="signal-meta">${blk.age_hours || 0}h · ${_ts(blk.detected_at)}</div>
+                <div class="signal-meta">${blk.age_hours || 0}h ? ${_ts(blk.detected_at)}</div>
               </div>
               <span class="sev-tag sev-${blk.severity}">${blk.severity}</span>
             </div>
@@ -2050,10 +1979,10 @@ function applyTranslations() {
       // Output package
       document.getElementById('ws-output-package').innerHTML = `
         <div class="output-package">
-          <div class="output-package-icon">📦</div>
+          <div class="output-package-icon">??</div>
           <div class="output-package-info">
             <div class="output-package-name">Project Output Package</div>
-            <div class="output-package-meta">${Object.values(complete).filter(a => a && a.has_content).length} artifact(s) ready · Ready for export when acceptance is approved</div>
+            <div class="output-package-meta">${Object.values(complete).filter(a => a && a.has_content).length} artifact(s) ready ? Ready for export when acceptance is approved</div>
           </div>
           <div class="output-package-actions">
             <button class="ghost sm" onclick="navigateTo('deliverables')">View Deliverables</button>
@@ -2081,7 +2010,7 @@ function applyTranslations() {
       let cls = '';
       if (i < currentIdx) cls = 'done';
       else if (i === currentIdx) cls = 'current';
-      const icon = i < currentIdx ? '✓' : i === currentIdx ? '→' : '';
+      const icon = i < currentIdx ? '?? : i === currentIdx ? '?? : '';
       return `<div class="pipeline-stage ${cls}">
         <div class="pipeline-icon ${cls}">${icon}</div>
         <div class="pipeline-label">${s.label}</div>
@@ -2089,18 +2018,18 @@ function applyTranslations() {
     }).join('');
   }
 
-  /* ── INTAKE ── */
+  /* ???? INTAKE ???? */
   const INTAKE_FIELDS = ['int-name', 'int-owner', 'int-goal'];
   let currentPrereqProjectId = null;
 
   // Artifact type display names and icons
   const ARTIFACT_META = {
-    scope:       { label: 'Scope',         icon: '📐', producer: 'Alex / BA' },
-    spec:        { label: 'Specification', icon: '📄', producer: 'BA Agent' },
-    arch:        { label: 'Architecture',  icon: '🏗️', producer: 'SA Agent' },
-    testcase:    { label: 'Test Case',     icon: '🧪', producer: 'QA Agent' },
-    testreport:  { label: 'Test Report',   icon: '📋', producer: 'QA Agent' },
-    guideline:   { label: 'Guideline',      icon: '📏', producer: 'Maverick' },
+    scope:       { label: 'Scope',         icon: '??', producer: 'Alex / BA' },
+    spec:        { label: 'Specification', icon: '??', producer: 'BA Agent' },
+    arch:        { label: 'Architecture',  icon: '????, producer: 'SA Agent' },
+    testcase:    { label: 'Test Case',     icon: '??', producer: 'QA Agent' },
+    testreport:  { label: 'Test Report',   icon: '??', producer: 'QA Agent' },
+    guideline:   { label: 'Guideline',      icon: '??', producer: 'Maverick' },
   };
   const ARTIFACT_ORDER = ['scope', 'spec', 'arch', 'testcase', 'testreport', 'guideline'];
 
@@ -2126,10 +2055,10 @@ function applyTranslations() {
       if (!el || !state) return;
       if (el.value.trim()) {
         state.className = 'field-state filled';
-        state.textContent = '✓ Filled';
+        state.textContent = '??Filled';
       } else {
         state.className = 'field-state missing';
-        state.textContent = '⚠ Required — not provided';
+        state.textContent = '??Required ??not provided';
       }
     });
 
@@ -2161,7 +2090,7 @@ function applyTranslations() {
       return;
     }
 
-    _neutral(out, 'Creating project…');
+    _neutral(out, 'Creating project??);
     try {
       const d = await _api('POST', '/projects', {
         project_name: name,
@@ -2179,13 +2108,13 @@ function applyTranslations() {
 
         // Show project info
         document.getElementById('int-proj-info').textContent =
-          `${name} · ${d.project_status} · Owner: ${owner}`;
+          `${name} ? ${d.project_status} ? Owner: ${owner}`;
 
         // Show Phase 2
         document.getElementById('int-phase2').style.display = 'block';
         document.getElementById('int-phase1-progress').style.display = 'none';
         document.getElementById('int-create-btn').disabled = true;
-        document.getElementById('int-create-btn').textContent = '✓ Project Created';
+        document.getElementById('int-create-btn').textContent = '??Project Created';
 
         // Load and render prerequisite package
         await loadPrereqPackage(d.project_id);
@@ -2201,7 +2130,7 @@ function applyTranslations() {
 
   async function loadPrereqPackage(projectId) {
     const list = document.getElementById('int-prereq-list');
-    list.innerHTML = '<div class="empty-state" style="padding:1rem">Loading prerequisite package…</div>';
+    list.innerHTML = '<div class="empty-state" style="padding:1rem">Loading prerequisite package??/div>';
     try {
       const d = await _api('GET', `/projects/${projectId}/prerequisites`);
       if (!d.ok) { list.innerHTML = '<div class="empty-state">Failed to load prerequisites.</div>'; return; }
@@ -2241,7 +2170,7 @@ function applyTranslations() {
 
   function renderPrereqCard(at, meta, pa) {
     const statusClass = pa.submitted ? 'submitted' : 'pending';
-    const statusIcon = pa.submitted ? '✓' : '○';
+    const statusIcon = pa.submitted ? '?? : '??;
     const statusLabel = pa.submitted ? 'Submitted' : 'Pending';
     const submittedAt = pa.submitted_at ? new Date(pa.submitted_at).toLocaleString() : '';
 
@@ -2251,7 +2180,7 @@ function applyTranslations() {
         <div class="prereq-card-header">
           <div class="prereq-icon">${meta.icon}</div>
           <div class="prereq-title">${meta.label}</div>
-          <div class="prereq-status submitted">✓ Submitted</div>
+          <div class="prereq-status submitted">??Submitted</div>
         </div>
         <div class="prereq-meta">
           <span>Producer: ${_esc(pa.producer || meta.producer)}</span>
@@ -2265,10 +2194,10 @@ function applyTranslations() {
         <div class="prereq-card-header">
           <div class="prereq-icon">${meta.icon}</div>
           <div class="prereq-title">${meta.label}</div>
-          <div class="prereq-status pending">○ Pending</div>
+          <div class="prereq-status pending">??Pending</div>
         </div>
         <div class="prereq-form">
-          <textarea id="prereq-content-${at}" rows="2" placeholder="Brief description or summary of this ${meta.label.toLowerCase()}…"></textarea>
+          <textarea id="prereq-content-${at}" rows="2" placeholder="Brief description or summary of this ${meta.label.toLowerCase()}??></textarea>
           <div class="prereq-producer-row">
             <input id="prereq-producer-${at}" type="text" placeholder="Producer (e.g. ${meta.producer})" value="${meta.producer}" />
             <button class="primary sm" onclick="submitPrereq('${at}')">Submit</button>
@@ -2315,17 +2244,13 @@ function applyTranslations() {
     navigateTo('review'); doLoadReview();
   }
 
-  /* ── DELIVERABLES BROWSER ── */
+  /* ???? DELIVERABLES BROWSER ???? */
   async function loadDelProjects() {
     const sel = document.getElementById('del-project-select');
-      const revSel = document.getElementById('review-project-select');
-      if (revSel) {
-        revSel.innerHTML = '<option value="">' + (T[_lang] && T[_lang].review_select_project || '(select project)') + '</option>' + sel.innerHTML.replace(/<option value="">[^<]*<\/option>/, '');
-      }
     try {
       const d = await _api('GET', '/projects');
       if (!d.ok) return;
-      sel.innerHTML = '<option value="">— Select project —</option>' +
+      sel.innerHTML = '<option value="">??Select project ??/option>' +
         (d.projects || []).map(p => `<option value="${p.project_id}">${_esc(p.project_name)}</option>`).join('');
       // If global project is selected, sync
       const gp = document.getElementById('global-project-select').value;
@@ -2337,7 +2262,7 @@ function applyTranslations() {
     const pid = document.getElementById('del-project-select').value;
     const list = document.getElementById('del-list');
     if (!pid) { list.innerHTML = '<div class="empty-state">Select a project to browse its deliverables.</div>'; return; }
-    list.innerHTML = '<div class="empty-state">Loading…</div>';
+    list.innerHTML = '<div class="empty-state">Loading??/div>';
     try {
       const d = await _api('GET', '/projects/' + encodeURIComponent(pid) + '/artifacts');
       if (!d.ok) { list.innerHTML = '<div class="empty-state">Failed to load artifacts.</div>'; return; }
@@ -2355,12 +2280,12 @@ function applyTranslations() {
     const search = (document.getElementById('del-search').value || '').toLowerCase();
 
     const typeInfo = {
-      scope:  {label:'Scope',         icon:'📐'},
-      spec:   {label:'Specification', icon:'📄'},
-      arch:   {label:'Architecture',   icon:'🏗️'},
-      testcase:{label:'Test Case',    icon:'🧪'},
-      testreport:{label:'Test Report',icon:'📋'},
-      guideline:{label:'Guideline',   icon:'📏'},
+      scope:  {label:'Scope',         icon:'??'},
+      spec:   {label:'Specification', icon:'??'},
+      arch:   {label:'Architecture',   icon:'????},
+      testcase:{label:'Test Case',    icon:'??'},
+      testreport:{label:'Test Report',icon:'??'},
+      guideline:{label:'Guideline',   icon:'??'},
     };
 
     const allTypes = Object.keys(typeInfo);
@@ -2393,17 +2318,17 @@ function applyTranslations() {
           <div class="deliverable-icon">${info.icon}</div>
           <div class="deliverable-info">
             <div class="deliverable-name">${info.label}</div>
-            <div class="deliverable-meta">${art && art.produced_by ? 'Produced by: ' + _esc(art.produced_by) + ' · ' : ''}${art && art.created_at ? _ts(art.created_at) : 'Not yet produced'}</div>
+            <div class="deliverable-meta">${art && art.produced_by ? 'Produced by: ' + _esc(art.produced_by) + ' ? ' : ''}${art && art.created_at ? _ts(art.created_at) : 'Not yet produced'}</div>
           </div>
           <div class="deliverable-status">
             ${done
-              ? '<span class="badge badge-complete">✓ Complete</span>'
-              : '<span class="badge badge-missing">○ Missing</span>'
+              ? '<span class="badge badge-complete">??Complete</span>'
+              : '<span class="badge badge-missing">??Missing</span>'
             }
           </div>
         </div>
         ${done && art.content
-          ? `<div class="deliverable-preview">${_esc(art.content.substring(0, 200))}${art.content.length > 200 ? '…' : ''}</div>
+          ? `<div class="deliverable-preview">${_esc(art.content.substring(0, 200))}${art.content.length > 200 ? '?? : ''}</div>
              <div class="deliverable-actions">
                <button class="ghost sm" onclick="openArtifactContent('${type}')">View Full</button>
                <button class="ghost sm" onclick="doExportArtifact('${pid}','${type}')">Export</button>
@@ -2416,7 +2341,7 @@ function applyTranslations() {
     }).join('')}</div>`;
   }
 
-  /* ── ARTIFACT MODAL ── */
+  /* ???? ARTIFACT MODAL ???? */
   function openArtifactContent(type) {
     const cache = window._cachedDeliverables;
     if (!cache) return;
@@ -2427,8 +2352,8 @@ function applyTranslations() {
 
   function openArtifactModal(type, content) {
     const typeInfo = {
-      scope:'📐 Scope', spec:'📄 Specification', arch:'🏗️ Architecture',
-      testcase:'🧪 Test Case', testreport:'📋 Test Report', guideline:'📏 Guideline'
+      scope:'?? Scope', spec:'?? Specification', arch:'????Architecture',
+      testcase:'?? Test Case', testreport:'?? Test Report', guideline:'?? Guideline'
     };
     document.getElementById('modal-artifact-title').textContent = typeInfo[type] || type;
     document.getElementById('modal-artifact-body').textContent = content || '(No content)';
@@ -2473,13 +2398,13 @@ function applyTranslations() {
     alert(`Request for ${type} sent to relevant agent. This will be handled via the agent spawn system.`);
   }
 
-  /* ── ACCEPTANCE ── */
+  /* ???? ACCEPTANCE ???? */
   async function loadAccProjects() {
     const sel = document.getElementById('acc-project-select');
     try {
       const d = await _api('GET', '/projects');
       if (!d.ok) return;
-      sel.innerHTML = '<option value="">— Select project —</option>' +
+      sel.innerHTML = '<option value="">??Select project ??/option>' +
         (d.projects || []).map(p => `<option value="${p.project_id}">${_esc(p.project_name)}</option>`).join('');
       const gp = document.getElementById('global-project-select').value;
       if (gp) sel.value = gp;
@@ -2490,7 +2415,7 @@ function applyTranslations() {
     const pid = document.getElementById('acc-project-select').value;
     const content = document.getElementById('acc-content');
     if (!pid) { content.innerHTML = '<div class="empty-state">Select a project to review its acceptance package.</div>'; return; }
-    content.innerHTML = '<div class="empty-state">Loading…</div>';
+    content.innerHTML = '<div class="empty-state">Loading??/div>';
 
     try {
       const [projRes, accRes, artsRes] = await Promise.all([
@@ -2507,12 +2432,12 @@ function applyTranslations() {
 
       const complete = proj.artifact_completeness || {};
       const types = [
-        {k:'scope', label:'Scope', icon:'📐'},
-        {k:'spec', label:'Spec', icon:'📄'},
-        {k:'arch', label:'Arch', icon:'🏗️'},
-        {k:'testcase', label:'Test Case', icon:'🧪'},
-        {k:'testreport', label:'Test Report', icon:'📋'},
-        {k:'guideline', label:'Guideline', icon:'📏'},
+        {k:'scope', label:'Scope', icon:'??'},
+        {k:'spec', label:'Spec', icon:'??'},
+        {k:'arch', label:'Arch', icon:'????},
+        {k:'testcase', label:'Test Case', icon:'??'},
+        {k:'testreport', label:'Test Report', icon:'??'},
+        {k:'guideline', label:'Guideline', icon:'??'},
       ];
 
       const pkg = acc.ok && acc.acceptance_package ? acc.acceptance_package : null;
@@ -2544,7 +2469,7 @@ function applyTranslations() {
               ${types.map(t => {
                 const done = complete[t.k] && complete[t.k].has_content;
                 return `<div class="artifact-chip ${done ? 'done' : 'missing'}">
-                  <div class="artifact-chip-icon">${done ? '✓' : '○'}</div>
+                  <div class="artifact-chip-icon">${done ? '?? : '??}</div>
                   <div class="artifact-chip-name">${t.icon} ${t.label}</div>
                   <div class="artifact-chip-status">${done ? 'Complete' : 'Missing'}</div>
                 </div>`;
@@ -2555,7 +2480,7 @@ function applyTranslations() {
           ${pkg ? `
             ${pkg.verification_notes ? `<div style="font-size:0.85rem;color:var(--text-dim);margin-bottom:0.75rem;padding:0.5rem 0.75rem;background:var(--surface);border-radius:6px;border-left:2px solid var(--border-light)">${_esc(pkg.verification_notes)}</div>` : ''}
             <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.75rem">
-              ${pkg.decision_by ? 'By: ' + _esc(pkg.decision_by) + ' · ' : ''}
+              ${pkg.decision_by ? 'By: ' + _esc(pkg.decision_by) + ' ? ' : ''}
               ${pkg.decided_at ? _ts(pkg.decided_at) : 'Decision not yet recorded'}
             </div>
           ` : ''}
@@ -2569,7 +2494,7 @@ function applyTranslations() {
               </div>
             </div>
             <div class="flex gap-05">
-              <button class="success" onclick="doApproveAcceptance('${pid}')">✓ Approve &amp; Close</button>
+              <button class="success" onclick="doApproveAcceptance('${pid}')">??Approve &amp; Close</button>
               <button class="danger" onclick="doRejectAcceptance('${pid}')">Request Revision</button>
             </div>
           ` : `
@@ -2604,11 +2529,11 @@ function applyTranslations() {
             <div class="card-title">Project Output Package</div>
           </div>
           <div class="output-package">
-            <div class="output-package-icon">📦</div>
+            <div class="output-package-icon">??</div>
             <div class="output-package-info">
               <div class="output-package-name">Exportable Deliverable: ${isApproved ? 'READY' : 'PENDING APPROVAL'}</div>
-              <div class="output-package-meta">${completeCount} artifact(s) available · ${types.length - completeCount} missing</div>
-              ${!allComplete ? `<div style="font-size:0.75rem;color:var(--amber);margin-top:0.2rem">Note: ${types.length - completeCount} artifact(s) still missing — output package is partial</div>` : ''}
+              <div class="output-package-meta">${completeCount} artifact(s) available ? ${types.length - completeCount} missing</div>
+              ${!allComplete ? `<div style="font-size:0.75rem;color:var(--amber);margin-top:0.2rem">Note: ${types.length - completeCount} artifact(s) still missing ??output package is partial</div>` : ''}
             </div>
             <div class="output-package-actions">
               <button class="ghost sm" onclick="navigateTo('deliverables')">Preview Package</button>
@@ -2624,19 +2549,19 @@ function applyTranslations() {
           </div>
           <div class="checklist">
             <div class="checklist-item">
-              <div class="checklist-icon ${proj.project_status !== 'active' && proj.project_status ? 'done' : 'pending'}">${proj.project_status !== 'active' && proj.project_status ? '✓' : '○'}</div>
+              <div class="checklist-icon ${proj.project_status !== 'active' && proj.project_status ? 'done' : 'pending'}">${proj.project_status !== 'active' && proj.project_status ? '?? : '??}</div>
               <div class="checklist-text">Project past DEV stage</div>
             </div>
             <div class="checklist-item">
-              <div class="checklist-icon ${completeCount > 0 ? 'done' : 'pending'}">${completeCount > 0 ? '✓' : '○'}</div>
+              <div class="checklist-icon ${completeCount > 0 ? 'done' : 'pending'}">${completeCount > 0 ? '?? : '??}</div>
               <div class="checklist-text">At least one artifact produced</div>
             </div>
             <div class="checklist-item ${allComplete ? '' : 'pending'}">
-              <div class="checklist-icon ${allComplete ? 'done' : 'pending'}">${allComplete ? '✓' : '○'}</div>
+              <div class="checklist-icon ${allComplete ? 'done' : 'pending'}">${allComplete ? '?? : '??}</div>
               <div class="checklist-text">All required artifacts present</div>
             </div>
             <div class="checklist-item ${hasDecision ? '' : 'pending'}">
-              <div class="checklist-icon ${hasDecision ? 'done' : 'pending'}">${hasDecision ? '✓' : '○'}</div>
+              <div class="checklist-icon ${hasDecision ? 'done' : 'pending'}">${hasDecision ? '?? : '??}</div>
               <div class="checklist-text">Acceptance decision recorded</div>
             </div>
           </div>
@@ -2688,12 +2613,12 @@ function applyTranslations() {
     URL.revokeObjectURL(url);
   }
 
-  /* ── STATUS ── */
+  /* ???? STATUS ???? */
   async function doStatus() {
     const taskId = document.getElementById('status-task-id').value.trim();
     const out = document.getElementById('status-output');
     if (!taskId) { _warn(out, 'Enter a task ID.'); return; }
-    _neutral(out, 'Loading…');
+    _neutral(out, 'Loading??);
     const d = await _api('GET', '/status/' + encodeURIComponent(taskId));
     if (d.ok) { _ok(out, JSON.stringify(d, null, 2)); }
     else { _err(out, d.message || 'Failed'); }
@@ -2703,19 +2628,19 @@ function applyTranslations() {
     const pid = document.getElementById('list-project-id').value.trim();
     const out = document.getElementById('list-output');
     if (!pid) { _warn(out, 'Enter a project ID.'); return; }
-    _neutral(out, 'Loading…');
+    _neutral(out, 'Loading??);
     const d = await _api('GET', '/projects/' + encodeURIComponent(pid) + '/tasks');
     if (d.ok) { _ok(out, JSON.stringify(d, null, 2)); }
     else { _err(out, d.message || 'Failed'); }
   }
 
-  /* ── ADVISORIES ── */
+  /* ???? ADVISORIES ???? */
   async function loadAdvProjects() {
     const sel = document.getElementById('adv-project-select');
     try {
       const d = await _api('GET', '/projects');
       if (!d.ok) return;
-      sel.innerHTML = '<option value="">— Select project —</option>' +
+      sel.innerHTML = '<option value="">??Select project ??/option>' +
         (d.projects || []).map(p => `<option value="${p.project_id}">${_esc(p.project_name)}</option>`).join('');
     } catch(e) {}
   }
@@ -2724,7 +2649,7 @@ function applyTranslations() {
     const pid = document.getElementById('adv-project-select').value;
     const panel = document.getElementById('adv-list');
     if (!pid) { panel.innerHTML = '<div class="empty-state">Select a project to view advisories.</div>'; return; }
-    panel.innerHTML = '<div class="empty-state">Loading…</div>';
+    panel.innerHTML = '<div class="empty-state">Loading??/div>';
     try {
       const [advRes, blkRes] = await Promise.all([
         fetch(BASE + '/projects/' + encodeURIComponent(pid) + '/advisories'),
@@ -2738,14 +2663,14 @@ function applyTranslations() {
 
       if (blockers.length > 0) {
         html += `<div class="mb-1">
-          <div class="section-title mb-1" style="color:var(--red)">⚠ Blockers (${blockers.length})</div>
+          <div class="section-title mb-1" style="color:var(--red)">??Blockers (${blockers.length})</div>
           <div class="signal-list">
             ${blockers.map(b => `
               <div class="signal-item blocker">
-                <div class="signal-icon" style="color:var(--red)">⚠</div>
+                <div class="signal-icon" style="color:var(--red)">??/div>
                 <div class="signal-body">
                   <div class="signal-msg">${_esc(b.reason)}</div>
-                  <div class="signal-meta">Task: ${_esc(b.task_id)} · ${b.age_hours || 0}h old · ${_ts(b.detected_at)}</div>
+                  <div class="signal-meta">Task: ${_esc(b.task_id)} ? ${b.age_hours || 0}h old ? ${_ts(b.detected_at)}</div>
                 </div>
                 <div class="signal-right">
                   <span class="sev-tag sev-${b.severity}">${b.severity}</span>
@@ -2759,16 +2684,16 @@ function applyTranslations() {
 
       if (advisories.length > 0) {
         html += `<div>
-          <div class="section-title mb-1">📋 Advisories (${advisories.length})</div>
+          <div class="section-title mb-1">?? Advisories (${advisories.length})</div>
           <div class="signal-list">
             ${advisories.map(a => {
-              const icon = {risk:'⚠️',schedule:'⏱',stage:'→',blocker:'🚧'}[a.advisory_type] || 'ℹ️';
+              const icon = {risk:'???',schedule:'??,stage:'??,blocker:'??'}[a.advisory_type] || '???';
               const sevClass = a.severity === 'critical' ? 'sev-critical' : a.severity === 'warn' ? 'sev-warn' : 'sev-info';
               return `<div class="signal-item ${a.severity === 'critical' ? 'blocker' : a.severity === 'warn' ? 'warn' : ''}">
                 <div class="signal-icon">${icon}</div>
                 <div class="signal-body">
                   <div class="signal-msg">[${a.advisory_type}] ${_esc(a.message)}</div>
-                  <div class="signal-meta">${a.task_id ? 'Task: ' + _esc(a.task_id) + ' · ' : ''}Stage: ${a.stage || '—'} · ${_ts(a.created_at)}</div>
+                  <div class="signal-meta">${a.task_id ? 'Task: ' + _esc(a.task_id) + ' ? ' : ''}Stage: ${a.stage || '??} ? ${_ts(a.created_at)}</div>
                 </div>
                 <div class="signal-right">
                   <span class="sev-tag ${sevClass}">${a.severity}</span>
@@ -2780,7 +2705,7 @@ function applyTranslations() {
         </div>`;
       }
 
-      if (!html) html = '<div class="empty-state">No active advisories or blockers. ✓</div>';
+      if (!html) html = '<div class="empty-state">No active advisories or blockers. ??/div>';
       panel.innerHTML = html;
     } catch(e) { panel.innerHTML = '<div class="empty-state">Cannot reach PMO backend.</div>'; }
   }
@@ -2799,12 +2724,12 @@ function applyTranslations() {
     else alert(d.message || 'Failed');
   }
 
-  /* ── GATE PANEL ── */
+  /* ???? GATE PANEL ???? */
   async function doLoadGate() {
     const taskId = document.getElementById('gate-task-id').value.trim();
     const out = document.getElementById('gate-output');
     if (!taskId) { _warn(out, 'Enter a task ID first.'); return; }
-    _neutral(out, 'Loading…');
+    _neutral(out, 'Loading??);
     const d = await _api('GET', '/gate/' + encodeURIComponent(taskId));
     if (!d.ok) { _err(out, d.message || 'Failed'); return; }
 
@@ -2821,7 +2746,7 @@ function applyTranslations() {
           const done = i < stageIdx;
           const cur = i === stageIdx;
           return `<div style="display:inline-flex;flex-direction:column;align-items:center;gap:0.2rem;margin-right:0.5rem">
-            <div style="width:28px;height:28px;border-radius:50%;border:2px solid ${done ? 'var(--green)' : cur ? 'var(--accent)' : 'var(--border-light)'};background:${done ? 'var(--green-bg)' : cur ? 'var(--accent-glow)' : 'var(--surface)'};display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:${done ? 'var(--green)' : cur ? 'var(--accent)' : 'var(--text-muted)'}">${done ? '✓' : cur ? '→' : ''}</div>
+            <div style="width:28px;height:28px;border-radius:50%;border:2px solid ${done ? 'var(--green)' : cur ? 'var(--accent)' : 'var(--border-light)'};background:${done ? 'var(--green-bg)' : cur ? 'var(--accent-glow)' : 'var(--surface)'};display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:${done ? 'var(--green)' : cur ? 'var(--accent)' : 'var(--text-muted)'}">${done ? '?? : cur ? '?? : ''}</div>
             <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:${done ? 'var(--green)' : cur ? 'var(--accent)' : 'var(--text-muted)'}">${s}</div>
           </div>` + (i < stages.length - 1 ? `<div style="display:inline-block;width:16px;height:2px;background:${i < stageIdx ? 'var(--green)' : 'var(--border)'};vertical-align:14px;margin-right:0.5rem"></div>` : '');
         }).join('')}
@@ -2833,11 +2758,11 @@ function applyTranslations() {
             <input id="gate-decision-note" placeholder="Note (optional)" />
           </div>
           <div style="display:flex;align-items:flex-end;gap:0.4rem">
-            <button class="success sm" onclick="doApproveGate('${taskId}')">✓ Approve</button>
-            <button class="danger sm" onclick="doRejectGate('${taskId}')">✗ Reject</button>
+            <button class="success sm" onclick="doApproveGate('${taskId}')">??Approve</button>
+            <button class="danger sm" onclick="doRejectGate('${taskId}')">??Reject</button>
           </div>
         </div>
-      ` : `<div class="output ${d.gate_status === 'APPROVED' ? 'ok' : 'error'}">Gate: ${d.gate_status}${d.decision_note ? ' — ' + _esc(d.decision_note) : ''}</div>`}
+      ` : `<div class="output ${d.gate_status === 'APPROVED' ? 'ok' : 'error'}">Gate: ${d.gate_status}${d.decision_note ? ' ??' + _esc(d.decision_note) : ''}</div>`}
     `;
   }
 
@@ -2853,13 +2778,20 @@ function applyTranslations() {
   async function doRejectGate(taskId) {
     const note = document.getElementById('gate-decision-note')?.value.trim();
     if (!note) { alert('Rejection note is required.'); return; }
+    const actor = prompt('Your name:');
+    if (!actor) return;
+    const d = await _api('POST', '/gate/' + encodeURIComponent(taskId) + '/reject', {actor, reason: note});
+    if (d.ok) doLoadGate();
+    else alert(d.message || 'Failed');
+  }
 
-  /* ── PRE-KICKOFF REVIEW (Sprint 2R) ── */
+
+  /* PRE-KICKOFF REVIEW (Sprint 2R) */
   async function doLoadReview() {
     const pid = document.getElementById('review-project-select').value;
     const out = document.getElementById('review-output');
     if (!pid) { _err(out, t('review_no_project')); return; }
-    _neutral(out, 'Loading…');
+    _neutral(out, 'Loading...');
     const d = await _api('GET', '/projects/' + encodeURIComponent(pid) + '/review-status');
     if (!d.ok) { _err(out, d.message || t('review_load_err')); return; }
     _ok(out, 'Review status loaded');
@@ -2874,82 +2806,52 @@ function applyTranslations() {
 
   function renderReviewCards(pid, d) {
     const rs = d.review_status;
-    const reviewers = ['ba', 'sa', 'qa'];
-    const labels = { ba: 'BA', sa: 'SA', qa: 'QA' };
-
-    reviewers.forEach(function(r) {
-      const s = rs[r];
-      const statusEl = document.getElementById('review-' + r + '-status');
-      const actionsEl = document.getElementById('review-' + r + '-actions');
-      statusEl.innerHTML = renderReviewerStatus(s, labels[r]);
-      actionsEl.innerHTML = renderReviewerActions(pid, r, s);
+    ['ba','sa','qa'].forEach(function(r) {
+      var s = rs[r];
+      document.getElementById('review-' + r + '-status').innerHTML = renderReviewerStatus(s);
+      document.getElementById('review-' + r + '-actions').innerHTML = renderReviewerActions(pid, r, s);
     });
-
-    // Maverick recommendation
-    const mav = rs.maverick_recommendation;
-    const mavStatusEl = document.getElementById('review-maverick-status');
-    const mavActionsEl = document.getElementById('review-maverick-actions');
-    mavStatusEl.innerHTML = renderMaverickStatus(mav);
-    mavActionsEl.innerHTML = renderMaverickActions(pid, mav, d.can_recommend_kickoff, d.any_revision_needed);
-
-    // Kickoff decision (shown only after Maverick recommends kickoff)
-    const kickoffCard = document.getElementById('review-kickoff-card');
-    if (mav.status === 'recommend_kickoff') {
-      kickoffCard.style.display = '';
-      const kickStatusEl = document.getElementById('review-kickoff-status');
-      const kickActionsEl = document.getElementById('review-kickoff-actions');
-      kickStatusEl.innerHTML = '<div style="color:var(--green);font-weight:600">Kickoff Recommended — Awaiting Alex Decision</div>';
-      kickActionsEl.innerHTML = '<div class="form-row"><div class="field" style="flex:2"><textarea id="kickoff-note" rows="2" placeholder="' + t('review_kickoff_note_placeholder') + '"></textarea></div></div><div style="display:flex;gap:0.5rem;margin-top:0.5rem"><button class="success" onclick="doApproveKickoff(\'' + pid + '\')">' + t('review_kickoff_approve') + '</button><button class="danger" onclick="doRejectKickoff(\'' + pid + '\')">' + t('review_kickoff_reject') + '</button></div>';
-    } else {
-      kickoffCard.style.display = 'none';
-    }
+    var mav = rs.maverick_recommendation;
+    document.getElementById('review-maverick-status').innerHTML = renderMaverickStatus(mav);
+    document.getElementById('review-maverick-actions').innerHTML = renderMaverickActions(pid, mav, d.can_recommend_kickoff, d.any_revision_needed);
   }
 
-  function renderReviewerStatus(s, label) {
-    const statusMap = {
-      'pending': { cls: 'neutral', label: t('review_pending') },
-      'approved': { cls: 'ok', label: t('review_approved') },
-      'revision_needed': { cls: 'error', label: t('review_revision_needed') }
+  function renderReviewerStatus(s) {
+    var statusMap = {
+      'pending': {cls:'neutral', label: t('review_pending')},
+      'approved': {cls:'ok', label: t('review_approved')},
+      'revision_needed': {cls:'error', label: t('review_revision_needed')}
     };
-    const info = statusMap[s.status] || statusMap['pending'];
-    const requester = s.requested_at ? escHtml(s.requested_at.substring(0, 16)) : t('review_no_requester');
-    const decided = s.decided_at ? escHtml(s.decided_at.substring(0, 16)) : t('review_no_decided');
-    const note = s.note ? '<div style="font-size:0.8rem;color:var(--text-dim);margin-top:0.25rem">' + escHtml(s.note) + '</div>' : '';
+    var info = statusMap[s.status] || statusMap['pending'];
+    var req = s.requested_at ? escHtml(s.requested_at.substring(0,16)) : t('review_no_requester');
+    var dec = s.decided_at ? escHtml(s.decided_at.substring(0,16)) : t('review_no_decided');
+    var note = s.note ? '<div style="font-size:0.8rem;color:var(--text-dim);margin-top:0.25rem">' + escHtml(s.note) + '</div>' : '';
     return '<div class="output ' + info.cls + '" style="margin:0">' + info.label + '</div>' +
-      '<div style="font-size:0.75rem;color:var(--text-dim);margin-top:0.3rem">Requested: ' + requester + '</div>' +
-      '<div style="font-size:0.75rem;color:var(--text-dim)">Decided: ' + decided + '</div>' +
-      note;
+      '<div style="font-size:0.75rem;color:var(--text-dim);margin-top:0.3rem">Requested: ' + req + '</div>' +
+      '<div style="font-size:0.75rem;color:var(--text-dim)">Decided: ' + dec + '</div>' + note;
   }
 
   function renderReviewerActions(pid, reviewer, s) {
-    if (s.status !== 'pending') {
-      return ''; // Already decided, no action
-    }
-    return '<button class="success sm" onclick="doRequestReview(\'' + pid + '\',\'' + reviewer + '\')" style="margin-top:0.5rem">' + t('review_btn_request') + '</button>' +
-      '<div style="display:flex;gap:0.3rem;margin-top:0.3rem">' +
-      '<button class="success sm" onclick="doRecordOutcome(\'' + pid + '\',\'' + reviewer + '\',\'approved\')">' + t('review_btn_approve') + '</button>' +
-      '<button class="danger sm" onclick="doRecordOutcome(\'' + pid + '\',\'' + reviewer + '\',\'revision_needed\')">' + t('review_btn_revision') + '</button>' +
-      '</div>';
+    if (s.status !== 'pending') return '';
+    return '<button class="success sm" onclick="doRecordOutcome(\'' + pid + '\',\'' + reviewer + '\',\'approved\')" style="margin-top:0.5rem">' + t('review_btn_approve') + '</button>' +
+      '<button class="danger sm" onclick="doRecordOutcome(\'' + pid + '\',\'' + reviewer + '\',\'revision_needed\')" style="margin-top:0.25rem">' + t('review_btn_revision') + '</button>';
   }
 
   function renderMaverickStatus(mav) {
-    const statusMap = {
-      'pending': { cls: 'neutral', label: t('review_maverick_pending') },
-      'recommend_kickoff': { cls: 'ok', label: t('review_maverick_kickoff') },
-      'recommend_revision': { cls: 'error', label: t('review_maverick_revision') }
+    var statusMap = {
+      'pending': {cls:'neutral', label: t('review_maverick_pending')},
+      'recommend_kickoff': {cls:'ok', label: t('review_maverick_kickoff')},
+      'recommend_revision': {cls:'error', label: t('review_maverick_revision')}
     };
-    const info = statusMap[mav.status] || statusMap['pending'];
-    const when = mav.recommended_at ? escHtml(mav.recommended_at.substring(0, 16)) : '—';
-    const note = mav.note ? '<div style="font-size:0.8rem;color:var(--text-dim);margin-top:0.25rem">' + escHtml(mav.note) + '</div>' : '';
+    var info = statusMap[mav.status] || statusMap['pending'];
+    var when = mav.recommended_at ? escHtml(mav.recommended_at.substring(0,16)) : '';
+    var note = mav.note ? '<div style="font-size:0.8rem;color:var(--text-dim);margin-top:0.25rem">' + escHtml(mav.note) + '</div>' : '';
     return '<div class="output ' + info.cls + '" style="margin:0">' + info.label + '</div>' +
-      '<div style="font-size:0.75rem;color:var(--text-dim);margin-top:0.3rem">When: ' + when + '</div>' +
-      note;
+      (when ? '<div style="font-size:0.75rem;color:var(--text-dim);margin-top:0.3rem">When: ' + when + '</div>' : '') + note;
   }
 
   function renderMaverickActions(pid, mav, canRec, anyRevision) {
-    if (mav.status !== 'pending') {
-      return ''; // Already recommended
-    }
+    if (mav.status !== 'pending') return '';
     if (canRec) {
       return '<div class="form-row" style="margin-top:0.5rem"><div class="field" style="flex:2"><textarea id="mav-note" rows="2" placeholder="' + t('review_maverick_note_placeholder') + '"></textarea></div></div>' +
         '<div style="display:flex;gap:0.3rem;margin-top:0.3rem"><button class="success" onclick="doRecommendKickoff(\'' + pid + '\',\'recommend_kickoff\')">' + t('review_maverick_kickoff') + '</button><button class="secondary" onclick="doRecommendKickoff(\'' + pid + '\',\'recommend_revision\')">' + t('review_maverick_revision') + '</button></div>';
@@ -2961,30 +2863,21 @@ function applyTranslations() {
     }
   }
 
-  async function doRequestReview(pid, reviewer) {
-    const actor = prompt('Your name (Maverick):');
-    if (!actor) return;
-    const d = await _api('POST', '/projects/' + encodeURIComponent(pid) + '/reviews/' + reviewer + '/request', { actor: actor });
-    if (d.ok) { await doLoadReview(); }
-    else { alert(d.message || 'Failed'); }
-  }
-
   async function doRecordOutcome(pid, reviewer, outcome) {
-    const note = prompt('Decision note (optional):') || '';
-    const actor = prompt('Reviewer name:');
+    var note = prompt('Decision note (optional):') || '';
+    var actor = prompt('Reviewer name:');
     if (!actor) return;
-    const d = await _api('POST', '/projects/' + encodeURIComponent(pid) + '/reviews/' + reviewer + '/outcome', { outcome: outcome, note: note, actor: actor });
+    var d = await _api('POST', '/projects/' + encodeURIComponent(pid) + '/reviews/' + reviewer + '/outcome', {outcome: outcome, note: note, actor: actor});
     if (d.ok) { await doLoadReview(); }
     else { alert(d.message || 'Failed'); }
   }
 
   async function doRecommendKickoff(pid, recommendation) {
-    const note = document.getElementById('mav-note') ? document.getElementById('mav-note').value : '';
-    const actor = prompt('Your name (Maverick):');
+    var note = document.getElementById('mav-note') ? document.getElementById('mav-note').value : '';
+    var actor = prompt('Your name (Maverick):');
     if (!actor) return;
-    const d = await _api('POST', '/projects/' + encodeURIComponent(pid) + '/recommend-kickoff', { recommendation: recommendation, note: note, actor: actor });
+    var d = await _api('POST', '/projects/' + encodeURIComponent(pid) + '/recommend-kickoff', {recommendation: recommendation, note: note, actor: actor});
     if (d.ok) {
-      // Reload review status
       await doLoadReview();
       alert(t('review_maverick_success'));
     } else {
@@ -2992,39 +2885,13 @@ function applyTranslations() {
     }
   }
 
-  async function doApproveKickoff(pid) {
-    const note = document.getElementById('kickoff-note') ? document.getElementById('kickoff-note').value : '';
-    const actor = prompt('Your name (Alex):');
-    if (!actor) return;
-    // V1.6: Alex approves kickoff — record via kickoff_decision on project
-    // For now: alert (kickoff_decision tool not yet exposed via frontend)
-    // This is intentionally a placeholder — actual kickoff tool needs separate implementation
-    alert('Kickoff APPROVED by ' + actor + '. Note: ' + note);
-  }
-
-  async function doRejectKickoff(pid) {
-    const note = document.getElementById('kickoff-note') ? document.getElementById('kickoff-note').value : '';
-    if (!note) { alert('Rejection note is required.'); return; }
-    const actor = prompt('Your name (Alex):');
-    if (!actor) return;
-    alert('Kickoff REJECTED by ' + actor + '. Reason: ' + note);
-  }
-
   function escHtml(s) {
     if (!s) return '';
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-
-    const actor = prompt('Your name:');
-    if (!actor) return;
-    const d = await _api('POST', '/gate/' + encodeURIComponent(taskId) + '/reject', {actor, reason: note});
-    if (d.ok) doLoadGate();
-    else alert(d.message || 'Failed');
-  }
-
   
-  /* ── WORKSPACE SHELL (Alpine.js) ── */
+  /* ???? WORKSPACE SHELL (Alpine.js) ???? */
   document.addEventListener('alpine:init', () => {
     Alpine.data('workspaceShell', () => ({
       projectName: '', projectOwner: '', projectGoal: '', projectStatus: '',
@@ -3060,20 +2927,20 @@ function applyTranslations() {
           this.projectGoal = proj.project_goal || '';
           this.projectStatus = proj.project_status || '';
           this.projectCreated = proj.created_at || '';
-          // Intake fields — clearly from submitted intake, NOT project state
+          // Intake fields ??clearly from submitted intake, NOT project state
           this.intakeSummary = proj.intake_summary || '';
           this.intakeDeliverable = proj.intake_deliverable || '';
           this.intakeContext = proj.intake_business_context || '';
           // Update DOM for manual rendering
           document.getElementById('ws-proj-name').textContent = this.projectName;
           document.getElementById('ws-proj-owner').textContent = this.projectOwner;
-          document.getElementById('ws-proj-goal').textContent = this.projectGoal || '—';
+          document.getElementById('ws-proj-goal').textContent = this.projectGoal || '??;
           document.getElementById('ws-proj-status').innerHTML = '<span class="badge ' + this.badgeClass(this.projectStatus) + '">' + this.projectStatus + '</span>';
-          document.getElementById('ws-proj-created').textContent = this.projectCreated ? new Date(this.projectCreated).toLocaleString() : '—';
+          document.getElementById('ws-proj-created').textContent = this.projectCreated ? new Date(this.projectCreated).toLocaleString() : '??;
           // Intake summary fields
-          document.getElementById('ws-intake-summary-val').textContent = this.intakeSummary || '—';
-          document.getElementById('ws-intake-deliverable-val').textContent = this.intakeDeliverable || '—';
-          document.getElementById('ws-intake-context-val').textContent = this.intakeContext || '—';
+          document.getElementById('ws-intake-summary-val').textContent = this.intakeSummary || '??;
+          document.getElementById('ws-intake-deliverable-val').textContent = this.intakeDeliverable || '??;
+          document.getElementById('ws-intake-context-val').textContent = this.intakeContext || '??;
           // Tasks for pipeline stage
           const tasksRes = await fetch(BASE + '/projects/' + encodeURIComponent(pid) + '/tasks');
           const tasksData = await tasksRes.json();
@@ -3099,7 +2966,7 @@ function applyTranslations() {
         const note = document.getElementById('ws-pipeline-note');
         if (!el) return;
         if (!this.pipelineActive || !this.currentStage) {
-          el.innerHTML = '<div class="pipeline-none">No active pipeline — project not yet started</div>';
+          el.innerHTML = '<div class="pipeline-none">No active pipeline ??project not yet started</div>';
           if (note) note.style.display = 'block';
           return;
         }
@@ -3114,7 +2981,7 @@ function applyTranslations() {
           let cls = '';
           if (i < currentIdx) cls = 'done';
           else if (i === currentIdx) cls = 'current';
-          const icon = i < currentIdx ? '✓' : i === currentIdx ? '→' : '';
+          const icon = i < currentIdx ? '?? : i === currentIdx ? '?? : '';
           return '<div class="pipeline-stage ' + cls + '">' +
             '<div class="pipeline-icon ' + cls + '">' + icon + '</div>' +
             '<div class="pipeline-label">' + s.label + '</div></div>' +
@@ -3129,10 +2996,10 @@ function applyTranslations() {
     }));
   });
 
-  /* ── INIT ── */
+  /* ???? INIT ???? */
   loadGlobalProjects();
   intakeValidate();
-/* ── INIT ── */
+/* ???? INIT ???? */
   loadGlobalProjects();
   intakeValidate();
   // Set nav active
