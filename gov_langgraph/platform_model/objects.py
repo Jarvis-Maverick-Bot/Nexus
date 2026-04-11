@@ -269,6 +269,38 @@ class Project:
         """Return True if all 6 prerequisite artifacts are submitted."""
         return all(pa.submitted for pa in self.prerequisite_artifacts.values())
 
+    def build_output_package(self) -> dict:
+        """
+        Build and store the output package from delivered artifacts.
+        Called when acceptance is approved.
+        Returns the output_package dict.
+        """
+        type_map = self.get_artifacts_by_type()
+        artifacts = []
+        for at in ArtifactType.all():
+            if at in type_map and not type_map[at].is_empty():
+                art = type_map[at]
+                artifacts.append({
+                    "artifact_type": at.value,
+                    "display_name": at.display_name,
+                    "content": art.content,
+                    "produced_by": art.produced_by,
+                    "produced_at": art.produced_at.isoformat() if art.produced_at else None,
+                })
+        artifact_types_present = {a["artifact_type"] for a in artifacts}
+        is_complete = all(at.value in artifact_types_present for at in ArtifactType.all())
+        self.output_package = {
+            "package_id": str(uuid.uuid4()),
+            "created_at": datetime.utcnow().isoformat(),
+            "is_complete": is_complete,
+            "artifacts": artifacts,
+        }
+        return self.output_package
+
+    def get_output_package(self) -> dict | None:
+        """Return the output package if one has been built."""
+        return self.output_package if self.output_package else None
+
     def validate_intake(self) -> bool:
         """
         Returns True if all required intake fields are present.

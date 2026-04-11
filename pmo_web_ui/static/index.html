@@ -156,6 +156,13 @@ const T = {
     out_loading: 'Loading…',
     out_announcing: 'Announcing…',
 
+    // Sprint 4R: Acceptance & Closure
+    acc_output_package: 'Output Package',
+    acc_independently_deliverable: 'Independently Deliverable',
+    acc_download_package: 'Download Package',
+    acc_preview_package: 'Preview Package',
+    acc_closure_readiness: 'Closure Readiness',
+
     // Language
     lang_toggle: 'EN / 中文',
   },
@@ -280,6 +287,13 @@ const T = {
     out_saving: '保存中…',
     out_loading: '加载中…',
     out_announcing: '发布中…',
+
+    // Sprint 4R: Acceptance & Closure
+    acc_output_package: '输出包',
+    acc_independently_deliverable: '可独立交付',
+    acc_download_package: '下载输出包',
+    acc_preview_package: '预览输出包',
+    acc_closure_readiness: '关闭就绪',
 
     // Language
     lang_toggle: 'EN / 中文',
@@ -547,6 +561,8 @@ const T = {
     .badge-pending { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(37,99,235,0.3); }
     .badge-complete { background: var(--green-bg); color: var(--green); border: 1px solid rgba(22,163,74,0.3); }
     .badge-missing { background: rgba(71,85,105,0.08); color: var(--text-dim); border: 1px solid rgba(71,85,105,0.2); }
+    /* Sprint 4R: Independently Deliverable badge */
+    .badge-deliverable { background: rgba(22,163,74,0.12); color: #16a34a; border: 1px solid rgba(22,163,74,0.3); }
 
     /* ── SEVERITY TAGS ── */
     .sev-tag {
@@ -2421,15 +2437,19 @@ const T = {
     content.innerHTML = '<div class="empty-state">Loading…</div>';
 
     try {
-      const [projRes, accRes, artsRes] = await Promise.all([
+      const [projRes, accRes, artsRes, outRes] = await Promise.all([
         fetch(BASE + '/projects/' + encodeURIComponent(pid)),
         fetch(BASE + '/projects/' + encodeURIComponent(pid) + '/acceptance-package'),
         fetch(BASE + '/projects/' + encodeURIComponent(pid) + '/artifacts'),
+        fetch(BASE + '/projects/' + encodeURIComponent(pid) + '/output-package'),
       ]);
 
       const proj = await projRes.json();
       const acc = await accRes.json();
       const arts = await artsRes.json();
+      const out = await outRes.json();
+      const outputPackage = out.ok ? (out.output_package || null) : null;
+      const isIndependentlyDeliverable = outputPackage && outputPackage.is_complete;
 
       if (!proj.ok) { content.innerHTML = '<div class="empty-state">Failed to load project.</div>'; return; }
 
@@ -2530,6 +2550,7 @@ const T = {
         <div class="card">
           <div class="card-header">
             <div class="card-title">Project Output Package</div>
+            ${isIndependentlyDeliverable ? '<span class="badge badge-deliverable">Independently Deliverable</span>' : ''}
           </div>
           <div class="output-package">
             <div class="output-package-icon">📦</div>
@@ -2600,18 +2621,23 @@ const T = {
   }
 
   async function doExportPackage(pid) {
-    const d = await _api('GET', '/projects/' + encodeURIComponent(pid) + '/artifacts');
-    if (!d.ok) return;
-    const arts = d.artifacts || [];
-    let content = `Project Acceptance Package\n${'='.repeat(40)}\n\n`;
+    const d = await _api('GET', '/projects/' + encodeURIComponent(pid) + '/output-package');
+    if (!d.ok || !d.output_package) {
+      alert(d.message || 'Output package not available.');
+      return;
+    }
+    const pkg = d.output_package;
+    const arts = pkg.artifacts || [];
+    const complete = pkg.is_complete ? 'COMPLETE' : 'PARTIAL';
+    let content = `Project Output Package\n${'='.repeat(40)}\nPackage ID: ${pkg.package_id}\nStatus: ${complete}\nArtifacts: ${arts.length}\n${'='.repeat(40)}\n\n`;
     arts.forEach(a => {
-      if (a.content) content += `${a.artifact_type.toUpperCase()}\n${'-'.repeat(20)}\n${a.content}\n\n`;
+      content += `[${a.artifact_type}] ${a.display_name}\n${'-'.repeat(40)}\n${a.content || '(no content)'}\n\n`;
     });
     const blob = new Blob([content], {type: 'text/plain'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'acceptance-package.txt';
+    a.download = 'output-package.txt';
     a.click();
     URL.revokeObjectURL(url);
   }

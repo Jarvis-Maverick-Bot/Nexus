@@ -48,6 +48,8 @@ from gov_langgraph.openclaw_integration.tools import (
     complete_intake_tool,
     submit_prerequisite_tool,
     get_prerequisite_package_tool,
+    get_output_package_tool,
+    package_output_tool,
     request_ba_review_tool,
     request_sa_review_tool,
     request_qa_review_tool,
@@ -362,6 +364,28 @@ def reject_acceptance(project_id: str, body: dict):
             )
     body["project_id"] = project_id
     result = reject_acceptance_tool(body)
+    if not result.get("ok", False):
+        return _tool_error(result)
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Sprint 4R: Output Package endpoints
+# ---------------------------------------------------------------------------
+
+@app.get("/projects/{project_id}/output-package")
+def get_output_package(project_id: str):
+    """Get or build the output package for a project."""
+    result = get_output_package_tool({"project_id": project_id})
+    if not result.get("ok", False):
+        return _tool_error(result)
+    return result
+
+
+@app.post("/projects/{project_id}/output-package")
+def build_output_package(project_id: str):
+    """Build (or rebuild) the output package from current delivered artifacts."""
+    result = package_output_tool({"project_id": project_id})
     if not result.get("ok", False):
         return _tool_error(result)
     return result

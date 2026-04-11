@@ -1670,6 +1670,8 @@ def approve_acceptance_tool(input: dict) -> dict:
             return _error_response("validation_error", "No acceptance package to approve")
 
         project.acceptance_package.approve(decided_by=actor, note=note)
+        # Sprint 4R: build output package on acceptance approval
+        output_pkg = project.build_output_package()
         h["store"].save_project(project)
 
         h["journal"].append_raw(
@@ -1729,6 +1731,72 @@ def reject_acceptance_tool(input: dict) -> dict:
         return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
     except Exception as e:
         return _error_response("unknown", f"Failed to reject acceptance: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Sprint 4R: Output Package Tools
+
+def get_output_package_tool(input: dict) -> dict:
+    """
+    Get the output package for a project.
+    Builds it if not yet created.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, output_package: dict | None}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        if not project.output_package:
+            pkg = project.build_output_package()
+            h["store"].save_project(project)
+        else:
+            pkg = project.output_package
+
+        return {"ok": True, "output_package": pkg}
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to get output package: {e}")
+
+
+def package_output_tool(input: dict) -> dict:
+    """
+    Build (or rebuild) the output package from current delivered artifacts.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, output_package: dict, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        pkg = project.build_output_package()
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="output_package_built",
+            event_summary=f"Output package built — {len(pkg['artifacts'])} artifacts, complete={pkg['is_complete']}",
+            actor=input.get("actor", "system"),
+        )
+
+        return {
+            "ok": True,
+            "output_package": pkg,
+            "message": f"Output package built — {len(pkg['artifacts'])} artifact(s), complete={pkg['is_complete']}",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to build output package: {e}")
 
 
 # ---------------------------------------------------------------------------
