@@ -10,7 +10,7 @@ async function doLoadGate() {
     if (!d.ok) { _err(out, d.message || 'Failed'); return; }
 
     const stages = ['INTAKE','BA','SA','DEV','QA','DONE'];
-    const stageIdx = stages.indexOf(d.current_stage) || 1;
+    const stageIdx = (i => i >= 0 ? i : 1)(stages.indexOf(d.current_stage));
 
     out.innerHTML = `
       <div style="margin-bottom:0.75rem">
