@@ -2782,6 +2782,19 @@ function applyTranslations() {
 
 
   /* PRE-KICKOFF REVIEW (Sprint 2R) */
+
+  // Sprint 2R: delegate clicks on review action buttons via data-action
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    var pid = btn.dataset.pid;
+    var reviewer = btn.dataset.reviewer;
+    var action = btn.dataset.action;
+    if (action === 'approve') doRecordOutcome(pid, reviewer, 'approved');
+    else if (action === 'revision') doRecordOutcome(pid, reviewer, 'revision_needed');
+    else if (action === 'request') doRecordOutcome(pid, reviewer, 'request');
+  });
+
   async function doLoadReview() {
     var pid = document.getElementById('review-project-select').value;
     var out = document.getElementById('review-output');
@@ -2827,8 +2840,12 @@ function applyTranslations() {
 
   function renderReviewerActions(pid, reviewer, s) {
     if (s.status !== 'pending') return '';
-    return '<button class="success sm" onclick="doRecordOutcome(\' + pid + '\',\'' + reviewer + '\',\'approved\')" style="margin-top:0.5rem">Approve</button>' +
-      '<button class="danger sm" onclick="doRecordOutcome(\' + pid + '\',\'' + reviewer + '\',\'revision_needed\')" style="margin-top:0.25rem">Revision</button>';
+    var pidEsc = encodeURIComponent(pid);
+    if (!s.requested_at) {
+      return '<button class="primary sm" style="margin-top:0.5rem" onclick="doRecordOutcome(''+pidEsc+'',''+reviewer+'','+'request'+')">Request</button>';
+    }
+    return '<button class="success sm" style="margin-top:0.5rem" onclick="doRecordOutcome(''+pidEsc+'',''+reviewer+'','+'approved'+')">Approve</button>' +
+      '<button class="danger sm" style="margin-top:0.25rem" onclick="doRecordOutcome(''+pidEsc+'',''+reviewer+'','+'revision_needed'+')">Revision</button>';
   }
 
   function renderMaverickStatus(mav) {
@@ -2857,25 +2874,20 @@ function applyTranslations() {
     }
   }
 
-  async function doRecordOutcome(pid, reviewer, outcome) {
-    var note = prompt('Decision note (optional):') || '';
-    var actor = prompt('Reviewer name:');
-    if (!actor) return;
-    var d = await _api('POST', '/projects/' + encodeURIComponent(pid) + '/reviews/' + reviewer + '/outcome', {outcome: outcome, note: note, actor: actor});
-    if (d.ok) { await doLoadReview(); }
-    else { alert(d.message || 'Failed'); }
-  }
-
-  async function doRecommendKickoff(pid, recommendation) {
-    var note = document.getElementById('mav-note') ? document.getElementById('mav-note').value : '';
-    var actor = prompt('Your name (Maverick):');
-    if (!actor) return;
-    var d = await _api('POST', '/projects/' + encodeURIComponent(pid) + '/recommend-kickoff', {recommendation: recommendation, note: note, actor: actor});
-    if (d.ok) {
-      await doLoadReview();
-      alert('Recommendation recorded');
+  async function doRecordOutcome(pid, reviewer, action) {
+    if (action === 'request') {
+      var actor = prompt('Reviewer name:');
+      if (!actor) return;
+      var d = await _api('POST', '/projects/' + encodeURIComponent(pid) + '/reviews/' + reviewer + '/request', {actor: actor});
+      if (d.ok) { await doLoadReview(); }
+      else { alert(d.message || 'Failed'); }
     } else {
-      alert(d.message || d.error || 'Failed');
+      var note = prompt('Decision note (optional):') || '';
+      var actor = prompt('Reviewer name:');
+      if (!actor) return;
+      var d = await _api('POST', '/projects/' + encodeURIComponent(pid) + '/reviews/' + reviewer + '/outcome', {outcome: action, note: note, actor: actor});
+      if (d.ok) { await doLoadReview(); }
+      else { alert(d.message || 'Failed'); }
     }
   }
 
