@@ -2549,8 +2549,8 @@ const T = {
         <!-- Output Package -->
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Project Output Package</div>
-            ${isIndependentlyDeliverable ? '<span class="badge badge-deliverable">Independently Deliverable</span>' : ''}
+            <div class="card-title">${T[T.currLang].acc_output_package}</div>
+            ${isIndependentlyDeliverable ? '<span class="badge badge-deliverable">' + T[T.currLang].acc_independently_deliverable + '</span>' : ''}
           </div>
           <div class="output-package">
             <div class="output-package-icon">📦</div>
@@ -2560,8 +2560,8 @@ const T = {
               ${!allComplete ? `<div style="font-size:0.75rem;color:var(--amber);margin-top:0.2rem">Note: ${types.length - completeCount} artifact(s) still missing — output package is partial</div>` : ''}
             </div>
             <div class="output-package-actions">
-              <button class="ghost sm" onclick="navigateTo('deliverables')">Preview Package</button>
-              <button class="secondary sm" ${!isApproved ? 'disabled' : ''} onclick="doExportPackage('${pid}')">Download Package</button>
+              <button class="ghost sm" onclick="navigateTo('deliverables')">${T[T.currLang].acc_preview_package}</button>
+              <button class="secondary sm" ${!isApproved ? 'disabled' : ''} onclick="doExportPackage('${pid}')">${T[T.currLang].acc_download_package}</button>
             </div>
           </div>
         </div>
@@ -2569,7 +2569,7 @@ const T = {
         <!-- Closure Readiness -->
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Closure Readiness</div>
+            <div class="card-title">${T[T.currLang].acc_closure_readiness}</div>
           </div>
           <div class="checklist">
             <div class="checklist-item">
