@@ -50,8 +50,6 @@ def _is_terminal(workitem: WorkItem) -> bool:
 
 # ---------------------------------------------------------------------------
 # Harness instances (created once, passed to tools)
-# ---------------------------------------------------------------------------
-
 _harness: dict[str, Any] = {}
 
 
@@ -94,8 +92,6 @@ def _sm() -> StateMachine:
 
 # ---------------------------------------------------------------------------
 # Tool functions
-# ---------------------------------------------------------------------------
-
 
 def create_project_tool(input: dict) -> dict:
     """
@@ -286,8 +282,6 @@ def get_prerequisite_package_tool(input: dict) -> dict:
 
 # ---------------------------------------------------------------------------
 # Sprint 2R: Pre-Kickoff Review Tools
-# ---------------------------------------------------------------------------
-
 def request_ba_review_tool(input: dict) -> dict:
     """
     Request a BA pre-kickoff review for a project.
@@ -1144,8 +1138,6 @@ def _gate_message(status: str, stage: str) -> str:
 
 # ---------------------------------------------------------------------------
 # Project tools
-# ---------------------------------------------------------------------------
-
 
 def get_project_tool(input: dict) -> dict:
     """
@@ -1238,8 +1230,6 @@ def list_projects_tool(input: dict) -> dict:
 
 # ---------------------------------------------------------------------------
 # Intake tools (V1.6)
-# ---------------------------------------------------------------------------
-
 def validate_intake_tool(input: dict) -> dict:
     """
     Validate whether a project has all required intake fields present.
@@ -1346,8 +1336,6 @@ def complete_intake_tool(input: dict) -> dict:
 
 # ---------------------------------------------------------------------------
 # Artifact tools
-# ---------------------------------------------------------------------------
-
 def upsert_artifact_tool(input: dict) -> dict:
     """
     Add or update an artifact for a project.
@@ -1461,8 +1449,6 @@ def get_artifacts_tool(input: dict) -> dict:
 
 # ---------------------------------------------------------------------------
 # Acceptance tools
-# ---------------------------------------------------------------------------
-
 def get_acceptance_package_tool(input: dict) -> dict:
     """
     Get acceptance package for a project.
@@ -1647,8 +1633,6 @@ def reject_acceptance_tool(input: dict) -> dict:
 
 # ---------------------------------------------------------------------------
 # Advisory tools (Sprint 4)
-# ---------------------------------------------------------------------------
-
 def get_advisories_tool(input: dict) -> dict:
     """
     Get active advisory signals for a project.
@@ -1785,8 +1769,6 @@ def acknowledge_advisory_tool(input: dict) -> dict:
 
 # ---------------------------------------------------------------------------
 # Blocker tools (Sprint 4)
-# ---------------------------------------------------------------------------
-
 def get_blockers_tool(input: dict) -> dict:
     """Get active blockers for a project or task."""
     try:
@@ -1920,8 +1902,6 @@ def resolve_blocker_tool(input: dict) -> dict:
 
 # ---------------------------------------------------------------------------
 # Maverick spawn tools
-# ---------------------------------------------------------------------------
-
 _maverick_spawner = None
 
 
