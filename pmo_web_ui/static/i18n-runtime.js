@@ -1,7 +1,7 @@
 // static/i18n-runtime.js - i18n / language runtime
 // Extracted from index.html (RFC-2 slice 2)
 
-_lang = localStorage.getItem('pmo_lang') || 'en';
+let _lang = localStorage.getItem('pmo_lang') || 'en';
 
 function lang() { return _lang; }
 
