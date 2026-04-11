@@ -14,7 +14,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import Optional, Literal
 
 
 # ---------------------------------------------------------------------------
@@ -93,6 +93,64 @@ class Role(str, Enum):
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Sprint 2R: Pre-Kickoff Review Model
+# ---------------------------------------------------------------------------
+
+class ReviewStatus(str, Enum):
+    """Status for a single reviewer's pre-kickoff review."""
+    PENDING = "pending"
+    APPROVED = "approved"
+    REVISION_NEEDED = "revision_needed"
+
+
+class MaverickRecommendationStatus(str, Enum):
+    """Maverick's consolidated recommendation after reviewing all BA/SA/QA outcomes."""
+    PENDING = "pending"
+    RECOMMEND_KICKOFF = "recommend_kickoff"
+    RECOMMEND_REVISION = "recommend_revision"
+
+
+class KickoffDecisionStatus(str, Enum):
+    """Alex's final kickoff decision."""
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+
+@dataclass
+class ReviewRecord:
+    """
+    Tracks a single reviewer's pre-kickoff review state.
+    Used during the V1.6 PRE_KICKOFF_REVIEW phase.
+    """
+    status: ReviewStatus = ReviewStatus.PENDING
+    requested_at: Optional[datetime] = None
+    decided_at: Optional[datetime] = None
+    note: str = ""
+
+
+@dataclass
+class MaverickRecommendation:
+    """
+    Maverick's consolidated recommendation after reviewing all BA/SA/QA outcomes.
+    Separate from individual reviewer status — Maverick synthesizes, doesn't replace.
+    """
+    status: MaverickRecommendationStatus = MaverickRecommendationStatus.PENDING
+    recommended_at: Optional[datetime] = None
+    note: str = ""
+
+
+@dataclass
+class KickoffDecision:
+    """
+    Alex's final kickoff decision.
+    Distinct from Maverick recommendation — Alex is the final authority.
+    """
+    status: KickoffDecisionStatus = KickoffDecisionStatus.PENDING
+    decided_at: Optional[datetime] = None
+    note: str = ""
+
 @dataclass
 class Project:
     """
@@ -142,6 +200,13 @@ class Project:
     # Timestamp when all 6 prerequisite artifacts were submitted
     prerequisite_submitted_at: Optional[datetime] = None
 
+
+    # Sprint 2R: Pre-kickoff review (V1.6)
+    ba_review: ReviewRecord = field(default_factory=ReviewRecord)
+    sa_review: ReviewRecord = field(default_factory=ReviewRecord)
+    qa_review: ReviewRecord = field(default_factory=ReviewRecord)
+    maverick_recommendation: MaverickRecommendation = field(default_factory=MaverickRecommendation)
+    kickoff_decision: Optional[KickoffDecision] = None
     # --- Prerequisite package helpers ---
 
     def initialize_prerequisites(self) -> None:
@@ -317,6 +382,97 @@ class Project:
 # TaskState — separate from WorkItem per Step 2
 # ---------------------------------------------------------------------------
 
+
+
+    # --- Sprint 2R: Pre-kickoff Review Helpers ---
+
+    def request_review(self, reviewer: Literal["ba", "sa", "qa"]) -> None:
+        """Mark a review as requested. Sets requested_at timestamp."""
+        record: ReviewRecord = getattr(self, f"{reviewer}_review")
+        record.requested_at = datetime.utcnow()
+        record.status = ReviewStatus.PENDING
+
+    def record_review_outcome(
+        self,
+        reviewer: Literal["ba", "sa", "qa"],
+        outcome: ReviewStatus,
+        note: str = "",
+    ) -> None:
+        """Record a reviewer's outcome (APPROVED or REVISION_NEEDED)."""
+        record: ReviewRecord = getattr(self, f"{reviewer}_review")
+        record.status = outcome
+        record.decided_at = datetime.utcnow()
+        record.note = note
+
+    def get_review_status(self) -> dict:
+        """Return full review status as dict."""
+        return {
+            "ba": {
+                "status": self.ba_review.status.value,
+                "requested_at": self.ba_review.requested_at.isoformat() if self.ba_review.requested_at else None,
+                "decided_at": self.ba_review.decided_at.isoformat() if self.ba_review.decided_at else None,
+                "note": self.ba_review.note,
+            },
+            "sa": {
+                "status": self.sa_review.status.value,
+                "requested_at": self.sa_review.requested_at.isoformat() if self.sa_review.requested_at else None,
+                "decided_at": self.sa_review.decided_at.isoformat() if self.sa_review.decided_at else None,
+                "note": self.sa_review.note,
+            },
+            "qa": {
+                "status": self.qa_review.status.value,
+                "requested_at": self.qa_review.requested_at.isoformat() if self.qa_review.requested_at else None,
+                "decided_at": self.qa_review.decided_at.isoformat() if self.qa_review.decided_at else None,
+                "note": self.qa_review.note,
+            },
+            "maverick_recommendation": {
+                "status": self.maverick_recommendation.status.value,
+                "recommended_at": self.maverick_recommendation.recommended_at.isoformat() if self.maverick_recommendation.recommended_at else None,
+                "note": self.maverick_recommendation.note,
+            },
+        }
+
+    def is_review_complete(self) -> bool:
+        """All 3 reviewers have decided (approved or revision_needed)."""
+        return (
+            self.ba_review.status != ReviewStatus.PENDING
+            and self.sa_review.status != ReviewStatus.PENDING
+            and self.qa_review.status != ReviewStatus.PENDING
+        )
+
+    def any_revision_needed(self) -> bool:
+        """Any reviewer marked REVISION_NEEDED?"""
+        return (
+            self.ba_review.status == ReviewStatus.REVISION_NEEDED
+            or self.sa_review.status == ReviewStatus.REVISION_NEEDED
+            or self.qa_review.status == ReviewStatus.REVISION_NEEDED
+        )
+
+    def can_recommend_kickoff(self) -> bool:
+        """Maverick may recommend kickoff only if all reviews complete AND none need revision."""
+        return self.is_review_complete() and not self.any_revision_needed()
+
+    def recommend_kickoff(
+        self,
+        recommendation: MaverickRecommendationStatus,
+        note: str = "",
+    ) -> None:
+        """Maverick records a kickoff recommendation (RECOMMEND_KICKOFF or RECOMMEND_REVISION)."""
+        self.maverick_recommendation.status = recommendation
+        self.maverick_recommendation.recommended_at = datetime.utcnow()
+        self.maverick_recommendation.note = note
+
+    def decide_kickoff(
+        self,
+        decision: KickoffDecisionStatus,
+        note: str = "",
+    ) -> None:
+        """Alex records final kickoff decision (APPROVED or REJECTED)."""
+        self.kickoff_decision = KickoffDecision(
+            status=decision,
+            decided_at=datetime.utcnow(),
+            note=note,
+        )
 
 @dataclass
 class TaskState:

@@ -23,6 +23,9 @@ from gov_langgraph.platform_model import (
     Artifact, ArtifactType, AcceptancePackage,
     AdvisorySignal, AdvisoryType,
     Blocker, BlockerSeverity,
+    ReviewStatus, ReviewRecord,
+    MaverickRecommendationStatus, MaverickRecommendation,
+    KickoffDecisionStatus, KickoffDecision,
     get_v1_pipeline_workflow,
 )
 from gov_langgraph.platform_model.state_machine import StateMachine
@@ -205,7 +208,6 @@ def submit_prerequisite_tool(input: dict) -> dict:
                 "error": "content_too_short",
                 "message": f"Prerequisite content must be at least 10 characters. Got: '{content_preview}'",
             }
-            }
 
         project.submit_prerequisite(artifact_type, content_preview, producer)
         h["store"].save_project(project)
@@ -280,6 +282,264 @@ def get_prerequisite_package_tool(input: dict) -> dict:
         return {"ok": False, "error": f"Project not found: {project_id}", "message": f"Project not found: {project_id}"}
     except Exception as e:
         return {"ok": False, "error": str(e), "message": f"Failed to get prerequisite package: {e}"}
+
+
+# ---------------------------------------------------------------------------
+# Sprint 2R: Pre-Kickoff Review Tools
+# ---------------------------------------------------------------------------
+
+def request_ba_review_tool(input: dict) -> dict:
+    """
+    Request a BA pre-kickoff review for a project.
+    Independent — does not block SA or QA reviews.
+
+    Args:
+        input: {project_id: str, actor: str}
+    Returns:
+        {ok: bool, reviewer: str, requested_at: str, message: str}
+    """
+    return _request_review(input, "ba")
+
+
+def request_sa_review_tool(input: dict) -> dict:
+    """
+    Request an SA pre-kickoff review for a project.
+    Independent — does not block BA or QA reviews.
+
+    Args:
+        input: {project_id: str, actor: str}
+    Returns:
+        {ok: bool, reviewer: str, requested_at: str, message: str}
+    """
+    return _request_review(input, "sa")
+
+
+def request_qa_review_tool(input: dict) -> dict:
+    """
+    Request a QA pre-kickoff review for a project.
+    Independent — does not block BA or SA reviews.
+
+    Args:
+        input: {project_id: str, actor: str}
+    Returns:
+        {ok: bool, reviewer: str, requested_at: str, message: str}
+    """
+    return _request_review(input, "qa")
+
+
+def _request_review(input: dict, reviewer: str) -> dict:
+    """Shared implementation for request_*_review_tool."""
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        project.request_review(reviewer)
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type=f"{reviewer.upper()}_review_requested",
+            event_summary=f"{reviewer.upper()} review requested",
+            actor=input.get("actor", "unknown"),
+        )
+
+        return {
+            "ok": True,
+            "reviewer": reviewer,
+            "requested_at": (
+                getattr(project, f'{reviewer}_review').requested_at.isoformat()
+                if getattr(project, f'{reviewer}_review').requested_at else None
+            ),
+            "message": f"{reviewer.upper()} review requested",
+        }
+    except ObjectNotFoundError:
+        return {"ok": False, "error": f"Project not found: {project_id}", "message": f"Project not found: {project_id}"}
+    except ValueError as e:
+        return {"ok": False, "error": str(e), "message": str(e)}
+    except Exception as e:
+        return {"ok": False, "error": str(e), "message": f"Failed to request review: {e}"}
+
+
+def record_review_outcome_tool(input: dict) -> dict:
+    """
+    Record a reviewer's outcome: APPROVED or REVISION_NEEDED.
+    Does NOT transition project status — Maverick does that via recommend_kickoff_tool.
+    Raises error if outcome is PENDING.
+
+    Args:
+        input: {
+            project_id: str,
+            reviewer: str,  # ba, sa, or qa
+            outcome: str,  # approved or revision_needed
+            note: str,
+            actor: str,
+        }
+    Returns:
+        {ok: bool, reviewer: str, outcome: str, decided_at: str, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        reviewer = input["reviewer"]
+        outcome_str = input["outcome"]
+        note = input.get("note", "")
+
+        # Map string to enum
+        outcome_map = {
+            "approved": ReviewStatus.APPROVED,
+            "revision_needed": ReviewStatus.REVISION_NEEDED,
+        }
+        if outcome_str not in outcome_map:
+            return {
+                "ok": False,
+                "error": f"Invalid outcome: {outcome_str}. Must be 'approved' or 'revision_needed'.",
+                "message": f"Invalid outcome: {outcome_str}",
+            }
+        outcome = outcome_map[outcome_str]
+
+        project = h["store"].load_project(project_id)
+        project.record_review_outcome(reviewer, outcome, note)
+        h["store"].save_project(project)
+
+        record = getattr(project, f"{reviewer}_review")
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type=f"{reviewer.upper()}_review_{outcome_str}",
+            event_summary=f"{reviewer.upper()} review: {outcome_str}",
+            actor=input.get("actor", "unknown"),
+        )
+
+        return {
+            "ok": True,
+            "reviewer": reviewer,
+            "outcome": outcome_str,
+            "decided_at": record.decided_at.isoformat() if record.decided_at else None,
+            "note": record.note,
+            "message": f"{reviewer.upper()} review recorded: {outcome_str}",
+        }
+    except ObjectNotFoundError:
+        return {"ok": False, "error": f"Project not found: {project_id}", "message": f"Project not found: {project_id}"}
+    except ValueError as e:
+        return {"ok": False, "error": str(e), "message": str(e)}
+    except Exception as e:
+        return {"ok": False, "error": str(e), "message": f"Failed to record review outcome: {e}"}
+
+
+def get_review_status_tool(input: dict) -> dict:
+    """
+    Get the full review status for a project: BA/SA/QA + Maverick recommendation + kickoff decision.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, project_id: str, project_status: str, review_status: dict,
+         can_recommend_kickoff: bool, any_revision_needed: bool, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        review_status = project.get_review_status()
+
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "project_status": project.project_status.value,
+            "review_status": review_status,
+            "is_review_complete": project.is_review_complete(),
+            "any_revision_needed": project.any_revision_needed(),
+            "can_recommend_kickoff": project.can_recommend_kickoff(),
+            "message": "Review status retrieved",
+        }
+    except ObjectNotFoundError:
+        return {"ok": False, "error": f"Project not found: {project_id}", "message": f"Project not found: {project_id}"}
+    except Exception as e:
+        return {"ok": False, "error": str(e), "message": f"Failed to get review status: {e}"},
+
+
+def recommend_kickoff_tool(input: dict) -> dict:
+    """
+    Maverick makes a kickoff recommendation: RECOMMEND_KICKOFF or RECOMMEND_REVISION.
+
+    KICKOFF requires: all 3 reviews complete AND no REVISION_NEEDED.
+    If any review is REVISION_NEEDED, Maverick should recommend REVISION.
+
+    This sets MaverickRecommendation on the project — does NOT change project_status directly.
+    Caller (or kickoff_tool) should transition project based on recommendation.
+
+    Args:
+        input: {
+            project_id: str,
+            recommendation: str,  # recommend_kickoff or recommend_revision
+            note: str,
+            actor: str,
+        }
+    Returns:
+        {ok: bool, recommendation: str, recommended_at: str, note: str, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        rec_str = input["recommendation"]
+        note = input.get("note", "")
+
+        rec_map = {
+            "recommend_kickoff": MaverickRecommendationStatus.RECOMMEND_KICKOFF,
+            "recommend_revision": MaverickRecommendationStatus.RECOMMEND_REVISION,
+        }
+        if rec_str not in rec_map:
+            return {
+                "ok": False,
+                "error": f"Invalid recommendation: {rec_str}. Must be 'recommend_kickoff' or 'recommend_revision'.",
+                "message": f"Invalid recommendation: {rec_str}",
+            }
+        recommendation = rec_map[rec_str]
+
+        project = h["store"].load_project(project_id)
+
+        # Pre-check: if recommending kickoff, verify conditions are met
+        if recommendation == MaverickRecommendationStatus.RECOMMEND_KICKOFF:
+            if not project.is_review_complete():
+                return {
+                    "ok": False,
+                    "error": "reviews_incomplete",
+                    "message": "Cannot recommend kickoff: not all reviews are complete. Complete all reviews first.",
+                }
+            if project.any_revision_needed():
+                return {
+                    "ok": False,
+                    "error": "revision_needed",
+                    "message": "Cannot recommend kickoff: one or more reviews require revision. Recommend revision instead.",
+                }
+
+        project.recommend_kickoff(recommendation, note)
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type=f"maverick_{rec_str}",
+            event_summary=f"Maverick recommendation: {rec_str}",
+            actor=input.get("actor", "unknown"),
+        )
+
+        return {
+            "ok": True,
+            "recommendation": rec_str,
+            "recommended_at": (
+                project.maverick_recommendation.recommended_at.isoformat()
+                if project.maverick_recommendation.recommended_at else None
+            ),
+            "note": project.maverick_recommendation.note,
+            "message": f"Maverick recommendation recorded: {rec_str}"
+        }
+    except ObjectNotFoundError:
+        return {"ok": False, "error": f"Project not found: {project_id}", "message": f"Project not found: {project_id}"}
+    except ValueError as e:
+        return {"ok": False, "error": str(e), "message": str(e)}
+    except Exception as e:
+        return {"ok": False, "error": str(e), "message": f"Failed to recommend kickoff: {e}"}
 
 
 def create_task_tool(input: dict) -> dict:
