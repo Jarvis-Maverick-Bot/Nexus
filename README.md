@@ -8,7 +8,7 @@
 
 ## What is this?
 
-`gov_langgraph` is the Claw Studio governance engine. It provides:
+`gov_langgraph` is the THE ONE enterprise governance engine. It provides:
 
 - **Platform Core** — objects, authority rules, state machine for BA→SA→DEV→QA pipeline
 - **Harness Layer** — persistence, checkpointing, event journaling, evidence storage
@@ -124,7 +124,7 @@ gov_langgraph/
 
 | Sprint | Focus | Status | Key Commits |
 |--------|-------|--------|-------------|
-| 1R | Claw Studio Definition | ✅ Closed | — |
+| 1R | THE ONE Definition | ✅ Closed | — |
 | 2R | Workflow + Stage Definitions | ✅ Closed | Smoke tests 7/7 pass |
 | 3R | Game Brief + Game Spec | ✅ Closed | GC-BRIEF-001, GC-SPEC-001 |
 | 4R | PMO Game Production Surface | ✅ Closed | Backend 7f7becf, Frontend b722693 |
