@@ -1212,6 +1212,9 @@ const T = {
       <div class="nav-item" onclick="navigateTo('review')" id="nav-review">
         <span class="nav-icon">🔍</span> <span data-i18n="nav_review">Review</span>
       </div>
+      <div class="nav-item" onclick="navigateTo('games')" id="nav-games">
+        <span class="nav-icon">🎮</span> <span data-i18n="nav_games">Games</span>
+      </div>
       <div class="nav-item" onclick="navigateTo('acceptance')" id="nav-acceptance">
         <span class="nav-icon">✓</span> <span data-i18n="nav_acceptance">Acceptance</span>
       </div>
@@ -1648,6 +1651,134 @@ const T = {
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- SURFACE: GAME PRODUCTION (Sprint 4R) -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-games">
+      <div class="surface-header">
+        <div class="surface-title">Game Production</div>
+        <div class="surface-subtitle">Track game progress through the production pipeline</div>
+      </div>
+
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-header">
+          <div class="card-title">Games</div>
+          <div class="flex gap-05 items-center">
+            <button class="secondary sm" onclick="loadGamesList()">↻ Refresh</button>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:1rem">
+          <div class="field" style="flex:1">
+            <label>Game Title</label>
+            <input id="game-title" placeholder="e.g. Grid Chase" />
+          </div>
+          <div class="field" style="flex:1">
+            <label>Owner</label>
+            <input id="game-owner" placeholder="e.g. Producer" />
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button id="btn-create-game" onclick="doCreateGame()">+ Create Game</button>
+          </div>
+        </div>
+        <div id="games-list">
+          <div class="empty-state">No games yet. Create one above.</div>
+        </div>
+      </div>
+
+      <div id="game-detail" class="hidden">
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-header">
+            <div class="card-title" id="gd-title">Game Detail</div>
+            <div class="flex gap-05">
+              <button class="secondary sm" onclick="gdRefresh()">↻ Refresh</button>
+            </div>
+          </div>
+          <div class="meta-grid mb-1">
+            <div class="meta-item"><div class="meta-label">Stage</div><div class="meta-value" id="gd-stage">—</div></div>
+            <div class="meta-item"><div class="meta-label">Status</div><div class="meta-value" id="gd-status">—</div></div>
+            <div class="meta-item"><div class="meta-label">Owner</div><div class="meta-value" id="gd-owner">—</div></div>
+            <div class="meta-item"><div class="meta-label">Viper Trigger</div><div class="meta-value" id="gd-trigger">—</div></div>
+          </div>
+          <div id="gd-escalation" class="alert alert-warn hidden">
+            Escalation: <span id="gd-esc-reason-text"></span>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-header">
+            <div class="card-title">Advance Stage</div>
+          </div>
+          <div class="form-row">
+            <div class="field" style="flex:1">
+              <label>Next Stage</label>
+              <select id="gd-next-stage"><option value="">— select —</option></select>
+            </div>
+            <div class="field" style="flex:1">
+              <label>Artifact ID <span class="text-dim">(optional)</span></label>
+              <input id="gd-artifact-id" placeholder="artifact id" />
+            </div>
+          </div>
+          <div class="form-row" id="gd-viper-row">
+            <div class="field" style="flex:1">
+              <label>Viper Trigger?</label>
+              <select id="gd-viper-trigger"><option value="false">No</option><option value="true">Yes — Viper engaged</option></select>
+            </div>
+            <div class="field" style="flex:2">
+              <label>Trigger Note <span class="text-dim">(optional)</span></label>
+              <input id="gd-trigger-note" placeholder="Why is Viper engaged?" />
+            </div>
+          </div>
+          <div id="gd-concept-row" class="hidden form-row">
+            <div class="field" style="flex:1">
+              <label>Approval Note <span class="text-dim">(optional)</span></label>
+              <input id="gd-approval-note" placeholder="Governance approval note" />
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-end;margin-top:0.5rem">
+            <button id="btn-adv-stage" onclick="doAdvanceStage()">Advance Stage</button>
+          </div>
+          <div id="gd-adv-msg" class="mt-1 text-dim"></div>
+        </div>
+
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-header">
+            <div class="card-title">Submit Status Report</div>
+          </div>
+          <div class="form-row">
+            <div class="field" style="flex:1"><label>Stage</label><input id="gd-sr-stage" placeholder="Current stage" /></div>
+            <div class="field" style="flex:1"><label>Status</label><input id="gd-sr-status" placeholder="e.g. in_progress" /></div>
+            <div class="field" style="flex:1"><label>Progress</label><input id="gd-sr-progress" placeholder="e.g. 50%" /></div>
+          </div>
+          <div class="form-row">
+            <div class="field" style="flex:1"><label>Blocker <span class="text-dim">(optional)</span></label><input id="gd-sr-blocker" placeholder="none" /></div>
+            <div class="field" style="flex:1"><label>Next Action</label><input id="gd-sr-next" placeholder="What happens next" /></div>
+          </div>
+          <div style="display:flex;align-items:flex-end;margin-top:0.5rem">
+            <button id="btn-sr" onclick="doSubmitSR()">Submit Status Report</button>
+          </div>
+          <div id="gd-sr-msg" class="mt-1 text-dim"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Escalate</div>
+          </div>
+          <div class="form-row">
+            <div class="field" style="flex:2">
+              <label>Reason</label>
+              <input id="gd-esc-reason-input" placeholder="Why is this escalated?" />
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-end;margin-top:0.5rem">
+            <button id="btn-escalate" class="danger" onclick="doEscalate()">Raise Escalation</button>
+          </div>
+          <div id="gd-esc-msg" class="mt-1 text-dim"></div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
     <!-- UTILITY: GATE PANEL                                       -->
     <!-- ═══════════════════════════════════════════════════════════ -->
     <div class="page" id="page-gate">
@@ -1789,6 +1920,7 @@ const T = {
     if (page === 'acceptance') loadAccProjects();
     if (page === 'advisories') loadAdvProjects();
     if (page === 'review') loadReviewProjects();
+    if (page === 'games') loadGamesList();
   applyTranslations();
     if (page === 'status') { /* manual query */ }
     if (page === 'gate') { /* manual query */ }
@@ -2736,7 +2868,195 @@ const T = {
     } catch(e) { panel.innerHTML = '<div class="empty-state">Cannot reach PMO backend.</div>'; }
   }
 
-  async function doResolveBlocker(pid, blockerId) {
+  async 
+  /* ── GAME PRODUCTION (Sprint 4R) ── */
+
+  async function loadGamesList() {
+    const list = document.getElementById('games-list');
+    if (!list) return;
+    list.innerHTML = '<div class="empty-state">Loading…</div>';
+    try {
+      const d = await _api('GET', '/games');
+      if (!d.ok) { list.innerHTML = '<div class="empty-state">Failed to load games.</div>'; return; }
+      const games = d.games || [];
+      if (games.length === 0) {
+        list.innerHTML = '<div class="empty-state">No games yet. Create one above.</div>';
+        return;
+      }
+      let html = '<table class="data-table"><thead><tr><th>Title</th><th>Stage</th><th>Status</th><th>Owner</th><th>Viper</th><th></th></tr></thead><tbody>';
+      for (const g of games) {
+        html += '<tr>';
+        html += '<td>' + _esc(g.title) + '</td>';
+        html += '<td><span class="stage-tag">' + _esc(g.current_stage) + '</span></td>';
+        html += '<td>' + _esc(g.task_status) + '</td>';
+        html += '<td>' + _esc(g.owner || '—') + '</td>';
+        html += '<td>' + (g.viper_triggered ? '<span class="sev-tag sev-high">Yes</span>' : '—') + '</td>';
+        html += '<td><button class="secondary sm" onclick="selectGame(\'' + g.game_id + '\')">View</button></td>';
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      list.innerHTML = html;
+    } catch(e) {
+      list.innerHTML = '<div class="empty-state">Failed to load games.</div>';
+    }
+  }
+
+  let _selectedGameId = null;
+
+  async function doCreateGame() {
+    const title = document.getElementById('game-title').value.trim();
+    const owner = document.getElementById('game-owner').value.trim();
+    if (!title || !owner) { alert('Title and Owner are required.'); return; }
+    const btn = document.getElementById('btn-create-game');
+    btn.disabled = true;
+    btn.textContent = 'Creating…';
+    try {
+      const d = await _api('POST', '/games', { title, owner });
+      if (!d.ok) { alert('Failed: ' + d.message); return; }
+      document.getElementById('game-title').value = '';
+      document.getElementById('game-owner').value = '';
+      await loadGamesList();
+      if (d.game_id) await selectGame(d.game_id);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '+ Create Game';
+    }
+  }
+
+  async function selectGame(gameId) {
+    _selectedGameId = gameId;
+    const detail = document.getElementById('game-detail');
+    if (!detail) return;
+    detail.classList.remove('hidden');
+    await gdRefresh();
+    detail.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  async function gdRefresh() {
+    if (!_selectedGameId) return;
+    try {
+      const d = await _api('GET', '/games/' + encodeURIComponent(_selectedGameId));
+      if (!d.ok) return;
+
+      document.getElementById('gd-title').textContent = d.title || '—';
+      document.getElementById('gd-stage').textContent = d.current_stage || '—';
+      document.getElementById('gd-status').textContent = d.task_status || '—';
+      document.getElementById('gd-owner').textContent = d.owner || '—';
+
+      const gf = d.game_fields || {};
+      const triggered = gf.viper_triggered;
+      const triggerText = triggered ? 'YES — ' + (gf.trigger_note || '') : 'No';
+      document.getElementById('gd-trigger').textContent = triggerText;
+
+      // Escalation
+      const esc = gf.escalation;
+      const escEl = document.getElementById('gd-escalation');
+      if (esc && esc.escalated) {
+        escEl.classList.remove('hidden');
+        const txt = document.getElementById('gd-esc-reason-text');
+        if (txt) txt.textContent = esc.reason + ' by ' + esc.by;
+      } else {
+        escEl.classList.add('hidden');
+      }
+
+      // Populate stage advance select
+      const nextStage = document.getElementById('gd-next-stage');
+      const stage = d.current_stage;
+      const transitions = {
+        'CONCEPT': ['GAME_SPEC'],
+        'GAME_SPEC': ['PRODUCTION_PREP'],
+        'PRODUCTION_PREP': ['PRODUCTION_BUILD'],
+        'PRODUCTION_BUILD': ['QA_PLAYTEST'],
+        'QA_PLAYTEST': ['ACCEPTANCE_DELIVERY'],
+        'ACCEPTANCE_DELIVERY': []
+      };
+      const allowed = transitions[stage] || [];
+      let opts = '<option value="">— select —</option>';
+      for (const s of allowed) opts += '<option value="' + s + '">' + s + '</option>';
+      nextStage.innerHTML = opts;
+
+      // Show viper row only at PRODUCTION_PREP boundary
+      const vRow = document.getElementById('gd-viper-row');
+      if (vRow) vRow.classList.toggle('hidden', stage !== 'PRODUCTION_PREP');
+
+      // Show concept approval note only at CONCEPT stage
+      const cRow = document.getElementById('gd-concept-row');
+      if (cRow) cRow.classList.toggle('hidden', stage !== 'CONCEPT');
+
+    } catch(e) {
+      console.error('gdRefresh failed:', e);
+    }
+  }
+
+  async function doAdvanceStage() {
+    if (!_selectedGameId) return;
+    const nextStage = document.getElementById('gd-next-stage').value;
+    const artifactId = document.getElementById('gd-artifact-id').value.trim();
+    const viperTrigger = document.getElementById('gd-viper-trigger').value === 'true';
+    const triggerNote = document.getElementById('gd-trigger-note').value.trim();
+    const approvalNote = document.getElementById('gd-approval-note').value.trim();
+    const msg = document.getElementById('gd-adv-msg');
+    if (!nextStage) { if (msg) msg.textContent = 'Select a next stage.'; return; }
+    if (msg) msg.textContent = '…';
+
+    const body = {
+      new_stage: nextStage,
+      actor: 'PMO',
+      concept_approved: nextStage === 'GAME_SPEC'
+    };
+    if (artifactId) body.artifact_id = artifactId;
+    if (viperTrigger) { body.viper_triggered = true; body.trigger_note = triggerNote; }
+    if (approvalNote) body.approval_note = approvalNote;
+
+    try {
+      const d = await _api('POST', '/games/' + encodeURIComponent(_selectedGameId) + '/stage', body);
+      if (!d.ok) { if (msg) msg.textContent = 'Error: ' + d.message; return; }
+      if (msg) msg.textContent = 'Advanced to ' + nextStage + '.';
+      await gdRefresh();
+      await loadGamesList();
+    } catch(e) {
+      if (msg) msg.textContent = 'Failed: ' + e.message;
+    }
+  }
+
+  async function doSubmitSR() {
+    if (!_selectedGameId) return;
+    const stage = document.getElementById('gd-sr-stage').value.trim();
+    const status = document.getElementById('gd-sr-status').value.trim();
+    const progress = document.getElementById('gd-sr-progress').value.trim();
+    const blocker = document.getElementById('gd-sr-blocker').value.trim();
+    const nextAction = document.getElementById('gd-sr-next').value.trim();
+    const msg = document.getElementById('gd-sr-msg');
+    if (!stage || !status || !progress || !nextAction) {
+      if (msg) msg.textContent = 'Stage, Status, Progress, Next Action are required.'; return;
+    }
+    if (msg) msg.textContent = '…';
+    try {
+      const d = await _api('POST', '/games/' + encodeURIComponent(_selectedGameId) + '/status-report', {
+        stage, status, progress, next_action: nextAction, blocker, actor: 'PMO'
+      });
+      if (msg) msg.textContent = d.ok ? 'Status report submitted.' : 'Error: ' + d.message;
+    } catch(e) {
+      if (msg) msg.textContent = 'Failed: ' + e.message;
+    }
+  }
+
+  async function doEscalate() {
+    if (!_selectedGameId) return;
+    const reason = document.getElementById('gd-esc-reason-input').value.trim();
+    const msg = document.getElementById('gd-esc-msg');
+    if (!reason) { if (msg) msg.textContent = 'Reason is required.'; return; }
+    if (msg) msg.textContent = '…';
+    try {
+      const d = await _api('POST', '/games/' + encodeURIComponent(_selectedGameId) + '/escalate', { reason, actor: 'PMO' });
+      if (msg) msg.textContent = d.ok ? 'Escalation raised.' : 'Error: ' + d.message;
+      if (d.ok) await gdRefresh();
+    } catch(e) {
+      if (msg) msg.textContent = 'Failed: ' + e.message;
+    }
+  }
+
+function doResolveBlocker(pid, blockerId) {
     const actor = prompt('Your name:');
     if (!actor) return;
     const d = await _api('POST', '/projects/' + encodeURIComponent(pid) + '/blockers/' + blockerId + '/resolve', {resolved_by: actor});

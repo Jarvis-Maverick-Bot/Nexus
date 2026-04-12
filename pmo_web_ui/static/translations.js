@@ -12,16 +12,14 @@ const T = {
     nav_workspace: 'Workspace',
     nav_intake: 'New Project',
     nav_deliverables: 'Deliverables',
-    nav_acceptance: 'Acceptance',
+    nav_review: 'Review',
+    nav_games: 'Games',
 
-    nav_workspace: 'Workspace',
-    nav_intake: 'New Project',
-    nav_deliverables: 'Deliverables',
     nav_acceptance: 'Acceptance',
 
     // Topbar
     topbar_select_project: 'Select project…',
-    topbar_version: 'v1.5',
+    topbar_version: 'v1.6',
     lang_toggle: 'EN / 中文',
     lang_toggle: 'EN / 中文',
 
@@ -142,12 +140,14 @@ const T = {
     nav_workspace: '工作区',
     nav_intake: '新建项目',
     nav_deliverables: '交付物',
-    nav_acceptance: '验收',
+    nav_review: '审查',
+    nav_games: '游戏',
 
+    nav_acceptance: '验收',
 
     // Topbar
     topbar_select_project: '选择项目…',
-    topbar_version: 'v1.5',
+    topbar_version: 'v1.6',
     lang_toggle: 'EN / 中文',
 
     // Projects page
