@@ -16,7 +16,7 @@ def load_grid(grid_id: str) -> Grid:
             f"Unknown grid_id: {grid_id}. Valid: {', '.join(_STARTER_GRIDS)}"
         )
     w, h, seed, _ = _STARTER_GRIDS[grid_id]
-    return Grid(w, h, seed=seed)
+    return Grid(w, h, seed=seed, grid_id=grid_id)
 
 
 def get_optimal_steps(grid_id: str) -> int:

@@ -92,7 +92,8 @@ class Game:
             self.state = State.ESCAPED
             from datetime import datetime
             ts = datetime.now().isoformat(timespec="seconds")
-            return f"ESCAPED|{self.step_count}|{self.grid}|{ts}"
+            tier = compute_tier(self.grid.grid_id, self.step_count)
+            return f"ESCAPED|{self.step_count}|{self.grid}|{ts}|{tier}"
         return "OK"
 
     def status(self) -> str:

@@ -23,9 +23,10 @@ class TestCompletionDetection:
             result = g.move(move)
         assert result.startswith("ESCAPED|"), f"Got: {result}"
         parts = result.split("|")
-        assert len(parts) == 4
+        assert len(parts) == 5, f"ESCAPED should have 5 fields (tier added), got {len(parts)}: {result}"
         assert parts[0] == "ESCAPED"
         assert int(parts[1]) == 8
+        assert parts[4] in ("PERFECT", "EXCELLENT", "GOOD", "COMPLETED", "OVERMOVED")
         datetime.fromisoformat(parts[3])
 
     def test_after_escaped_no_further_moves(self):

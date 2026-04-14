@@ -33,12 +33,13 @@ class Grid:
                 Same seed + same width/height always produces identical grid.
     """
 
-    def __init__(self, width: int, height: int, seed: Optional[int] = None):
+    def __init__(self, width: int, height: int, seed: Optional[int] = None, grid_id: Optional[str] = None):
         if width < 5 or height < 5:
             raise ValueError("Grid must be at least 5x5")
         self.width = width
         self.height = height
         self.seed = seed
+        self._grid_id = grid_id
         self._cells = None
         self._start = None
         self._exit = None
@@ -182,6 +183,10 @@ class Grid:
                     row += self._cells[y][x].value
             lines.append(row)
         return "\n".join(lines)
+
+    @property
+    def grid_id(self) -> Optional[str]:
+        return self._grid_id
 
     def __repr__(self) -> str:
         return f"Grid({self.width}x{self.height}, seed={self.seed})"

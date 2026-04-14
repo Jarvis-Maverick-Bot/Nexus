@@ -1,74 +1,58 @@
-# Planner Instantiation Trace — M4-R1
+# Planner Instantiation Trace — M4-R1 (Real Task Redo)
 
-**Date:** 2026-04-14 15:49 GMT+8
-**User story input:** "As a player, I want the game to detect when I have escaped the grid so that I can see my final score and completion time."
-**Game context:** Grid Escape (Python, 7x7/8x8/10x10 grids)
-**Completion format:** ESCAPED|<steps>|<grid_id>|<timestamp>
+**Date:** 2026-04-14 16:14 GMT+8
+**Status:** REVISION — using real task against actual V1.8 codebase
+**Purpose:** Address Nova's blocking issue — prior trace used detached example instead of real integrated handoff
 
 ---
 
-## Planner Output
+## Task Selection Rationale
+
+**User story:** "As a player, I want the ESCAPED message to include my tier, so I immediately know how well I played."
+
+**Why this task:**
+- Real gap: `compute_tier` exists but is never called in the escape path
+- Real codebase: `games/grid_escape/engine.py` + `games/grid_escape/scoring.py`
+- The ESCAPED message currently reads: `ESCAPED|<steps>|<grid>|<timestamp>` — no tier
+- This is bounded, meaningful, and actually improves the product
+
+---
+
+## Planner Output (16:14 GMT+8)
 
 ```json
 {
   "task_plan": [
     {
       "task_id": "TASK-001",
-      "description": "Define and implement exit/escape zone detection",
+      "description": "Update the ESCAPED message format in engine.py to include a tier field as the sixth field. Change format from 'ESCAPED|<steps>|<grid>|<timestamp>' to 'ESCAPED|<steps>|<grid>|<timestamp>|<tier>'.",
       "acceptance_criteria": [
-        "Define what constitutes 'escape' for each grid size (e.g., reaching a designated exit cell or boundary)",
-        "Exit detection logic is triggered only when player is on an exit cell and performs a move"
+        "The ESCAPED message format string is updated to include a sixth field for tier",
+        "All call sites that parse or construct the ESCAPED message are updated to handle the new field"
       ],
-      "estimated_complexity": "MEDIUM"
+      "estimated_complexity": "LOW"
     },
     {
       "task_id": "TASK-002",
-      "description": "Track player step count throughout game session",
+      "description": "Wire compute_tier into the escape path in engine.py. When the player reaches EXIT, call scoring.compute_tier(grid_id, steps) and insert the returned tier string as the sixth field in the ESCAPED message.",
       "acceptance_criteria": [
-        "Step counter increments on each valid player move",
-        "Step count is available and retrievable at the moment of escape detection"
+        "compute_tier is called exactly once in the escape code path",
+        "The tier returned by compute_tier is inserted as the sixth field in the ESCAPED message"
       ],
       "estimated_complexity": "LOW"
     },
     {
       "task_id": "TASK-003",
-      "description": "Implement and track game elapsed time (start to completion)",
+      "description": "Add end-to-end integration test(s) to verify ESCAPED message now contains a valid tier. Test at least two grids confirming tier field is present and dynamic (not hardcoded).",
       "acceptance_criteria": [
-        "Timer starts when a new game/grid is initialized",
-        "Elapsed time is captured with sufficient precision at the moment of escape detection"
-      ],
-      "estimated_complexity": "LOW"
-    },
-    {
-      "task_id": "TASK-004",
-      "description": "Wire escape detection into the game completion flow",
-      "acceptance_criteria": [
-        "When escape is detected, the game transitions to a completion state",
-        "Game prevents further moves after escape is detected"
+        "A test exercises the escape path end-to-end and asserts ESCAPED message contains a non-empty tier string",
+        "At least two distinct tiers are exercised to confirm the field is dynamic"
       ],
       "estimated_complexity": "MEDIUM"
-    },
-    {
-      "task_id": "TASK-005",
-      "description": "Format and output completion message: ESCAPED|<steps>|<grid_id>|<timestamp>",
-      "acceptance_criteria": [
-        "Output string follows the exact format: ESCAPED|<steps>|<grid_id>|<timestamp>",
-        "grid_id corresponds to the played grid (ge-001, ge-002, or ge-003)"
-      ],
-      "estimated_complexity": "LOW"
-    },
-    {
-      "task_id": "TASK-006",
-      "description": "Display final score and completion time to player",
-      "acceptance_criteria": [
-        "Player can see their total steps taken",
-        "Player can see their total elapsed time"
-      ],
-      "estimated_complexity": "LOW"
     }
   ],
-  "decomposition_notes": "The feature is decomposed into 6 tasks: exit zone definition (prerequisite for detection), step tracking, timer tracking, wiring escape into game flow, output formatting, and result display. Exit detection and game flow wiring are the core complexity items; the rest are straightforward tracking and formatting tasks.",
-  "recommended_order": ["TASK-001", "TASK-002", "TASK-003", "TASK-004", "TASK-005", "TASK-006"]
+  "decomposition_notes": "TASK-001 and TASK-002 are tightly coupled — format change + tier wiring. TASK-003 is separate because testing the escape path requires test fixtures. The work touches exactly two files: engine.py and a test file. Minimal, self-contained change.",
+  "recommended_order": ["TASK-001", "TASK-002", "TASK-003"]
 }
 ```
 
@@ -77,12 +61,13 @@
 ## Verification
 
 - [x] User story in -> task plan out
-- [x] 6 tasks with unique task_ids
+- [x] 3 tasks with unique task_ids (TASK-001, TASK-002, TASK-003)
 - [x] Each task has at least 2 acceptance criteria
-- [x] recommended_order covers all 6 task_ids
+- [x] recommended_order covers all 3 task_ids
 - [x] Planner did not write code — only decomposed
+- [x] Task is REAL — targets actual missing feature in `games/grid_escape/engine.py`
 - [x] Input/output contract matches skill spec
 
-**Status: PLANNER SEAT INSTANTIATED**
+**Status:** PLANNER SEAT RE-VERIFIED (real task)
 
 Seat labeled `instantiated` in: `V1_8_AGENT_ROLES.md`
