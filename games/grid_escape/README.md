@@ -2,24 +2,27 @@
 
 First AI-native game product for the Jarvis/Viper governance platform.
 
-## Overview
-
-Grid Escape is a maze navigation game where an AI agent finds its way from **START** to **EXIT**. The game is played via CLI — designed for both human and agent interaction.
-
 ## Quick Start
 
+**Recommended (if `python -m` works in your environment):**
 ```bash
-# Interactive mode
 python -m games.grid_escape --grid ge-001
+```
 
-# Batch mode (for agents)
-echo -e "look\nmove east\nmove south\n..." | python -m games.grid_escape --grid ge-001
+**Fallback (works in any environment):**
+```bash
+python games/grid_escape.py --grid ge-001
+```
+
+**Batch mode (for agents):**
+```bash
+echo -e "look\nmove east\n..." | python games/grid_escape.py --grid ge-001
 ```
 
 ## Grid IDs
 
 | Grid | Size | Optimal |
-|------|-------|---------|
+|------|------|---------|
 | `ge-001` | 7 x 7 | 8 steps |
 | `ge-002` | 8 x 8 | 12 steps |
 | `ge-003` | 10 x 10 | 18 steps |
@@ -62,26 +65,33 @@ After ESCAPED, the tier is computed from steps vs optimal:
 ## Architecture
 
 ```
-games/grid_escape/
-  __init__.py      — Package
-  grid.py          — Grid data model, BFS pathfinding, wall perimeter
-  engine.py        — Game state machine
-  scoring.py       — Tier computation
-  grids.py         — Starter grid definitions (ge-001/002/003)
-  __main__.py      — CLI entry point
-  tests/
-    test_pathfinding.py
-    test_grids.py
-    test_movement.py
-    test_commands.py
-    test_completion.py
-    test_scoring.py
+games/
+  grid_escape.py        # Fallback runner (works without -m)
+  __init__.py           # Package marker
+  grid_escape/
+    __init__.py
+    __main__.py         # CLI entry point
+    grid.py             # Grid data model, BFS pathfinding, wall perimeter
+    engine.py           # Game state machine
+    scoring.py          # Tier computation
+    grids.py            # Starter grid definitions (ge-001/002/003)
+    tests/
+      test_pathfinding.py
+      test_grids.py
+      test_movement.py
+      test_commands.py
+      test_completion.py
+      test_scoring.py
 ```
 
 ## Running Tests
 
 ```bash
-PYTHONPATH=games python -m pytest games/grid_escape/tests/ -v
+pip install -e .
+python -m pytest games/grid_escape/tests/ -v
 ```
 
-All 53 tests should pass.
+Or without installing:
+```bash
+PYTHONPATH=games python -m pytest games/grid_escape/tests/ -v
+```
