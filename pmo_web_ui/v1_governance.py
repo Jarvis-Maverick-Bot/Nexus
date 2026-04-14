@@ -1,11 +1,11 @@
 """
-V1.8 Governance UI — Thin visibility layer for V1.8 delivery.
+PMO Governance UI — Thin visibility layer for PMO delivery management.
 
 Adds foundational PMO governance routes on top of existing PMO Web UI:
-  /governance/workflow   — active delivery items with status
-  /governance/queue      — V1.8 delivery queue
-  /governance/artifacts  — artifact/review visibility
-  /governance/approvals  — human approval surfaces
+  /pmo/workflow   — active delivery items with status
+  /pmo/queue      — delivery queue
+  /pmo/artifacts  — artifact/review visibility
+  /pmo/approvals  — human approval surfaces
 
 Data served from PMO CLI state store (governance/pmo/data/).
 
@@ -25,7 +25,7 @@ sys.path.insert(0, str(_ROOT))
 from fastapi import APIRouter
 from governance.pmo.pmo_cli import status, get_event_log, get_task_log
 
-router = APIRouter(prefix="/governance", tags=["PMO Governance"])
+router = APIRouter(prefix="/pmo", tags=["PMO Governance"])
 
 
 @router.get("/workflow")
