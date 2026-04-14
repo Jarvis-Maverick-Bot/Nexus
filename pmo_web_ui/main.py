@@ -64,6 +64,7 @@ from gov_langgraph.openclaw_integration.tools import (
     submit_game_status_report_tool,
     approve_game_concept_tool,
 )
+from pmo_web_ui.v1_governance import router as v1_router
 
 PORT = int(os.getenv("PMO_PORT", "8000"))
 
@@ -75,6 +76,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="PMO Web UI", version="1.0.0", lifespan=lifespan)
+app.include_router(v1_router)
 
 app.add_middleware(
     CORSMiddleware,
