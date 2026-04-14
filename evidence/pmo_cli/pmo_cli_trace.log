@@ -1,0 +1,19 @@
+﻿
+=== PMO CLI Smoke Test — M2-R1 ===
+{   "ok": true,   "item_id": "WI-001",   "name": "Grid Escape M1",   "stage": "BACKLOG" } 
+
+{   "ok": true,   "items": [     {       "id": "WI-001",       "name": "Grid Escape M1",       "stage": "BACKLOG",       "created_at": "2026-04-14T06:03:01+00:00",       "updated_at": "2026-04-14T06:03:01+00:00",       "artifacts": [],       "validations": [],       "blockers": [],       "transitions": [],       "delivery_package": null     }   ],   "total": 1 } 
+
+{   "ok": true,   "artifact_id": "ART-c8a8b379",   "item_id": "WI-001",   "path": "D:\\Projects\\gov_langgraph\\games\\grid_escape\\README.md" } 
+
+{   "ok": true,   "item_id": "WI-001",   "from": "BACKLOG",   "to": "IN_PROGRESS" } 
+
+{   "ok": true,   "validation_id": "VAL-7605f0fe",   "item_id": "WI-001",   "result": "PASS" } 
+
+{   "ok": true,   "blocker_id": "BLK-e5a4d5ad",   "item_id": "WI-001",   "description": "Needs Nova review before delivery" } 
+
+{   "ok": true,   "package_id": "PKG-49f64563",   "item_id": "WI-001",   "stage": "IN_PROGRESS" } 
+
+{   "ok": true,   "item": {     "id": "WI-001",     "name": "Grid Escape M1",     "stage": "IN_PROGRESS",     "created_at": "2026-04-14T06:03:01+00:00",     "updated_at": "2026-04-14T06:03:02+00:00",     "artifacts": [       {         "id": "ART-c8a8b379",         "item_id": "WI-001",         "path": "D:\\Projects\\gov_langgraph\\games\\grid_escape\\README.md",         "name": "README.md",         "submitted_at": "2026-04-14T06:03:01+00:00"       }     ],     "validations": [       {         "id": "VAL-7605f0fe",         "item_id": "WI-001",         "result": "PASS",         "recorded_at": "2026-04-14T06:03:01+00:00"       }     ],     "blockers": [       {         "id": "BLK-e5a4d5ad",         "item_id": "WI-001",         "description": "Needs Nova review before delivery",         "signaled_at": "2026-04-14T06:03:01+00:00",         "resolved": false       }     ],     "transitions": [       {         "from": "BACKLOG",         "to": "IN_PROGRESS",         "at": "2026-04-14T06:03:01+00:00"       }     ],     "delivery_package": {       "id": "PKG-49f64563",       "item_id": "WI-001",       "name": "Grid Escape M1",       "stage": "IN_PROGRESS",       "artifacts": [         "ART-c8a8b379"       ],       "validations": [         "VAL-7605f0fe"       ],       "blockers": [         "BLK-e5a4d5ad"       ],       "created_at": "2026-04-14T06:03:02+00:00"     }   } } 
+
+=== End ===

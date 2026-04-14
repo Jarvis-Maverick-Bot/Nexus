@@ -1,0 +1,63 @@
+{
+  "items": {
+    "WI-001": {
+      "id": "WI-001",
+      "name": "Grid Escape M1",
+      "stage": "IN_PROGRESS",
+      "created_at": "2026-04-14T06:03:01+00:00",
+      "updated_at": "2026-04-14T06:03:02+00:00",
+      "artifacts": [
+        {
+          "id": "ART-c8a8b379",
+          "item_id": "WI-001",
+          "path": "D:\\Projects\\gov_langgraph\\games\\grid_escape\\README.md",
+          "name": "README.md",
+          "submitted_at": "2026-04-14T06:03:01+00:00"
+        }
+      ],
+      "validations": [
+        {
+          "id": "VAL-7605f0fe",
+          "item_id": "WI-001",
+          "result": "PASS",
+          "recorded_at": "2026-04-14T06:03:01+00:00"
+        }
+      ],
+      "blockers": [
+        {
+          "id": "BLK-e5a4d5ad",
+          "item_id": "WI-001",
+          "description": "Needs Nova review before delivery",
+          "signaled_at": "2026-04-14T06:03:01+00:00",
+          "resolved": false
+        }
+      ],
+      "transitions": [
+        {
+          "from": "BACKLOG",
+          "to": "IN_PROGRESS",
+          "at": "2026-04-14T06:03:01+00:00"
+        }
+      ],
+      "delivery_package": {
+        "id": "PKG-49f64563",
+        "item_id": "WI-001",
+        "name": "Grid Escape M1",
+        "stage": "IN_PROGRESS",
+        "artifacts": [
+          "ART-c8a8b379"
+        ],
+        "validations": [
+          "VAL-7605f0fe"
+        ],
+        "blockers": [
+          "BLK-e5a4d5ad"
+        ],
+        "created_at": "2026-04-14T06:03:02+00:00"
+      }
+    }
+  },
+  "sequences": {
+    "work_item": 1
+  }
+}
