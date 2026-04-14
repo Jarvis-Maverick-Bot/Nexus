@@ -102,5 +102,17 @@
       }
     },
     "at": "2026-04-14T07:16:42+00:00"
+  },
+  {
+    "task_id": "TASK-UAT-001",
+    "action": "launch-subagent",
+    "actor": "Jarvis",
+    "result": {
+      "ok": true,
+      "task_id": "TASK-UAT-001",
+      "agent_type": "TDD",
+      "status": "RUNNING"
+    },
+    "at": "2026-04-14T11:34:28+00:00"
   }
 ]

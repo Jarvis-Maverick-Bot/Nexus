@@ -119,10 +119,28 @@
         }
       ],
       "delivery_package": null
+    },
+    "WI-004": {
+      "id": "WI-004",
+      "name": "Grid Escape UAT",
+      "stage": "IN_PROGRESS",
+      "created_at": "2026-04-14T11:17:42+00:00",
+      "updated_at": "2026-04-14T11:20:17+00:00",
+      "artifacts": [],
+      "validations": [],
+      "blockers": [],
+      "transitions": [
+        {
+          "from": "BACKLOG",
+          "to": "IN_PROGRESS",
+          "at": "2026-04-14T11:20:17+00:00"
+        }
+      ],
+      "delivery_package": null
     }
   },
   "sequences": {
-    "work_item": 3
+    "work_item": 4
   },
   "tasks": {
     "TASK-M3R2-001": {
@@ -139,7 +157,15 @@
           "invoked_at": "2026-04-14T07:16:41+00:00"
         }
       ]
+    },
+    "TASK-UAT-001": {
+      "id": "TASK-UAT-001",
+      "agent_type": "TDD",
+      "status": "RUNNING",
+      "created_at": "2026-04-14T11:34:28+00:00",
+      "updated_at": "2026-04-14T11:34:28+00:00",
+      "actions": []
     }
   },
-  "updated_at": "2026-04-14T07:16:41+00:00"
+  "updated_at": "2026-04-14T11:34:28+00:00"
 }
