@@ -114,5 +114,71 @@
       "status": "RUNNING"
     },
     "at": "2026-04-14T11:34:28+00:00"
+  },
+  {
+    "task_id": "TASK-TEST-001",
+    "action": "launch-subagent",
+    "actor": "Jarvis",
+    "result": {
+      "task_id": "TASK-TEST-001",
+      "task_type": "TDD",
+      "requested_by": "Jarvis",
+      "executor": "TDD",
+      "input_payload": {},
+      "status": "RUNNING",
+      "created_at": "2026-04-14T12:24:04+00:00",
+      "started_at": "2026-04-14T12:24:04+00:00",
+      "updated_at": "2026-04-14T12:24:04+00:00",
+      "completed_at": null,
+      "result_summary": null,
+      "output_ref": null,
+      "error": null,
+      "logs_ref": null
+    },
+    "at": "2026-04-14T12:24:04+00:00"
+  },
+  {
+    "task_id": "TASK-TEST-001",
+    "action": "pause-task",
+    "actor": "Jarvis",
+    "result": {
+      "task_id": "TASK-TEST-001",
+      "task_type": "TDD",
+      "requested_by": "Jarvis",
+      "executor": "TDD",
+      "input_payload": {},
+      "status": "WAITING",
+      "created_at": "2026-04-14T12:24:04+00:00",
+      "started_at": "2026-04-14T12:24:04+00:00",
+      "updated_at": "2026-04-14T12:24:10+00:00",
+      "completed_at": null,
+      "result_summary": null,
+      "output_ref": null,
+      "error": null,
+      "logs_ref": null
+    },
+    "at": "2026-04-14T12:24:10+00:00"
+  },
+  {
+    "task_id": "TASK-TEST-001",
+    "action": "terminate-task",
+    "actor": "Jarvis",
+    "result": {
+      "task_id": "TASK-TEST-001",
+      "task_type": "TDD",
+      "requested_by": "Jarvis",
+      "executor": "TDD",
+      "input_payload": {},
+      "status": "CANCELED",
+      "created_at": "2026-04-14T12:24:04+00:00",
+      "started_at": "2026-04-14T12:24:04+00:00",
+      "updated_at": "2026-04-14T12:24:15+00:00",
+      "completed_at": "2026-04-14T12:24:15+00:00",
+      "result_summary": null,
+      "output_ref": null,
+      "error": null,
+      "logs_ref": null
+    },
+    "at": "2026-04-14T12:24:15+00:00"
   }
 ]
