@@ -9,9 +9,10 @@ from grid_escape.grid import Grid
 
 _STARTER_GRIDS = {
     # grid_id: (width, height, seed, optimal_steps)
-    "ge-001": (7, 7, 8, 8),
-    "ge-002": (8, 8, 3, 12),
-    "ge-003": (10, 10, 101, 18),
+    # Seeds verified with wall perimeter enforced
+    "ge-001": (7, 7, 3, 8),
+    "ge-002": (8, 8, 549, 12),
+    "ge-003": (10, 10, 548, 18),
 }
 
 

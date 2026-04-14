@@ -52,43 +52,54 @@ class Grid:
         # Initialize all cells as OPEN
         self._cells = [[CellType.OPEN for _ in range(self.width)] for _ in range(self.height)]
 
-        # Place START in top-left region
+        # Wall perimeter first — no interior wall placement on border cells
+        for x in range(self.width):
+            self._cells[0][x] = CellType.WALL
+            self._cells[self.height - 1][x] = CellType.WALL
+        for y in range(self.height):
+            self._cells[y][0] = CellType.WALL
+            self._cells[y][self.width - 1] = CellType.WALL
+
+        # Place START in interior (top-left region)
         sx = rng.randrange(1, min(3, self.width - 2))
         sy = rng.randrange(1, min(3, self.height - 2))
         self._cells[sy][sx] = CellType.START
         self._start = (sx, sy)
 
-        # Place EXIT in bottom-right region
+        # Place EXIT in interior (bottom-right region)
         ex = rng.randrange(self.width - 3, self.width - 1)
         ey = rng.randrange(self.height - 3, self.height - 1)
         self._cells[ey][ex] = CellType.EXIT
         self._exit = (ex, ey)
 
-        # Add random walls (25-35% of interior cells)
-        interior = []
-        for y in range(1, self.height - 1):
-            for x in range(1, self.width - 1):
-                if (x, y) not in (self._start, self._exit):
-                    interior.append((x, y))
+        # Add random walls to interior cells only (25-35%)
+        interior = [
+            (x, y)
+            for y in range(1, self.height - 1)
+            for x in range(1, self.width - 1)
+            if (x, y) not in (self._start, self._exit)
+            and self._cells[y][x] == CellType.OPEN
+        ]
         rng.shuffle(interior)
         wall_count = int(len(interior) * rng.uniform(0.25, 0.35))
         for x, y in interior[:wall_count]:
             self._cells[y][x] = CellType.WALL
 
-        # Ensure path exists — if BFS fails, regenerate walls
+        # Ensure path exists — if BFS fails, reduce walls until solvable
         for attempt in range(100):
             path = self._bfs()
             if path is not None:
-                self._optimal = len(path) - 1  # steps, not nodes
+                self._optimal = len(path) - 1
                 return
-            # Clear walls and try fewer
-            interior_cur = [(x, y) for y in range(1, self.height - 1)
-                                     for x in range(1, self.width - 1)
-                                     if self._cells[y][x] == CellType.WALL
-                                     and (x, y) not in (self._start, self._exit)]
-            rng.shuffle(interior_cur)
-            remove_count = len(interior_cur) // 2
-            for x, y in interior_cur[:remove_count]:
+            interior_walls = [
+                (x, y)
+                for y in range(1, self.height - 1)
+                for x in range(1, self.width - 1)
+                if self._cells[y][x] == CellType.WALL
+                and (x, y) not in (self._start, self._exit)
+            ]
+            rng.shuffle(interior_walls)
+            for x, y in interior_walls[:len(interior_walls) // 2]:
                 self._cells[y][x] = CellType.OPEN
 
         raise RuntimeError(f"Could not generate solvable grid after 100 attempts (w={self.width}, h={self.height}, seed={self.seed})")
@@ -152,7 +163,6 @@ class Grid:
     def render(self, agent_pos: Optional[tuple[int, int]] = None) -> str:
         """Render grid as ASCII string.
 
-
         Args:
             agent_pos: (x, y) of agent. If None, shows START instead of AGENT.
         """
@@ -160,16 +170,13 @@ class Grid:
         for y in range(self.height):
             row = ""
             for x in range(self.width):
-                # Agent takes precedence over START/EXIT
                 if agent_pos == (x, y):
                     row += CellType.AGENT.value
                 elif (x, y) == self._exit:
                     row += CellType.EXIT.value
                 elif agent_pos is not None and (x, y) == self._start:
-                    # Don't show START once agent has moved
                     row += CellType.OPEN.value
                 elif (x, y) == self._start:
-                    # Show START only when agent hasn't moved yet
                     row += CellType.START.value
                 else:
                     row += self._cells[y][x].value
@@ -183,11 +190,9 @@ class Grid:
     def from_ascii(cls, ascii_map: str, seed: Optional[int] = None) -> "Grid":
         """Create a Grid from an ASCII-art string.
 
-
         Args:
             ascii_map: Multi-line string with '#'=WALL, '.'=OPEN, 'S'=START, 'E'=EXIT
             seed: Optional seed (not used for generation, stored for repr)
-
         """
         lines = ascii_map.strip().split("\n")
         height = len(lines)
@@ -205,15 +210,16 @@ class Grid:
         for y, line in enumerate(lines):
             row = []
             for x, char in enumerate(line.ljust(width)):
-                cell_map = {"#": CellType.WALL, ".": CellType.OPEN,
-                        "S": CellType.START, "E": CellType.EXIT}
+                cell_map = {
+                    "#": CellType.WALL, ".": CellType.OPEN,
+                    "S": CellType.START, "E": CellType.EXIT,
+                }
                 row.append(cell_map.get(char, CellType.WALL))
                 if char == "S":
                     grid._start = (x, y)
                 elif char == "E":
                     grid._exit = (x, y)
             grid._cells.append(row)
-
 
         path = grid._bfs()
         if path is None:
