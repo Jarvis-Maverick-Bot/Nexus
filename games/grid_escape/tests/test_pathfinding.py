@@ -1,7 +1,7 @@
 """Tests for grid data model and BFS pathfinding."""
 
 import pytest
-from grid_escape.grid import Grid, CellType
+from games.grid_escape.grid import Grid, CellType
 
 
 class TestGridModel:
@@ -47,13 +47,11 @@ class TestGridModel:
         assert g.cell_at(ex, ey) == CellType.EXIT
 
     def test_optimal_path_ge_zero_for_solvable(self):
-        """For each starter grid, optimal path should be >= 0."""
         for grid_id, (w, h, opt) in [
             ("ge-001", (7, 7, 8)),
             ("ge-002", (8, 8, 12)),
             ("ge-003", (10, 10, 18)),
         ]:
-            # Seeds chosen to produce grids with those optimal steps
             g = Grid(w, h, seed=42)
             steps = g.compute_optimal_path()
             assert steps >= 0, f"{grid_id}: optimal path should be >= 0, got {steps}"
@@ -61,17 +59,14 @@ class TestGridModel:
 
 class TestBFSPathfinding:
     def test_bfs_returns_negative_for_unsolvable(self):
-        """A grid with all walls around start should be unsolvable."""
         g = Grid(5, 5, seed=1)
-        # If BFS gives -1, that means no path found (expected for some seeds)
         result = g.compute_optimal_path()
-        assert result == -1 or result >= 0  # -1 means unsolvable, >= 0 means solvable
+        assert result == -1 or result >= 0
 
     def test_bfs_path_length_matches_compute_optimal(self):
         g = Grid(7, 7, seed=42)
         steps = g.compute_optimal_path()
         if steps >= 0:
-            # Verify by walking the path
             path = g._bfs()
             assert path is not None
             assert len(path) - 1 == steps

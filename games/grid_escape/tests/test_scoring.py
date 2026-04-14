@@ -1,8 +1,7 @@
 """Tests for scoring tiers (Task 1.6)."""
 
 import pytest
-from grid_escape.engine import Game
-from grid_escape.grids import get_optimal_steps
+from games.grid_escape.grids import get_optimal_steps
 
 
 TIER_RULES = [
@@ -21,7 +20,6 @@ TIER_RULES = [
 
 
 def tier(diff: int) -> str:
-    """Compute tier from step difference."""
     if diff <= 0:
         return "PERFECT"
     elif diff <= 2:

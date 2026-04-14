@@ -1,11 +1,10 @@
 """Tests for completion detection (Task 1.5)."""
 
 import pytest
-from grid_escape.engine import Game, State
+from games.grid_escape.engine import Game, State
 from datetime import datetime
 
 
-# BFS-verified paths for each grid
 _PATHS = {
     "ge-001": ["east", "south", "east", "south", "south", "east", "south", "east"],
     "ge-002": ["east", "north", "east", "east", "east", "east", "south",
@@ -18,12 +17,10 @@ _PATHS = {
 
 class TestCompletionDetection:
     def test_escaped_output_format(self):
-        """Last move of optimal path triggers ESCAPED."""
         g = Game.new("ge-001")
         g.restart()
         for move in _PATHS["ge-001"]:
             result = g.move(move)
-        # Final move already triggered ESCAPED — result is ESCAPED line
         assert result.startswith("ESCAPED|"), f"Got: {result}"
         parts = result.split("|")
         assert len(parts) == 4

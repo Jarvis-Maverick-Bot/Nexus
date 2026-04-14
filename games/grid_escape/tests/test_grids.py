@@ -1,7 +1,7 @@
 """Verify starter grids load correctly with expected optimal steps."""
 
 import pytest
-from grid_escape.grids import load_grid, get_optimal_steps
+from games.grid_escape.grids import load_grid, get_optimal_steps
 
 
 class TestStarterGrids:

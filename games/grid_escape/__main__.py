@@ -7,7 +7,7 @@ Usage:
 
 import sys
 import argparse
-from grid_escape.engine import Game, State
+from games.grid_escape.engine import Game, State
 
 
 def main() -> None:

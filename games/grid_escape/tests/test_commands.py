@@ -1,27 +1,22 @@
 """Tests for game commands."""
 
 import pytest
-from grid_escape.engine import Game, State
+from games.grid_escape.engine import Game, State
 
 
 class TestAll5Commands:
     def test_all_commands_recognized(self):
         g = Game.new("ge-001")
         g.restart()
-        # look
         result = g.look()
         assert isinstance(result, str)
         assert len(result) > 0
-        # move
         result = g.move("east")
         assert result in ("OK", "BLOCKED", "ESCAPED")
-        # status
         result = g.status()
         assert "Steps:" in result
-        # restart
         result = g.restart()
-        assert result is None  # restart returns None
-        # quit
+        assert result is None
         result = g.quit()
         assert "FINAL SCORE" in result
 
@@ -32,7 +27,7 @@ class TestAll5Commands:
         assert "UNKNOWN" in result
 
     def test_restart_resets_correctly(self):
-        g = Game.new("ge-003")  # ge-003 S has South and East open
+        g = Game.new("ge-003")
         g.restart()
         g.move("south")
         g.move("east")
@@ -63,7 +58,6 @@ class TestAll5Commands:
     def test_restart_during_escaped_resets(self):
         g = Game.new("ge-001")
         g.restart()
-        # Force escaped state
         g.state = State.ESCAPED
         g.restart()
         assert g.state == State.ACTIVE
