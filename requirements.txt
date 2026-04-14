@@ -1,6 +1,52 @@
+<<<<<<< HEAD
 # PMO Smart Agent V1 — Runtime dependencies
 # Install: pip install -r requirements.txt
 
 fastapi>=0.100.0
 uvicorn>=0.23.0
 pydantic>=2.0.0
+=======
+# PMO Smart Agent V1.7 — Runtime dependencies
+
+# Core framework
+langgraph>=1.0.0
+
+# Web server
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+starlette>=0.27.0
+
+# Data / validation
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# Serialization / config
+pyyaml>=6.0
+orjson>=3.9.0
+
+# LangGraph checkpoint & store
+langgraph-checkpoint>=2.0.0
+langgraph-sdk>=0.1.0
+
+# Utilities
+httpx>=0.25.0  # for async HTTP calls (used by API client)
+
+# ── PMO Runtime Modules ──
+# The following packages are required to boot pmo_web_ui.main:
+#   - pmo_web_ui.main          (FastAPI app)
+#   - gov_langgraph.openclaw_integration.tools
+#   - gov_langgraph.langgraph_engine
+#
+# Full list from pip freeze on working environment:
+#   langgraph==1.1.6
+#   langgraph-checkpoint==4.0.1
+#   langgraph-prebuilt==1.0.9
+#   langgraph-sdk==0.3.12
+#   langchain-core (transitive via langgraph)
+#   fastapi==0.135.3
+#   pydantic==2.12.5
+#   pydantic-settings==2.13.1
+#   starlette==1.0.0
+#   uvicorn==0.43.0
+#   PyYAML==6.0.3
+>>>>>>> release/v1.8-dev

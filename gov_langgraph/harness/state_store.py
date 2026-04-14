@@ -259,6 +259,132 @@ def _parse_datetime(value: str | None) -> datetime | None:
 
 
 def _dict_to_project(data: dict) -> Project:
+    from gov_langgraph.platform_model import (
+        Artifact, ArtifactType, AcceptancePackage, PrereqArtifact,
+        AdvisorySignal, AdvisoryType,
+        Blocker, BlockerSeverity,
+        ReviewStatus, ReviewRecord,
+        MaverickRecommendationStatus, MaverickRecommendation,
+        KickoffDecisionStatus, KickoffDecision,
+    )
+
+    # Sprint 2R: Reconstruct BA/SA/QA review records
+    def _recon_review(data_dict: dict) -> ReviewRecord:
+        return ReviewRecord(
+            status=ReviewStatus(data_dict["status"]) if data_dict.get("status") else ReviewStatus.PENDING,
+            requested_at=_parse_datetime(data_dict.get("requested_at")),
+            decided_at=_parse_datetime(data_dict.get("decided_at")),
+            note=data_dict.get("note", ""),
+        )
+
+    ba_review_data = data.get("ba_review", {})
+    sa_review_data = data.get("sa_review", {})
+    qa_review_data = data.get("qa_review", {})
+    ba_review = _recon_review(ba_review_data) if ba_review_data else ReviewRecord()
+    sa_review = _recon_review(sa_review_data) if sa_review_data else ReviewRecord()
+    qa_review = _recon_review(qa_review_data) if qa_review_data else ReviewRecord()
+
+    # Sprint 2R: Reconstruct Maverick recommendation
+    mav_data = data.get("maverick_recommendation", {})
+    maverick_recommendation = MaverickRecommendation(
+        status=MaverickRecommendationStatus(mav_data["status"]) if mav_data.get("status") else MaverickRecommendationStatus.PENDING,
+        recommended_at=_parse_datetime(mav_data.get("recommended_at")),
+        note=mav_data.get("note", ""),
+    )
+
+    # Sprint 2R: Reconstruct Alex kickoff decision
+    kickoff_data = data.get("kickoff_decision")
+    kickoff_decision = None
+    if kickoff_data:
+        kickoff_decision = KickoffDecision(
+            status=KickoffDecisionStatus(kickoff_data["status"]) if kickoff_data.get("status") else KickoffDecisionStatus.PENDING,
+            decided_at=_parse_datetime(kickoff_data.get("decided_at")),
+            note=kickoff_data.get("note", ""),
+        )
+
+    # Reconstruct prerequisite artifacts
+    prerequisite_artifacts: dict[str, PrereqArtifact] = {}
+    for at_str, pa_data in data.get("prerequisite_artifacts", {}).items():
+        at = ArtifactType(pa_data["artifact_type"])
+        prerequisite_artifacts[at_str] = PrereqArtifact(
+            artifact_type=at,
+            artifact_id=pa_data.get("artifact_id"),
+            submitted=pa_data.get("submitted", False),
+            content_preview=pa_data.get("content_preview", ""),
+            producer=pa_data.get("producer", ""),
+            submitted_at=_parse_datetime(pa_data.get("submitted_at")),
+        )
+
+    # Reconstruct artifacts dict
+    artifacts: dict[str, Artifact] = {}
+    for artifact_id, artifact_data in data.get("artifacts", {}).items():
+        at = ArtifactType(artifact_data["artifact_type"])
+        artifacts[artifact_id] = Artifact(
+            artifact_id=artifact_data.get("artifact_id", artifact_id),
+            artifact_type=at,
+            project_id=artifact_data["project_id"],
+            content=artifact_data.get("content", ""),
+            produced_by=artifact_data.get("produced_by", ""),
+            produced_at=_parse_datetime(artifact_data.get("produced_at")) or datetime.utcnow(),
+        )
+
+    # Reconstruct acceptance package
+    acceptance_package: AcceptancePackage | None = None
+    pkg_data = data.get("acceptance_package")
+    if pkg_data:
+        pkg_artifacts: dict[ArtifactType, Artifact] = {}
+        for at_str, art_data in pkg_data.get("artifacts", {}).items():
+            at = ArtifactType(at_str)
+            pkg_artifacts[at] = Artifact(
+                artifact_type=at,
+                project_id=art_data["project_id"],
+                content=art_data.get("content", ""),
+                produced_by=art_data.get("produced_by", ""),
+                produced_at=_parse_datetime(art_data.get("produced_at")) or datetime.utcnow(),
+            )
+        acceptance_package = AcceptancePackage(
+            package_id=pkg_data.get("package_id", ""),
+            task_id=pkg_data.get("task_id", ""),
+            project_id=pkg_data.get("project_id", ""),
+            artifacts=pkg_artifacts,
+            verification_notes=pkg_data.get("verification_notes", ""),
+            acceptance_decision=GateDecision(pkg_data["acceptance_decision"]) if pkg_data.get("acceptance_decision") else None,
+            decision_by=pkg_data.get("decision_by"),
+            decision_note=pkg_data.get("decision_note", ""),
+            decided_at=_parse_datetime(pkg_data.get("decided_at")),
+            created_at=_parse_datetime(pkg_data.get("created_at")) or datetime.utcnow(),
+        )
+
+    # Reconstruct advisories
+    advisories: dict[str, AdvisorySignal] = {}
+    for adv_id, adv_data in data.get("advisories", {}).items():
+        advisories[adv_id] = AdvisorySignal(
+            advisory_id=adv_data.get("advisory_id", adv_id),
+            advisory_type=AdvisoryType(adv_data["advisory_type"]),
+            project_id=adv_data["project_id"],
+            message=adv_data.get("message", ""),
+            severity=adv_data.get("severity", "info"),
+            task_id=adv_data.get("task_id"),
+            stage=adv_data.get("stage"),
+            actor=adv_data.get("actor", "maverick"),
+            created_at=_parse_datetime(adv_data.get("created_at")) or datetime.utcnow(),
+            acknowledged=adv_data.get("acknowledged", False),
+        )
+
+    # Reconstruct blockers
+    blockers: dict[str, Blocker] = {}
+    for blk_id, blk_data in data.get("blockers", {}).items():
+        blockers[blk_id] = Blocker(
+            blocker_id=blk_data.get("blocker_id", blk_id),
+            task_id=blk_data["task_id"],
+            project_id=blk_data["project_id"],
+            reason=blk_data.get("reason", ""),
+            severity=BlockerSeverity(blk_data.get("severity", "medium")),
+            detected_at=_parse_datetime(blk_data.get("detected_at")) or datetime.utcnow(),
+            resolved_at=_parse_datetime(blk_data.get("resolved_at")),
+            resolved_by=blk_data.get("resolved_by"),
+        )
+
     return Project(
         project_id=data["project_id"],
         project_name=data["project_name"],
@@ -270,6 +396,25 @@ def _dict_to_project(data: dict) -> Project:
         project_owner=data["project_owner"],
         created_at=_parse_datetime(data.get("created_at")) or datetime.utcnow(),
         closed_at=_parse_datetime(data.get("closed_at")),
+        artifacts=artifacts,
+        acceptance_package=acceptance_package,
+        advisories=advisories,
+        blockers=blockers,
+        # V1.6 intake fields
+        intake_complete=data.get("intake_complete", False),
+        intake_summary=data.get("intake_summary", ""),
+        intake_deliverable=data.get("intake_deliverable", ""),
+        intake_business_context=data.get("intake_business_context", ""),
+        output_package=data.get("output_package", {}),
+        # V1.6 prerequisite package
+        prerequisite_artifacts=prerequisite_artifacts,
+        prerequisite_submitted_at=_parse_datetime(data.get("prerequisite_submitted_at")),
+        # Sprint 2R: Pre-kickoff review
+        ba_review=ba_review,
+        sa_review=sa_review,
+        qa_review=qa_review,
+        maverick_recommendation=maverick_recommendation,
+        kickoff_decision=kickoff_decision,
     )
 
 

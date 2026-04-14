@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grid Chase — Dashboard</title>
+  <style>
+    body { font-family: monospace; background: #0d1117; color: #e6edf3; padding: 1rem; }
+    h1 { color: #58a6ff; }
+    .panel { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 1rem; margin-bottom: 1rem; }
+    label { display: block; margin-top: 0.5rem; color: #8b949e; font-size: 0.85rem; }
+    input, select, button { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 4px; padding: 0.4rem; margin: 0.25rem; }
+    button { cursor: pointer; color: #58a6ff; }
+    button:hover { border-color: #58a6ff; }
+    #grid-display { font-size: 1.1rem; line-height: 1.4; white-space: pre; margin-top: 0.5rem; }
+    .stat { display: inline-block; min-width: 160px; }
+    .stat-value { color: #58a6ff; font-weight: bold; }
+    .token { color: #3fb950; }
+    .obstacle { color: #f85149; }
+    .agent { color: #d29922; font-weight: bold; }
+    .controls { margin-top: 0.5rem; }
+    .controls button { margin: 0.2rem; padding: 0.3rem 0.6rem; }
+    table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; }
+    th, td { border: 1px solid #30363d; padding: 0.3rem 0.6rem; text-align: left; }
+    th { color: #8b949e; }
+    tr:nth-child(even) { background: #1c2128; }
+  </style>
+</head>
+<body>
+  <h1>Grid Chase Dashboard</h1>
+
+  <!-- Session Create -->
+  <div class="panel">
+    <div class="stat">Session: <span class="stat-value" id="session-id">—</span></div>
+    <div class="stat">Run: <span class="stat-value" id="run-id">—</span></div>
+    <div class="stat">Seed: <span class="stat-value" id="episode-seed">—</span></div>
+    <div style="margin-top:0.5rem">
+      <button onclick="createSession()">New Session</button>
+      <button onclick="startRun()" id="btn-start" disabled>Start Run</button>
+      <button onclick="fetchLeaderboard()" id="btn-lb" disabled>Refresh Leaderboard</button>
+    </div>
+  </div>
+
+  <!-- Game State -->
+  <div class="panel" id="game-panel" style="display:none">
+    <div>
+      <div class="stat">Step: <span class="stat-value" id="step">0</span></div>
+      <div class="stat">Tokens: <span class="stat-value" id="tokens">0</span></div>
+      <div class="stat">Collected: <span class="stat-value" id="collected">0</span></div>
+      <div class="stat">Moves: <span class="stat-value" id="moves">0</span></div>
+    </div>
+    <pre id="grid-display"></pre>
+    <div class="controls">
+      <button onclick="doStep('NORTH')">NORTH</button>
+      <button onclick="doStep('SOUTH')">SOUTH</button>
+      <button onclick="doStep('EAST')">EAST</button>
+      <button onclick="doStep('WEST')">WEST</button>
+      <button onclick="startRun()">New Run</button>
+    </div>
+    <div id="episode-end" style="display:none; margin-top:0.5rem; color:#d29922"></div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="panel">
+    <h3>Leaderboard</h3>
+    <table id="leaderboard">
+      <thead><tr><th>Agent</th><th>Score</th><th>Tokens</th><th>Moves</th></tr></thead>
+      <tbody id="lb-body"><tr><td colspan="4" style="color:#8b949e">No runs yet</td></tr></tbody>
+    </table>
+  </div>
+
+  <script>
+    const BASE = 'http://localhost:8001/api/v1';
+    let currentSession = null;
+    let currentRun = null;
+
+    function cellHtml(c) {
+      if (c === 'A') return '<span class="agent">A</span>';
+      if (c === 'T') return '<span class="token">T</span>';
+      if (c === '#') return '<span class="obstacle">#</span>';
+      return '.';
+    }
+
+    function renderGrid(grid) {
+      return grid.map(row => row.map(cellHtml).join(' ')).join('\n');
+    }
+
+    async function createSession() {
+      const r = await fetch(BASE + '/sessions', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({})
+      });
+      const d = await r.json();
+      currentSession = d.session_id;
+      document.getElementById('session-id').textContent = d.session_id;
+      document.getElementById('episode-seed').textContent = d.episode_seed;
+      document.getElementById('btn-start').disabled = false;
+      document.getElementById('game-panel').style.display = 'none';
+      document.getElementById('episode-end').style.display = 'none';
+      document.getElementById('lb-body').innerHTML = '<tr><td colspan="4" style="color:#8b949e">No runs yet</td></tr>';
+    }
+
+    async function startRun() {
+      if (!currentSession) { alert('Create a session first'); return; }
+      const r = await fetch(BASE + '/sessions/' + currentSession + '/runs', { method: 'POST' });
+      const d = await r.json();
+      currentRun = d.run_id;
+      document.getElementById('run-id').textContent = d.run_id;
+      document.getElementById('game-panel').style.display = 'block';
+      document.getElementById('episode-end').style.display = 'none';
+      document.getElementById('btn-lb').disabled = false;
+      updateState(d.initial_state);
+    }
+
+    async function doStep(action) {
+      if (!currentRun) { alert('Start a run first'); return; }
+      const r = await fetch(BASE + '/run/' + currentRun + '/step', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ action })
+      });
+      const d = await r.json();
+      updateState(d.state);
+      if (d.episode_done) {
+        document.getElementById('episode-end').style.display = 'block';
+        document.getElementById('episode-end').textContent =
+          'Episode done: ' + d.termination_reason + ' | Score: ' + d.state.tokens_collected;
+        await fetchLeaderboard();
+      }
+    }
+
+    function updateState(state) {
+      document.getElementById('step').textContent = state.step;
+      document.getElementById('tokens').textContent = state.tokens_remaining;
+      document.getElementById('collected').textContent = state.tokens_collected;
+      document.getElementById('moves').textContent = state.moves_taken;
+      document.getElementById('grid-display').innerHTML = renderGrid(state.grid);
+    }
+
+    async function fetchLeaderboard() {
+      if (!currentSession) return;
+      const r = await fetch(BASE + '/leaderboard/' + currentSession);
+      const d = await r.json();
+      if (!d.leaderboard || d.leaderboard.length === 0) {
+        document.getElementById('lb-body').innerHTML = '<tr><td colspan="4" style="color:#8b949e">No runs yet</td></tr>';
+        return;
+      }
+      document.getElementById('lb-body').innerHTML = d.leaderboard.map(e =>
+        '<tr><td>' + e.agent_name + '</td><td>' + e.run_score + '</td><td>' + e.tokens_collected + '</td><td>' + e.moves_taken + '</td></tr>'
+      ).join('');
+    }
+  </script>
+</body>
+</html>

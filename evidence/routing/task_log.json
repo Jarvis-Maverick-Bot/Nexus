@@ -1,0 +1,110 @@
+{
+  "ok": true,
+  "log": [
+    {
+      "task_id": "TASK-M3R2-001",
+      "action": "launch-subagent",
+      "actor": "Jarvis",
+      "result": {
+        "ok": true,
+        "task_id": "TASK-M3R2-001",
+        "agent_type": "TDD",
+        "status": "RUNNING"
+      },
+      "at": "2026-04-14T07:16:41+00:00"
+    },
+    {
+      "task_id": "TASK-M3R2-001",
+      "action": "inspect-task",
+      "actor": "Jarvis",
+      "result": {
+        "ok": true,
+        "task": {
+          "id": "TASK-M3R2-001",
+          "agent_type": "TDD",
+          "status": "RUNNING",
+          "created_at": "2026-04-14T07:16:41+00:00",
+          "updated_at": "2026-04-14T07:16:41+00:00",
+          "actions": []
+        }
+      },
+      "at": "2026-04-14T07:16:41+00:00"
+    },
+    {
+      "task_id": "TASK-M3R2-001",
+      "action": "pause-task",
+      "actor": "Jarvis",
+      "result": {
+        "ok": true,
+        "task_id": "TASK-M3R2-001",
+        "status": "PAUSED"
+      },
+      "at": "2026-04-14T07:16:41+00:00"
+    },
+    {
+      "task_id": "TASK-M3R2-001",
+      "action": "inspect-task",
+      "actor": "Jarvis",
+      "result": {
+        "ok": true,
+        "task": {
+          "id": "TASK-M3R2-001",
+          "agent_type": "TDD",
+          "status": "PAUSED",
+          "created_at": "2026-04-14T07:16:41+00:00",
+          "updated_at": "2026-04-14T07:16:41+00:00",
+          "actions": []
+        }
+      },
+      "at": "2026-04-14T07:16:41+00:00"
+    },
+    {
+      "task_id": "TASK-M3R2-001",
+      "action": "invoke-command",
+      "actor": "Jarvis",
+      "result": {
+        "ok": true,
+        "command_id": "CMD-30e3d1d8",
+        "task_id": "TASK-M3R2-001",
+        "command": "status --brief"
+      },
+      "at": "2026-04-14T07:16:41+00:00"
+    },
+    {
+      "task_id": "TASK-M3R2-001",
+      "action": "terminate-task",
+      "actor": "Jarvis",
+      "result": {
+        "ok": true,
+        "task_id": "TASK-M3R2-001",
+        "status": "TERMINATED"
+      },
+      "at": "2026-04-14T07:16:41+00:00"
+    },
+    {
+      "task_id": "TASK-M3R2-001",
+      "action": "inspect-task",
+      "actor": "Jarvis",
+      "result": {
+        "ok": true,
+        "task": {
+          "id": "TASK-M3R2-001",
+          "agent_type": "TDD",
+          "status": "TERMINATED",
+          "created_at": "2026-04-14T07:16:41+00:00",
+          "updated_at": "2026-04-14T07:16:41+00:00",
+          "actions": [
+            {
+              "id": "CMD-30e3d1d8",
+              "task_id": "TASK-M3R2-001",
+              "command": "status --brief",
+              "invoked_at": "2026-04-14T07:16:41+00:00"
+            }
+          ]
+        }
+      },
+      "at": "2026-04-14T07:16:42+00:00"
+    }
+  ],
+  "total": 7
+}

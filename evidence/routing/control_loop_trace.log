@@ -1,0 +1,105 @@
+{
+  "sprint": "M3-R2",
+  "loop": "LAUNCH->INSPECT->PAUSE->INSPECT->INVOKE->TERMINATE->INSPECT",
+  "task_id": "TASK-M3R2-001",
+  "evidence": [
+    {
+      "step": "LAUNCH",
+      "result": {
+        "ok": true,
+        "task_id": "TASK-M3R2-001",
+        "agent_type": "TDD",
+        "status": "RUNNING"
+      }
+    },
+    {
+      "step": "INSPECT",
+      "result": {
+        "ok": true,
+        "task": {
+          "id": "TASK-M3R2-001",
+          "agent_type": "TDD",
+          "status": "RUNNING",
+          "created_at": "2026-04-14T07:16:41+00:00",
+          "updated_at": "2026-04-14T07:16:41+00:00",
+          "actions": []
+        }
+      }
+    },
+    {
+      "step": "PAUSE",
+      "result": {
+        "ok": true,
+        "task_id": "TASK-M3R2-001",
+        "status": "PAUSED"
+      }
+    },
+    {
+      "step": "INSPECT-PAUSED",
+      "result": {
+        "ok": true,
+        "task": {
+          "id": "TASK-M3R2-001",
+          "agent_type": "TDD",
+          "status": "PAUSED",
+          "created_at": "2026-04-14T07:16:41+00:00",
+          "updated_at": "2026-04-14T07:16:41+00:00",
+          "actions": []
+        }
+      }
+    },
+    {
+      "step": "INVOKE",
+      "result": {
+        "ok": true,
+        "command_id": "CMD-30e3d1d8",
+        "task_id": "TASK-M3R2-001",
+        "command": "status --brief"
+      }
+    },
+    {
+      "step": "TERMINATE",
+      "result": {
+        "ok": true,
+        "task_id": "TASK-M3R2-001",
+        "status": "TERMINATED"
+      }
+    },
+    {
+      "step": "INSPECT-TERMINATED",
+      "result": {
+        "ok": true,
+        "task": {
+          "id": "TASK-M3R2-001",
+          "agent_type": "TDD",
+          "status": "TERMINATED",
+          "created_at": "2026-04-14T07:16:41+00:00",
+          "updated_at": "2026-04-14T07:16:41+00:00",
+          "actions": [
+            {
+              "id": "CMD-30e3d1d8",
+              "task_id": "TASK-M3R2-001",
+              "command": "status --brief",
+              "invoked_at": "2026-04-14T07:16:41+00:00"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "FORBIDDEN",
+      "result": {
+        "ok": false,
+        "error": "FORBIDDEN",
+        "reason": "UNAUTHORIZED_BOT not authorized for terminate-task in V1.8"
+      }
+    },
+    {
+      "step": "ALREADY-TERMINATED",
+      "result": {
+        "ok": false,
+        "error": "Task already terminated: TASK-M3R2-001"
+      }
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "sprint": "M3-R1",
+  "loop": "INTAKE\u2192DETERMINE\u2192ROUTE\u2192RESOLVE\u2192RELAY",
+  "event_id": "EVT-74006c24",
+  "evidence": [
+    {
+      "step": "INTAKE",
+      "input": "{\"type\":\"UNKNOWN_TOOL\",\"initiator\":\"Jarvis\",\"context\":{\"tool\":\"grid_escape_v2\",\"session\":\"M3-R1\"},\"payload\":{\"tool_name\":\"grid_escape_v2\",\"reason\":\"tool not found\"}}",
+      "output": {
+        "ok": true,
+        "event_id": "EVT-74006c24",
+        "status": "FORWARDED",
+        "destination": "AGENT",
+        "at": "2026-04-14T07:01:38+00:00"
+      },
+      "at": "2026-04-14T07:01:38+00:00",
+      "event_id": "EVT-74006c24"
+    },
+    {
+      "step": "DETERMINE",
+      "event_type": "UNKNOWN_TOOL",
+      "destination": "AGENT",
+      "rule": "UNKNOWN_TOOL -> AGENT (rule table)"
+    },
+    {
+      "step": "ROUTE",
+      "status": "FORWARDED",
+      "destination": "AGENT",
+      "event_id": "EVT-74006c24",
+      "at": "2026-04-14T07:01:38+00:00"
+    },
+    {
+      "step": "RESOLVE",
+      "destination": "AGENT",
+      "response": {
+        "resolved": true,
+        "action": "Sub-agent notified via AGENT destination"
+      },
+      "at": "2026-04-14T07:01:38+00:00"
+    },
+    {
+      "step": "RELAY",
+      "initiator": "Jarvis",
+      "result": "Resolution relayed to initiating Agent",
+      "event_id": "EVT-74006c24",
+      "at": "2026-04-14T07:01:38+00:00"
+    }
+  ]
+}

@@ -19,7 +19,13 @@ from typing import Any, Optional
 from gov_langgraph.harness import HarnessConfig, StateStore, Checkpointer, EventJournal
 from gov_langgraph.platform_model import (
     Project, WorkItem, TaskState, Workflow,
-    Role, TaskStatus, Handoff, Gate, GateDecision, Event,
+    Role, TaskStatus, ProjectStatus, Handoff, Gate, GateDecision, Event,
+    Artifact, ArtifactType, AcceptancePackage,
+    AdvisorySignal, AdvisoryType,
+    Blocker, BlockerSeverity,
+    ReviewStatus, ReviewRecord,
+    MaverickRecommendationStatus, MaverickRecommendation,
+    KickoffDecisionStatus, KickoffDecision,
     get_v1_pipeline_workflow,
 )
 from gov_langgraph.platform_model.state_machine import StateMachine
@@ -44,8 +50,6 @@ def _is_terminal(workitem: WorkItem) -> bool:
 
 # ---------------------------------------------------------------------------
 # Harness instances (created once, passed to tools)
-# ---------------------------------------------------------------------------
-
 _harness: dict[str, Any] = {}
 
 
@@ -88,32 +92,53 @@ def _sm() -> StateMachine:
 
 # ---------------------------------------------------------------------------
 # Tool functions
-# ---------------------------------------------------------------------------
-
 
 def create_project_tool(input: dict) -> dict:
     """
-    Create a new project.
+    Create a new project in DRAFT state with prerequisite package initialized.
+
+    V1.6: Project starts in DRAFT state. Prerequisite package (6 artifacts)
+    is initialized but empty. Project auto-transitions:
+      DRAFT -> INTAKE_SUBMITTED (first artifact submitted)
+      INTAKE_SUBMITTED -> PRE_KICKOFF_REVIEW (all 6 submitted)
+
+    Required: project_name, project_goal, project_owner
+    Optional: intake_summary, intake_deliverable, intake_business_context,
+              domain_type, actor
 
     Args:
-        input: {project_name: str, project_goal: str, domain_type: str, project_owner: str}
+        input: {
+            project_name: str, project_goal: str, project_owner: str,
+            intake_summary: str, intake_deliverable: str, intake_business_context: str,
+            domain_type: str, actor: str,
+        }
     Returns:
-        {ok: bool, project_id: str, message: str}
+        {ok: bool, project_id: str, message: str, project_status: str,
+         prerequisite_submitted: int}  # 0/6 initially
     """
     try:
         h = _harness
+
         project = Project(
             project_name=input["project_name"],
             project_goal=input.get("project_goal", ""),
             domain_type=input.get("domain_type", "internal"),
             project_owner=input.get("project_owner", ""),
+            project_status=ProjectStatus.DRAFT,  # V1.6: start in DRAFT
+            intake_summary=input.get("intake_summary", ""),
+            intake_deliverable=input.get("intake_deliverable", ""),
+            intake_business_context=input.get("intake_business_context", ""),
         )
+
+        # V1.6: Initialize empty prerequisite package
+        project.initialize_prerequisites()
+
         h["store"].save_project(project)
 
         h["journal"].append_raw(
             project_id=project.project_id,
             event_type="project_created",
-            event_summary=f"Project '{project.project_name}' created",
+            event_summary=f"Project '{project.project_name}' created in DRAFT",
             actor=input.get("actor", "unknown"),
         )
 
@@ -121,10 +146,396 @@ def create_project_tool(input: dict) -> dict:
             "ok": True,
             "project_id": project.project_id,
             "project_name": project.project_name,
-            "message": f"Project '{project.project_name}' created",
+            "project_status": project.project_status.value,
+            "prerequisite_submitted": 0,  # 0/6 initially
+            "prerequisite_complete": False,
+            "message": f"Project '{project.project_name}' created in DRAFT with 0/6 prerequisites",
         }
     except Exception as e:
         return {"ok": False, "error": str(e), "message": f"Failed to create project: {e}"}
+
+
+def submit_prerequisite_tool(input: dict) -> dict:
+    """
+    Submit one prerequisite artifact to a project's prerequisite package.
+
+    V1.6: Projects start in DRAFT. Submitting artifacts transitions:
+      DRAFT -> INTAKE_SUBMITTED (first artifact)
+      INTAKE_SUBMITTED -> PRE_KICKOFF_REVIEW (all 6)
+
+    Args:
+        input: {
+            project_id: str,
+            artifact_type: str,  # scope, spec, arch, testcase, testreport, guideline
+            content_preview: str,  # short description of the artifact
+            producer: str,  # who produced it (Alex, BA, SA, QA, etc.)
+            actor: str,
+        }
+    Returns:
+        {ok: bool, project_status: str, prerequisite_submitted: int,
+         prerequisite_complete: bool, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        artifact_type = input["artifact_type"]
+        content_preview = input.get("content_preview", "")
+        producer = input.get("producer", "")
+
+        project = h["store"].load_project(project_id)
+
+        # V1.5 migration: initialize prerequisite_artifacts if empty
+        if not project.prerequisite_artifacts:
+            project.initialize_prerequisites()
+
+        # Validate artifact_type
+        valid_types = [at.value for at in ArtifactType.all()]
+        if artifact_type not in valid_types:
+            return {
+                "ok": False,
+                "error": f"Invalid artifact_type. Must be one of: {valid_types}",
+                "message": f"Unknown artifact type: {artifact_type}",
+            }
+
+        # Require meaningful content (minimum 10 characters)
+        if not content_preview or len(content_preview.strip()) < 10:
+            return {
+                "ok": False,
+                "error": "content_too_short",
+                "message": f"Prerequisite content must be at least 10 characters. Got: '{content_preview}'",
+            }
+
+        project.submit_prerequisite(artifact_type, content_preview, producer)
+        h["store"].save_project(project)
+
+        submitted_count = sum(
+            1 for pa in project.prerequisite_artifacts.values() if pa.submitted
+        )
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="prerequisite_submitted",
+            event_summary=f"Prerequisite '{artifact_type}' submitted for project",
+            actor=input.get("actor", "unknown"),
+        )
+
+        return {
+            "ok": True,
+            "project_status": project.project_status.value,
+            "prerequisite_submitted": submitted_count,
+            "prerequisite_complete": project.is_prerequisite_complete(),
+            "prerequisite_submitted_at": (
+                project.prerequisite_submitted_at.isoformat()
+                if project.prerequisite_submitted_at else None
+            ),
+            "message": f"Prerequisite '{artifact_type}' submitted ({submitted_count}/6)",
+        }
+    except ObjectNotFoundError:
+        return {"ok": False, "error": f"Project not found: {project_id}", "message": f"Project not found: {project_id}"}
+    except Exception as e:
+        return {"ok": False, "error": str(e), "message": f"Failed to submit prerequisite: {e}"}
+
+
+def get_prerequisite_package_tool(input: dict) -> dict:
+    """
+    Get the full prerequisite package state for a project.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, project_id: str, project_status: str,
+         prerequisite_submitted: int, prerequisite_complete: bool,
+         prerequisite_submitted_at: str|None, artifacts: dict}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+
+        project = h["store"].load_project(project_id)
+
+        # V1.5 migration: initialize prerequisite_artifacts if empty
+        if not project.prerequisite_artifacts:
+            project.initialize_prerequisites()
+            h["store"].save_project(project)
+
+        submitted_count = sum(
+            1 for pa in project.prerequisite_artifacts.values() if pa.submitted
+        )
+
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "project_status": project.project_status.value,
+            "prerequisite_submitted": submitted_count,
+            "prerequisite_complete": project.is_prerequisite_complete(),
+            "prerequisite_submitted_at": (
+                project.prerequisite_submitted_at.isoformat()
+                if project.prerequisite_submitted_at else None
+            ),
+            "artifacts": project.get_prerequisite_package(),
+        }
+    except ObjectNotFoundError:
+        return {"ok": False, "error": f"Project not found: {project_id}", "message": f"Project not found: {project_id}"}
+    except Exception as e:
+        return {"ok": False, "error": str(e), "message": f"Failed to get prerequisite package: {e}"}
+
+
+# ---------------------------------------------------------------------------
+# Sprint 2R: Pre-Kickoff Review Tools
+def request_ba_review_tool(input: dict) -> dict:
+    """
+    Request a BA pre-kickoff review for a project.
+    Independent — does not block SA or QA reviews.
+
+    Args:
+        input: {project_id: str, actor: str}
+    Returns:
+        {ok: bool, reviewer: str, requested_at: str, message: str}
+    """
+    return _request_review(input, "ba")
+
+
+def request_sa_review_tool(input: dict) -> dict:
+    """
+    Request an SA pre-kickoff review for a project.
+    Independent — does not block BA or QA reviews.
+
+    Args:
+        input: {project_id: str, actor: str}
+    Returns:
+        {ok: bool, reviewer: str, requested_at: str, message: str}
+    """
+    return _request_review(input, "sa")
+
+
+def request_qa_review_tool(input: dict) -> dict:
+    """
+    Request a QA pre-kickoff review for a project.
+    Independent — does not block BA or SA reviews.
+
+    Args:
+        input: {project_id: str, actor: str}
+    Returns:
+        {ok: bool, reviewer: str, requested_at: str, message: str}
+    """
+    return _request_review(input, "qa")
+
+
+def _request_review(input: dict, reviewer: str) -> dict:
+    """Shared implementation for request_*_review_tool."""
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        project.request_review(reviewer)
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type=f"{reviewer.upper()}_review_requested",
+            event_summary=f"{reviewer.upper()} review requested",
+            actor=input.get("actor", "unknown"),
+        )
+
+        return {
+            "ok": True,
+            "reviewer": reviewer,
+            "requested_at": (
+                getattr(project, f'{reviewer}_review').requested_at.isoformat()
+                if getattr(project, f'{reviewer}_review').requested_at else None
+            ),
+            "message": f"{reviewer.upper()} review requested",
+        }
+    except ObjectNotFoundError:
+        return {"ok": False, "error": f"Project not found: {project_id}", "message": f"Project not found: {project_id}"}
+    except ValueError as e:
+        return {"ok": False, "error": str(e), "message": str(e)}
+    except Exception as e:
+        return {"ok": False, "error": str(e), "message": f"Failed to request review: {e}"}
+
+
+def record_review_outcome_tool(input: dict) -> dict:
+    """
+    Record a reviewer's outcome: APPROVED or REVISION_NEEDED.
+    Does NOT transition project status — Maverick does that via recommend_kickoff_tool.
+    Raises error if outcome is PENDING.
+
+    Args:
+        input: {
+            project_id: str,
+            reviewer: str,  # ba, sa, or qa
+            outcome: str,  # approved or revision_needed
+            note: str,
+            actor: str,
+        }
+    Returns:
+        {ok: bool, reviewer: str, outcome: str, decided_at: str, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        reviewer = input["reviewer"]
+        outcome_str = input["outcome"]
+        note = input.get("note", "")
+
+        # Map string to enum
+        outcome_map = {
+            "approved": ReviewStatus.APPROVED,
+            "revision_needed": ReviewStatus.REVISION_NEEDED,
+        }
+        if outcome_str not in outcome_map:
+            return {
+                "ok": False,
+                "error": f"Invalid outcome: {outcome_str}. Must be 'approved' or 'revision_needed'.",
+                "message": f"Invalid outcome: {outcome_str}",
+            }
+        outcome = outcome_map[outcome_str]
+
+        project = h["store"].load_project(project_id)
+        project.record_review_outcome(reviewer, outcome, note)
+        h["store"].save_project(project)
+
+        record = getattr(project, f"{reviewer}_review")
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type=f"{reviewer.upper()}_review_{outcome_str}",
+            event_summary=f"{reviewer.upper()} review: {outcome_str}",
+            actor=input.get("actor", "unknown"),
+        )
+
+        return {
+            "ok": True,
+            "reviewer": reviewer,
+            "outcome": outcome_str,
+            "decided_at": record.decided_at.isoformat() if record.decided_at else None,
+            "note": record.note,
+            "message": f"{reviewer.upper()} review recorded: {outcome_str}",
+        }
+    except ObjectNotFoundError:
+        return {"ok": False, "error": f"Project not found: {project_id}", "message": f"Project not found: {project_id}"}
+    except ValueError as e:
+        return {"ok": False, "error": str(e), "message": str(e)}
+    except Exception as e:
+        return {"ok": False, "error": str(e), "message": f"Failed to record review outcome: {e}"}
+
+
+def get_review_status_tool(input: dict) -> dict:
+    """
+    Get the full review status for a project: BA/SA/QA + Maverick recommendation + kickoff decision.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, project_id: str, project_status: str, review_status: dict,
+         can_recommend_kickoff: bool, any_revision_needed: bool, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        review_status = project.get_review_status()
+
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "project_status": project.project_status.value,
+            "review_status": review_status,
+            "is_review_complete": project.is_review_complete(),
+            "any_revision_needed": project.any_revision_needed(),
+            "can_recommend_kickoff": project.can_recommend_kickoff(),
+            "message": "Review status retrieved",
+        }
+    except ObjectNotFoundError:
+        return {"ok": False, "error": f"Project not found: {project_id}", "message": f"Project not found: {project_id}"}
+    except Exception as e:
+        return {"ok": False, "error": str(e), "message": f"Failed to get review status: {e}"},
+
+
+def recommend_kickoff_tool(input: dict) -> dict:
+    """
+    Maverick makes a kickoff recommendation: RECOMMEND_KICKOFF or RECOMMEND_REVISION.
+
+    KICKOFF requires: all 3 reviews complete AND no REVISION_NEEDED.
+    If any review is REVISION_NEEDED, Maverick should recommend REVISION.
+
+    This sets MaverickRecommendation on the project — does NOT change project_status directly.
+    Caller (or kickoff_tool) should transition project based on recommendation.
+
+    Args:
+        input: {
+            project_id: str,
+            recommendation: str,  # recommend_kickoff or recommend_revision
+            note: str,
+            actor: str,
+        }
+    Returns:
+        {ok: bool, recommendation: str, recommended_at: str, note: str, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        rec_str = input["recommendation"]
+        note = input.get("note", "")
+
+        rec_map = {
+            "recommend_kickoff": MaverickRecommendationStatus.RECOMMEND_KICKOFF,
+            "recommend_revision": MaverickRecommendationStatus.RECOMMEND_REVISION,
+        }
+        if rec_str not in rec_map:
+            return {
+                "ok": False,
+                "error": f"Invalid recommendation: {rec_str}. Must be 'recommend_kickoff' or 'recommend_revision'.",
+                "message": f"Invalid recommendation: {rec_str}",
+            }
+        recommendation = rec_map[rec_str]
+
+        project = h["store"].load_project(project_id)
+
+        # Pre-check: if recommending kickoff, verify conditions are met
+        if recommendation == MaverickRecommendationStatus.RECOMMEND_KICKOFF:
+            if not project.is_review_complete():
+                return {
+                    "ok": False,
+                    "error_type": "reviews_incomplete",
+                    "error": "reviews_incomplete",
+                    "message": "Cannot recommend kickoff: not all reviews are complete. Complete all reviews first.",
+                }
+            if project.any_revision_needed():
+                return {
+                    "ok": False,
+                    "error_type": "revision_needed",
+                    "error": "revision_needed",
+                    "message": "Cannot recommend kickoff: one or more reviews require revision. Recommend revision instead.",
+                }
+
+        project.recommend_kickoff(recommendation, note)
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type=f"maverick_{rec_str}",
+            event_summary=f"Maverick recommendation: {rec_str}",
+            actor=input.get("actor", "unknown"),
+        )
+
+        return {
+            "ok": True,
+            "recommendation": rec_str,
+            "recommended_at": (
+                project.maverick_recommendation.recommended_at.isoformat()
+                if project.maverick_recommendation.recommended_at else None
+            ),
+            "note": project.maverick_recommendation.note,
+            "message": f"Maverick recommendation recorded: {rec_str}"
+        }
+    except ObjectNotFoundError:
+        return {"ok": False, "error": f"Project not found: {project_id}", "message": f"Project not found: {project_id}"}
+    except ValueError as e:
+        return {"ok": False, "error": str(e), "message": str(e)}
+    except Exception as e:
+        return {"ok": False, "error": str(e), "message": f"Failed to recommend kickoff: {e}"}
 
 
 def create_task_tool(input: dict) -> dict:
@@ -186,20 +597,17 @@ def create_task_tool(input: dict) -> dict:
         return {"ok": False, "error": str(e), "message": f"Failed to create task: {e}"}
 
 
-# Default project ID for kickoff — all kickoff tasks go here unless configured otherwise
-DEFAULT_PROJECT_ID = "pmo-kickoff"
-
-
 def kickoff_task_tool(input: dict) -> dict:
     """
     Announce a new project kickoff — creates a workitem at INTAKE stage.
 
-    Product-shaped interface. Alex provides title, description, priority, and optional assignee.
-    Backend handles project assignment and stage setting automatically.
+    V1.5: project_id is required. Every task must belong to an explicit project.
+    No DEFAULT_PROJECT_ID fallback — use create_project_tool first if needed.
 
     Args:
         input: {
             title: str (required) — task title,
+            project_id: str (required) — UUID of the project to create task under,
             description: str (required) — what this work is,
             priority: int (required) — 0=P0, 1=P1, 2=P2, 3=P3,
             assignee: str (optional) — initial owner, blank = unassigned,
@@ -212,15 +620,42 @@ def kickoff_task_tool(input: dict) -> dict:
         h = _harness
 
         title = input["title"]
+        project_id = input.get("project_id", "").strip()
+        if not project_id:
+            return _error_response(
+                "validation_error",
+                "project_id is required. Create a project first via POST /projects."
+            )
+
         description = input.get("description", "")
         priority = input.get("priority", 3)
         assignee = input.get("assignee", "").strip() or "unassigned"
         actor = input.get("actor", "unknown")
 
+        # Validate project exists
+        if not h["store"].exists("project", project_id):
+            return _error_response(
+                "project_not_found",
+                f"Project '{project_id}' not found. Create it first via POST /projects."
+            )
+
+        # V1.6 Sprint 2R: block kickoff unless project is KICKOFF_READY
+        project = h["store"].load_project(project_id)
+        if project.project_status != ProjectStatus.KICKOFF_READY:
+            return {
+                "ok": False,
+                "error_type": "kickoff_blocked",
+                "error": "kickoff_blocked",
+                "message": (
+                    f"Cannot kick off: project is in '{project.project_status.value}' state. "
+                    "Complete pre-kickoff review and get Maverick 'Recommend Kickoff' before kicking off."
+                ),
+            }
+
         workitem = WorkItem(
             task_title=title,
             task_description=description,
-            project_id=DEFAULT_PROJECT_ID,
+            project_id=project_id,
             current_owner=assignee,
             current_stage="INTAKE",
             priority=priority,
@@ -236,7 +671,7 @@ def kickoff_task_tool(input: dict) -> dict:
         h["store"].save_taskstate(task_state)
 
         h["journal"].append_raw(
-            project_id=DEFAULT_PROJECT_ID,
+            project_id=project_id,
             event_type="task_kickoff",
             event_summary=f"Kickoff announced: '{title}' — assigned to {assignee}",
             actor=actor,
@@ -248,9 +683,10 @@ def kickoff_task_tool(input: dict) -> dict:
             "ok": True,
             "task_id": workitem.task_id,
             "task_title": workitem.task_title,
+            "project_id": project_id,
             "current_stage": "INTAKE",
             "assignee": assignee,
-            "message": f"Kickoff announced: '{title}' entered pipeline at INTAKE, assigned to {assignee}.",
+            "message": f"Kickoff announced: '{title}' entered pipeline at INTAKE under project {project_id}, assigned to {assignee}.",
         }
     except PlatformException as e:
         return _error_response("platform_unavailable", str(e))
@@ -713,3 +1149,1471 @@ def _gate_message(status: str, stage: str) -> str:
     elif status == "rejected":
         return f"Gate at '{stage}' was rejected."
     return f"No gate configured for stage '{stage}'."
+
+
+# ---------------------------------------------------------------------------
+# Project tools
+
+def get_project_tool(input: dict) -> dict:
+    """
+    Get details of a specific project including artifact completeness.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, project_id, project_name, project_status, artifact_completeness, missing_artifacts, ...}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        # Build artifact completeness map
+        artifact_map = project.get_artifacts_by_type()
+        artifact_completeness = {}
+        for at in ArtifactType.all():
+            if at in artifact_map and not artifact_map[at].is_empty():
+                artifact_completeness[at.value] = {
+                    "artifact_id": artifact_map[at].artifact_id,
+                    "produced_by": artifact_map[at].produced_by,
+                    "produced_at": artifact_map[at].produced_at.isoformat(),
+                    "has_content": True,
+                }
+            else:
+                artifact_completeness[at.value] = {"has_content": False}
+
+        missing = project.get_missing_artifacts()
+
+        return {
+            "ok": True,
+            "project_id": project.project_id,
+            "project_name": project.project_name,
+            "project_goal": project.project_goal,
+            "domain_type": project.domain_type,
+            "project_owner": project.project_owner,
+            "project_status": project.project_status.value,
+            "created_at": project.created_at.isoformat(),
+            "artifact_completeness": artifact_completeness,
+            "missing_artifacts": [at.value for at in missing],
+            "all_artifacts_present": len(missing) == 0,
+            "message": f"Project: {project.project_name} ({project.project_status.value})",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to get project: {e}")
+
+
+def list_projects_tool(input: dict) -> dict:
+    """
+    List all projects, optionally filtered by status.
+
+    Args:
+        input: {status: str | None}  # active, on_hold, closed, shutdown
+    Returns:
+        {ok: bool, projects: list[dict], count: int}
+    """
+    try:
+        h = _harness
+        status_filter = input.get("status")
+
+        project_ids = h["store"].list_projects()
+        projects = []
+        for pid in project_ids:
+            try:
+                proj = h["store"].load_project(pid)
+                if status_filter is None or proj.project_status.value == status_filter:
+                    projects.append({
+                        "project_id": proj.project_id,
+                        "project_name": proj.project_name,
+                        "project_status": proj.project_status.value,
+                        "project_owner": proj.project_owner,
+                        "created_at": proj.created_at.isoformat(),
+                    })
+            except Exception:
+                pass  # Skip corrupted project records
+
+        return {
+            "ok": True,
+            "projects": projects,
+            "count": len(projects),
+            "message": f"{len(projects)} project(s) found",
+        }
+    except Exception as e:
+        return _error_response("unknown", f"Failed to list projects: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Intake tools (V1.6)
+def validate_intake_tool(input: dict) -> dict:
+    """
+    Validate whether a project has all required intake fields present.
+
+    Required intake fields: intake_summary, intake_deliverable, intake_business_context.
+    Arch is optional at intake.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, project_id: str, intake_complete: bool,
+         missing_fields: list[str], message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        missing = []
+        if not project.intake_summary.strip():
+            missing.append("intake_summary")
+        if not project.intake_deliverable.strip():
+            missing.append("intake_deliverable")
+        if not project.intake_business_context.strip():
+            missing.append("intake_business_context")
+
+        is_valid = len(missing) == 0
+
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "intake_complete": is_valid,
+            "missing_fields": missing,
+            "message": (
+                "Intake validation passed — all required fields present"
+                if is_valid
+                else f"Intake incomplete — missing: {', '.join(missing)}"
+            ),
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to validate intake: {e}")
+
+
+def complete_intake_tool(input: dict) -> dict:
+    """
+    Mark a project's structured intake as complete.
+    Validates all required intake fields are present before marking complete.
+
+    Required intake fields: intake_summary, intake_deliverable, intake_business_context.
+    Arch is optional at intake (downstream delivery artifact).
+    Once complete, enables kickoff.
+
+    Args:
+        input: {project_id: str, actor: str}
+    Returns:
+        {ok: bool, project_id: str, intake_complete: bool, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        actor = input.get("actor", "unknown")
+
+        project = h["store"].load_project(project_id)
+
+        # Validate first
+        if not project.validate_intake():
+            missing = []
+            if not project.intake_summary.strip():
+                missing.append("intake_summary")
+            if not project.intake_deliverable.strip():
+                missing.append("intake_deliverable")
+            if not project.intake_business_context.strip():
+                missing.append("intake_business_context")
+            return _error_response(
+                "intake_incomplete",
+                f"Cannot complete intake — missing required fields: {', '.join(missing)}",
+                project_id=project_id,
+                missing_fields=missing,
+            )
+
+        project.complete_intake()
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="intake_completed",
+            event_summary=f"Structured intake completed for project '{project.project_name}'",
+            actor=actor,
+        )
+
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "intake_complete": True,
+            "message": f"Structured intake completed — kickoff enabled for project '{project.project_name}'",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to complete intake: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Artifact tools
+def upsert_artifact_tool(input: dict) -> dict:
+    """
+    Add or update an artifact for a project.
+
+    Args:
+        input: {
+            project_id: str,
+            artifact_type: str,  # scope|spec|arch|testcase|testreport|guideline
+            content: str,
+            produced_by: str,
+        }
+    Returns:
+        {ok: bool, artifact_id: str, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        artifact_type_str = input["artifact_type"]
+        content = input.get("content", "")
+        produced_by = input.get("produced_by", "")
+
+        # Validate artifact type
+        try:
+            artifact_type = ArtifactType(artifact_type_str)
+        except ValueError:
+            return _error_response(
+                "validation_error",
+                f"Invalid artifact_type: {artifact_type_str}. Must be one of: {[e.value for e in ArtifactType.all()]}",
+            )
+
+        project = h["store"].load_project(project_id)
+
+        # Create artifact
+        artifact = Artifact(
+            artifact_type=artifact_type,
+            project_id=project_id,
+            content=content,
+            produced_by=produced_by,
+        )
+        project.add_artifact(artifact)
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="artifact_updated",
+            event_summary=f"Artifact '{artifact_type.value}' updated by {produced_by}",
+            actor=produced_by,
+        )
+
+        return {
+            "ok": True,
+            "artifact_id": artifact.artifact_id,
+            "artifact_type": artifact_type.value,
+            "message": f"Artifact '{artifact_type.display_name}' saved",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to upsert artifact: {e}")
+
+
+def get_artifacts_tool(input: dict) -> dict:
+    """
+    Get all artifacts for a project.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, artifacts: list[dict], missing: list[str]}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        type_map = project.get_artifacts_by_type()
+        prereq_map = project.prerequisite_artifacts
+        artifacts = []
+        for at in ArtifactType.all():
+            if at in type_map and not type_map[at].is_empty():
+                artifacts.append({
+                    "artifact_id": type_map[at].artifact_id,
+                    "artifact_type": at.value,
+                    "display_name": at.display_name,
+                    "produced_by": type_map[at].produced_by,
+                    "produced_at": type_map[at].produced_at.isoformat(),
+                    "content_preview": type_map[at].content[:200] if type_map[at].content else "",
+                    "has_content": True,
+                    "category": "delivery",
+                })
+            else:
+                # Check if submitted as prerequisite (no delivery artifact yet)
+                prereq_submitted = (
+                    at.value in prereq_map
+                    and prereq_map[at.value].submitted
+                )
+                prereq_id = (
+                    prereq_map[at.value].artifact_id
+                    if prereq_submitted
+                    else None
+                )
+                artifacts.append({
+                    "artifact_id": prereq_id,
+                    "artifact_type": at.value,
+                    "display_name": at.display_name,
+                    "generated_by": at.generated_by,
+                    "stage_hint": at.stage_hint,
+                    "has_content": prereq_submitted,
+                    "content_preview": (
+                        prereq_map[at.value].content_preview
+                        if prereq_submitted
+                        else ""
+                    ),
+                    "category": "prerequisite" if prereq_submitted else None,
+                })
+
+        missing = project.get_missing_artifacts()
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "artifacts": artifacts,
+            "missing": [at.value for at in missing],
+            "all_present": len(missing) == 0,
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to get artifacts: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Artifact retrieval tools
+
+
+def get_artifact_tool(input: dict) -> dict:
+    """
+    Get a single artifact by its artifact_id.
+
+    Args:
+        input: {artifact_id: str}
+    Returns:
+        {ok: bool, artifact: dict | None}
+    """
+    try:
+        h = _harness
+        artifact_id = input.get("artifact_id")
+        if not artifact_id:
+            return _error_response("validation_error", "artifact_id is required")
+
+        # Iterate through projects to find the artifact by ID
+        store = h["store"]
+        for project_id in store.list_projects():
+            try:
+                project = store.load_project(project_id)
+            except Exception:
+                continue
+            type_map = project.get_artifacts_by_type()
+            for at in ArtifactType.all():
+                if at in type_map:
+                    art = type_map[at]
+                    if art.artifact_id == artifact_id:
+                        return {
+                            "ok": True,
+                            "artifact": {
+                                "artifact_id": art.artifact_id,
+                                "artifact_type": art.artifact_type.value,
+                                "display_name": art.artifact_type.display_name,
+                                "project_id": art.project_id,
+                                "content": art.content,
+                                "produced_by": art.produced_by,
+                                "produced_at": art.produced_at.isoformat(),
+                                "has_content": bool(art.content),
+                            },
+                        }
+            # Also search prerequisite artifacts
+            prereq_map = project.prerequisite_artifacts
+            for at_val, pa in prereq_map.items():
+                if pa.artifact_id == artifact_id:
+                    at_enum = ArtifactType(at_val)
+                    return {
+                        "ok": True,
+                        "artifact": {
+                            "artifact_id": pa.artifact_id,
+                            "artifact_type": at_val,
+                            "display_name": at_enum.display_name,
+                            "project_id": project.project_id,
+                            "content": pa.content_preview,
+                            "produced_by": pa.producer,
+                            "produced_at": pa.submitted_at.isoformat() if pa.submitted_at else None,
+                            "has_content": pa.submitted,
+                        },
+                    }
+        return {"ok": True, "artifact": None, "error": "Artifact not found"}
+    except Exception as e:
+        return _error_response("unknown", f"Failed to get artifact: {e}")
+
+
+# Acceptance tools
+def get_acceptance_package_tool(input: dict) -> dict:
+    """
+    Get acceptance package for a project.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, acceptance_package: dict | None, artifact_summary: dict}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        pkg = project.acceptance_package
+        if pkg is None:
+            return {
+                "ok": True,
+                "project_id": project_id,
+                "acceptance_package": None,
+                "all_artifacts_present": project.is_artifact_complete(),
+                "missing_artifacts": [at.value for at in project.get_missing_artifacts()],
+                "message": "No acceptance package created yet",
+            }
+
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "acceptance_package": {
+                "package_id": pkg.package_id,
+                "task_id": pkg.task_id,
+                "is_complete": pkg.is_complete(),
+                "verification_notes": pkg.verification_notes,
+                "acceptance_decision": pkg.acceptance_decision.value if pkg.acceptance_decision else None,
+                "decision_by": pkg.decision_by,
+                "decision_note": pkg.decision_note,
+                "decided_at": pkg.decided_at.isoformat() if pkg.decided_at else None,
+                "created_at": pkg.created_at.isoformat(),
+            },
+            "all_artifacts_present": project.is_artifact_complete(),
+            "missing_artifacts": [at.value for at in project.get_missing_artifacts()],
+            "message": f"Acceptance package: {pkg.acceptance_decision.value if pkg.acceptance_decision else 'pending'}",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to get acceptance package: {e}")
+
+
+def create_acceptance_package_tool(input: dict) -> dict:
+    """
+    Create or update acceptance package for a project.
+
+    Args:
+        input: {project_id: str, task_id: str, verification_notes: str}
+    Returns:
+        {ok: bool, package_id: str, is_complete: bool, missing_artifacts: list[str]}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        task_id = input.get("task_id", "")
+        verification_notes = input.get("verification_notes", "")
+
+        project = h["store"].load_project(project_id)
+
+        pkg = AcceptancePackage(
+            task_id=task_id,
+            project_id=project_id,
+            verification_notes=verification_notes,
+        )
+        # Link existing artifacts
+        type_map = project.get_artifacts_by_type()
+        for at, artifact in type_map.items():
+            pkg.artifacts[at] = artifact
+
+        project.acceptance_package = pkg
+        h["store"].save_project(project)
+
+        missing = project.get_missing_artifacts()
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="acceptance_package_created",
+            event_summary=f"Acceptance package created for task {task_id}",
+            actor=input.get("actor", "system"),
+        )
+
+        return {
+            "ok": True,
+            "package_id": pkg.package_id,
+            "task_id": task_id,
+            "is_complete": pkg.is_complete(),
+            "missing_artifacts": [at.value for at in missing],
+            "message": f"Acceptance package created — {len(missing)} artifact(s) missing",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to create acceptance package: {e}")
+
+
+def approve_acceptance_tool(input: dict) -> dict:
+    """
+    Approve an acceptance package (Alex/governance decision).
+
+    Args:
+        input: {project_id: str, actor: str, note: str}
+    Returns:
+        {ok: bool, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        actor = input.get("actor", "")
+        note = input.get("note", "")
+
+        project = h["store"].load_project(project_id)
+        if project.acceptance_package is None:
+            return _error_response("validation_error", "No acceptance package to approve")
+
+        project.acceptance_package.approve(decided_by=actor, note=note)
+        # Sprint 4R: build output package on acceptance approval
+        output_pkg = project.build_output_package()
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="acceptance_approved",
+            event_summary=f"Acceptance approved by {actor}: {note}",
+            actor=actor,
+        )
+
+        return {
+            "ok": True,
+            "message": f"Acceptance approved by {actor}",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to approve acceptance: {e}")
+
+
+def reject_acceptance_tool(input: dict) -> dict:
+    """
+    Reject an acceptance package and request revision.
+
+    Args:
+        input: {project_id: str, actor: str, reason: str}
+    Returns:
+        {ok: bool, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        actor = input.get("actor", "")
+        reason = input.get("reason", "")
+
+        if not reason:
+            return _error_response("validation_error", "Rejection reason is required")
+
+        project = h["store"].load_project(project_id)
+        if project.acceptance_package is None:
+            return _error_response("validation_error", "No acceptance package to reject")
+
+        project.acceptance_package.reject(decided_by=actor, note=reason)
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="acceptance_rejected",
+            event_summary=f"Acceptance rejected by {actor}: {reason}",
+            actor=actor,
+        )
+
+        return {
+            "ok": True,
+            "message": f"Acceptance rejected — revision requested: {reason}",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to reject acceptance: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Sprint 4R: Output Package Tools
+
+def get_output_package_tool(input: dict) -> dict:
+    """
+    Get the output package for a project.
+    Builds it if not yet created.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, output_package: dict | None}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        if not project.output_package:
+            pkg = project.build_output_package()
+            h["store"].save_project(project)
+        else:
+            pkg = project.output_package
+
+        return {"ok": True, "output_package": pkg}
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to get output package: {e}")
+
+
+def package_output_tool(input: dict) -> dict:
+    """
+    Build (or rebuild) the output package from current delivered artifacts.
+
+    Args:
+        input: {project_id: str}
+    Returns:
+        {ok: bool, output_package: dict, message: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        pkg = project.build_output_package()
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="output_package_built",
+            event_summary=f"Output package built — {len(pkg['artifacts'])} artifacts, complete={pkg['is_complete']}",
+            actor=input.get("actor", "system"),
+        )
+
+        return {
+            "ok": True,
+            "output_package": pkg,
+            "message": f"Output package built — {len(pkg['artifacts'])} artifact(s), complete={pkg['is_complete']}",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to build output package: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Advisory tools (Sprint 4)
+def get_advisories_tool(input: dict) -> dict:
+    """
+    Get active advisory signals for a project.
+
+    Args:
+        input: {project_id: str, acknowledged: bool | None}
+    Returns:
+        {ok: bool, advisories: list[dict]}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        ack_filter = input.get("acknowledged")
+
+        # Use project helper for unfiltered case (returns newest-first)
+        if ack_filter is None:
+            active = project.get_active_advisories()
+        else:
+            # Apply filter + sort newest-first
+            all_advisories = sorted(
+                project.advisories.values(),
+                key=lambda a: a.created_at,
+                reverse=True,
+            )
+            active = [a for a in all_advisories if a.acknowledged == ack_filter]
+
+        advisories = [
+            {
+                "advisory_id": adv.advisory_id,
+                "advisory_type": adv.advisory_type.value,
+                "message": adv.message,
+                "severity": adv.severity,
+                "task_id": adv.task_id,
+                "stage": adv.stage,
+                "actor": adv.actor,
+                "acknowledged": adv.acknowledged,
+                "created_at": adv.created_at.isoformat(),
+            }
+            for adv in active
+        ]
+
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "advisories": advisories,
+            "count": len(advisories),
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to get advisories: {e}")
+
+
+def raise_advisory_tool(input: dict) -> dict:
+    """
+    Raise an advisory signal for a project (used by Maverick or PMO).
+
+    Args:
+        input: {
+            project_id: str,
+            advisory_type: str,  # risk|schedule|stage|summary|blocker
+            message: str,
+            severity: str,  # info|warn|critical
+            task_id: str | None,
+            stage: str | None,
+            actor: str,
+        }
+    Returns:
+        {ok: bool, advisory_id: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        project = h["store"].load_project(project_id)
+
+        try:
+            advisory_type = AdvisoryType(input["advisory_type"])
+        except ValueError:
+            return _error_response("validation_error", f"Invalid advisory_type: {input['advisory_type']}")
+
+        advisory = AdvisorySignal(
+            advisory_type=advisory_type,
+            project_id=project_id,
+            message=input.get("message", ""),
+            severity=input.get("severity", "info"),
+            task_id=input.get("task_id"),
+            stage=input.get("stage"),
+            actor=input.get("actor", "maverick"),
+        )
+        project.add_advisory(advisory)
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="advisory_raised",
+            event_summary=f"Advisory [{advisory_type.value}]: {advisory.message[:80]}",
+            actor=input.get("actor", "maverick"),
+        )
+
+        return {
+            "ok": True,
+            "advisory_id": advisory.advisory_id,
+            "advisory_type": advisory_type.value,
+            "message": f"Advisory raised: {advisory_type.value}",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to raise advisory: {e}")
+
+
+def acknowledge_advisory_tool(input: dict) -> dict:
+    """Acknowledge/dismiss an advisory signal."""
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        advisory_id = input["advisory_id"]
+        project = h["store"].load_project(project_id)
+
+        if advisory_id not in project.advisories:
+            return _error_response("validation_error", f"Advisory '{advisory_id}' not found")
+
+        project.advisories[advisory_id].ack()
+        h["store"].save_project(project)
+
+        return {"ok": True, "message": f"Advisory {advisory_id} acknowledged"}
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to acknowledge advisory: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Blocker tools (Sprint 4)
+def get_blockers_tool(input: dict) -> dict:
+    """Get active blockers for a project or task."""
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        task_id = input.get("task_id")
+        project = h["store"].load_project(project_id)
+
+        blockers = []
+        for blk in project.blockers.values():
+            if blk.is_resolved():
+                continue
+            if task_id and blk.task_id != task_id:
+                continue
+            blockers.append({
+                "blocker_id": blk.blocker_id,
+                "task_id": blk.task_id,
+                "reason": blk.reason,
+                "severity": blk.severity.value,
+                "age_hours": round(blk.age_hours(), 1),
+                "detected_at": blk.detected_at.isoformat(),
+                "resolved": False,
+            })
+
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "blockers": blockers,
+            "count": len(blockers),
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to get blockers: {e}")
+
+
+def raise_blocker_tool(input: dict) -> dict:
+    """
+    Raise a blocker for a task.
+
+    Args:
+        input: {project_id, task_id, reason, severity: str}
+    Returns:
+        {ok: bool, blocker_id: str}
+    """
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        task_id = input["task_id"]
+        reason = input.get("reason", "")
+        severity_str = input.get("severity", "medium")
+
+        try:
+            severity = BlockerSeverity(severity_str)
+        except ValueError:
+            severity = BlockerSeverity.MEDIUM
+
+        project = h["store"].load_project(project_id)
+
+        blocker = Blocker(
+            task_id=task_id,
+            project_id=project_id,
+            reason=reason,
+            severity=severity,
+        )
+        project.add_blocker(blocker)
+        h["store"].save_project(project)
+
+        # Also raise a RISK advisory automatically
+        advisory = AdvisorySignal(
+            advisory_type=AdvisoryType.BLOCKER,
+            project_id=project_id,
+            message=f"Blocker on task {task_id}: {reason[:100]}",
+            severity="warn" if severity != BlockerSeverity.CRITICAL else "critical",
+            task_id=task_id,
+            actor="maverick",
+        )
+        project.add_advisory(advisory)
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="blocker_raised",
+            event_summary=f"Blocker on task {task_id}: {reason[:80]}",
+            actor=input.get("actor", "maverick"),
+        )
+
+        return {
+            "ok": True,
+            "blocker_id": blocker.blocker_id,
+            "advisory_id": advisory.advisory_id,
+            "message": f"Blocker raised for task {task_id}",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to raise blocker: {e}")
+
+
+def resolve_blocker_tool(input: dict) -> dict:
+    """Resolve/dismiss a blocker."""
+    try:
+        h = _harness
+        project_id = input["project_id"]
+        blocker_id = input["blocker_id"]
+        resolved_by = input.get("resolved_by", "")
+
+        project = h["store"].load_project(project_id)
+        if blocker_id not in project.blockers:
+            return _error_response("validation_error", f"Blocker '{blocker_id}' not found")
+
+        project.blockers[blocker_id].resolve(resolved_by=resolved_by)
+        h["store"].save_project(project)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="blocker_resolved",
+            event_summary=f"Blocker {blocker_id} resolved by {resolved_by}",
+            actor=resolved_by,
+        )
+
+        return {
+            "ok": True,
+            "message": f"Blocker {blocker_id} resolved by {resolved_by}",
+        }
+    except ObjectNotFoundError:
+        return _error_response("project_not_found", f"Project '{input.get('project_id')}' not found")
+    except Exception as e:
+        return _error_response("unknown", f"Failed to resolve blocker: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Maverick spawn tools
+_maverick_spawner = None
+
+
+def _get_maverick_spawner():
+    """Get or create MaverickSpawner singleton."""
+    global _maverick_spawner
+    if _maverick_spawner is None:
+        from gov_langgraph.openclaw_integration.maverick_spawner import MaverickSpawner
+        _maverick_spawner = MaverickSpawner()
+    return _maverick_spawner
+
+
+def spawn_agent_tool(input: dict) -> dict:
+    """
+    Spawn a known agent for a task via MaverickSpawner.
+
+    Agent and workflow definitions are loaded from config/agents.yaml.
+    No hardcoded agent IDs or sequences.
+
+    Args:
+        input: {
+            project_id: str,
+            task_id: str,
+            role: str (optional — defaults to current_stage),
+        }
+    Returns:
+        {ok: bool, session_key: str, status: str, error: str | None}
+    """
+    try:
+        h = _harness
+
+        project_id = input["project_id"]
+        task_id = input["task_id"]
+        role = input.get("role")
+
+        # Load project and task for context
+        try:
+            project = h["store"].load_project(project_id)
+        except ObjectNotFoundError:
+            return _error_response("project_not_found", f"Project '{project_id}' not found")
+
+        try:
+            task = h["store"].load_workitem(task_id)
+        except ObjectNotFoundError:
+            return _error_response("task_not_found", f"Task '{task_id}' not found")
+
+        spawner = _get_maverick_spawner()
+        result = spawner.schedule(
+            project_name=project.project_name,
+            project_id=project.project_id,
+            task_title=task.task_title,
+            task_id=task.task_id,
+            current_stage=task.current_stage,
+            role=role,
+        )
+
+        if result.ok:
+            h["journal"].append_raw(
+                project_id=project_id,
+                event_type="agent_spawned",
+                event_summary=f"Agent '{role or task.current_stage}' spawned for task '{task.task_title}'",
+                actor="maverick",
+                task_id=task_id,
+            )
+
+        return {
+            "ok": result.ok,
+            "session_key": result.session_key,
+            "status": result.status,
+            "error": result.error,
+            "message": (
+                f"Agent spawned: {role or task.current_stage}"
+                if result.ok
+                else f"Spawn failed: {result.error}"
+            ),
+        }
+    except Exception as e:
+        return _error_response("unknown", f"Failed to spawn agent: {e}")
+
+
+# ============================================================================
+# GAME PRODUCTION TOOLS (Sprint 4R)
+# ============================================================================
+
+from pathlib import Path
+from datetime import datetime as dt
+
+
+# Game stages for production workflow
+GAME_STAGES = [
+    "CONCEPT",
+    "GAME_SPEC",
+    "PRODUCTION_PREP",
+    "PRODUCTION_BUILD",
+    "QA_PLAYTEST",
+    "ACCEPTANCE_DELIVERY",
+]
+
+GAME_STAGE_TRANSITIONS = {
+    "CONCEPT": ["GAME_SPEC"],
+    "GAME_SPEC": ["PRODUCTION_PREP"],
+    "PRODUCTION_PREP": ["PRODUCTION_BUILD"],
+    "PRODUCTION_BUILD": ["QA_PLAYTEST"],
+    "QA_PLAYTEST": ["ACCEPTANCE_DELIVERY"],
+    "ACCEPTANCE_DELIVERY": [],
+}
+
+
+
+def _game_fields_path(task_id: str) -> Path:
+    """Path to game_fields JSON file for a game work item."""
+    cfg = _harness["config"]
+    gf_dir = Path(cfg.state_dir) / "_game_fields"
+    gf_dir.mkdir(parents=True, exist_ok=True)
+    return gf_dir / f"{task_id}.json"
+
+
+
+def _init_game_fields(task_id: str, owner: str) -> None:
+    """Initialize game_fields storage for a new game work item."""
+    import json
+    data = {
+        "task_id": task_id,
+        "concept_approved": False,
+        "artifact_ids": {},
+        "viper_triggered": False,
+        "trigger_note": "",
+        "trigger_decided_by": None,
+        "trigger_decided_at": None,
+        "escalation": None,
+        "status_reports": [],
+        "created_at": dt.utcnow().isoformat(),
+        "created_by": owner,
+    }
+    _game_fields_path(task_id).write_text(
+        json.dumps(data, indent=2), encoding="utf-8"
+    )
+
+
+
+def _load_game_fields(task_id: str) -> dict:
+    """Load game_fields for a game work item."""
+    import json
+    path = _game_fields_path(task_id)
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _save_game_fields(task_id: str, game_fields: dict) -> None:
+    """Save game_fields for a game work item."""
+    import json
+    _game_fields_path(task_id).write_text(
+        json.dumps(game_fields, indent=2), encoding="utf-8"
+    )
+
+
+
+def create_game_tool(input: dict) -> dict:
+    """
+    Create a new game production WorkItem at CONCEPT stage.
+
+    Required: title, owner
+    Optional: project_id (defaults to '_game_production_')
+
+    """
+    try:
+        h = _harness
+        title = input.get("title", "").strip()
+        owner = input.get("owner", "").strip()
+        project_id = input.get("project_id", "_game_production_")
+
+
+        if not title:
+            return _error_response("validation_error", "title is required")
+        if not owner:
+            return _error_response("validation_error", "owner is required")
+
+
+        workitem = WorkItem(
+            task_title=title,
+            project_id=project_id,
+            task_description="game_production",
+            current_owner=owner,
+            current_stage="CONCEPT",
+            task_status=TaskStatus.IN_PROGRESS,
+        )
+        h["store"].save_workitem(workitem)
+        _init_game_fields(workitem.task_id, owner)
+
+        h["journal"].append_raw(
+            project_id=project_id,
+            event_type="game_created",
+            event_summary=f"Game '{title}' created at CONCEPT stage by {owner}",
+            actor=owner,
+            task_id=workitem.task_id,
+        )
+
+        return {
+            "ok": True,
+            "game_id": workitem.task_id,
+            "title": title,
+            "owner": owner,
+            "current_stage": "CONCEPT",
+            "project_id": project_id,
+            "message": f"Game '{title}' created at CONCEPT stage",
+        }
+    except Exception as e:
+        return _error_response("unknown", f"Failed to create game: {e}")
+
+
+def advance_game_stage_tool(input: dict) -> dict:
+    """
+    Advance a game WorkItem to a new stage.
+
+    Required: game_id, new_stage, actor
+    Optional: concept_approved, artifact_id, viper_triggered, trigger_note
+
+    Governance gate: CONCEPT -> GAME_SPEC requires concept_approved=true
+    Viper trigger: recorded at PRODUCTION_PREP -> PRODUCTION_BUILD boundary
+    """
+    try:
+        h = _harness
+        game_id = input.get("game_id", "").strip()
+        new_stage = input.get("new_stage", "").strip()
+        actor = input.get("actor", "PMO").strip()
+        artifact_id = input.get("artifact_id")
+        concept_approved = input.get("concept_approved", False)
+        viper_triggered = input.get("viper_triggered", False)
+        trigger_note = input.get("trigger_note", "")
+
+
+        if not game_id:
+            return _error_response("validation_error", "game_id is required")
+        if not new_stage:
+            return _error_response("validation_error", "new_stage is required")
+
+        try:
+            workitem = h["store"].load_workitem(game_id)
+        except ObjectNotFoundError:
+            return _error_response("task_not_found", f"Game '{game_id}' not found")
+
+
+        current_stage = workitem.current_stage
+        valid_next = GAME_STAGE_TRANSITIONS.get(current_stage, [])
+        if new_stage not in valid_next:
+            return _error_response(
+                "validation_error",
+                f"Invalid transition {current_stage} -> {new_stage}. Allowed: {valid_next}"
+            )
+
+
+        if current_stage == "CONCEPT" and new_stage == "GAME_SPEC":
+            if not concept_approved:
+                return _error_response(
+                    "validation_error",
+                    "Concept approval required before advancing to GAME_SPEC"
+                )
+
+        trigger_fired = None
+        if current_stage == "PRODUCTION_PREP" and new_stage == "PRODUCTION_BUILD":
+            trigger_fired = viper_triggered
+
+
+        workitem.current_stage = new_stage
+        h["store"].save_workitem(workitem)
+
+
+        game_fields = _load_game_fields(game_id)
+        if artifact_id:
+            game_fields.setdefault("artifact_ids", {})[new_stage] = artifact_id
+        if trigger_fired is not None:
+            game_fields["viper_triggered"] = trigger_fired
+            game_fields["trigger_note"] = trigger_note
+            game_fields["trigger_decided_by"] = actor
+            game_fields["trigger_decided_at"] = dt.utcnow().isoformat()
+        _save_game_fields(game_id, game_fields)
+
+        summary = f"Game stage advanced: {current_stage} -> {new_stage} by {actor}"
+        if trigger_fired is not None:
+            summary += f" [viper_triggered={trigger_fired}]"
+        if artifact_id:
+            summary += f" artifact={artifact_id}"
+
+        h["journal"].append_raw(
+            project_id=workitem.project_id,
+            event_type="game_stage_advanced",
+            event_summary=summary,
+            actor=actor,
+            task_id=game_id,
+        )
+
+        return {
+            "ok": True,
+            "game_id": game_id,
+            "previous_stage": current_stage,
+            "current_stage": new_stage,
+            "viper_triggered": trigger_fired,
+            "message": f"Game advanced: {current_stage} -> {new_stage}",
+        }
+    except Exception as e:
+        return _error_response("unknown", f"Failed to advance game stage: {e}")
+
+
+
+
+def get_game_tool(input: dict) -> dict:
+    """Get game details including game_fields."""
+    try:
+        h = _harness
+        game_id = input.get("game_id", "").strip()
+
+        if not game_id:
+            return _error_response("validation_error", "game_id is required")
+
+
+        try:
+            workitem = h["store"].load_workitem(game_id)
+        except ObjectNotFoundError:
+            return _error_response("task_not_found", f"Game '{game_id}' not found")
+
+        game_fields = _load_game_fields(game_id)
+
+        return {
+            "ok": True,
+            "game_id": game_id,
+            "title": workitem.task_title,
+            "current_stage": workitem.current_stage,
+            "owner": workitem.current_owner,
+            "project_id": workitem.project_id,
+            "task_status": workitem.task_status.value,
+            "game_fields": game_fields,
+        }
+    except Exception as e:
+        return _error_response("unknown", f"Failed to get game: {e}")
+
+
+
+
+def list_games_tool(input: dict) -> dict:
+    """List all game work items, optionally filtered by owner or stage."""
+    try:
+        h = _harness
+        owner_filter = input.get("owner")
+        stage_filter = input.get("stage")
+
+
+        all_task_ids = h["store"].list_workitems(project_id=None)
+        games = []
+
+
+        for tid in all_task_ids:
+            try:
+                workitem = h["store"].load_workitem(tid)
+            except Exception:
+                continue
+            if getattr(workitem, "task_description", "") != "game_production":
+                continue
+            if owner_filter and workitem.current_owner != owner_filter:
+                continue
+            if stage_filter and workitem.current_stage != stage_filter:
+                continue
+
+
+            game_fields = _load_game_fields(tid)
+            games.append({
+                "game_id": tid,
+                "title": workitem.task_title,
+                "current_stage": workitem.current_stage,
+                "owner": workitem.current_owner,
+                "task_status": workitem.task_status.value,
+                "viper_triggered": game_fields.get("viper_triggered", False),
+                "escalation": game_fields.get("escalation"),
+            })
+
+        return {
+            "ok": True,
+            "games": games,
+            "count": len(games),
+            "message": f"{len(games)} game(s) found",
+        }
+    except Exception as e:
+        return _error_response("unknown", f"Failed to list games: {e}")
+
+
+def raise_game_escalation_tool(input: dict) -> dict:
+    """PMO raises an escalation for a game with a reason."""
+    try:
+        h = _harness
+        game_id = input.get("game_id", "").strip()
+        reason = input.get("reason", "").strip()
+        actor = input.get("actor", "PMO").strip()
+
+        if not game_id:
+            return _error_response("validation_error", "game_id is required")
+
+
+        try:
+            workitem = h["store"].load_workitem(game_id)
+        except ObjectNotFoundError:
+            return _error_response("task_not_found", f"Game '{game_id}' not found")
+
+
+        escalation = {
+            "escalated": True,
+            "reason": reason,
+            "by": actor,
+            "at": dt.utcnow().isoformat(),
+        }
+
+
+        game_fields = _load_game_fields(game_id)
+        game_fields["escalation"] = escalation
+        _save_game_fields(game_id, game_fields)
+
+
+        h["journal"].append_raw(
+            project_id=workitem.project_id,
+            event_type="game_escalation_raised",
+            event_summary=f"Escalation raised for game '{workitem.task_title}' by {actor}: {reason}",
+            actor=actor,
+            task_id=game_id,
+        )
+
+        return {
+            "ok": True,
+            "game_id": game_id,
+            "escalation": escalation,
+            "message": f"Escalation raised for game '{workitem.task_title}'",
+        }
+    except Exception as e:
+        return _error_response("unknown", f"Failed to raise escalation: {e}")
+
+
+
+def submit_game_status_report_tool(input: dict) -> dict:
+    """
+    Submit a status report for a game.
+
+    Required: game_id, stage, status, progress, next_action, actor
+    Optional: blocker, escalation_flag
+    """
+    try:
+        h = _harness
+        game_id = input.get("game_id", "").strip()
+        actor = input.get("actor", "PMO").strip()
+        stage = input.get("stage", "").strip()
+        status = input.get("status", "").strip()
+        progress = input.get("progress", "").strip()
+        next_action = input.get("next_action", "").strip()
+        blocker = input.get("blocker", "")
+        escalation_flag = input.get("escalation_flag", False)
+
+
+        if not game_id:
+            return _error_response("validation_error", "game_id is required")
+        if not all([stage, status, progress, next_action]):
+            return _error_response(
+                "validation_error",
+                "stage, status, progress, next_action are required"
+            )
+
+
+        try:
+            workitem = h["store"].load_workitem(game_id)
+        except ObjectNotFoundError:
+            return _error_response("task_not_found", f"Game '{game_id}' not found")
+
+
+        report = {
+            "game_id": game_id,
+            "stage": stage,
+            "status": status,
+            "progress": progress,
+            "blocker": blocker,
+            "escalation_flag": escalation_flag,
+            "next_action": next_action,
+            "submitted_by": actor,
+            "submitted_at": dt.utcnow().isoformat(),
+        }
+
+        game_fields = _load_game_fields(game_id)
+        game_fields.setdefault("status_reports", []).append(report)
+        _save_game_fields(game_id, game_fields)
+
+        h["journal"].append_raw(
+            project_id=workitem.project_id,
+            event_type="game_status_report_submitted",
+            event_summary=f"Status report for stage '{stage}' submitted by {actor} on game '{workitem.task_title}'",
+            actor=actor,
+            task_id=game_id,
+        )
+
+        return {
+            "ok": True,
+            "game_id": game_id,
+            "report": report,
+            "message": "Status report submitted",
+        }
+    except Exception as e:
+        return _error_response("unknown", f"Failed to submit status report: {e}")
+
+
+
+def approve_game_concept_tool(input: dict) -> dict:
+    """Record governance concept approval for a game."""
+    try:
+        h = _harness
+        game_id = input.get("game_id", "").strip()
+        actor = input.get("actor", "Governance").strip()
+        note = input.get("note", "")
+
+
+        if not game_id:
+            return _error_response("validation_error", "game_id is required")
+
+        try:
+            workitem = h["store"].load_workitem(game_id)
+        except ObjectNotFoundError:
+            return _error_response("task_not_found", f"Game '{game_id}' not found")
+
+
+        game_fields = _load_game_fields(game_id)
+        game_fields["concept_approved"] = True
+        game_fields["concept_approved_by"] = actor
+        game_fields["concept_approved_at"] = dt.utcnow().isoformat()
+        game_fields["concept_approval_note"] = note
+        _save_game_fields(game_id, game_fields)
+
+
+        h["journal"].append_raw(
+            project_id=workitem.project_id,
+            event_type="game_concept_approved",
+            event_summary=f"Concept approved for game '{workitem.task_title}' by {actor}",
+            actor=actor,
+            task_id=game_id,
+        )
+
+        return {
+            "ok": True,
+            "game_id": game_id,
+            "concept_approved": True,
+            "message": f"Concept approved for game '{workitem.task_title}'",
+        }
+    except Exception as e:
+        return _error_response("unknown", f"Failed to approve concept: {e}")
+

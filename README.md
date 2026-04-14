@@ -1,19 +1,37 @@
-# gov_langgraph — V1 Implementation
+# gov_langgraph — V1.7 Build Candidate
 
-**Version:** V1 Phase 1–3 (Week 1–3)
-**Status:** Week 3 complete — LangGraph engine operational.
+**Version:** V1.7 (`origin/v1.7`, tag `v1.7.0`)
+**Status:** ✅ Sprint 6R CLOSED — Nova ACCEPT WITH NOTES (2026-04-12 23:39 GMT+8)
+**Pending:** Alex second-round UAT
 
 ---
 
 ## What is this?
 
-`gov_langgraph` is the governance graph engine for THE ONE enterprise governance layer.
+`gov_langgraph` is the THE ONE enterprise governance engine. It provides:
 
-It provides:
-- **Platform Core** — objects, authority rules, state machine for a BA→SA→DEV→QA pipeline
+- **Platform Core** — objects, authority rules, state machine for BA→SA→DEV→QA pipeline
 - **Harness Layer** — persistence, checkpointing, event journaling, evidence storage
-- **PMO CLI** — command-line visibility into project/task state
-- **OpenClaw Integration** — tool functions + coordinator for Telegram-based operation
+- **PMO Web UI** — FastAPI dashboard at `http://localhost:8000/`
+- **Game Production Surface** — Grid Chase tracked through all 6 stages
+- **OpenClaw Integration** — tool functions for Telegram-based operation
+
+---
+
+## V1.7 Build Summary
+
+**Grid Chase** (game_id: `633e3ac6-1511-4605-9cb6-ddf7eb00b924`) completed all 6 governance stages:
+
+| Stage | Status | Artifact |
+|-------|--------|----------|
+| CONCEPT | ✅ Complete | GC-BRIEF-001 |
+| GAME_SPEC | ✅ Complete | GC-SPEC-001 |
+| PRODUCTION_PREP | ✅ Complete | GC-HANDOVER-001 |
+| PRODUCTION_BUILD | ✅ Complete | GC-BUILD-001 |
+| QA_PLAYTEST | ✅ Complete | — |
+| ACCEPTANCE_DELIVERY | ✅ Complete | GC-DELIVERY-001 |
+
+**Git tag:** `v1.7.0` applied and pushed to `origin/v1.7`
 
 ---
 
@@ -21,58 +39,33 @@ It provides:
 
 ```bash
 cd D:\Projects\gov_langgraph
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Boot PMO Web UI
+python -m uvicorn pmo_web_ui.main:app --port 8000
+
+# Open in browser
+# http://localhost:8000/
 ```
 
-### Run the E2E test
+---
+
+## Running Tests
 
 ```bash
-# LangGraph E2E test (full pipeline)
-python LANGGRAPH_E2E_TEST.py
+# Smoke tests (Sprint 2R — 7 workflow tests)
+python run_s2_tests.py
 
-# Platform model test (state machine unit tests)
+# Smoke tests (Sprint 4R — 9 PMO game surface tests)
+python run_s4_tests.py
+
+# E2E integration test (full 6-stage progression)
 python E2E_TEST.py
-```
 
-### Use the PMO CLI
-
-```bash
-python -m gov_langgraph.pmo_smart_agent.cli list <project_id>
-python -m gov_langgraph.pmo_smart_agent.cli pipeline <project_id>
-python -m gov_langgraph.pmo_smart_agent.cli status <task_id>
-python -m gov_langgraph.pmo_smart_agent.cli events <task_id> --project <project_id>
-python -m gov_langgraph.pmo_smart_agent.cli checkpoint <task_id>
-```
-
-### Use the OpenClaw tools (Python)
-
-```python
-from gov_langgraph.openclaw_integration import Coordinator, init_harness
-from gov_langgraph.harness import HarnessConfig
-
-HarnessConfig().ensure_dirs()
-c = Coordinator()
-
-# Create project
-r = c.handle('create_project', {
-    'project_name': 'My Project',
-    'project_goal': 'Build something',
-    'actor': 'alex',
-})
-
-# Create task
-r = c.handle('create_task', {
-    'task_title': 'My Task',
-    'project_id': r['data']['project_id'],
-    'current_owner': 'viper_ba',
-    'actor': 'alex',
-})
-
-# Advance stage
-r = c.handle('advance_stage', {
-    'task_id': r['data']['task_id'],
-    'target_stage': 'SA',
-    'actor': 'viper_ba',
-})
+# Full LangGraph pipeline test
+python LANGGRAPH_E2E_TEST.py
 ```
 
 ---
@@ -81,44 +74,96 @@ r = c.handle('advance_stage', {
 
 ```
 gov_langgraph/
-├── platform_model/          # Layer 3: Platform Core
-│   ├── __init__.py         # Public API exports
-│   ├── objects.py          # Project, WorkItem, TaskState, Workflow, Handoff, Gate, Event
-│   ├── authority.py        # Role-based authority (Tier 1/2/3)
-│   ├── state_machine.py    # Stage transition validation
-│   ├── exceptions.py       # Exception hierarchy
-│   └── workflows.py        # V1 Pipeline definition (single source of truth)
+├── platform_model/              # Platform Core
+│   ├── objects.py              # Project, WorkItem, TaskState, Workflow, Handoff, Gate, Event
+│   ├── authority.py            # Role-based authority (Tier 1/2/3)
+│   ├── state_machine.py         # Stage transition validation
+│   ├── exceptions.py           # Exception hierarchy
+│   └── workflows.py            # V1 Pipeline definition
 │
-├── langgraph_engine/        # Week 3: LangGraph StateGraph
-│   ├── state.py            # GovernanceState dataclass
-│   ├── graph.py           # build_graph() — START->maverick->stage nodes->END
-│   ├── pipeline.py        # compile() + run_workitem()
-│   ├── runtime.py         # RuntimeContext singleton
-│   ├── edges.py           # Edge routing rules (documented)
-│   └── nodes/             # Stage nodes + maverick
-│       ├── base.py        # BaseNode
-│       ├── maverick.py   # Maverick node
-│       └── viper_ba.py   # Viper BA/SA/DEV/QA nodes
+├── langgraph_engine/            # LangGraph StateGraph
+│   ├── state.py                # GovernanceState dataclass
+│   ├── graph.py                # build_graph() — START→maverick→stage nodes→END
+│   ├── pipeline.py             # compile() + run_workitem()
+│   ├── runtime.py              # RuntimeContext singleton
+│   ├── edges.py               # Edge routing rules
+│   └── nodes/                 # Stage nodes + maverick
 │
-├── harness/                # Layer 2 + Layer 3: Persistence
-│   ├── config.py          # HarnessConfig — paths and settings
-│   ├── state_store.py      # JSON file I/O for Project/WorkItem/TaskState/Gate/Handoff
-│   ├── checkpointer.py     # Before/after checkpointing + restore
-│   ├── events.py          # Append-only event journal
-│   └── evidence.py        # Evidence reference storage
+├── harness/                     # Persistence
+│   ├── config.py               # HarnessConfig
+│   ├── state_store.py         # JSON file I/O
+│   ├── checkpointer.py        # Before/after checkpointing
+│   ├── events.py             # Append-only event journal
+│   └── evidence.py           # Evidence storage
 │
-├── pmo_smart_agent/        # PMO visibility layer
-│   ├── cli.py             # 6 commands: status, list, pipeline, events, checkpoint, evidence
-│   └── dashboard.py       # get_pipeline_view() + render_pipeline_text()
+├── pmo_smart_agent/            # PMO CLI
+│   ├── cli.py                # 6 commands: status, list, pipeline, events, checkpoint, evidence
+│   └── dashboard.py          # get_pipeline_view() + render_pipeline_text()
 │
-└── openclaw_integration/   # OpenClaw tool layer
-    ├── tools.py           # 8 tool functions
-    └── coordinator.py     # Routes Telegram → tool, formats response
+├── pmo_web_ui/                 # PMO Web UI (FastAPI)
+│   └── main.py               # Server on port 8000
+│       └── static/           # Frontend assets
+│           ├── index.html   # Main dashboard
+│           ├── main-app.js  # Extracted inline script (V1.7 fix)
+│           ├── utils.js     # Pure JS helpers
+│           ├── gate-surface.js  # Gate interaction
+│           └── i18n-runtime.js  # EN/ZH translations
+│
+├── openclaw_integration/       # OpenClaw tool layer
+│   └── tools.py              # 20 tool functions for Telegram operation
+│
+└── artifacts/                 # Grid Chase production artifacts
+    └── GC-BUILD-001/         # Build Candidate (game engine + REST API + web dashboard)
+        ├── game_engine.py    # Flask game API server
+        └── requirements.txt  # Runtime dependencies
 ```
 
 ---
 
-## V1 Authority Model
+## V1.7 Sprint Log
+
+| Sprint | Focus | Status | Key Commits |
+|--------|-------|--------|-------------|
+| 1R | THE ONE Definition | ✅ Closed | — |
+| 2R | Workflow + Stage Definitions | ✅ Closed | Smoke tests 7/7 pass |
+| 3R | Game Brief + Game Spec | ✅ Closed | GC-BRIEF-001, GC-SPEC-001 |
+| 4R | PMO Game Production Surface | ✅ Closed | Backend 7f7becf, Frontend b722693 |
+| 5R | Production Handoff + Validation | ✅ Closed | GC-HANDOVER-001, GC-VALIDATION-001, GC-DELIVERY-001 |
+| 6R | E2E + Smoke + Integration + Acceptance | ✅ Closed | Tag v1.7.0, Nova ACCEPT WITH NOTES |
+
+---
+
+## Smoke Test Results (Sprint 6R)
+
+**Sprint 2R — 7/7 pass (2026-04-12 21:22 GMT+8)**
+
+| Test | Description | Result |
+|------|-------------|--------|
+| Case 1 | New game → CONCEPT | ✅ |
+| Case 2 | CONCEPT → GAME_SPEC (no approval) blocked | ✅ |
+| Case 3 | CONCEPT → GAME_SPEC (approved) | ✅ |
+| Case 4 | GAME_SPEC → PRODUCTION_PREP | ✅ |
+| Case 5 | GAME_SPEC → PRODUCTION_BUILD (skip) blocked | ✅ |
+| Case 6 | PRODUCTION_PREP → PRODUCTION_BUILD | ✅ |
+| Case 7 | PRODUCTION_BUILD → PRODUCTION_PREP (backward) blocked | ✅ |
+
+**Sprint 4R — 9/9 pass (2026-04-12 21:22 GMT+8)**
+
+| Test | Description | Result |
+|------|-------------|--------|
+| S4.1 | Create game | ✅ |
+| S4.2 | Retrieve game | ✅ |
+| S4.3 | Valid advance | ✅ |
+| S4.4 | Invalid advance | ✅ |
+| S4.5 | Invalid skip | ✅ |
+| S4.6 | Invalid backward | ✅ |
+| S4.7 | Trigger flag | ✅ |
+| S4.8 | Escalation | ✅ |
+| S4.9 | Status report | ✅ |
+
+---
+
+## Authority Model
 
 **Tier 1 — Query only:** All roles can perform query actions (no mutations).
 
@@ -131,35 +176,14 @@ gov_langgraph/
 **Tier 3 — Delivery Layer:** Stage execution roles.
 - `viper_ba`, `viper_sa`, `viper_dev`, `viper_qa` — stage owners
 
-**V1 Pipeline Stages:** `BA → SA → DEV → QA`
-
-**Transitions:**
-- `BA` → `SA`
-- `SA` → `DEV`
-- `DEV` → `QA`
-
 ---
 
-## Week 2 Deliverables (Harness Layer)
+## Known Issues / Non-Blocking Notes
 
-| Day | Module | Status |
-|-----|--------|--------|
-| Day 1 | Config + StateStore + Checkpointer + Events + Evidence | ✅ Nova approved |
-| Day 2 | StateMachine wired with Checkpointer + EventJournal | ✅ Nova approved |
-| Day 3 | PMO CLI + Dashboard | ✅ Nova approved |
-| Day 4 | OpenClaw Integration (Tools + Coordinator) | ✅ Nova approved |
-| Day 5 | End-to-End Test + README | ✅ Complete |
-
----
-
-## Key Design Decisions
-
-- **Harness = persistence only** — no governance semantics
-- **Events are append-only** — never modify or delete
-- **Dependency injection** — harness instances passed in, not globals
-- **Single workflow source** — `platform_model/workflows.py` defines V1 pipeline
-- **JSONL format** — one record per line, no indent, for event/evidence logs
-- **Checkpoints are sequential, not atomic** — discipline required
+| Issue | Severity | Note |
+|-------|----------|------|
+| Python 3.14 / Pydantic V1 warning | Low | Non-blocking. Migrate to Pydantic V2 patterns before Python 3.14 baseline. |
+| GitHub Issue #2 (workspaceShell) | ✅ Fixed | Fixed in commit `7254873`. Served runtime confirmed correct. |
 
 ---
 
@@ -174,17 +198,8 @@ gov_langgraph/
 
 ---
 
-## Running on Windows
+## References
 
-```powershell
-cd D:\Projects\gov_langgraph
-python E2E_TEST.py
-```
-
-SSH is configured for GitHub push (no credential popups).
-
----
-
-## Next: Week 3
-
-**LangGraph Engine** — GovernanceState, nodes (maverick, viper_*), edges, pipeline compilation.
+- Execution plan: `\\192.168.31.124\Nova-Jarvis-Shared\working\gov_langgraph\V1.7\V1_7_EXECUTION_PLAN.md`
+- Sprint 6R log: `C:\Users\John\.openclaw\workspace\SPRINT_6R.md`
+- Artifact chain: GC-BRIEF-001 → GC-SPEC-001 → GC-HANDOVER-001 → GC-BUILD-001 → GC-VALIDATION-001 → GC-DELIVERY-001

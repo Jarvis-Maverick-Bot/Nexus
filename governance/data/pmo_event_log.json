@@ -1,0 +1,62 @@
+[
+  {
+    "event_id": "EVT-0b38bd47",
+    "type": "UNKNOWN_TOOL",
+    "initiator": "Jarvis",
+    "context": {
+      "tool": "grid_escape_v2"
+    },
+    "payload": {},
+    "determined_destination": "AGENT",
+    "status": "FORWARDED",
+    "forwarded_at": "2026-04-14T07:01:11+00:00"
+  },
+  {
+    "event_id": "EVT-3c7f32bf",
+    "type": "BLOCKER_ESCALATION",
+    "initiator": "Jarvis",
+    "context": {},
+    "payload": {
+      "item_id": "WI-001"
+    },
+    "determined_destination": "PMO",
+    "status": "FORWARDED",
+    "forwarded_at": "2026-04-14T07:01:11+00:00"
+  },
+  {
+    "event_id": "EVT-2361eaf5",
+    "type": "CLARIFICATION_NEEDED",
+    "initiator": "Jarvis",
+    "context": {},
+    "payload": {},
+    "determined_destination": "NOVA",
+    "status": "FORWARDED",
+    "forwarded_at": "2026-04-14T07:01:11+00:00"
+  },
+  {
+    "event_id": "EVT-25b30ab0",
+    "type": "RANDOM_EVENT",
+    "initiator": "Jarvis",
+    "context": {},
+    "payload": {},
+    "determined_destination": "PMO",
+    "status": "FORWARDED",
+    "forwarded_at": "2026-04-14T07:01:11+00:00"
+  },
+  {
+    "event_id": "EVT-74006c24",
+    "type": "UNKNOWN_TOOL",
+    "initiator": "Jarvis",
+    "context": {
+      "tool": "grid_escape_v2",
+      "session": "M3-R1"
+    },
+    "payload": {
+      "tool_name": "grid_escape_v2",
+      "reason": "tool not found"
+    },
+    "determined_destination": "AGENT",
+    "status": "FORWARDED",
+    "forwarded_at": "2026-04-14T07:01:38+00:00"
+  }
+]
