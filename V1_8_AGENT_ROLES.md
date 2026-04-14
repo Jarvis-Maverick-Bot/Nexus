@@ -1,4 +1,4 @@
-# V1.8 Agent Roles — Claw Studio Seat Definitions
+# V1.8 Agent Roles - Claw Studio Seat Definitions
 
 **Version:** 1.0
 **Date:** 2026-04-14
@@ -19,8 +19,8 @@ Claw Studio agents are role-shaped sub-agents that accept structured inputs and 
 
 ### Planner
 
-**Status:** `instantiated` (2026-04-14)
-**Function coverage:** F7.1.1–F7.1.3, F7.4.1
+**Status:** `approved` (2026-04-14T16:30 GMT+8)
+**Function coverage:** F7.1.1-F7.1.3, F7.4.1
 
 **Role:** Accepts a user story or work item description, decomposes it into a task plan with acceptance criteria per task. Feeds the TDD seat.
 
@@ -30,7 +30,7 @@ Claw Studio agents are role-shaped sub-agents that accept structured inputs and 
 
 **Output contract:**
 - `task_plan`: list of `{task_id, description, acceptance_criteria}` objects
-- `decomposition_notes`: string — rationale for how work was split
+- `decomposition_notes`: string - rationale for how work was split
 
 **Skill spec:** `agent_seats/planner/skill.md`
 
@@ -40,8 +40,8 @@ Claw Studio agents are role-shaped sub-agents that accept structured inputs and 
 
 ### TDD (Test-Driven Development)
 
-**Status:** `instantiated` (2026-04-14)
-**Function coverage:** F7.1.1–F7.1.3, F7.4.2
+**Status:** `approved` (2026-04-14T16:30 GMT+8)
+**Function coverage:** F7.1.1-F7.1.3, F7.4.2
 
 **Role:** Receives a task specification from Planner, produces a failing test first, then minimal passing implementation. Proven cycle: failing test appears before passing code.
 
@@ -50,8 +50,8 @@ Claw Studio agents are role-shaped sub-agents that accept structured inputs and 
 - `acceptance_criteria`: list of criteria from Planner
 
 **Output contract:**
-- `failing_test`: code string — test that fails against current implementation
-- `passing_code`: code string — minimal implementation that makes test pass
+- `failing_test`: code string - test that fails against current implementation
+- `passing_code`: code string - minimal implementation that makes test pass
 - `test_results`: `{passed: bool, output: string}`
 
 **Skill spec:** `agent_seats/tdd/skill.md`
@@ -60,17 +60,17 @@ Claw Studio agents are role-shaped sub-agents that accept structured inputs and 
 
 ---
 
-## V1.9 Role Stubs (Pre-Sprint Artifacts — NOT Instantiated)
+## V1.9 Role Stubs (Pre-Sprint Artifacts - NOT Instantiated)
 
 The following roles are documented here as target specifications for V1.9. They are NOT part of V1.8 sprint work.
 
 | Role | Function | Status |
 |------|----------|--------|
-| Architect | F7.4.3 | stub — targeting V1.9 |
-| CodeReviewer | F7.4.3 | stub — targeting V1.9 |
-| Security | F7.4.3 | stub — targeting V1.9 |
-| Docs | F7.4.3 | stub — targeting V1.9 |
-| DBExpert | F7.4.3 | stub — targeting V1.9 |
+| Architect | F7.4.3 | stub - targeting V1.9 |
+| CodeReviewer | F7.4.3 | stub - targeting V1.9 |
+| Security | F7.4.3 | stub - targeting V1.9 |
+| Docs | F7.4.3 | stub - targeting V1.9 |
+| DBExpert | F7.4.3 | stub - targeting V1.9 |
 
 Each stub documents: input contract, output contract, role boundary. Skill specs to be defined in V1.9.
 
