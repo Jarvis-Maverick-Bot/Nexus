@@ -152,6 +152,7 @@ class Grid:
     def render(self, agent_pos: Optional[tuple[int, int]] = None) -> str:
         """Render grid as ASCII string.
 
+
         Args:
             agent_pos: (x, y) of agent. If None, shows START instead of AGENT.
         """
@@ -159,12 +160,17 @@ class Grid:
         for y in range(self.height):
             row = ""
             for x in range(self.width):
+                # Agent takes precedence over START/EXIT
                 if agent_pos == (x, y):
                     row += CellType.AGENT.value
-                elif (x, y) == self._start:
-                    row += CellType.START.value
                 elif (x, y) == self._exit:
                     row += CellType.EXIT.value
+                elif agent_pos is not None and (x, y) == self._start:
+                    # Don't show START once agent has moved
+                    row += CellType.OPEN.value
+                elif (x, y) == self._start:
+                    # Show START only when agent hasn't moved yet
+                    row += CellType.START.value
                 else:
                     row += self._cells[y][x].value
             lines.append(row)
