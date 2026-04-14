@@ -1,7 +1,8 @@
 # V1.8 Execution Plan
 
-**Version:** 1.3  
-**Date:** 2026-04-13  
+**Version:** 1.4  
+**Date:** 2026-04-14  
+**Last Updated:** M1-R1, M1-R2, M2-R1, M2-R2 completed (4/10 sprints)  
 **Game:** Grid Escape  
 **Objective:** Deliver the first real AI-native game through the Claw Studio + Viper operating model, CLI-first, with PMO Event Routing
 
@@ -867,20 +868,21 @@ M4-R4 [T10.1–T10.6] ←──────────────────�
 
 ## 8. Sprint Summary Table
 
-| Sprint | Functions | Task Count | Duration |
-|--------|-----------|-----------|----------|
-| M1-R1 | F1.1.1, F1.1.3, F1.1.5, F1.2.1–F1.2.4, F2.1.1–F2.2.5, F2.3.1–F2.3.3, F9.1.1, F10.1.1–10.1.2 | 9 | 2 days |
-| M1-R2 | F1.3.1–F1.3.4, F2.3.1–F2.3.3, F9.1.2 | 3 | 1 day |
-| M2-R1 | F3.1.1–F3.1.3, F3.2.1–F3.2.6, F9.1.3, F10.1.3, F10.2.2 | 5 | 2 days |
-| M2-R2 | F3.3.1–F3.3.3, F9.1.3, F10.2.2 | 5 | 1 day |
-| M3-R1 | F5.1.1–F5.3.4, F6.3.1–F6.3.3 | 5 | 2 days |
-| M3-R2 | F6.1.1–F6.3.3, F9.1.4 | 3 | 1 day |
-| M4-R1 | F7.1.1–F7.3.3, F7.4.1, F7.4.2, F7.4.4, F9.2.1–F9.2.3 | 6 | 2 days |
-| M4-R2 | F4.1.1–F4.3.3, F9.2.1–F9.2.3 | 3 | 1 day |
-| M4-R3 | F8.1.1–F8.3.3, F10.2.3 | 3 | 1 day |
-| M4-R4 | F9.1.1–F9.3.3, F10.1.1–F10.3.3, F11.2.1–F11.2.3 | 6 | 1 day |
+| Sprint | Functions | Task Count | Duration | Status |
+|--------|-----------|-----------|----------|--------|
+| M1-R1 | F1.1.1, F1.1.3, F1.1.5, F1.2.1–F1.2.4, F2.1.1–F2.2.5, F2.3.1–F2.3.3, F9.1.1, F10.1.1–10.1.2 | 9 | 2 days | **DONE** |
+| M1-R2 | F1.3.1–F1.3.4, F2.3.1–F2.3.3, F9.1.2 | 3 | 1 day | **DONE** |
+| M2-R1 | F3.1.1–F3.1.3, F3.2.1–F3.2.6, F9.1.3, F10.1.3, F10.2.2 | 5 | 2 days | **DONE** |
+| M2-R2 | F3.3.1–F3.3.3, F9.1.3, F10.2.2 | 5 | 1 day | **DONE** |
+| M3-R1 | F5.1.1–F5.3.4, F6.3.1–F6.3.3 | 5 | 2 days | pending |
+| M3-R2 | F6.1.1–F6.3.3, F9.1.4 | 3 | 1 day | pending |
+| M4-R1 | F7.1.1–F7.3.3, F7.4.1, F7.4.2, F7.4.4, F9.2.1–F9.2.3 | 6 | 2 days | pending |
+| M4-R2 | F4.1.1–F4.3.3, F9.2.1–F9.2.3 | 3 | 1 day | pending |
+| M4-R3 | F8.1.1–F8.3.3, F10.2.3 | 3 | 1 day | pending |
+| M4-R4 | F9.1.1–F9.3.3, F10.1.1–F10.3.3, F11.2.1–F11.2.3 | 6 | 1 day | pending |
 
 **Total:** 10 sprints, 48 tasks, ~13 days
+**Completed:** 4/10 sprints (M1-R1, M1-R2, M2-R1, M2-R2)
 
 ---
 
