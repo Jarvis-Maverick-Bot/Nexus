@@ -128,7 +128,7 @@ class TestTaskListCommand:
 
         tasks = task_list()
         assert len(tasks) == 1
-        assert tasks[0]["lifecycle_state"] == TaskLifecycleState.CREATED.value
+        assert tasks[0]["lifecycle_state"] == TaskLifecycleState.QUEUED.value  # Initial state per PRD §5.B Req 8
 
 
 class TestStateDomainSeparation:
@@ -141,15 +141,16 @@ class TestStateDomainSeparation:
 
         # Distinct enum types
         assert MessageState is not TaskLifecycleState
-        # Queue: 6 states, Task: 8 states
-        assert len(MessageState) == 6
+        # Queue: 8 states (NEW, ROUTED, CLAIMED, WAITING, ANSWERED, CLOSED, CANCELED, EXPIRED)
+        # Task: 8 states (QUEUED, DISPATCHED, RUNNING, WAITING, SUCCEEDED, FAILED, CANCELED, TIMED_OUT)
+        assert len(MessageState) == 8
         assert len(TaskLifecycleState) == 8
         # The enums are from different classes (true separation)
         assert isinstance(MessageState.NEW, MessageState)
-        assert isinstance(TaskLifecycleState.CREATED, TaskLifecycleState)
+        assert isinstance(TaskLifecycleState.QUEUED, TaskLifecycleState)  # Initial state
         # Cross-type membership is False (they are different types)
         assert not isinstance(MessageState.NEW, TaskLifecycleState)
-        assert not isinstance(TaskLifecycleState.CREATED, MessageState)
+        assert not isinstance(TaskLifecycleState.QUEUED, MessageState)
 
     def test_queue_message_fields_distinct_from_task_fields(self):
         """T5.4: Message fields are distinct from Task fields."""

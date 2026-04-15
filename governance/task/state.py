@@ -1,9 +1,9 @@
 """
 governance/task/state.py
-V1.9 Sprint 1, Task T2.3
+V1.9 Sprint 1, Task T2.3 (revised to match PRD V0_1 §5.B Req 8)
 Task lifecycle state machine.
 
-States: CREATED -> QUEUED -> PROMOTED -> IN_PROGRESS -> WAITING -> COMPLETED -> FAILED -> CANCELLED
+States: QUEUED -> DISPATCHED -> RUNNING -> WAITING -> SUCCEEDED | FAILED | CANCELED | TIMED_OUT
 Explicit transition rules and trigger documentation.
 """
 
@@ -14,37 +14,37 @@ from .store import get_task_store
 
 
 _TRANSITIONS: Dict[TaskLifecycleState, Tuple[List[TaskLifecycleState], str]] = {
-    TaskLifecycleState.CREATED: (
-        [TaskLifecycleState.QUEUED, TaskLifecycleState.CANCELLED],
-        "CREATED: task initialized. Queue it for execution (QUEUED) or cancel before queuing (CANCELLED)."
-    ),
     TaskLifecycleState.QUEUED: (
-        [TaskLifecycleState.PROMOTED, TaskLifecycleState.CANCELLED],
-        "QUEUED: task is queued and waiting to be picked up. Promote when executor picks it up (PROMOTED) or cancel (CANCELLED)."
+        [TaskLifecycleState.DISPATCHED, TaskLifecycleState.CANCELED],
+        "QUEUED: task is waiting to be dispatched. Dispatch to executor (DISPATCHED) or cancel (CANCELED)."
     ),
-    TaskLifecycleState.PROMOTED: (
-        [TaskLifecycleState.IN_PROGRESS, TaskLifecycleState.CANCELLED],
-        "PROMOTED: source message consumed, task is in executor's queue. Start work (IN_PROGRESS) or cancel (CANCELLED)."
+    TaskLifecycleState.DISPATCHED: (
+        [TaskLifecycleState.RUNNING, TaskLifecycleState.CANCELED],
+        "DISPATCHED: executor has been assigned. Start work (RUNNING) or cancel (CANCELED)."
     ),
-    TaskLifecycleState.IN_PROGRESS: (
-        [TaskLifecycleState.WAITING, TaskLifecycleState.COMPLETED, TaskLifecycleState.FAILED, TaskLifecycleState.CANCELLED],
-        "IN_PROGRESS: work is underway. Wait on dependency (WAITING), complete successfully (COMPLETED), fail with error (FAILED), or cancel (CANCELLED)."
+    TaskLifecycleState.RUNNING: (
+        [TaskLifecycleState.WAITING, TaskLifecycleState.SUCCEEDED, TaskLifecycleState.FAILED, TaskLifecycleState.CANCELED, TaskLifecycleState.TIMED_OUT],
+        "RUNNING: executor is actively working. Wait on dependency (WAITING), succeed (SUCCEEDED), fail (FAILED), cancel (CANCELED), or timeout (TIMED_OUT)."
     ),
     TaskLifecycleState.WAITING: (
-        [TaskLifecycleState.IN_PROGRESS, TaskLifecycleState.COMPLETED, TaskLifecycleState.FAILED, TaskLifecycleState.CANCELLED],
-        "WAITING: blocked on external dependency. Resume work (IN_PROGRESS), complete (COMPLETED), fail (FAILED), or cancel (CANCELLED)."
+        [TaskLifecycleState.RUNNING, TaskLifecycleState.SUCCEEDED, TaskLifecycleState.FAILED, TaskLifecycleState.CANCELED, TaskLifecycleState.TIMED_OUT],
+        "WAITING: blocked on external dependency. Resume work (RUNNING), succeed (SUCCEEDED), fail (FAILED), cancel (CANCELED), or timeout (TIMED_OUT)."
     ),
-    TaskLifecycleState.COMPLETED: (
+    TaskLifecycleState.SUCCEEDED: (
         [],
-        "COMPLETED: task finished successfully. Terminal state."
+        "SUCCEEDED: task completed successfully. Terminal state."
     ),
     TaskLifecycleState.FAILED: (
         [],
         "FAILED: task encountered an error. Terminal state."
     ),
-    TaskLifecycleState.CANCELLED: (
+    TaskLifecycleState.CANCELED: (
         [],
-        "CANCELLED: task was cancelled. Terminal state."
+        "CANCELED: task was cancelled by authorized action. Terminal state."
+    ),
+    TaskLifecycleState.TIMED_OUT: (
+        [],
+        "TIMED_OUT: task exceeded allowed execution window. Terminal state."
     ),
 }
 
@@ -100,21 +100,22 @@ def get_state_info(state: TaskLifecycleState) -> dict:
         "valid_transitions": [s.value for s in valid_next_states(state)],
         "description": trigger_description(state),
         "is_terminal": state in (
-            TaskLifecycleState.COMPLETED,
+            TaskLifecycleState.SUCCEEDED,
             TaskLifecycleState.FAILED,
-            TaskLifecycleState.CANCELLED,
+            TaskLifecycleState.CANCELED,
+            TaskLifecycleState.TIMED_OUT,
         ),
     }
 
 
 def all_states() -> List[TaskLifecycleState]:
     return [
-        TaskLifecycleState.CREATED,
         TaskLifecycleState.QUEUED,
-        TaskLifecycleState.PROMOTED,
-        TaskLifecycleState.IN_PROGRESS,
+        TaskLifecycleState.DISPATCHED,
+        TaskLifecycleState.RUNNING,
         TaskLifecycleState.WAITING,
-        TaskLifecycleState.COMPLETED,
+        TaskLifecycleState.SUCCEEDED,
         TaskLifecycleState.FAILED,
-        TaskLifecycleState.CANCELLED,
+        TaskLifecycleState.CANCELED,
+        TaskLifecycleState.TIMED_OUT,
     ]

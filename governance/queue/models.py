@@ -1,6 +1,6 @@
 """
 governance/queue/models.py
-V1.9 Sprint 1, Task T1.1
+V1.9 Sprint 1, Task T1.1 (revised to match PRD V0_1 §5.A Req 1-5)
 Message object model for governed queue.
 
 PRD Reference: PRD Section 5.A, Requirements 1-5 (Queue and message coordination)
@@ -14,13 +14,19 @@ import uuid
 
 
 class MessageState(str, Enum):
-    """Message lifecycle states. States: NEW -> ROUTED -> CLAIMED -> WAITING -> ANSWERED -> CLOSED"""
-    NEW = "NEW"
-    ROUTED = "ROUTED"
-    CLAIMED = "CLAIMED"
-    WAITING = "WAITING"
-    ANSWERED = "ANSWERED"
-    CLOSED = "CLOSED"
+    """
+    Message lifecycle states per PRD §5.A.
+    Normal flow: NEW -> ROUTED -> CLAIMED -> WAITING -> ANSWERED -> CLOSED
+    Exception terminals: CANCELED, EXPIRED
+    """
+    NEW = "NEW"          # Message created, not yet routed
+    ROUTED = "ROUTED"   # Assigned to receiver
+    CLAIMED = "CLAIMED" # Receiver has claimed the message
+    WAITING = "WAITING" # Blocked or waiting for response
+    ANSWERED = "ANSWERED" # Response received
+    CLOSED = "CLOSED"   # Normal terminal state
+    CANCELED = "CANCELED" # Cancelled by authorized action (terminal)
+    EXPIRED = "EXPIRED"  # Exceeded time-to-live (terminal)
 
 
 class MessageType(str, Enum):
@@ -94,13 +100,16 @@ class Message:
 
     def transition_to(self, new_state: MessageState) -> None:
         """Transition message to new state. Validates transition is legal."""
+        # Per PRD §5.A: normal flow + CANCELED/EXPIRED terminals
         valid_transitions = {
-            MessageState.NEW: [MessageState.ROUTED, MessageState.CLOSED],
-            MessageState.ROUTED: [MessageState.CLAIMED, MessageState.CLOSED],
-            MessageState.CLAIMED: [MessageState.WAITING, MessageState.ANSWERED, MessageState.CLOSED],
-            MessageState.WAITING: [MessageState.ANSWERED, MessageState.CLOSED],
+            MessageState.NEW: [MessageState.ROUTED, MessageState.CANCELED, MessageState.EXPIRED],
+            MessageState.ROUTED: [MessageState.CLAIMED, MessageState.CANCELED, MessageState.EXPIRED],
+            MessageState.CLAIMED: [MessageState.WAITING, MessageState.ANSWERED, MessageState.CANCELED, MessageState.EXPIRED],
+            MessageState.WAITING: [MessageState.ANSWERED, MessageState.CANCELED, MessageState.EXPIRED],
             MessageState.ANSWERED: [MessageState.CLOSED],
             MessageState.CLOSED: [],
+            MessageState.CANCELED: [],
+            MessageState.EXPIRED: [],
         }
         if new_state in valid_transitions.get(self.state, []):
             self.state = new_state
@@ -108,7 +117,7 @@ class Message:
         else:
             raise ValueError(
                 f"Illegal transition: {self.state.value} -> {new_state.value}. "
-                f"Valid transitions from {self.state.value}: {[s.value for s in valid_transitions[self.state]]}"
+                f"Valid transitions from {self.state.value}: {[s.value for s in valid_transitions.get(self.state, [])]}"
             )
 
     def touch(self) -> None:
@@ -117,4 +126,4 @@ class Message:
 
     def is_terminal(self) -> bool:
         """Returns True if message is in a terminal state."""
-        return self.state in (MessageState.ANSWERED, MessageState.CLOSED)
+        return self.state in (MessageState.ANSWERED, MessageState.CLOSED, MessageState.CANCELED, MessageState.EXPIRED)

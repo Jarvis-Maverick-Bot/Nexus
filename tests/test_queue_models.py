@@ -85,6 +85,10 @@ class TestMessageModel:
         assert msg.is_terminal()
         msg.state = MessageState.CLOSED
         assert msg.is_terminal()
+        msg.state = MessageState.CANCELED
+        assert msg.is_terminal()
+        msg.state = MessageState.EXPIRED
+        assert msg.is_terminal()
 
     def test_link_response(self):
         from governance.queue.models import Message, MessageType
@@ -104,23 +108,31 @@ class TestQueueState:
     def test_valid_next_states(self):
         from governance.queue.state import valid_next_states
         from governance.queue.models import MessageState
+        # NEW can go to ROUTED, CANCELED, or EXPIRED (per queue/state.py)
         assert MessageState.ROUTED in valid_next_states(MessageState.NEW)
+        assert MessageState.CANCELED in valid_next_states(MessageState.NEW)
+        assert MessageState.EXPIRED in valid_next_states(MessageState.NEW)
         assert MessageState.ANSWERED not in valid_next_states(MessageState.NEW)
 
     def test_can_transition(self):
         from governance.queue.state import can_transition
         from governance.queue.models import MessageState
         assert can_transition(MessageState.NEW, MessageState.ROUTED)
+        assert can_transition(MessageState.NEW, MessageState.CANCELED)
         assert not can_transition(MessageState.NEW, MessageState.ANSWERED)
 
     def test_all_states(self):
         from governance.queue.state import all_states
         from governance.queue.models import MessageState
         states = all_states()
-        assert len(states) == 6
+        # MessageState now has 8 states: NEW, ROUTED, CLAIMED, WAITING, ANSWERED, CLOSED, CANCELED, EXPIRED
+        assert len(states) == 8
+        assert MessageState.CANCELED in states
+        assert MessageState.EXPIRED in states
         assert states == [
             MessageState.NEW, MessageState.ROUTED, MessageState.CLAIMED,
             MessageState.WAITING, MessageState.ANSWERED, MessageState.CLOSED,
+            MessageState.CANCELED, MessageState.EXPIRED,
         ]
 
 

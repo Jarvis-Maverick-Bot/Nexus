@@ -132,8 +132,14 @@ def get_registry() -> CollaboratorRegistry:
     if _default_registry is None:
         _default_registry = CollaboratorRegistry()
         # Auto-register initial proof-case collaborators
+        # Registered under both short name (planner/tdd) and full name (jarvis-planner/jarvis-tdd)
+        # per Architecture Doc §19 — routing accepts either
         from .planner import get_planner
         from .tdd import get_tdd
-        _default_registry.register("planner", get_planner())
-        _default_registry.register("tdd", get_tdd())
+        planner = get_planner()
+        tdd = get_tdd()
+        _default_registry.register("planner", planner)
+        _default_registry.register("jarvis-planner", planner)
+        _default_registry.register("tdd", tdd)
+        _default_registry.register("jarvis-tdd", tdd)
     return _default_registry

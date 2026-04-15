@@ -1,12 +1,12 @@
 """
 governance/task/models.py
-V1.9 Sprint 1, Task T2.1
+V1.9 Sprint 1, Task T2.1 (revised to match PRD V0_1 §5.B Req 8)
 Task execution lifecycle model.
 
 Distinct from Message (governance/queue/models.py) and WorkItem (platform_model/objects.py).
 Implements the 8-state task lifecycle per PRD Section 5.B, Requirements 6-10.
 
-States: CREATED -> QUEUED -> PROMOTED -> IN_PROGRESS -> WAITING -> COMPLETED -> FAILED -> CANCELLED
+States: QUEUED -> DISPATCHED -> RUNNING -> WAITING -> SUCCEEDED | FAILED | CANCELED | TIMED_OUT
 """
 
 from dataclasses import dataclass, field
@@ -18,17 +18,22 @@ import uuid
 
 class TaskLifecycleState(str, Enum):
     """
-    8-state task lifecycle.
-    States: CREATED -> QUEUED -> PROMOTED -> IN_PROGRESS -> WAITING -> COMPLETED -> FAILED -> CANCELLED
+    8-state task lifecycle per PRD §5.B Req 8.
+    States: QUEUED, DISPATCHED, RUNNING, WAITING, SUCCEEDED, FAILED, CANCELED, TIMED_OUT
     """
-    CREATED = "CREATED"          # Task created, not yet queued
-    QUEUED = "QUEUED"            # Queued for execution
-    PROMOTED = "PROMOTED"        # Promoted from queue (source message consumed)
-    IN_PROGRESS = "IN_PROGRESS"  # Executor has claimed it, work ongoing
-    WAITING = "WAITING"          # Waiting on external dependency or input
-    COMPLETED = "COMPLETED"      # Work finished successfully
-    FAILED = "FAILED"            # Work failed or errored
-    CANCELLED = "CANCELLED"      # Task cancelled before completion
+    QUEUED = "QUEUED"            # Task created, waiting to be dispatched to executor
+    DISPATCHED = "DISPATCHED"    # Assigned to executor, executor has acknowledged
+    RUNNING = "RUNNING"          # Executor actively working
+    WAITING = "WAITING"          # Blocked on external dependency or input
+    SUCCEEDED = "SUCCEEDED"      # Work finished successfully (terminal)
+    FAILED = "FAILED"            # Work failed with error (terminal)
+    CANCELED = "CANCELED"        # Terminated by authorized action (terminal)
+    TIMED_OUT = "TIMED_OUT"      # Exceeded allowed execution window (terminal)
+
+    @classmethod
+    def terminal_states(cls) -> list:
+        """Return all terminal states."""
+        return [cls.SUCCEEDED, cls.FAILED, cls.CANCELED, cls.TIMED_OUT]
 
 
 class TaskResult:
@@ -86,7 +91,7 @@ class Task:
         result_record: Embedded TaskResult (None until task completes/fails)
     """
     assigned_executor: str
-    lifecycle_state: TaskLifecycleState = TaskLifecycleState.CREATED
+    lifecycle_state: TaskLifecycleState = TaskLifecycleState.QUEUED
     task_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     source_message_id: Optional[str] = None
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
@@ -123,15 +128,16 @@ class Task:
         self.updated_at = datetime.now(timezone.utc).isoformat()
 
     def transition_to(self, new_state: TaskLifecycleState) -> None:
+        # Per PRD §5.B Req 8: QUEUED -> DISPATCHED -> RUNNING -> WAITING -> SUCCEEDED/FAILED/CANCELED/TIMED_OUT
         valid_transitions = {
-            TaskLifecycleState.CREATED: [TaskLifecycleState.QUEUED, TaskLifecycleState.CANCELLED],
-            TaskLifecycleState.QUEUED: [TaskLifecycleState.PROMOTED, TaskLifecycleState.CANCELLED],
-            TaskLifecycleState.PROMOTED: [TaskLifecycleState.IN_PROGRESS, TaskLifecycleState.CANCELLED],
-            TaskLifecycleState.IN_PROGRESS: [TaskLifecycleState.WAITING, TaskLifecycleState.COMPLETED, TaskLifecycleState.FAILED, TaskLifecycleState.CANCELLED],
-            TaskLifecycleState.WAITING: [TaskLifecycleState.IN_PROGRESS, TaskLifecycleState.COMPLETED, TaskLifecycleState.FAILED, TaskLifecycleState.CANCELLED],
-            TaskLifecycleState.COMPLETED: [],
+            TaskLifecycleState.QUEUED: [TaskLifecycleState.DISPATCHED, TaskLifecycleState.CANCELED],
+            TaskLifecycleState.DISPATCHED: [TaskLifecycleState.RUNNING, TaskLifecycleState.CANCELED],
+            TaskLifecycleState.RUNNING: [TaskLifecycleState.WAITING, TaskLifecycleState.SUCCEEDED, TaskLifecycleState.FAILED, TaskLifecycleState.CANCELED, TaskLifecycleState.TIMED_OUT],
+            TaskLifecycleState.WAITING: [TaskLifecycleState.RUNNING, TaskLifecycleState.SUCCEEDED, TaskLifecycleState.FAILED, TaskLifecycleState.CANCELED, TaskLifecycleState.TIMED_OUT],
+            TaskLifecycleState.SUCCEEDED: [],
             TaskLifecycleState.FAILED: [],
-            TaskLifecycleState.CANCELLED: [],
+            TaskLifecycleState.CANCELED: [],
+            TaskLifecycleState.TIMED_OUT: [],
         }
         if new_state in valid_transitions.get(self.lifecycle_state, []):
             self.lifecycle_state = new_state
@@ -144,7 +150,7 @@ class Task:
 
     def complete(self, summary: str, output: Optional[Dict[str, Any]] = None) -> None:
         self.result_record = TaskResult(status="success", summary=summary, output=output)
-        self.transition_to(TaskLifecycleState.COMPLETED)
+        self.transition_to(TaskLifecycleState.SUCCEEDED)
 
     def fail(self, summary: str, error: str) -> None:
         self.result_record = TaskResult(status="failure", summary=summary, error=error)
@@ -152,7 +158,8 @@ class Task:
 
     def is_terminal(self) -> bool:
         return self.lifecycle_state in (
-            TaskLifecycleState.COMPLETED,
+            TaskLifecycleState.SUCCEEDED,
             TaskLifecycleState.FAILED,
-            TaskLifecycleState.CANCELLED,
+            TaskLifecycleState.CANCELED,
+            TaskLifecycleState.TIMED_OUT,
         )

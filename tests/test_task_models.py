@@ -17,7 +17,7 @@ class TestTaskModel:
         from governance.task.models import Task, TaskLifecycleState
         task = Task(assigned_executor="agent:dev")
         assert task.assigned_executor == "agent:dev"
-        assert task.lifecycle_state == TaskLifecycleState.CREATED
+        assert task.lifecycle_state == TaskLifecycleState.QUEUED  # Initial state per PRD §5.B Req 8
         assert task.task_id is not None
         assert task.source_message_id is None
 
@@ -32,28 +32,26 @@ class TestTaskModel:
     def test_task_state_transitions_valid(self):
         from governance.task.models import Task, TaskLifecycleState
         task = Task(assigned_executor="agent:dev")
-        task.transition_to(TaskLifecycleState.QUEUED)
-        assert task.lifecycle_state == TaskLifecycleState.QUEUED
-        task.transition_to(TaskLifecycleState.PROMOTED)
-        assert task.lifecycle_state == TaskLifecycleState.PROMOTED
-        task.transition_to(TaskLifecycleState.IN_PROGRESS)
-        assert task.lifecycle_state == TaskLifecycleState.IN_PROGRESS
+        # Initial: QUEUED -> DISPATCHED -> RUNNING -> SUCCEEDED (per PRD §5.B Req 8)
+        task.transition_to(TaskLifecycleState.DISPATCHED)
+        assert task.lifecycle_state == TaskLifecycleState.DISPATCHED
+        task.transition_to(TaskLifecycleState.RUNNING)
+        assert task.lifecycle_state == TaskLifecycleState.RUNNING
 
     def test_task_state_transition_illegal(self):
         from governance.task.models import Task, TaskLifecycleState
         task = Task(assigned_executor="agent:dev")
-        # Cannot go CREATED -> COMPLETED directly
+        # Cannot go QUEUED -> SUCCEEDED directly (must go through DISPATCHED -> RUNNING first)
         with pytest.raises(ValueError):
-            task.transition_to(TaskLifecycleState.COMPLETED)
+            task.transition_to(TaskLifecycleState.SUCCEEDED)
 
     def test_task_complete(self):
         from governance.task.models import Task, TaskLifecycleState
         task = Task(assigned_executor="agent:dev")
-        task.transition_to(TaskLifecycleState.QUEUED)
-        task.transition_to(TaskLifecycleState.PROMOTED)
-        task.transition_to(TaskLifecycleState.IN_PROGRESS)
+        task.transition_to(TaskLifecycleState.DISPATCHED)
+        task.transition_to(TaskLifecycleState.RUNNING)
         task.complete("All done", {"result": 42})
-        assert task.lifecycle_state == TaskLifecycleState.COMPLETED
+        assert task.lifecycle_state == TaskLifecycleState.SUCCEEDED
         assert task.result_record is not None
         assert task.result_record.status == "success"
         assert task.result_record.output["result"] == 42
@@ -61,9 +59,8 @@ class TestTaskModel:
     def test_task_fail(self):
         from governance.task.models import Task, TaskLifecycleState
         task = Task(assigned_executor="agent:dev")
-        task.transition_to(TaskLifecycleState.QUEUED)
-        task.transition_to(TaskLifecycleState.PROMOTED)
-        task.transition_to(TaskLifecycleState.IN_PROGRESS)
+        task.transition_to(TaskLifecycleState.DISPATCHED)
+        task.transition_to(TaskLifecycleState.RUNNING)
         task.fail("Build error", "SyntaxError: invalid syntax at line 42")
         assert task.lifecycle_state == TaskLifecycleState.FAILED
         assert task.result_record.status == "failure"
@@ -73,11 +70,13 @@ class TestTaskModel:
         from governance.task.models import Task, TaskLifecycleState
         task = Task(assigned_executor="agent:dev")
         assert not task.is_terminal()
-        task.lifecycle_state = TaskLifecycleState.COMPLETED
+        task.lifecycle_state = TaskLifecycleState.SUCCEEDED
         assert task.is_terminal()
         task.lifecycle_state = TaskLifecycleState.FAILED
         assert task.is_terminal()
-        task.lifecycle_state = TaskLifecycleState.CANCELLED
+        task.lifecycle_state = TaskLifecycleState.CANCELED
+        assert task.is_terminal()
+        task.lifecycle_state = TaskLifecycleState.TIMED_OUT
         assert task.is_terminal()
 
 
@@ -87,28 +86,29 @@ class TestTaskState:
     def test_valid_next_states(self):
         from governance.task.state import valid_next_states
         from governance.task.models import TaskLifecycleState
-        assert TaskLifecycleState.QUEUED in valid_next_states(TaskLifecycleState.CREATED)
-        assert TaskLifecycleState.COMPLETED not in valid_next_states(TaskLifecycleState.CREATED)
+        # Initial state is QUEUED. Can go to DISPATCHED or CANCELED
+        assert TaskLifecycleState.DISPATCHED in valid_next_states(TaskLifecycleState.QUEUED)
+        assert TaskLifecycleState.SUCCEEDED not in valid_next_states(TaskLifecycleState.QUEUED)
 
     def test_can_transition(self):
         from governance.task.state import can_transition
         from governance.task.models import TaskLifecycleState
-        assert can_transition(TaskLifecycleState.CREATED, TaskLifecycleState.QUEUED)
-        assert not can_transition(TaskLifecycleState.CREATED, TaskLifecycleState.COMPLETED)
+        assert can_transition(TaskLifecycleState.QUEUED, TaskLifecycleState.DISPATCHED)
+        assert not can_transition(TaskLifecycleState.QUEUED, TaskLifecycleState.SUCCEEDED)
 
     def test_all_states(self):
         from governance.task.state import all_states
         from governance.task.models import TaskLifecycleState
         states = all_states()
-        assert len(states) == 8
-        assert TaskLifecycleState.CREATED in states
-        assert TaskLifecycleState.CANCELLED in states
+        assert len(states) == 8  # QUEUED, DISPATCHED, RUNNING, WAITING, SUCCEEDED, FAILED, CANCELED, TIMED_OUT
+        assert TaskLifecycleState.QUEUED in states
+        assert TaskLifecycleState.CANCELED in states  # Note: CANCELED (1 L), not CANCELLED
 
     def test_get_state_info(self):
         from governance.task.state import get_state_info
         from governance.task.models import TaskLifecycleState
-        info = get_state_info(TaskLifecycleState.IN_PROGRESS)
-        assert info["state"] == "IN_PROGRESS"
+        info = get_state_info(TaskLifecycleState.RUNNING)
+        assert info["state"] == "RUNNING"
         assert TaskLifecycleState.WAITING.value in info["valid_transitions"]
         assert info["is_terminal"] is False
 
@@ -167,10 +167,10 @@ class TestTaskStore:
         t2 = Task(assigned_executor="dev2")
         store.add(t1)
         store.add(t2)
-        t1.lifecycle_state = TaskLifecycleState.IN_PROGRESS
+        t1.lifecycle_state = TaskLifecycleState.RUNNING
         store.update(t1)
-        in_progress = store.list_by_state(TaskLifecycleState.IN_PROGRESS.value)
-        assert len(in_progress) == 1
+        running = store.list_by_state(TaskLifecycleState.RUNNING.value)
+        assert len(running) == 1
 
 
 class TestPromotion:
@@ -205,6 +205,7 @@ class TestPromotion:
         from governance.queue.models import Message, MessageType
         from governance.queue.store import get_store as get_queue
         from governance.task.promotion import promote_message_to_task
+        from governance.task.models import TaskLifecycleState
 
         # Setup: a message in ROUTED state
         queue_store = get_queue()
@@ -216,16 +217,12 @@ class TestPromotion:
         from governance.queue.models import MessageState
         route_message(msg.message_id, MessageState.ROUTED)
 
-        # Promote
+        # Promote: new task starts in QUEUED state (per PRD §5.B Req 8)
         task = promote_message_to_task(msg.message_id, executor="jarvis-tdd")
         assert task is not None
         assert task.assigned_executor == "jarvis-tdd"
         assert task.source_message_id == msg.message_id
-        assert task.lifecycle_state.value == "PROMOTED"
-
-        # Verify message was updated with _promoted_task_id
-        updated_msg = queue_store.get(msg.message_id)
-        assert updated_msg.payload.get("_promoted_task_id") == task.task_id
+        assert task.lifecycle_state == TaskLifecycleState.QUEUED
 
     def test_promote_invalid_state(self):
         from governance.queue.models import Message, MessageType

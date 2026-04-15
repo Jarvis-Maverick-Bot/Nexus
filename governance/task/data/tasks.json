@@ -1,0 +1,38 @@
+[
+  {
+    "task_id": "task-001",
+    "source_message_id": "msg-002",
+    "assigned_executor": "tdd",
+    "lifecycle_state": "SUCCEEDED",
+    "created_at": "2026-04-15T10:07:00+00:00",
+    "updated_at": "2026-04-15T10:12:00+00:00",
+    "result_record": {
+      "status": "success",
+      "summary": "TDD suite written and all tests passing",
+      "output": {
+        "tests_passed": 53,
+        "tests_failed": 0
+      },
+      "error": null,
+      "completed_at": "2026-04-15T10:12:00+00:00"
+    }
+  },
+  {
+    "task_id": "task-002",
+    "source_message_id": null,
+    "assigned_executor": "planner",
+    "lifecycle_state": "RUNNING",
+    "created_at": "2026-04-15T10:13:00+00:00",
+    "updated_at": "2026-04-15T10:14:00+00:00",
+    "result_record": null
+  },
+  {
+    "task_id": "task-003",
+    "source_message_id": null,
+    "assigned_executor": "jarvis",
+    "lifecycle_state": "WAITING",
+    "created_at": "2026-04-15T10:10:00+00:00",
+    "updated_at": "2026-04-15T10:11:00+00:00",
+    "result_record": null
+  }
+]

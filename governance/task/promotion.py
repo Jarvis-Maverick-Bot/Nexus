@@ -1,10 +1,12 @@
 """
 governance/task/promotion.py
-V1.9 Sprint 1, Task T2.4
+V1.9 Sprint 1, Task T2.4 (revised to match PRD V0_1 §5.B Req 8)
 Queue-to-task promotion logic.
 
 Converts a queued Message into an executable Task.
-Source message is transitioned to CLAIMED state; new Task is created in PROMOTED state.
+Source message is transitioned to CONSUMED; new Task is created in QUEUED state.
+
+Promotion chain: ROUTED|CLAIMED message -> promote -> Task(QUEUED) -> DISPATCHED -> RUNNING -> terminal
 
 The message-to-task boundary is explicit and inspectable:
 - Message carries the task_id once promoted
@@ -68,10 +70,11 @@ def promote_message_to_task(
         transition_message(message_id, MessageState.CLAIMED)
 
     # Create the task, linked to the source message
+    # Initial state is QUEUED per PRD §5.B Req 8 (not PROMOTED)
     task = Task(
         assigned_executor=executor,
         source_message_id=message_id,
-        lifecycle_state=TaskLifecycleState.PROMOTED,
+        lifecycle_state=TaskLifecycleState.QUEUED,
     )
 
     # Link the message -> task relationship in payload

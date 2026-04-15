@@ -1,0 +1,54 @@
+[
+  {
+    "message_id": "msg-001",
+    "sender": "jarvis",
+    "receiver": "planner",
+    "msg_type": "REQUEST",
+    "payload": {
+      "content": "Analyze the grid escape game and produce a task breakdown for TDD implementation",
+      "priority": "normal"
+    },
+    "state": "CLOSED",
+    "created_at": "2026-04-15T10:00:00+00:00",
+    "updated_at": "2026-04-15T10:05:00+00:00"
+  },
+  {
+    "message_id": "msg-002",
+    "sender": "planner",
+    "receiver": "tdd",
+    "msg_type": "REQUEST",
+    "payload": {
+      "content": "Write TDD test suite for grid escape game per planner breakdown",
+      "priority": "high"
+    },
+    "state": "CLAIMED",
+    "created_at": "2026-04-15T10:06:00+00:00",
+    "updated_at": "2026-04-15T10:07:00+00:00"
+  },
+  {
+    "message_id": "msg-003",
+    "sender": "jarvis",
+    "receiver": "nova",
+    "msg_type": "ESCALATION",
+    "payload": {
+      "content": "TDD output requires governance review before proceeding",
+      "priority": "high"
+    },
+    "state": "ROUTED",
+    "created_at": "2026-04-15T10:10:00+00:00",
+    "updated_at": "2026-04-15T10:10:00+00:00"
+  },
+  {
+    "message_id": "msg-004",
+    "sender": "tdd",
+    "receiver": "jarvis",
+    "msg_type": "RESPONSE",
+    "payload": {
+      "_promoted_task_id": "task-001",
+      "content": "TDD suite complete. All tests green. Ready for integration."
+    },
+    "state": "ANSWERED",
+    "created_at": "2026-04-15T10:08:00+00:00",
+    "updated_at": "2026-04-15T10:12:00+00:00"
+  }
+]

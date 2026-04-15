@@ -285,10 +285,9 @@ class TestCLIRestartSurvival:
         store1.add(task1)
         store1.add(task2)
 
-        # Advance task1 to IN_PROGRESS
-        task1.transition_to(TaskLifecycleState.QUEUED)
-        task1.transition_to(TaskLifecycleState.PROMOTED)
-        task1.transition_to(TaskLifecycleState.IN_PROGRESS)
+        # Advance task1 to RUNNING (initial QUEUED -> DISPATCHED -> RUNNING per PRD §5.B Req 8)
+        task1.transition_to(TaskLifecycleState.DISPATCHED)
+        task1.transition_to(TaskLifecycleState.RUNNING)
         store1.update(task1)
 
         assert task_store_module.TASKS_FILE.exists()
@@ -302,8 +301,8 @@ class TestCLIRestartSurvival:
 
         assert retrieved1 is not None, "Task 1 lost after restart simulation"
         assert retrieved2 is not None, "Task 2 lost after restart simulation"
-        assert retrieved1.lifecycle_state == TaskLifecycleState.IN_PROGRESS
-        assert retrieved2.lifecycle_state == TaskLifecycleState.CREATED
+        assert retrieved1.lifecycle_state == TaskLifecycleState.RUNNING
+        assert retrieved2.lifecycle_state == TaskLifecycleState.QUEUED  # Initial state per PRD
 
     def test_mixed_queue_and_task_persistence(self):
         """
