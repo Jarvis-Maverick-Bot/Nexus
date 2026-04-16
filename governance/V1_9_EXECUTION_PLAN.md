@@ -50,13 +50,13 @@ V1.9 delivers three bounded capability layers:
 
 ### Definition of Done
 
-- [x] NATS PUB/SUB operational (real transport, not mocked)
-- [x] Local cache fallback when NATS unavailable
-- [x] Queue state machine: NEW→ROUTED→CLAIMED→ANSWERED
-- [x] Response messages linked to request messages via `request_id`
+- [x] NATS publish operational (real transport; local-state/cache layer handles unavailable condition)
+- [x] Local state/cache + evidence/inspection surface (not alternate authoritative transport mode)
+- [x] Queue state machine implements full state model: NEW, ROUTED, CLAIMED, WAITING, ANSWERED, CLOSED, CANCELED, EXPIRED (evidence concentrated on main-path: NEW→ROUTED→CLAIMED→ANSWERED→CLOSED)
+- [x] Message linkage: linked response messages via `request_id` propagation (per PRD V0.3 linkage model)
 - [x] Append-only evidence log per message lifecycle
 - [x] Unit tests: all passing
-- [x] Evidence trace: scenario1_agent_to_agent_trace.md captured
+- [x] Evidence trace: scenario1_agent_to_agent_trace.md captured from real queue event log
 
 ### Evidence
 

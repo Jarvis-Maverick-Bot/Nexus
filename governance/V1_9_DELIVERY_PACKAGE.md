@@ -4,7 +4,7 @@
 **Prepared for:** Nova — V1.9 Formal Close Review
 **Date:** 2026-04-16
 **Branch:** `release/v1.9-dev`
-**Commit:** `be43586` (latest in chain)
+**Commit:** `e335767` (delivery package commit; Sprint 3 chain: e335767 ← be43586 ← 84eaf7f ← 77182b3 ← 58f727e)
 
 ---
 
@@ -14,7 +14,7 @@ V1.9 delivers three bounded capability layers:
 
 | Layer | Scope | Sprint |
 |-------|-------|--------|
-| FB8 Queue Foundation | Message queue infrastructure, NATS transport, bounded 4-state lifecycle (NEW→ROUTED→CLAIMED→ANSWERED), local cache fallback | Sprint 1 |
+| FB8 Queue Foundation | Message queue infrastructure, NATS transport, 8-state lifecycle (NEW→ROUTED→CLAIMED→WAITING→ANSWERED→CLOSED/CANCELED/EXPIRED), local state/cache + evidence/inspection surface | Sprint 1 |
 | FB3/F4 Routing + Escalation | Intake→Determine→Route→Resolve→Relay, escalation triggers, return-path decisions (APPROVE/REJECT/CONTINUE/STOP) | Sprint 2 |
 | CLI Completeness + Structural Migration | inspect_cmd unified across all 4 domains, evidence package, workitem module cleanup | Sprint 3 |
 
@@ -24,13 +24,11 @@ V1.9 delivers three bounded capability layers:
 
 | Document | Status | Location |
 |----------|--------|----------|
-| V1.9 PRD | Approved | Shared drive: `V1.9_PRD_V0_1.md` |
-| V1.9 Scope | Approved | Shared drive: `V1.9_SCOPE_V0_1.md` |
-| V1.9 Foundation | Approved | Shared drive: `V1.9_FOUNDATION_V0_2.md` |
-| V1.9 Architectural Design | Approved | Shared drive: `V1.9_ARCHITECTURAL_DESIGN_V0_5.md` |
-| V1.9 Execution Plan | Approved | Shared drive: `V1.9_EXECUTION_PLAN_V0_3.md` |
-
-*(Shared drive: `\\192.168.31.124\Nova-Jarvis-Shared\V1.9\`)*
+| V1.9 PRD | Approved | `\\192.168.31.124\Nova-Jarvis-Shared\working\gov_langgraph\V1.9\V1.9_PRD_V0_3.md` |
+| V1.9 Scope | Approved | `\\192.168.31.124\Nova-Jarvis-Shared\working\gov_langgraph\V1.9\V1.9_SCOPE_V0_3.md` |
+| V1.9 Foundation | Approved | `\\192.168.31.124\Nova-Jarvis-Shared\working\gov_langgraph\V1.9\V1.9_FOUNDATION_V0_2.md` |
+| V1.9 Architectural Design | Approved | `\\192.168.31.124\Nova-Jarvis-Shared\working\gov_langgraph\V1.9\V1.9_ARCHITECTURAL_DESIGN_V0_5.md` |
+| V1.9 Execution Plan | Approved | `\\192.168.31.124\Nova-Jarvis-Shared\working\gov_langgraph\V1.9\V1.9_EXECUTION_PLAN_V0_4.md` |
 
 ---
 
@@ -46,14 +44,16 @@ Functions: F1.1.1, F1.1.2, F1.2.1–F1.2.5, F2.1.1–F2.2.5
 | F1.1.1 | Queue creation (NEW state) | ✅ |
 | F1.1.2 | Queue listing and inspection | ✅ |
 | F1.2.1 | NATS publish | ✅ |
-| F1.2.2 | NATS subscribe + local cache | ✅ |
-| F1.2.3 | State transitions (NEW→ROUTED→CLAIMED→ANSWERED) | ✅ |
-| F1.2.4 | Response linking (request_id propagation) | ✅ |
+| F1.2.2 | NATS subscribe + local state/cache | ✅ |
+| F1.2.3 | State transitions (NEW→ROUTED→CLAIMED→WAITING→ANSWERED + CLOSED/CANCELED/EXPIRED) | ✅ |
+| F1.2.4 | Message linkage (linked response via request_id) | ✅ |
 | F1.2.5 | Append-only evidence log | ✅ |
 | F2.1.1–F2.1.4 | Message lifecycle + Planner seat | ✅ |
 | F2.2.1–F2.2.5 | Task lifecycle + TDD seat | ✅ |
 
-**Sign-off commit:** `106dcdf` (messages.json schema), `18a2fce` (task/message lifecycle corrected to PRD baseline)
+**Queue state model (per PRD V0.3):** NEW → ROUTED → CLAIMED → WAITING → ANSWERED → CLOSED. Full state set: NEW, ROUTED, CLAIMED, WAITING, ANSWERED, CLOSED, CANCELED, EXPIRED. Sprint 1 evidence concentrates on the main-path transitions (NEW→ROUTED→CLAIMED→ANSWERED→CLOSED).
+
+**Sign-off commits:** `106dcdf` (messages.json schema), `18a2fce` (task/message lifecycle corrected to PRD baseline)
 
 ---
 
@@ -73,7 +73,7 @@ Functions: F3.1.1–F3.3.3, F5.1.1–F5.3.4, F6.1.1–F6.3.3
 | F5.1.1–F5.3.4 | PMO Event Routing core | ✅ |
 | F6.1.1–F6.3.3 | Bounded command/control loop | ✅ |
 
-**Sign-off:** Nova approved M3 (routing/control bounded proof) with carry-forward note: describe M3 honestly as "bounded V1.9 routing/control proof, not a mature control-plane/runtime"
+**Sign-off:** Nova approved with carry-forward note: describe Sprint 2 as "bounded V1.9 routing/control proof, not a mature control-plane/runtime"
 
 ---
 
@@ -82,19 +82,22 @@ Functions: F3.1.1–F3.3.3, F5.1.1–F5.3.4, F6.1.1–F6.3.3
 
 | Task | Description | Status | Notes |
 |------|-------------|--------|-------|
-| T9.1 | inspect_cmd unified 4-domain coverage | ✅ Approved | |
-| T9.2 | Universal inspect path + source transparency | ✅ Approved | Path semantics corrected; source attribution added |
-| T10.1 | Evidence package | ✅ Approved | 5-scenario traces from real logs |
-| T10.2 | Sprint 1 + Sprint 2 evidence | ✅ Approved w/ notes | Scenario 2 weakest; Scenario 4 NATS wording caution |
-| T11 | Structural cleanup | ✅ Approved | workitem/ module created; V1.8 artifacts removed |
+| T9.1 | signal-blocker → FB4 | CLI signal-blocker routes to escalation triggers | ✅ |
+| T9.2 | inspect unification | Unified inspect across queue/task/WI/escalation domains | ✅ |
+| T10.1 | CLI evidence capture | Scenario 5: live `inspect` outputs | ✅ |
+| T10.2 | Evidence package | Sprint 1 + Sprint 2 scenario traces | ✅ w/ notes |
+| T11 | Structural cleanup | workitem/ module, V1.8 artifacts removed | ✅ |
 
-**Commit chain:**
+**Sprint 3 commit chain:**
 ```
+e335767 — delivery package + exec plan v1.4
 be43586 — T11 structural cleanup
 84eaf7f — T10.2 evidence package
 77182b3 — T9.2 inspect semantic fix
 58f727e — T9.1 signal-blocker → FB4 escalation
 ```
+
+**Sign-off:** Nova — T11 APPROVED; T10 APPROVED WITH NOTES (2026-04-16 16:12 GMT+8)
 
 ---
 
@@ -124,66 +127,104 @@ be43586 — T11 structural cleanup
 
 ### Sprint 3 Evidence (`evidence/sprint3/`)
 
-Sprint 3 deliverables (T9, T10, T11) are structural/code artifacts with no separate trace — evidence is the code itself and the approved Nova review record.
+Sprint 3 deliverables (T9, T10, T11) are structural/code artifacts — evidence is the code itself and the Nova review record.
 
 ---
 
-## 5. Module Structure
+## 5. Module Structure (Actual Repo State)
 
 ```
 governance/
-  workitem/              # V1.9 — workitem domain boundary
-    __init__.py
-    models.py            # WorkItem, Blocker, Artifact, Validation, DeliveryPackage
-    store.py             # PMO state store (governance/data/pmo_state.json)
-    transitions.py       # WorkItemStage enum + transition rules
   cli/
-    cli.py               # Unified CLI entry point
+    cli.py                      # Unified CLI entry point
     commands/
-      queue_cmd.py       # queue-list
-      task_cmd.py        # task-list
-      inspect_cmd.py     # inspect (NEW: unified 4-domain)
+      inspect_cmd.py            # inspect (4-domain unified)
+      queue_cmd.py              # queue-list
+      task_cmd.py               # task-list
+  collaborators/
+    base.py                     # Agent base class
+    planner.py                  # Planner seat
+    registry.py                 # Agent registry
+    tdd.py                      # TDD seat
+  control/
+    control.py                  # Control loop
+    task_store.py               # Task store (control plane)
   escalation/
-    triggers.py          # FB4 escalation triggers
-    return_path.py       # FB4 return-path decisions
-  routing/
-    rules.py             # FB3 routing rules
-    engine.py            # FB3 routing engine
-  data/
-    pmo_state.json       # PMO work-item state
-    pmo_event_log.json   # Event log
-    pmo_task_store.json  # Task store
-    pmo_task_log.json    # Task log
+    decision_record.py          # Escalation decision records
+    hold_state.py               # Escalation hold state
+    return_to_flow.py           # Return-to-flow logic
+    triggers.py                 # FB4 escalation triggers
   queue/
-    message_queue.py     # FB8 message queue
-    state.py             # Queue state machine
-    cache.py             # Local cache fallback
+    linkage.py                  # Message linkage (request_id/response)
+    local_state.py              # Local state/cache
+    models.py                   # Queue message models
+    nats_transport.py           # NATS transport layer
+    state.py                    # Queue state machine
+    store.py                    # Queue store
+  routing/
+    delivery.py                 # Route delivery
+    engine.py                   # Routing engine
+    multihop.py                 # Multi-hop routing
+    return_path.py              # Return-path decisions
+    rules.py                    # Routing rules
   task/
-    models.py            # Task models
-    lifecycle.py         # Task lifecycle state machine
-    store.py             # Task store
-  evidence/
-    queue/               # Queue event evidence logs
-    escalation/          # Escalation event evidence logs
-    routing/             # Routing evidence logs
-    sprint1/             # Sprint 1 scenario traces
-    sprint2/             # Sprint 2 scenario traces
-    sprint3/             # Sprint 3 (structural — no separate trace)
+    models.py                   # Task models
+    promotion.py                # Task promotion
+    state.py                    # Task lifecycle state machine
+    store.py                    # Task store
+  workitem/                     # V1.9 — workitem domain boundary
+    models.py                   # WorkItem, Blocker, Artifact, Validation, DeliveryPackage
+    store.py                    # PMO state store
+    transitions.py              # WorkItemStage enum + transition rules
+  ui/
+    main.py                     # UI entry point
+    v1_governance.py            # Governance UI
+  data/
+    pmo_state.json              # PMO work-item state
+    pmo_event_log.json          # Event log
+    pmo_task_store.json         # Task store
+    pmo_task_log.json           # Task log
+
+evidence/                        # Top-level evidence directory
+  escalation/                    # Escalation event logs
+    2026-04-15.jsonl
+    2026-04-16.jsonl
+  gameplay/                      # Game evidence (Grid Escape)
+    ge-001_completion.log
+    ge-002_completion.log
+    M1_R2_EVIDENCE.md
+  governance/                    # Governance trace files
+    handoff_chain_trace.md
+    planner_trace.md
+    tdd_trace.md
+  pmo_cli/                       # PMO CLI evidence
+    M2_R2_EVIDENCE.md
+    M2_R2_trace.log
+    pmo_cli_trace.log
+    run_trace.ps1
+  queue/                         # Queue event evidence logs
+    2026-04-15.jsonl
+    2026-04-16.jsonl
+  routing/                       # Routing evidence
+    control_loop_trace.log
+    routing_proof_case.log
+    task_log.json
+  sprint1/                       # Sprint 1 scenario traces
+  sprint2/                       # Sprint 2 scenario traces
+  sprint3/                       # Sprint 3 (structural — no separate trace)
 ```
 
 ---
 
 ## 6. Known Limitations (Carry-Forward)
 
-These are honest maturity notes — not hidden defects:
-
 | Item | Description | Filed As |
 |------|-------------|----------|
-| 1 | `governance/workitem/store.py` contains legacy `signal_blocker()` that is no longer the truthful CLI path (CLI now routes to FB4 escalation) | Cleanup item |
+| 1 | `governance/workitem/store.py` contains legacy `signal_blocker()` — CLI now routes to FB4 escalation; local function is dead code | Cleanup item |
 | 2 | Evidence package split across `sprint1/` and `sprint2/` — functional but not elegantly normalized | Future cleanup pass |
-| 3 | Scenario 4 trace: operational chain evidenced (planner+TDD+handoff), explicit NATS-layer subscribe/claim not as directly shown in excerpt | Wording caution |
+| 3 | Scenario 4 trace: operational chain evidenced (planner+TDD+handoff), explicit NATS-layer subscribe/claim not as directly shown | Wording caution |
 | 4 | Scenario 2 weakest of 5: mixes routing proof + control loop + queue snippets, less focused | Evidence note |
-| 5 | Sprint 2 routing/control described honestly as "bounded V1.9 proof, not a mature control-plane/runtime" | Nova carry-forward note |
+| 5 | Sprint 2 routing/control described as "bounded V1.9 proof, not a mature control-plane/runtime" | Nova carry-forward |
 
 ---
 
@@ -191,10 +232,10 @@ These are honest maturity notes — not hidden defects:
 
 Per Nova's carry-forward guidance:
 
-- **Not a mature routing runtime** — routing rules are bounded proof (FB3)
-- **Not a mature control plane** — command/control loop is bounded proof (FB4)
-- **Not a production agent platform** — NATS transport + local cache is bounded FB8 foundation
-- **Not a fully normalized evidence package** — 5-scenario traces exist but package structure is functional, not polished
+- **Not a mature routing runtime** — FB3 routing rules are bounded proof
+- **Not a mature control plane** — FB4 command/control is bounded proof, not live authority system
+- **Not a production agent platform** — NATS transport + local state/cache is bounded FB8 foundation
+- **Not a fully normalized evidence package** — 5-scenario traces exist but package structure is functional
 
 ---
 
