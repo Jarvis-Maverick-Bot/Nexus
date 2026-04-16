@@ -15,6 +15,7 @@ from governance.cli.store import (
 )
 from governance.cli.commands.queue_cmd import queue_list
 from governance.cli.commands.task_cmd import task_list
+from governance.cli.commands.inspect_cmd import inspect_item
 from governance.escalation.triggers import escalate as escalation_trigger
 
 
@@ -56,9 +57,10 @@ COMMANDS = {
     "record-validation":   (record_validation,   "<item_id> <pass|fail>"),
     "signal-blocker":      (do_signal_blocker,    "<item_id> <description>"),
     "package-delivery":    (package_delivery,     "<item_id>"),
-    # Category B: Queue / Task Observation
+    # Category B: Queue / Task / Inspection
     "queue-list":          (queue_list,          ""),
     "task-list":           (task_list,           ""),
+    "inspect":             (inspect_item,        "<item_id>"),
     # Category C: Observation / Result
     "status":              (get_item,             "[item_id]"),
 }
@@ -74,8 +76,8 @@ def main():
             fn, usage = COMMANDS[cmd]
             print(f"  governance {cmd} {usage}")
         print()
-        print("=== Category B: Queue / Task Observation ===")
-        for cmd in ["queue-list", "task-list"]:
+        print("=== Category B: Queue / Task / Inspection ===")
+        for cmd in ["queue-list", "task-list", "inspect"]:
             fn, usage = COMMANDS[cmd]
             print(f"  governance {cmd} {usage}")
         print()
@@ -117,12 +119,16 @@ def main():
         if len(args) < 1:
             print(json.dumps({"error": f"EXPECTED: {usage}"})); sys.exit(1)
         result = fn(args[0])
-    elif cmd == "status":
-        result = fn(args[0] if args else None)
     elif cmd == "queue-list":
         result = fn()
     elif cmd == "task-list":
         result = fn()
+    elif cmd == "inspect":
+        if len(args) < 1:
+            print(json.dumps({"error": "EXPECTED: <item_id>"})); sys.exit(1)
+        result = fn(args[0])
+    elif cmd == "status":
+        result = fn(args[0] if args else None)
 
     print(json.dumps(result, indent=2))
 
