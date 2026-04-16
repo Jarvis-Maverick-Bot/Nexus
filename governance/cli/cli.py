@@ -1,5 +1,5 @@
 # governance/cli/cli.py
-# Unified CLI entry point — Category A (governance/record), B (execution/dispatch), C (observation)
+# Unified CLI entry point — Category A (governance/record), B (observation)
 # Usage: python governance/cli/cli.py <command> [args]
 
 import sys
@@ -11,15 +11,41 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from governance.cli.store import (
     create_work_item, submit_artifact, request_transition,
-    record_validation, signal_blocker, package_delivery, get_item
+    record_validation, package_delivery, get_item
 )
 from governance.cli.commands.queue_cmd import queue_list
 from governance.cli.commands.task_cmd import task_list
-from governance.routing.engine import route_event, get_event_log
-from governance.control.control import (
-    launch_subagent, pause_task, resume_task, terminate_task,
-    invoke_command, inspect_task, get_task_result, get_task_log
-)
+from governance.escalation.triggers import escalate as escalation_trigger
+
+
+def do_signal_blocker(item_id: str, description: str) -> dict:
+    """
+    Signal a blocker against a work-item — routes to FB4 escalation system.
+
+    Per Execution Plan V0.4: signal-blocker replaces V1.8 store-based
+    blocker recording with FB4 escalation triggers.
+
+    This creates an escalation record and publishes to NATS (gov.escalations).
+    """
+    escalation = escalation_trigger(
+        item_id=item_id,
+        reason=f"blocker_signal: {description}",
+        context={
+            "escalated_by": "operator",
+            "escalation_reason": "blocker_signal",
+            "blocker": {
+                "description": description,
+                "severity": "medium",  # default severity for operator-signal
+            },
+        },
+    )
+    return {
+        "ok": True,
+        "blocker_id": escalation.escalation_id,
+        "item_id": item_id,
+        "description": description,
+        "escalation_state": escalation.state.value if hasattr(escalation.state, "value") else str(escalation.state),
+    }
 
 
 COMMANDS = {
@@ -28,31 +54,19 @@ COMMANDS = {
     "submit-artifact":     (submit_artifact,     "<item_id> <path>"),
     "request-transition":  (request_transition,  "<item_id> <stage>"),
     "record-validation":   (record_validation,   "<item_id> <pass|fail>"),
-    "signal-blocker":      (signal_blocker,      "<item_id> <description>"),
+    "signal-blocker":      (do_signal_blocker,    "<item_id> <description>"),
     "package-delivery":    (package_delivery,     "<item_id>"),
     # Category B: Queue / Task Observation
     "queue-list":          (queue_list,          ""),
     "task-list":           (task_list,           ""),
     # Category C: Observation / Result
     "status":              (get_item,             "[item_id]"),
-    # Category B: Execution / Dispatch
-    "launch-subagent":     (launch_subagent,      "<task_id> <agent_type>"),
-    "pause-task":          (pause_task,           "<task_id>"),
-    "resume-task":         (resume_task,          "<task_id>"),
-    "terminate-task":      (terminate_task,       "<task_id>"),
-    "invoke-command":      (invoke_command,        "<task_id> <command>"),
-    # Category C: Observation / Result
-    "route-event":         (route_event,          "<json_string>"),
-    "event-log":           (get_event_log,        "[event_id]"),
-    "inspect-task":        (inspect_task,          "<task_id>"),
-    "get-task-result":     (get_task_result,       "<task_id>"),
-    "task-log":            (get_task_log,          ""),
 }
 
 
 def main():
     if len(sys.argv) < 2 or sys.argv[1] == "--help" or sys.argv[1] == "-h":
-        print("Governance CLI — V1.8")
+        print("Governance CLI - V1.9")
         print()
         print("=== Category A: Governance / Record ===")
         for cmd in ["create-work-item", "submit-artifact", "request-transition",
@@ -66,9 +80,7 @@ def main():
             print(f"  governance {cmd} {usage}")
         print()
         print("=== Category C: Observation / Result ===")
-        for cmd in ["status", "route-event", "event-log", "inspect-task", "get-task-result", "task-log"]:
-            fn, usage = COMMANDS[cmd]
-            print(f"  governance {cmd} {usage}")
+        print("  governance status [item_id]")
         print()
         print("  governance --help")
         sys.exit(0)
@@ -107,42 +119,6 @@ def main():
         result = fn(args[0])
     elif cmd == "status":
         result = fn(args[0] if args else None)
-    elif cmd == "route-event":
-        if len(args) < 1:
-            print(json.dumps({"error": f"EXPECTED: {usage}"})); sys.exit(1)
-        result = fn(args[0])
-    elif cmd == "event-log":
-        result = fn(args[0] if args else None)
-    elif cmd == "launch-subagent":
-        if len(args) < 2:
-            print(json.dumps({"error": f"EXPECTED: {usage}"})); sys.exit(1)
-        result = fn(args[0], args[1])
-    elif cmd == "pause-task":
-        if len(args) < 1:
-            print(json.dumps({"error": f"EXPECTED: {usage}"})); sys.exit(1)
-        result = fn(args[0])
-    elif cmd == "resume-task":
-        if len(args) < 1:
-            print(json.dumps({"error": f"EXPECTED: {usage}"})); sys.exit(1)
-        result = fn(args[0])
-    elif cmd == "terminate-task":
-        if len(args) < 1:
-            print(json.dumps({"error": f"EXPECTED: {usage}"})); sys.exit(1)
-        result = fn(args[0])
-    elif cmd == "invoke-command":
-        if len(args) < 2:
-            print(json.dumps({"error": f"EXPECTED: {usage}"})); sys.exit(1)
-        result = fn(args[0], " ".join(args[1:]))
-    elif cmd == "inspect-task":
-        if len(args) < 1:
-            print(json.dumps({"error": f"EXPECTED: {usage}"})); sys.exit(1)
-        result = fn(args[0])
-    elif cmd == "get-task-result":
-        if len(args) < 1:
-            print(json.dumps({"error": f"EXPECTED: {usage}"})); sys.exit(1)
-        result = fn(args[0])
-    elif cmd == "task-log":
-        result = fn()
     elif cmd == "queue-list":
         result = fn()
     elif cmd == "task-list":
