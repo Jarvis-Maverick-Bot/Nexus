@@ -158,6 +158,25 @@ class CollabHandler:
         elif msg_type == 'diagnosis_response':
             return 'diagnosis_response_received'
 
+        elif msg_type == 'review_judgment':
+            return 'review_judgment_received'
+
+        elif msg_type == 'revision_request':
+            return 'revision_request_received'
+
+        elif msg_type == 'revision_update':
+            return 'revision_update_received'
+
+        elif msg_type == 'acceptance_proposal':
+            return 'acceptance_proposal_received'
+
+        elif msg_type == 'acceptance_confirmation':
+            self.store.update_collab(envelope.collab_id, status='completed')
+            return 'acceptance_confirmed'
+
+        elif msg_type == 'blocker_notice':
+            return 'blocker_noticed'
+
         else:
             return 'unknown_message_type'
 

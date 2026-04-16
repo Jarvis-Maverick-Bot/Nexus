@@ -115,6 +115,12 @@ class AckEnvelope:
 VALID_MESSAGE_TYPES = {
     'review_request',
     'review_response',
+    'review_judgment',
+    'revision_request',
+    'revision_update',
+    'acceptance_proposal',
+    'acceptance_confirmation',
+    'blocker_notice',
     'decision_proposal',
     'decision_response',
     'ack',
