@@ -6,6 +6,7 @@ Processes messages through handler, emits ACKs, logs to durable store
 
 import asyncio
 import json
+import os
 import signal
 import sys
 from pathlib import Path
@@ -30,9 +31,9 @@ class StandingListener:
     Maintains durable state store. Emits ACKs automatically.
     """
     
-    def __init__(self, my_id: str, nats_url: str = "nats://127.0.0.1:4222"):
+    def __init__(self, my_id: str, nats_url: str = None):
         self.my_id = my_id
-        self.nats_url = nats_url
+        self.nats_url = nats_url or os.environ.get("NATS_URL", "nats://127.0.0.1:4222")
         self.nc = None
         self.handler = None
         self.store = CollabStateStore(STATE_FILE, LOG_FILE)
