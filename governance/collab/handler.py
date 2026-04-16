@@ -49,7 +49,12 @@ class CollabHandler:
             return False
 
         # 2. Log inbound
-        self.store.log_message(envelope.as_dict(), direction='inbound')
+        try:
+            self.store.log_message(envelope.as_dict(), direction='inbound')
+        except Exception as e:
+            self._log_error(f"FATAL: log_message failed for {envelope.message_id}: {e}")
+            # Cannot continue if durable logging fails — fail visible
+            return False
 
         # 3. Ensure collab exists in store
         self.store.get_or_create_collab(
@@ -258,6 +263,11 @@ class CollabHandler:
             future = self._pending_ack[ack.ack_for]
             if not future.done():
                 future.set_result(ack)
+
+    def _log_error(self, msg: str):
+        """Error logger for handler-level failures."""
+        ts = datetime.now(timezone.utc).isoformat()
+        print(f"[{ts}][HANDLER_ERROR] {msg}")
 
     def get_collab_status(self, collab_id: str) -> Optional[dict]:
         """Get current status of a collaboration."""

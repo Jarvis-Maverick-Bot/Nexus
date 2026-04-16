@@ -68,8 +68,24 @@ class CollabStateStore:
             json.dump(data, f, indent=2, ensure_ascii=False)
     
     def _append_log(self, entry: dict):
-        with open(self.log_file, 'a', encoding='utf-8') as f:
-            f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+        try:
+            with open(self.log_file, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+        except Exception as e:
+            # Fallback: write to emergency log so failure is never silent
+            emergency_log = str(Path(DATA_DIR) / "collab_messages_emergency.jsonl")
+            try:
+                with open(emergency_log, 'a', encoding='utf-8') as f:
+                    f.write(json.dumps({
+                        "event": "log_write_failed",
+                        "original_entry": entry,
+                        "error": str(e),
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }, ensure_ascii=False) + '\n')
+            except:
+                pass
+            # Re-raise so caller knows the write failed
+            raise
     
     # ── Collaboration CRUD ──────────────────────────────────────────
     
@@ -136,17 +152,22 @@ class CollabStateStore:
     
     def log_message(self, envelope: dict, direction: str):
         """Append a message to the durable log."""
-        self._append_log({
-            "direction": direction,  # 'inbound' or 'outbound'
-            "collab_id": envelope.get('collab_id'),
-            "message_id": envelope.get('message_id'),
-            "message_type": envelope.get('message_type'),
-            "from": envelope.get('from'),
-            "to": envelope.get('to'),
-            "summary": envelope.get('summary', ''),
-            "timestamp": envelope.get('timestamp'),
-            "full_envelope": envelope
-        })
+        try:
+            self._append_log({
+                "direction": direction,  # 'inbound' or 'outbound'
+                "collab_id": envelope.get('collab_id'),
+                "message_id": envelope.get('message_id'),
+                "message_type": envelope.get('message_type'),
+                "from": envelope.get('from'),
+                "to": envelope.get('to'),
+                "summary": envelope.get('summary', ''),
+                "timestamp": envelope.get('timestamp'),
+                "full_envelope": envelope
+            })
+        except Exception:
+            # _append_log already wrote emergency log; surface the error
+            # so caller knows the write failed. Do not silently swallow.
+            raise
     
     def get_messages(self, collab_id: str, direction: Optional[str] = None) -> List[dict]:
         """Get all logged messages for a collab."""
