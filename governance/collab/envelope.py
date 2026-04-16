@@ -124,7 +124,9 @@ VALID_MESSAGE_TYPES = {
     'exit',
     'open',
     'ping',
-    'pong'
+    'pong',
+    'diagnosis_request',
+    'diagnosis_response',
 }
 
 # Valid ACK statuses
