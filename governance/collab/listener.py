@@ -168,9 +168,27 @@ class StandingListener:
         self._log("Listener stopped.")
 
 
+def _load_config():
+    """Load my_id and nats_url from collab_config.json if it exists."""
+    config_path = Path(__file__).parent / "collab_config.json"
+    if config_path.exists():
+        import json
+        with open(config_path, 'r') as f:
+            return json.load(f)
+    return {}
+
+
 async def main():
-    my_id = sys.argv[1] if len(sys.argv) > 1 else "jarvis"
-    nats_url = os.environ.get("NATS_URL", "nats://127.0.0.1:4222")
+    # CLI args override config file
+    my_id = sys.argv[1] if len(sys.argv) > 1 else None
+    nats_url = sys.argv[2] if len(sys.argv) > 2 else None
+
+    # Load from config file if not provided via CLI
+    config = _load_config()
+    if my_id is None:
+        my_id = config.get("my_id", "jarvis")
+    if nats_url is None:
+        nats_url = config.get("nats_url", "nats://127.0.0.1:4222")
 
     listener = StandingListener(my_id=my_id, nats_url=nats_url)
 
