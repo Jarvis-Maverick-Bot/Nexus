@@ -35,7 +35,7 @@ _COLLAB_DATA_DIR = os.environ.get(
 if _COLLAB_DATA_DIR:
     _DATA_DIR = _COLLAB_DATA_DIR
 else:
-    _DATA_DIR = str(_REPO_ROOT / "governance" / "data")
+    _DATA_DIR = str(Path(__file__).parent.parent / "data")
 
 STATE_FILE = os.path.join(_DATA_DIR, "collab_state.json")
 LOG_FILE = os.path.join(_DATA_DIR, "collab_messages.jsonl")
