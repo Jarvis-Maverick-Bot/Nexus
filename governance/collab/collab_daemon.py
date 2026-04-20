@@ -82,7 +82,6 @@ def _load_config() -> dict:
 
 def _is_process_running(pid: int) -> bool:
     """Cross-platform process existence check."""
-    import subprocess
     if sys.platform.startswith('win'):
         result = subprocess.run(
             ['tasklist', '/FI', f'PID eq {pid}'],
@@ -172,7 +171,9 @@ def _release_pid():
 def _stop_remote_daemon(pid: int):
     """
     Platform-specific stop of a remote daemon process.
-    SIGTERM on Unix; SIGINT (Ctrl+C equivalent) on Windows.
+    Unix: SIGTERM — graceful shutdown (daemon handles signal and calls stop()).
+    Windows: taskkill /F — force-kill; no graceful SIGTERM equivalent on Windows.
+    Graceful stop on Windows requires a named-pipe signal mechanism (not yet implemented).
     """
     if sys.platform.startswith('win'):
         import subprocess
@@ -324,8 +325,7 @@ class CollabDaemon:
             self._log("CMD", f"[{envelope.collab_id}] {envelope.message_type}: {envelope.summary}")
 
             # Ensure collab exists before writing daemon-owned fields
-            # (update_collab returns None if collab not yet created)
-            collab = self.store.get_or_create_collab(
+            self.store.get_or_create_collab(
                 envelope.collab_id,
                 opened_by=envelope.from_,
                 artifact_type=getattr(envelope, 'artifact_type', None) or '',
