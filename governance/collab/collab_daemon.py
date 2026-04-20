@@ -24,36 +24,54 @@ from governance.collab.handler import CollabHandler
 from governance.collab.state_store import CollabStateStore
 
 
-# ── Paths ─────────────────────────────────────────────────────────────
-_DATA_DIR = str(Path(__file__).parent.parent / "data")
-os.makedirs(_DATA_DIR, exist_ok=True)
+# ── Paths (initialized lazily in main()) ──────────────────────────────
+def _data_dir() -> str:
+    d = _DATA_DIR or str(Path(__file__).parent.parent / "data")
+    os.makedirs(d, exist_ok=True)
+    return d
 
-STATE_FILE = os.path.join(_DATA_DIR, "collab_state.json")
-LOG_FILE = os.path.join(_DATA_DIR, "collab_messages.jsonl")
-DAEMON_LOG = os.path.join(_DATA_DIR, "nats_collab_daemon.log")
-PID_FILE = os.path.join(_DATA_DIR, "collab_daemon.pid")
+def _paths():
+    d = _data_dir()
+    return {
+        'state': os.path.join(d, "collab_state.json"),
+        'log': os.path.join(d, "collab_messages.jsonl"),
+        'daemon_log': os.path.join(d, "nats_collab_daemon.log"),
+        'pid': os.path.join(d, "collab_daemon.pid"),
+    }
 
-# ── Config ─────────────────────────────────────────────────────────────
+# ── Defaults (override via collab_config.json) ──────────────────────────
 _POLL_INTERVAL = 30   # seconds between worker polls
 _HEARTBEAT_INTERVAL = 60  # seconds between heartbeats
 _SHUTDOWN_GRACE = 30  # seconds to finish current work before hard stop
+_DATA_DIR = None  # defaults to <repo>/governance/data
 
 
-def _log(msg_type: str, line: str):
-    """Log to daemon log file + stdout."""
+def _log_to_file(msg_type: str, line: str, log_path: str):
+    """Log to a specific file + stdout."""
     tz = timezone(timedelta(hours=8))
     ts = datetime.now(tz).isoformat()
     full = f"[{ts}] [{msg_type}] {line}"
     print(full)
     try:
-        with open(DAEMON_LOG, 'a', encoding='utf-8') as f:
+        with open(log_path, 'a', encoding='utf-8') as f:
             f.write(full + '\n')
     except OSError:
         pass
 
 
+def _log(msg_type: str, line: str):
+    """Log to daemon log (uses default path)."""
+    try:
+        p = _paths()
+        _log_to_file(msg_type, line, p['daemon_log'])
+    except Exception:
+        # Fallback: print only if path not ready yet
+        tz = timezone(timedelta(hours=8))
+        print(f"[{datetime.now(tz).isoformat()}] [{msg_type}] {line}")
+
+
 def _load_config() -> dict:
-    """Load my_id and nats_url from collab_config.json."""
+    """Load all config from collab_config.json."""
     config_path = Path(__file__).parent / "collab_config.json"
     if config_path.exists():
         with open(config_path, 'r') as f:
@@ -71,9 +89,10 @@ def _acquire_pid() -> bool:
     Try to acquire PID file.
     Returns True if acquired, False if another instance is already running.
     """
-    if os.path.exists(PID_FILE):
+    pid_path = _paths()['pid']
+    if os.path.exists(pid_path):
         try:
-            old_pid = int(open(PID_FILE, 'r').read().strip())
+            old_pid = int(open(pid_path, 'r').read().strip())
             # Check if process is actually running (Windows-compatible)
             import subprocess
             result = subprocess.run(
@@ -87,9 +106,9 @@ def _acquire_pid() -> bool:
                 _log("WARN", f"Stale PID file found (pid={old_pid}). Removing.")
         except (ValueError, OSError, subprocess.SubprocessError):
             pass
-        os.remove(PID_FILE)
+        os.remove(pid_path)
 
-    with open(PID_FILE, 'w') as f:
+    with open(pid_path, 'w') as f:
         f.write(str(os.getpid()))
     _log("INFO", f"PID file acquired: {os.getpid()}")
     return True
@@ -98,7 +117,7 @@ def _acquire_pid() -> bool:
 def _release_pid():
     """Remove PID file on shutdown."""
     try:
-        os.remove(PID_FILE)
+        os.remove(_paths()['pid'])
     except OSError:
         pass
 
@@ -115,7 +134,8 @@ class CollabDaemon:
         self.instance_id = _get_instance_id()
         self.nc = None
         self.handler = None
-        self.store = CollabStateStore(STATE_FILE, LOG_FILE)
+        p = _paths()
+        self.store = CollabStateStore(p['state'], p['log'])
         self._running = False
         self._tasks = []   # background tasks
         self._shutdown_event = asyncio.Event()
@@ -123,7 +143,8 @@ class CollabDaemon:
     # ── Logging ────────────────────────────────────────────────────────
 
     def _log(self, level: str, line: str):
-        _log(level, f"[{self.my_id}] {line}")
+        p = _paths()
+        _log_to_file(level, f"[{self.my_id}] {line}", p['daemon_log'])
 
     # ── Lifecycle ─────────────────────────────────────────────────────
 
@@ -335,13 +356,20 @@ async def main():
     if nats_url is None:
         nats_url = config.get("nats_url", "nats://127.0.0.1:4222")
 
+    # Load configurable constants (CLI overrides config; config overrides defaults)
+    global _POLL_INTERVAL, _HEARTBEAT_INTERVAL, _SHUTDOWN_GRACE, _DATA_DIR
+    _POLL_INTERVAL = int(os.environ.get('COLLAB_POLL_INTERVAL', config.get('poll_interval', _POLL_INTERVAL)))
+    _HEARTBEAT_INTERVAL = int(os.environ.get('COLLAB_HEARTBEAT_INTERVAL', config.get('heartbeat_interval', _HEARTBEAT_INTERVAL)))
+    _SHUTDOWN_GRACE = int(os.environ.get('COLLAB_SHUTDOWN_GRACE', config.get('shutdown_grace', _SHUTDOWN_GRACE)))
+    _DATA_DIR = config.get('data_dir', _DATA_DIR or str(Path(__file__).parent.parent / "data"))
+
     # Handle --stop mode
     if stop_mode:
         _log("INFO", f"Stop signal received for my_id={my_id}")
-        # Read PID file and signal that process
-        if os.path.exists(PID_FILE):
+        pid_path = _paths()['pid']
+        if os.path.exists(pid_path):
             try:
-                old_pid = int(open(PID_FILE, 'r').read().strip())
+                old_pid = int(open(pid_path, 'r').read().strip())
                 os.kill(old_pid, signal.SIGTERM)
                 _log("INFO", f"Sent SIGTERM to pid={old_pid}")
             except OSError as e:
