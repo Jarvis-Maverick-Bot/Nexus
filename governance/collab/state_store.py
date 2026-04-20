@@ -13,8 +13,8 @@ from dataclasses import dataclass, asdict
 
 # ── Configurable data directory via environment variable ───────────────
 # If COLLAB_DATA_DIR is set, use it. Otherwise compute from file location.
-# This file is at: .../collab_module/state_store.py
-# Repo root is: .../collab_module/../  (3 levels up from collab_module/)
+# This file is at: .../governance/collab/state_store.py
+# Repo root is: .../governance/../  (2 levels up from governance/)
 _COLLAB_DATA_DIR = os.environ.get(
     "COLLAB_DATA_DIR",
     None  # default to computed relative path
@@ -23,9 +23,8 @@ _COLLAB_DATA_DIR = os.environ.get(
 if _COLLAB_DATA_DIR:
     _DATA_DIR = _COLLAB_DATA_DIR
 else:
-    # Compute relative to this file: collab_module/state_store.py -> repo root
-    _REPO_ROOT = Path(__file__).parent.parent
-    _DATA_DIR = str(_REPO_ROOT / "governance" / "data")
+    # Compute relative to this file: governance/collab/ -> governance/data
+    _DATA_DIR = str(Path(__file__).parent.parent / "data")
 
 STATE_FILE = os.path.join(_DATA_DIR, "collab_state.json")
 MESSAGE_LOG_FILE = os.path.join(_DATA_DIR, "collab_messages.jsonl")
