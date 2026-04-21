@@ -52,7 +52,7 @@ def _is_exited(collab_id: str, store: CollabStateStore) -> bool:
     return state is not None and state.status == 'exited'
 
 
-def _get_next_receiver(domain, contract, store=None) -> str:
+def _get_next_receiver(domain, contract, store=None, fallback_from: str = None) -> str:
     """
     Determine who receives the next message.
     to 字段必须来自 contract routing context，禁止 from_ 反推。
@@ -60,7 +60,8 @@ def _get_next_receiver(domain, contract, store=None) -> str:
     Priority:
     1. CollabState.receiver (stored routing context for this collab)
     2. contract.next_step's executor (if next_step is defined)
-    3. raise ValueError — no hard-coded binary mapping
+    3. fallback_from — the from_ of the inbound message (last hop sender)
+    4. raise ValueError — no routing context available
     """
     from .runtime_contract_map import get_contract
 
@@ -75,6 +76,10 @@ def _get_next_receiver(domain, contract, store=None) -> str:
         next_contract = get_contract(contract.next_step)
         if next_contract:
             return next_contract.executor
+
+    # Priority 3: fallback_from (inbound message's from_, i.e., who sent this message)
+    if fallback_from in ('nova', 'jarvis'):
+        return fallback_from
 
     # No routing context available — fail explicitly, no binary fallback
     raise ValueError(
@@ -507,10 +512,12 @@ async def _handle_review_request(handler: 'CollabHandler', envelope: CollabEnvel
     stage = payload.get('stage', 'foundation_create_review')
 
     # Update state: Jarvis owns the review stage
+    # receiver=nova: review_response must be sent to Nova (not jarvis)
     handler.store.update_collab(
         envelope.collab_id,
         status='in_progress',
         current_owner='jarvis',
+        receiver='nova',
         artifact_type=payload.get('artifact_type', 'foundation'),
         artifact_path=artifact_path,
         pending_action='awaiting_review_execution',
