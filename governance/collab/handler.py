@@ -52,39 +52,46 @@ def _is_exited(collab_id: str, store: CollabStateStore) -> bool:
     return state is not None and state.status == 'exited'
 
 
-def _get_next_receiver(domain, contract) -> str:
+def _get_next_receiver(domain, contract, store=None) -> str:
     """
     Determine who receives the next message.
-    to 字段必须来自 contract 或 collab routing，禁止 from_ 反推。
+    to 字段必须来自 contract routing context，禁止 from_ 反推。
 
-    Logic:
-    - Use contract.next_step's executor if next_step exists
-    - Fall back to current_owner mapping
-    - Never infer from domain.from_
+    Priority:
+    1. CollabState.receiver (stored routing context for this collab)
+    2. contract.next_step's executor (if next_step is defined)
+    3. raise ValueError — no hard-coded binary mapping
     """
     from .runtime_contract_map import get_contract
 
+    # Priority 1: routing context stored in collab state
+    if store is not None:
+        state = store.get_collab(domain.collab_id)
+        if state is not None and getattr(state, 'receiver', None):
+            return state.receiver
+
+    # Priority 2: next_step's executor from contract
     if contract.next_step:
         next_contract = get_contract(contract.next_step)
         if next_contract:
             return next_contract.executor
 
-    if contract.current_owner == 'jarvis':
-        return 'nova'
-    elif contract.current_owner == 'nova':
-        return 'jarvis'
+    # No routing context available — fail explicitly, no binary fallback
+    raise ValueError(
+        f"Cannot determine 'to' receiver for {contract.message_type}: "
+        f"no CollabState.receiver and no next_step defined"
+    )
 
-    raise ValueError(f"Cannot determine 'to' receiver for {contract.message_type}")
 
-
-def _domain_to_envelope(domain, contract) -> CollabEnvelope:
+def _domain_to_envelope(domain, contract, store=None) -> CollabEnvelope:
     """
     把 DomainResult 转成 transport CollabEnvelope。
     Model 不直接产生 envelope。Runtime 负责转换。
 
     to 字段来自 _get_next_receiver()，禁止 from_ 反推。
+    store is passed to _get_next_receiver for CollabState.receiver lookup.
     """
-    to_receiver = _get_next_receiver(domain, contract)
+    to_receiver = _get_next_receiver(domain, contract, store)
 
     payload = {
         'result': domain.result,
@@ -360,7 +367,7 @@ async def run_pipeline(
 
     # ── Step 5: 构建 envelope + B层校验 ─────────────────────────────
     try:
-        outbound_envelope = _domain_to_envelope(domain_result, contract)
+        outbound_envelope = _domain_to_envelope(domain_result, contract, handler.store)
     except Exception as e:
         await _handle_failure(handler, envelope, contract, 'envelope_build_failed', [str(e)])
         return "envelope_build_failed"
@@ -418,33 +425,19 @@ async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: Co
     """
     Handle 'start_foundation_create' — Nova initiates Foundation delivery.
 
-    This handler runs on the receiving side (Jarvis): records state and ACKs.
-    Nova (the executor) produces the review_request herself — no outbound
-    business message from this handler. Uses run_pipeline(skip_send=True).
-    """
-    from .runtime_contract_map import get_contract
+    Transition-heavy step: receiving side (Jarvis) only records state and ACKs.
+    The executor (Nova) produces review_request herself — no outbound business
+    message from this handler.
 
+    Clean single-path: no run_pipeline, no dual logic.
+    State = open, owner = nova, pending_action = awaiting_foundation_draft.
+    """
     if _is_exited(envelope.collab_id, handler.store):
         await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
         return "rejected_exited"
 
-    contract = get_contract('start_foundation_create')
-
-    # Terminal path via run_pipeline: state update + notify, no outbound message
-    result = await run_pipeline(
-        handler=handler,
-        envelope=envelope,
-        contract=contract,
-        reasoning_fn=None,
-        doctrine_loading_set=contract.doctrine_loading_set,
-        workflow='v2_0',
-        stage='foundation_create',
-        skip_send=True
-    )
-
-    # Override last_event to be specific
     handler.store.update_collab(
-        envelope.collab_id,
+        collab_id=envelope.collab_id,
         status='open',
         current_owner='nova',
         artifact_type='foundation',
@@ -453,14 +446,14 @@ async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: Co
         last_event='foundation_create_started'
     )
     handler.store.emit_event(
-        envelope.collab_id,
-        'foundation_create_started',
+        collab_id=envelope.collab_id,
+        event='foundation_create_started',
         message_id=envelope.message_id,
         artifact_type='foundation',
         from_=envelope.from_
     )
 
-    return result
+    return 'foundation_create_started'
 
 
 async def _handle_foundation_draft_ready(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
