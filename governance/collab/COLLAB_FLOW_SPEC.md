@@ -1,8 +1,8 @@
-# Collaboration Flow Specification v0.2
+# Collaboration Flow Specification v0.3
 
-> **Supersedes:** v0.1
+> **Supersedes:** v0.2
 > **Date:** 2026-04-21
-> **Purpose:** Define complete Foundation Create flow with contract-driven runtime
+> **Purpose:** Three-layer runtime architecture — Contract / Reasoning / Execution
 
 ---
 
