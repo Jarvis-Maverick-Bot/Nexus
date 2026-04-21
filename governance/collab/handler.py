@@ -118,22 +118,22 @@ async def _handle_review_request(handler: 'CollabHandler', envelope: CollabEnvel
     """
     Handle 'review_request' — Nova hands over draft to Jarvis for review.
 
-    This handler OWNS the review execution (not the worker sweep).
+    Contract-driven: mandatory_output from runtime_contract_map is review_response.
+    This handler MUST produce that as a command-channel message, not just ACK.
+
+    Steps:
     1. Update state to in_progress/jarvis
     2. Execute review inline (await executor)
-    3. Send review_response as business response to Nova
+    3. Send mandatory_output (review_response) to Nova via command channel
     4. Update state based on result
-    5. Notify Alex via Telegram
-
-    Payload expected:
-      - command_intent: 'foundation_review_handover'
-      - artifact_path: real path to Nova's draft
-      - artifact_type: 'foundation'
-      - review_scope: what Jarvis is judging
-      - workflow: 'v2_0'
-      - stage: 'foundation_create_review'
+    5. Telegram notify per contract.notify_policy
     """
+    from governance.collab.runtime_contract_map import get_contract
     from governance.collab.review_executor import execute_review
+
+    # ── Contract validation ─────────────────────────────────────────
+    contract = get_contract('review_request')
+    mandatory_output = contract.mandatory_output if contract else 'review_response'
 
     payload = envelope.payload or {}
     artifact_path = payload.get('artifact_path', '')
