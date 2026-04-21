@@ -124,7 +124,9 @@ VALID_MESSAGE_TYPES = {
     'exit',
     'open',
     'ping',
-    'pong'
+    'pong',
+    'start_foundation_create',
+    'foundation_draft_ready'
 }
 
 # Valid ACK statuses

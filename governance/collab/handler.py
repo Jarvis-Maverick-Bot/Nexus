@@ -2,6 +2,10 @@
 NATS Collaboration Mechanism - Message Handler
 Event-driven skill dispatch from listener callback.
 Phase 2: handlers are concrete, worker is recovery sweep only.
+
+Layer C binding for: "Start V2.0 Foundation Create" command.
+Command intent: start_foundation_delivery
+Workflow: v2_0 / stage: foundation_create
 """
 
 import asyncio
@@ -52,6 +56,81 @@ async def _handle_open(handler: 'CollabHandler', envelope: CollabEnvelope) -> st
         current_owner=envelope.from_
     )
     return 'collab_opened'
+
+
+async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
+    """
+    Handle 'start_foundation_create' — initiates V2.0 Foundation delivery workflow.
+    Layer C binding for: "Start V2.0 Foundation Create" command.
+    Command intent: start_foundation_delivery
+
+    Business logic:
+    1. Create collab in 'open' state, owned by this agent (jarvis)
+    2. Set pending_action to 'awaiting_foundation_draft'
+    3. Emit foundation_create_started event
+    4. Return result string for ACK
+
+    This does NOT produce the artifact — skill/foundation_delivery handles that.
+    This only opens the workflow and sets the governance state.
+
+    Completion criteria:
+    - collab.status = 'open'
+    - collab.current_owner = handler.my_id
+    - collab.pending_action = 'awaiting_foundation_draft'
+    - collab.last_event = 'foundation_create_started'
+    """
+    handler.store.update_collab(
+        envelope.collab_id,
+        status='open',
+        current_owner=handler.my_id,
+        artifact_type='foundation',
+        artifact_path='governance/docs/V2_0_FOUNDATION.md',
+        pending_action='awaiting_foundation_draft',
+        last_event='foundation_create_started'
+    )
+    handler.store.emit_event(
+        envelope.collab_id,
+        'foundation_create_started',
+        message_id=envelope.message_id,
+        command_intent=envelope.payload.get('command_intent', 'start_foundation_delivery'),
+        workflow='v2_0',
+        stage='foundation_create',
+        artifact_type='foundation',
+        artifact_path='governance/docs/V2_0_FOUNDATION.md'
+    )
+    return 'foundation_create_started'
+
+
+async def _handle_foundation_draft_ready(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
+    """
+    Handle 'foundation_draft_ready' — confirms foundation draft is ready for review.
+    Triggered by the foundation_delivery skill after artifact is produced.
+
+    Business logic:
+    1. Update collab status to 'in_progress'
+    2. Clear pending_action (draft is done)
+    3. Set last_event to 'foundation_draft_ready'
+    4. Emit event for audit trail
+
+    Completion criteria:
+    - collab.status = 'in_progress'
+    - collab.pending_action = ''
+    - collab.last_event = 'foundation_draft_ready'
+    """
+    handler.store.update_collab(
+        envelope.collab_id,
+        status='in_progress',
+        pending_action='',
+        last_event='foundation_draft_ready'
+    )
+    handler.store.emit_event(
+        envelope.collab_id,
+        'foundation_draft_ready',
+        message_id=envelope.message_id,
+        artifact_type='foundation',
+        artifact_path='governance/docs/V2_0_FOUNDATION.md'
+    )
+    return 'foundation_draft_ready'
 
 
 async def _handle_review_request(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
@@ -184,6 +263,8 @@ async def _handle_unknown(handler: 'CollabHandler', envelope: CollabEnvelope) ->
 # Registry — maps message_type to skill handler
 SKILL_REGISTRY: Dict[str, Callable] = {
     'open': _handle_open,
+    'start_foundation_create': _handle_start_foundation_create,
+    'foundation_draft_ready': _handle_foundation_draft_ready,
     'review_request': _handle_review_request,
     'review_response': _handle_review_response,
     'decision_proposal': _handle_decision_proposal,
