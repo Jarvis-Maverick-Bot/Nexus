@@ -2,15 +2,15 @@
 Foundation Review Executor — Option B (near-term)
 Jarvis reviews Nova's Foundation draft and returns review judgment to Nova.
 
-Used by worker when pending_action = "awaiting_review_execution".
-Loads Nova's draft + doctrine, produces review judgment, sends review_response to Nova,
-updates state, sends Telegram notification to Alex.
+Doctrine-driven review: draft is judged against loaded doctrine files
+(baseline, scope, PRD), not by structural heuristics alone.
 """
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List, Tuple
 
 
 # Paths for doctrine loading — resolved from V2.0 shared drive structure
@@ -64,17 +64,12 @@ def _load_doctrine(doctrine_loading_set: list) -> dict:
 
 
 def _load_nova_draft(artifact_path: str) -> tuple[bool, str, Optional[str]]:
-    """
-    Load Nova's Foundation draft from artifact_path.
-    Returns (loaded, content, error_message).
-    """
+    """Load Nova's Foundation draft from artifact_path."""
     if not artifact_path:
         return False, "", "artifact_path is empty"
-
     path = Path(artifact_path)
     if not path.exists():
         return False, "", f"draft file not found: {artifact_path}"
-
     try:
         with open(path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -83,102 +78,250 @@ def _load_nova_draft(artifact_path: str) -> tuple[bool, str, Optional[str]]:
         return False, "", f"failed to read draft: {e}"
 
 
-def _produce_review_judgment(collab_id: str, draft_content: str, doctrine_snapshot: dict, review_scope: str) -> tuple[str, str]:
+def _extract_sections(text: str) -> Dict[str, str]:
     """
-    Produce review judgment for Nova's Foundation draft.
-    Returns (review_result, judgment_text).
-    review_result: "approved" | "revision_required" | "blocked"
+    Extract markdown sections from text.
+    Returns {section_name: section_content}.
     """
-    baseline_key = "v2_0_foundation_baseline"
-    baseline = doctrine_snapshot.get(baseline_key, "")
+    sections = {}
+    if not text:
+        return sections
+    lines = text.split('\n')
+    current_heading = None
+    current_content = []
+    for line in lines:
+        m = re.match(r'^##?\s+(.+)$', line)
+        if m:
+            if current_heading:
+                sections[current_heading] = '\n'.join(current_content).strip()
+            current_heading = m.group(1).strip()
+            current_content = []
+        else:
+            current_content.append(line)
+    if current_heading:
+        sections[current_heading] = '\n'.join(current_content).strip()
+    return sections
+
+
+def _section_matches_draft(section_name: str, draft_sections: Dict[str, str],
+                           doctrine_sections: Dict[str, str]) -> Tuple[bool, str]:
+    """
+    Check if a draft section covers a doctrine section topic.
+    Returns (matched: bool, notes: str).
+    """
+    draft_text = ' '.join(draft_sections.values()).lower()
+    doctrine_keys = list(doctrine_sections.keys())
+    matched = False
+    notes = ""
+
+    for key in doctrine_keys:
+        if key.lower() in draft_text or any(
+            kw in draft_text for kw in section_name.lower().split()
+        ):
+            matched = True
+            notes = f"Found overlap with doctrine section: {key}"
+            break
+
+    if not matched:
+        notes = f"No draft content matching doctrine section '{section_name}'"
+
+    return matched, notes
+
+
+def _produce_review_judgment(
+    collab_id: str,
+    draft_content: str,
+    doctrine_snapshot: dict,
+    review_scope: str
+) -> Tuple[str, str]:
+    """
+    Doctrine-driven review judgment.
+
+    Compares Nova's draft against three doctrine sources:
+    - V2.0 Foundation baseline: vision, goals, principles
+    - V2.0 Scope: what is in/out of scope
+    - V2.0 PRD: functional requirements and acceptance criteria
+
+    Produces section-by-section analysis and overall review_result.
+    """
+    baseline = doctrine_snapshot.get("v2_0_foundation_baseline", "")
     scope_doc = doctrine_snapshot.get("v2_0_scope", "")
     prd_doc = doctrine_snapshot.get("v2_0_prd", "")
 
+    baseline_sections = _extract_sections(baseline)
+    scope_sections = _extract_sections(scope_doc)
+    prd_sections = _extract_sections(prd_doc)
+
+    draft_sections = _extract_sections(draft_content)
     draft_len = len(draft_content) if draft_content else 0
 
-    # Simple structural check
-    checks = {
-        "has_content": draft_len > 100,
-        "has_v2_heading": "# V2.0" in draft_content or "V2.0" in draft_content,
-        "has_foundation_sections": any(kw in draft_content.lower() for kw in ["vision", "principle", "foundation", "goal", "objective"]),
-        "baseline_loaded": baseline_key in doctrine_snapshot,
-    }
+    # ── Baseline alignment check ────────────────────────────────────────────────
+    baseline_checks = []
+    for bs_name, bs_content in baseline_sections.items():
+        if len(bs_content) < 20:
+            continue
+        draft_lower = draft_content.lower()
+        # Check if baseline section topic is referenced in draft
+        keywords = [w for w in bs_name.lower().split() if len(w) > 3]
+        matched = any(kw in draft_lower for kw in keywords) if keywords else False
+        baseline_checks.append({
+            "doctrine_section": bs_name,
+            "present_in_draft": matched,
+            "chars": len(bs_content)
+        })
 
-    passed_checks = sum(1 for v in checks.values() if v)
-    total_checks = len(checks)
+    baseline_covered = sum(1 for c in baseline_checks if c["present_in_draft"])
+    baseline_total = len(baseline_checks)
 
-    # Determine review result
-    if passed_checks >= 4:
+    # ── Scope coverage check ────────────────────────────────────────────────────
+    scope_checks = []
+    for sc_name, sc_content in scope_sections.items():
+        if len(sc_content) < 20:
+            continue
+        draft_lower = draft_content.lower()
+        keywords = [w for w in sc_name.lower().split() if len(w) > 3]
+        matched = any(kw in draft_lower for kw in keywords) if keywords else False
+        scope_checks.append({
+            "doctrine_section": sc_name,
+            "covered_in_draft": matched,
+            "chars": len(sc_content)
+        })
+
+    scope_covered = sum(1 for c in scope_checks if c["covered_in_draft"])
+    scope_total = len(scope_checks)
+
+    # ── PRD requirement coverage ─────────────────────────────────────────────────
+    prd_checks = []
+    for pr_name, pr_content in prd_sections.items():
+        if len(pr_content) < 30:
+            continue
+        draft_lower = draft_content.lower()
+        # Extract requirement-like phrases (short lines, bullet points)
+        requirement_phrases = [
+            re.sub(r'^[\s\-\*]+', '', line).strip()
+            for line in pr_content.split('\n')
+            if len(line.strip()) > 10 and len(line.strip()) < 100
+        ]
+        matched_count = sum(
+            1 for phrase in requirement_phrases
+            if phrase.lower() in draft_content.lower()
+        )
+        coverage_pct = (matched_count / len(requirement_phrases) * 100) if requirement_phrases else 0
+        prd_checks.append({
+            "prd_section": pr_name,
+            "requirements_in_section": len(requirement_phrases),
+            "requirements_matched": matched_count,
+            "coverage_pct": round(coverage_pct, 1)
+        })
+
+    prd_total_requirements = sum(c["requirements_in_section"] for c in prd_checks)
+    prd_matched_requirements = sum(c["requirements_matched"] for c in prd_checks)
+    prd_coverage_pct = (prd_matched_requirements / prd_total_requirements * 100) if prd_total_requirements else 0
+
+    # ── Determine review_result ─────────────────────────────────────────────────
+    # thresholds for doctrine-driven judgment
+    baseline_ok = baseline_covered / baseline_total >= 0.6 if baseline_total else False
+    scope_ok = scope_covered / scope_total >= 0.5 if scope_total else False
+    prd_ok = prd_coverage_pct >= 40 if prd_total_requirements else False
+
+    if baseline_ok and scope_ok and prd_ok:
         review_result = "approved"
-    elif passed_checks >= 2:
+    elif baseline_ok and (scope_ok or prd_ok):
         review_result = "revision_required"
     else:
         review_result = "blocked"
 
+    # ── Build judgment report ───────────────────────────────────────────────────
     judgment = f"""# Foundation Review Judgment
 
 **Collab ID:** {collab_id}
 **Review Scope:** {review_scope}
 **Reviewed at:** {datetime.now(timezone.utc).isoformat()}
+**Method:** Doctrine-driven analysis (baseline + scope + PRD comparison)
 
 ---
 
-## Structural Checks
+## Baseline Alignment ({baseline_covered}/{baseline_total} sections covered)
 
-| Check | Result |
-|-------|--------|
-| Has meaningful content (>100 chars) | {'✅' if checks['has_content'] else '❌'} |
-| References V2.0 | {'✅' if checks['has_v2_heading'] else '❌'} |
-| Has foundation sections | {'✅' if checks['has_foundation_sections'] else '❌'} |
-| Baseline loaded | {'✅' if checks['baseline_loaded'] else '❌'} |
+| Doctrine Section | Present in Draft |
+|------------------|-----------------|
+"""
+    for c in baseline_checks:
+        status = "✅" if c["present_in_draft"] else "❌"
+        judgment += f"| {c['doctrine_section']} | {status} |\n"
 
-Passed: {passed_checks}/{total_checks}
+    judgment += f"\n**Baseline coverage: {baseline_covered}/{baseline_total} ({baseline_covered/baseline_total*100:.0f}%)**\n\n"
 
----
+    judgment += f"""## Scope Coverage ({scope_covered}/{scope_total} sections addressed)
 
-## Draft Summary
+| Doctrine Section | Addressed in Draft |
+|------------------|-------------------|
+"""
+    for c in scope_checks:
+        status = "✅" if c["covered_in_draft"] else "❌"
+        judgment += f"| {c['doctrine_section']} | {status} |\n"
 
-- Draft length: {draft_len} chars
-- Baseline reference: {len(baseline)} chars loaded
-- Scope reference: {len(scope_doc)} chars loaded
-- PRD reference: {len(prd_doc)} chars loaded
+    judgment += f"\n**Scope coverage: {scope_covered}/{scope_total} ({scope_covered/scope_total*100:.0f}%)**\n\n"
 
----
+    judgment += f"""## PRD Requirement Coverage ({prd_matched_requirements}/{prd_total_requirements} requirements matched)
 
-## Review Notes
+| PRD Section | Requirements | Matched | Coverage |
+|-------------|--------------|---------|----------|
+"""
+    for c in prd_checks:
+        judgment += f"| {c['prd_section']} | {c['requirements_in_section']} | {c['requirements_matched']} | {c['coverage_pct']:.0f}% |\n"
 
-**Overall assessment:** {'Solid foundation document covering required areas.' if review_result == 'approved' else 'Foundation document needs revision before approval.' if review_result == 'revision_required' else 'Foundation document has critical gaps.'}
+    judgment += f"\n**Overall PRD coverage: {prd_matched_requirements}/{prd_total_requirements} ({prd_coverage_pct:.0f}%)**\n\n"
 
-**Key observations:**
-- Content completeness: {'Adequate' if checks['has_content'] else 'Insufficient'} ({draft_len} chars)
-- V2.0 alignment: {'Present' if checks['has_v2_heading'] else 'Missing V2.0 reference'}
-- Foundation structure: {'Present' if checks['has_foundation_sections'] else 'Missing foundation sections'}
-- Doctrine alignment: {'Baseline loaded' if checks['baseline_loaded'] else 'Baseline not loaded — check path'}
+    judgment += f"""## Overall Assessment
+
+| Dimension | Threshold | Actual | Result |
+|-----------|-----------|--------|--------|
+| Baseline alignment | ≥60% | {baseline_covered/baseline_total*100:.0f}% | {'✅' if baseline_ok else '❌'} |
+| Scope coverage | ≥50% | {scope_covered/scope_total*100:.0f}% | {'✅' if scope_ok else '❌'} |
+| PRD requirements | ≥40% | {prd_coverage_pct:.0f}% | {'✅' if prd_ok else '❌'} |
 
 ---
 
 **Review Result: {review_result.upper()}**
 
-*Generated by Nexus Governed Execution Loop — Jarvis reviewer (Option B)*
+Draft length: {draft_len} chars
+
 """
+    if review_result == 'approved':
+        judgment += "The draft adequately covers the V2.0 Foundation baseline, addresses core scope areas, and satisfies minimum PRD requirements. Ready for progression."
+    elif review_result == 'revision_required':
+        gaps = []
+        if not baseline_ok:
+            gaps.append(f"baseline ({baseline_covered/baseline_total*100:.0f}% < 60%)")
+        if not scope_ok:
+            gaps.append(f"scope ({scope_covered/scope_total*100:.0f}% < 50%)")
+        if not prd_ok:
+            gaps.append(f"PRD ({prd_coverage_pct:.0f}% < 40%)")
+        judgment += f"Revision needed — gaps in: {', '.join(gaps)}. Please address these areas before re-submission."
+    else:
+        judgment += "Foundation draft has critical deficiencies across multiple doctrine dimensions. Significant rework required before further review."
+
+    judgment += "\n\n*Generated by Nexus Governed Execution Loop — Doctrine-driven review (Option B)*\n"
+
     return review_result, judgment
 
 
 async def execute_review(handler: 'CollabHandler', collab_id: str, artifact_path: str,
                          review_scope: str, doctrine_loading_set: list):
     """
-    Execute the Foundation review task (Option B reviewer).
+    Execute the Foundation review task (doctrine-driven Option B reviewer).
 
     Steps:
-      1. Load doctrine
+      1. Load doctrine (baseline + scope + PRD)
       2. Load Nova's draft
-      3. Produce review judgment
+      3. Produce doctrine-driven review judgment
       4. Save judgment artifact
-      5. Send review_response to Nova via NATS (gov.collab.command)
+      5. Send review_response to Nova via NATS
       6. Update collab state
       7. Notify Alex via Telegram
     """
-    handler._log("EXEC", f"[{collab_id}] starting foundation_review (Option B)")
+    handler._log("EXEC", f"[{collab_id}] starting doctrine-driven foundation_review")
 
     # 1. Load doctrine
     doctrine_result = _load_doctrine(doctrine_loading_set)
@@ -191,7 +334,7 @@ async def execute_review(handler: 'CollabHandler', collab_id: str, artifact_path
         )
         handler.store.emit_event(collab_id, 'doctrine_load_failed_review',
                                 error=doctrine_result.get('errors'))
-        handler._log("ERROR", f"[{collab_id}] doctrine_load_failed_review: {doctrine_result.get('errors')}")
+        handler._log("ERROR", f"[{collab_id}] doctrine_load_failed_review")
         return
 
     handler._log("EXEC", f"[{collab_id}] doctrine loaded OK: {list(doctrine_result.get('doctrine_snapshot', {}).keys())}")
@@ -211,15 +354,16 @@ async def execute_review(handler: 'CollabHandler', collab_id: str, artifact_path
 
     handler._log("EXEC", f"[{collab_id}] Nova draft loaded: {len(draft_content)} chars")
 
-    # 3. Produce review judgment
+    # 3. Produce doctrine-driven review judgment
     review_result, judgment = _produce_review_judgment(
         collab_id,
         draft_content,
         doctrine_result.get("doctrine_snapshot", {}),
         review_scope
     )
+    handler._log("EXEC", f"[{collab_id}] review judgment produced: {review_result}")
 
-    # 4. Save review judgment as artifact
+    # 4. Save judgment artifact
     repo_root = Path(__file__).parent.parent.parent
     judgment_path = repo_root / "governance" / "docs" / f"review_{collab_id}.md"
     try:
@@ -231,11 +375,11 @@ async def execute_review(handler: 'CollabHandler', collab_id: str, artifact_path
         handler._log("ERROR", f"[{collab_id}] failed to write review judgment: {e}")
         judgment_path = None
 
-    # 5. Send review_response to Nova via NATS gov.collab.command
+    # 5. Send review_response to Nova via NATS
     try:
         nc = getattr(handler, 'nc', None)
         if nc is None:
-            raise RuntimeError("handler.nc is None — NATS connection not available")
+            raise RuntimeError("handler.nc is None")
         from governance.collab.notify import send_review_response_to_nova
         await send_review_response_to_nova(
             nc=nc,
@@ -246,11 +390,11 @@ async def execute_review(handler: 'CollabHandler', collab_id: str, artifact_path
             stage="foundation_create_review",
             review_result=review_result,
             review_artifact_path=str(judgment_path) if judgment_path else "",
-            review_notes=f"Foundation {review_result}: {artifact_path}"
+            review_notes=judgment[:500]
         )
-        handler._log("EXEC", f"[{collab_id}] review_response sent to Nova via NATS")
+        handler._log("EXEC", f"[{collab_id}] review_response sent to Nova")
     except Exception as e:
-        handler._log("ERROR", f"[{collab_id}] failed to send review_response to Nova: {e}")
+        handler._log("ERROR", f"[{collab_id}] failed to send review_response: {e}")
 
     # 6. Update collab state
     handler.store.update_collab(
@@ -269,7 +413,7 @@ async def execute_review(handler: 'CollabHandler', collab_id: str, artifact_path
 
     handler._log("EXEC", f"[{collab_id}] collab state updated: review_completed")
 
-    # 7. Send Telegram notification to Alex
+    # 7. Notify Alex via Telegram
     try:
         from governance.collab.notify import send_telegram_notification_async
         send_telegram_notification_async(
@@ -279,8 +423,7 @@ async def execute_review(handler: 'CollabHandler', collab_id: str, artifact_path
             f"Result: *{review_result.upper()}*\n"
             f"Judgment: {str(judgment_path) if judgment_path else 'N/A'}"
         )
-        handler._log("EXEC", f"[{collab_id}] Telegram notification dispatched")
     except Exception as e:
         handler._log("WARN", f"[{collab_id}] Telegram notification failed: {e}")
 
-    handler._log("EXEC", f"[{collab_id}] foundation_review COMPLETE — result={review_result}")
+    handler._log("EXEC", f"[{collab_id}] doctrine-driven foundation_review COMPLETE — result={review_result}")
