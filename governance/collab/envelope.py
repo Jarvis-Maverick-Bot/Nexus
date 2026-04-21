@@ -52,6 +52,10 @@ class CollabEnvelope:
     def is_ack_for(self, other: 'CollabEnvelope') -> bool:
         return self.payload.get('ack_for') == other.message_id
 
+    def validate(self) -> bool:
+        """Basic validation: must have collab_id, message_type, from_, to."""
+        return bool(self.collab_id and self.message_type and self.from_ and self.to)
+
 
 @dataclass
 class AckEnvelope:
