@@ -25,7 +25,7 @@ async def main():
 
     nats_url = config.get("nats_url", "nats://127.0.0.1:4222")
     sender_id = config.get("sender_id", "nova")
-    target_id = config.get("my_id", "jarvis")
+    target_id = config.get("target_id", "jarvis")
     subjects = config.get("subjects", {
         "command": "gov.collab.command",
         "ack": "gov.collab.ack"
