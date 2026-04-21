@@ -407,21 +407,10 @@ class CollabDaemon:
             action = c.pending_action
 
             if action == 'awaiting_foundation_draft':
-                self._log("WORKER", f"[TASK_EXEC] collab_id={c.collab_id} pending_action={action} — triggering executor")
-                command_intent = 'start_foundation_delivery'
-                from governance.collab.foundation_executor import execute_foundation_delivery, get_task_context
-                task_context = get_task_context(
-                    collab_id=c.collab_id,
-                    command_intent=command_intent,
-                    payload={'source': 'worker_recovery'}
-                )
-                self._log("WORKER", f"[TASK_EXEC] collab_id={c.collab_id} doctrine_set={task_context.get('doctrine_loading_set')}")
-                try:
-                    await execute_foundation_delivery(self.handler, c.collab_id, task_context)
-                    self._log("WORKER", f"[TASK_EXEC] collab_id={c.collab_id} executor completed")
-                except Exception as e:
-                    self._log("ERROR", f"[TASK_EXEC] collab_id={c.collab_id} executor failed: {e}")
-                    self.store.update_collab(c.collab_id, status='failed', last_event='executor_error', pending_action='')
+                # Foundation delivery is owned by Nova (primary executor).
+                # On Jarvis side this is a transient state after start_foundation_create.
+                # Worker sweep does NOT execute Foundation delivery on Jarvis side.
+                self._log("WORKER", f"[SKIP] collab_id={c.collab_id} pending_action={action} — Nova owns foundation delivery")
 
             elif action == 'awaiting_review_execution':
                 # Handler owns this — do not process in worker sweep

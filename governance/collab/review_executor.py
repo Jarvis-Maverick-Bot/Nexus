@@ -282,18 +282,40 @@ async def execute_review(
     Does NOT: send NATS messages, update state, notify.
     Caller (CollabHandler pipeline) owns those.
     """
-    from governance.collab.runtime_contract_map import DomainResult
-
     handler._log("EXEC", f"[{collab_id}] starting doctrine-driven foundation_review")
 
-    # 1. Load doctrine — raises RuntimeError if all fail (pipeline catches as reasoning_failed)
+    # 1. Load doctrine — returns dict with doctrine_loaded status
     doctrine_result = _load_doctrine(doctrine_loading_set)
+    if not doctrine_result.get("doctrine_loaded"):
+        # Doctrine load failure — return revision_required DomainResult
+        # This is a business-level outcome, not an exception
+        handler._log("ERROR", f"[{collab_id}] doctrine_load_failed: {doctrine_result.get('errors')}")
+        return DomainResult(
+            message_type='review_response',
+            collab_id=collab_id,
+            from_='jarvis',
+            result='revision_required',
+            notes=f"Review cannot proceed: doctrine files unavailable — {doctrine_result.get('errors')}",
+            workflow='v2_0',
+            stage='foundation_create_review'
+        )
     handler._log("EXEC", f"[{collab_id}] doctrine loaded OK: {list(doctrine_result.get('doctrine_snapshot', {}).keys())}")
 
-    # 2. Load Nova's draft — raises RuntimeError on failure
+    # 2. Load Nova's draft — return revision_required DomainResult on failure
     loaded, draft_content, error = _load_nova_draft(artifact_path)
     if not loaded:
-        raise RuntimeError(f"draft_load_failed: {error}")
+        # Draft load failure — return revision_required DomainResult
+        # Pipeline will send review_response to Nova with revision_required
+        handler._log("ERROR", f"[{collab_id}] draft_load_failed: {error}")
+        return DomainResult(
+            message_type='review_response',
+            collab_id=collab_id,
+            from_='jarvis',
+            result='revision_required',
+            notes=f"Review cannot proceed: draft not found at {artifact_path}",
+            workflow='v2_0',
+            stage='foundation_create_review'
+        )
 
     handler._log("EXEC", f"[{collab_id}] Nova draft loaded: {len(draft_content)} chars")
 
@@ -320,8 +342,7 @@ async def execute_review(
 
     handler._log("EXEC", f"[{collab_id}] doctrine-driven foundation_review COMPLETE — result={review_result_str}")
 
-    # Return actual DomainResult — pipeline expects DomainResult, not dict
-    from governance.collab.runtime_contract_map import DomainResult
+    # Return DomainResult — pipeline expects DomainResult
     return DomainResult(
         message_type='review_response',
         collab_id=collab_id,
