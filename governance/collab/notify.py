@@ -1,55 +1,68 @@
 """
 Telegram notification helper for governed execution loop.
-Sends proactive notifications to Alex when required events occur.
+Sends proactive notifications to Alex via Telegram Bot HTTP API.
 """
 
+import urllib.request
+import urllib.error
+import json
 import os
+import threading
+from datetime import datetime, timezone
+from pathlib import Path
 
 
-def send_telegram_notification(message: str, chat_id: str = None):
+_TELEGRAM_BOT_TOKEN = "8599695108:AAEFpu_ij3eSR4obBKfgfkrQejhnl2hkabQ"
+_TELEGRAM_API_URL = f"https://api.telegram.org/bot{_TELEGRAM_BOT_TOKEN}"
+
+
+def _send_telegram_sync(message: str, chat_id: str = "8231866924") -> bool:
     """
-    Send a Telegram notification via OpenClaw message tool.
-    This is called from the daemon context when a "must notify" event occurs.
+    Send a Telegram message via Bot HTTP API.
+    Returns True if sent successfully, False otherwise.
     """
-    try:
-        # Use OpenClaw's built-in message tool via subprocess
-        # The message tool is available in the main session — here we use it via agent context
-        # For daemon context, we write to a notification queue file instead
-        # which the main session reads and sends
-        notification_queue_path = os.path.join(
-            os.environ.get('COLLAB_DATA_DIR', str(__file__).rsplit('governance', 1)[0] + 'governance\\data'),
-            'pending_notifications.jsonl'
-        )
+    payload = {
+        "chat_id": chat_id,
+        "text": message,
+        "parse_mode": "Markdown"
+    }
 
-        import json
-        from datetime import datetime, timezone
-
-        entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "message": message,
-            "chat_id": chat_id or "8231866924"  # Alex's Telegram chat ID
-        }
-
-        with open(notification_queue_path, 'a', encoding='utf-8') as f:
-            f.write(json.dumps(entry) + '\n')
-
-    except Exception as e:
-        # Silently fail — notification failure should not crash the executor
-        print(f"[WARN] Telegram notification failed: {e}")
-
-
-def read_pending_notifications() -> list:
-    """Read and return pending notifications, then clear the queue."""
-    notification_queue_path = os.path.join(
-        os.environ.get('COLLAB_DATA_DIR', str(__file__).rsplit('governance', 1)[0] + 'governance\\data'),
-        'pending_notifications.jsonl'
+    data = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(
+        f"{_TELEGRAM_API_URL}/sendMessage",
+        data=data,
+        headers={"Content-Type": "application/json"}
     )
+
     try:
-        with open(notification_queue_path, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-        # Clear the queue
-        open(notification_queue_path, 'w', encoding='utf-8').close()
-        import json
-        return [json.loads(line) for line in lines if line.strip()]
-    except Exception:
-        return []
+        with urllib.request.urlopen(req, timeout=15) as response:
+            result = json.loads(response.read().decode("utf-8"))
+            if result.get("ok"):
+                print(f"[NOTIFY] Telegram sent OK: {message[:60]}...")
+                return True
+            else:
+                print(f"[NOTIFY] Telegram API error: {result}")
+                return False
+    except urllib.error.HTTPError as e:
+        print(f"[NOTIFY] HTTP error {e.code}: {e.reason}")
+        return False
+    except Exception as e:
+        print(f"[NOTIFY] Telegram send failed: {e}")
+        return False
+
+
+def send_telegram_notification(message: str, chat_id: str = "8231866924") -> bool:
+    """
+    Send a Telegram notification.
+    Called from daemon context (executor) when a "must notify" event occurs.
+    """
+    return _send_telegram_sync(message, chat_id)
+
+
+def send_telegram_notification_async(message: str, chat_id: str = "8231866924"):
+    """
+    Fire-and-forget version: send Telegram notification without blocking.
+    Runs in a background thread.
+    """
+    t = threading.Thread(target=_send_telegram_sync, args=(message, chat_id))
+    t.start()

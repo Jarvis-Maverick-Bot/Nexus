@@ -57,6 +57,52 @@
               "routine_internal_transition"
             ]
           }
+        },
+        "foundation_create_review": {
+          "command_intent": "foundation_review_handover",
+          "description": "Nova hands over Foundation draft to Jarvis for review",
+          "doctrine_loading_set": [
+            "v2_0_foundation_baseline",
+            "v2_0_scope",
+            "v2_0_prd"
+          ],
+          "skill_handler_binding": {
+            "handler": "_handle_review_request",
+            "executor": "review_executor.execute_review",
+            "skill": "foundation_review"
+          },
+          "expected_output": {
+            "message_type": "review_response",
+            "artifacts_produced": [],
+            "completion_signal": "review_completed"
+          },
+          "completion_criteria": {
+            "success": {
+              "status": "completed",
+              "pending_action": "",
+              "last_event": "review_completed"
+            },
+            "failure": {
+              "status": "in_progress",
+              "pending_action": "awaiting_revision",
+              "last_event": "review_returned_for_revision"
+            }
+          },
+          "notification_events": {
+            "must_notify": [
+              "review_handover_received",
+              "review_completed",
+              "review_returned_for_revision",
+              "workflow_completed",
+              "blocked",
+              "escalated"
+            ],
+            "dashboard_only": [
+              "ack_received",
+              "event_acknowledged",
+              "routine_internal_transition"
+            ]
+          }
         }
       }
     }

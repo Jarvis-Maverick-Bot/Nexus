@@ -262,15 +262,15 @@ async def execute_foundation_delivery(handler: 'CollabHandler', collab_id: str, 
 
     handler._log("EXEC", f"[{collab_id}] collab state updated: foundation_draft_ready")
 
-    # 4. Send Telegram notification (write to queue for main session to send)
+    # 4. Send Telegram notification (async, non-blocking)
     # This event is in the "must notify" list
     try:
-        from governance.collab.notify import send_telegram_notification
-        send_telegram_notification(
+        from governance.collab.notify import send_telegram_notification_async
+        send_telegram_notification_async(
             f"Foundation draft ready — collab_id: {collab_id}\n"
             f"Artifact: {artifact_path}"
         )
-        handler._log("EXEC", f"[{collab_id}] Telegram notification queued")
+        handler._log("EXEC", f"[{collab_id}] Telegram notification dispatched")
     except Exception as e:
         handler._log("WARN", f"[{collab_id}] Telegram notification failed: {e}")
 

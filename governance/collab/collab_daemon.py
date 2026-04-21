@@ -41,7 +41,7 @@ def _paths():
     }
 
 # ── Defaults (override via collab_config.json) ──────────────────────────
-_POLL_INTERVAL = 30   # seconds between worker polls
+_POLL_INTERVAL = 5    # seconds between worker polls
 _HEARTBEAT_INTERVAL = 60  # seconds between heartbeats
 _SHUTDOWN_GRACE = 30  # seconds to finish current work before hard stop
 _DATA_DIR = None  # defaults to <repo>/governance/data
@@ -398,7 +398,7 @@ class CollabDaemon:
         """
         from governance.collab.foundation_executor import execute_foundation_delivery, get_task_context
 
-        collabs = self.store.list_collabs(status='open')
+        collabs = self.store.list_collabs(status=None)  # all collabs, filter by pending_action
         if not collabs:
             return
 
@@ -407,28 +407,33 @@ class CollabDaemon:
 
             if action == 'awaiting_foundation_draft':
                 self._log("WORKER", f"[TASK_EXEC] collab_id={c.collab_id} pending_action={action} — triggering executor")
-
-                # Construct task context from command_intent
-                # We get command_intent from the collab's last_event or stored payload
-                command_intent = 'start_foundation_delivery'  # default for foundation_create
-
-                # Get task context from workflow registry
+                command_intent = 'start_foundation_delivery'
+                from governance.collab.foundation_executor import execute_foundation_delivery, get_task_context
                 task_context = get_task_context(
                     collab_id=c.collab_id,
                     command_intent=command_intent,
                     payload={'source': 'worker_recovery'}
                 )
-
                 self._log("WORKER", f"[TASK_EXEC] collab_id={c.collab_id} doctrine_set={task_context.get('doctrine_loading_set')}")
-
-                # Execute — this calls the handler which loads doctrine, produces artifact, updates state
                 try:
                     await execute_foundation_delivery(self.handler, c.collab_id, task_context)
                     self._log("WORKER", f"[TASK_EXEC] collab_id={c.collab_id} executor completed")
                 except Exception as e:
                     self._log("ERROR", f"[TASK_EXEC] collab_id={c.collab_id} executor failed: {e}")
-                    # Mark as failed
                     self.store.update_collab(c.collab_id, status='failed', last_event='executor_error', pending_action='')
+
+            elif action == 'awaiting_review_execution':
+                self._log("WORKER", f"[TASK_EXEC] collab_id={c.collab_id} pending_action={action} — triggering review executor")
+                artifact_path = c.artifact_path or ''
+                review_scope = 'foundation completeness and governance alignment'
+                doctrine_loading_set = ['v2_0_foundation_baseline', 'v2_0_scope', 'v2_0_prd']
+                from governance.collab.review_executor import execute_review
+                try:
+                    await execute_review(self.handler, c.collab_id, artifact_path, review_scope, doctrine_loading_set)
+                    self._log("WORKER", f"[TASK_EXEC] collab_id={c.collab_id} review executor completed")
+                except Exception as e:
+                    self._log("ERROR", f"[TASK_EXEC] collab_id={c.collab_id} review executor failed: {e}")
+                    self.store.update_collab(c.collab_id, status='in_progress', last_event='review_executor_error', pending_action='awaiting_revision')
 
             elif action == 'awaiting_artifact':
                 self._log("WORKER", f"[RECOVERY_SWEEP] collab_id={c.collab_id} still waiting for artifact")

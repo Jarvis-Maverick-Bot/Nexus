@@ -135,25 +135,50 @@ async def _handle_foundation_draft_ready(handler: 'CollabHandler', envelope: Col
 
 async def _handle_review_request(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
     """
-    Handle 'review_request' — skill dispatch entry point.
-    The handler processes the review and sets pending_action accordingly.
-    For Phase 2 proof-of-concept: just mark in_progress.
+    Handle 'review_request' — Nova hands over draft to Jarvis for review.
+    
+    Nova (primary executor) has produced a real Foundation draft.
+    Jarvis (reviewer) receives it here and sets up review task.
+    
+    Payload expected:
+      - command_intent: 'foundation_review_handover'
+      - artifact_path: real path to Nova's draft
+      - artifact_type: 'foundation'
+      - review_scope: what Jarvis is judging
+      - expected_output: 'review_response'
+      - workflow: 'v2_0'
+      - stage: 'foundation_create_review'
     """
+    payload = envelope.payload or {}
+    artifact_path = payload.get('artifact_path', '')
+    review_scope = payload.get('review_scope', 'foundation completeness and governance alignment')
+    expected_output = payload.get('expected_output', 'review_response')
+    workflow = payload.get('workflow', 'v2_0')
+    stage = payload.get('stage', 'foundation_create_review')
+
+    # Store review context in collab state
     handler.store.update_collab(
         envelope.collab_id,
         status='in_progress',
         current_owner=handler.my_id,
-        pending_action='process_review'
+        artifact_type=payload.get('artifact_type', 'foundation'),
+        artifact_path=artifact_path,
+        pending_action='awaiting_review_execution',
+        last_event='review_handover_received'
     )
-    # Log skill dispatch
     handler.store.emit_event(
         envelope.collab_id,
-        'skill_dispatched',
+        'review_handover_received',
         message_id=envelope.message_id,
         skill='review_request',
-        summary=envelope.summary
+        summary=envelope.summary,
+        artifact_path=artifact_path,
+        review_scope=review_scope,
+        expected_output=expected_output,
+        workflow=workflow,
+        stage=stage
     )
-    return 'review_started'
+    return 'review_handover_received'
 
 
 async def _handle_review_response(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
