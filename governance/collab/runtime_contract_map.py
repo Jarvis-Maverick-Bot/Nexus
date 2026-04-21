@@ -102,7 +102,7 @@ class StepContract:
     description: str
     executor: str                   # 'nova' | 'jarvis'
     current_owner: str              # who owns the workflow at this step
-    mandatory_output: str           # the business message_type that MUST be sent
+    mandatory_output: Optional[str] = None  # None = terminal step (complete/exit)
     allowed_results: List[str]      # e.g. ['approved', 'revision_required', 'blocked']
     completion_condition: str        # what counts as step done (NOT ACK)
     notify_policy: List[NotifyPolicy] = field(default_factory=list)
@@ -262,11 +262,13 @@ def runtime_validate(message_type: str, domain_result: DomainResult) -> Reasonin
     校验模型输出是否符合 contract boundary。
 
     检查项：
-    1. result 是否在 allowed_results
-    2. required fields 是否齐全（collab_id, from_, message_type, result）
+    1. domain_result.message_type 必须等于 contract.mandatory_output
+    2. result 是否在 allowed_results（terminal step: allowed_results=[] 则跳过）
+    3. required fields 是否齐全（collab_id, from_, message_type, result）
     """
     contract = get_contract(message_type)
     errors = []
+    warnings = []
 
     if contract is None:
         return ReasoningValidation(
@@ -276,23 +278,36 @@ def runtime_validate(message_type: str, domain_result: DomainResult) -> Reasonin
             errors=[f"unknown message_type: {message_type}"]
         )
 
-    # Rule 1: result must be in allowed_results
-    if domain_result.result not in contract.allowed_results:
+    # Rule 1: message_type must match mandatory_output
+    if domain_result.message_type != contract.mandatory_output:
         errors.append(
-            f"result '{domain_result.result}' not in allowed_results for {message_type} "
-            f"(allowed: {contract.allowed_results})"
+            f"message_type '{domain_result.message_type}' does not match "
+            f"mandatory_output '{contract.mandatory_output}' for {message_type}"
         )
 
-    # Rule 2: required fields must be present
+    # Rule 2: result must be in allowed_results
+    # Skip for terminal steps (complete/exit have allowed_results=[])
+    if contract.allowed_results:
+        if domain_result.result not in contract.allowed_results:
+            errors.append(
+                f"result '{domain_result.result}' not in allowed_results for {message_type} "
+                f"(allowed: {contract.allowed_results})"
+            )
+
+    # Rule 3: required fields must be present
     for field_name in ['collab_id', 'from_', 'message_type', 'result']:
         if not getattr(domain_result, field_name, None):
             errors.append(f"required field '{field_name}' is missing")
 
     return ReasoningValidation(
         valid=len(errors) == 0,
-        result_enum_legal=domain_result.result in contract.allowed_results,
+        result_enum_legal=(
+            (not contract.allowed_results) or
+            (domain_result.result in contract.allowed_results)
+        ),
         required_fields_present=len(errors) == 0,
-        errors=errors
+        errors=errors,
+        warnings=warnings
     )
 
 

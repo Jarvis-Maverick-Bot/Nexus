@@ -186,14 +186,14 @@ def build_doctrine_context(
     doctrine_files = {}
     errors = list(loaded_result.errors)
     warnings = []
+    unavailable_doctrines = set()
 
     for name, snapshot in loaded_result.doctrine_snapshot.items():
         if snapshot.loaded:
             doctrine_files[name] = snapshot.content
         else:
             doctrine_files[name] = ""
-            if name not in errors:
-                errors.append(f"doctrine file unavailable: {name}")
+            unavailable_doctrines.add(name)
 
     # Parse scope
     scope_content = loaded_result.doctrine_snapshot.get("v2_0_scope", None)
