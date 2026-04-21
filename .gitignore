@@ -11,3 +11,7 @@ _test_spawn2.py
 pmo_server.err
 pmo_server.log
 _e2e_test.py
+
+# Local config — never commit
+governance/collab/collab_config.json
+governance/data/

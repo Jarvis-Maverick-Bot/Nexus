@@ -1,0 +1,17 @@
+{
+  "my_id": "",
+  "sender_id": "",
+  "target_id": "",
+  "nats_url": "",
+  "subjects": {
+    "command": "",
+    "ack": "",
+    "event": "",
+    "notify": ""
+  },
+  "poll_interval": 30,
+  "heartbeat_interval": 60,
+  "shutdown_grace": 30,
+  "data_dir": null,
+  "protocol_version": "0.2"
+}
