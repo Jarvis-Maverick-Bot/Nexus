@@ -29,10 +29,12 @@ _PRD_DOC = _SHARED_ROOT / "01-release-definition" / "V2_0_PRD_V0_2.md"
 def _load_doctrine(doctrine_loading_set: list) -> dict:
     """
     Load doctrine files from paths in doctrine_loading_set.
-    Returns doctrine_snapshot dict. Missing files are logged as warnings, not hard errors.
+    Returns doctrine_snapshot dict.
+    Raises RuntimeError if ALL doctrine files fail to load.
+    Partial failures are logged but allowed (doctrine_loaded=False returned).
     """
     loaded = {}
-    warnings = []
+    errors = []
 
     path_map = {
         "v2_0_foundation_baseline": _FOUNDATION_BASELINE,
@@ -43,28 +45,24 @@ def _load_doctrine(doctrine_loading_set: list) -> dict:
     for name in doctrine_loading_set:
         path = path_map.get(name)
         if not path:
-            warnings.append(f"no path mapping for doctrine: {name}")
+            errors.append(f"no path mapping for doctrine: {name}")
             continue
         if not path.exists():
-            warnings.append(f"doctrine file not found: {path}")
+            errors.append(f"doctrine file not found: {path}")
             continue
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 loaded[name] = f.read()
         except Exception as e:
-            warnings.append(f"failed to load {name}: {e}")
+            errors.append(f"failed to load {name}: {e}")
 
-    if warnings and not loaded:
-        return {
-            "doctrine_loaded": False,
-            "errors": warnings,
-            "loaded_at": datetime.now(timezone.utc).isoformat()
-        }
+    if not loaded:
+        raise RuntimeError(f"doctrine_load_failed: all files failed — {errors}")
 
     return {
         "doctrine_loaded": True,
         "doctrine_snapshot": loaded,
-        "warnings": warnings if warnings else None,
+        "warnings": errors if errors else None,
         "loaded_at": datetime.now(timezone.utc).isoformat()
     }
 
@@ -288,21 +286,14 @@ async def execute_review(
 
     handler._log("EXEC", f"[{collab_id}] starting doctrine-driven foundation_review")
 
-    # 1. Load doctrine — raise on failure (pipeline catches as reasoning_failed)
+    # 1. Load doctrine — raises RuntimeError if all fail (pipeline catches as reasoning_failed)
     doctrine_result = _load_doctrine(doctrine_loading_set)
-    if not doctrine_result.get("doctrine_loaded"):
-        err = RuntimeError(f"doctrine_load_failed: {doctrine_result.get('errors')}")
-        handler._log("ERROR", f"[{collab_id}] doctrine_load_failed_review")
-        raise err
-
     handler._log("EXEC", f"[{collab_id}] doctrine loaded OK: {list(doctrine_result.get('doctrine_snapshot', {}).keys())}")
 
-    # 2. Load Nova's draft — raise on failure
+    # 2. Load Nova's draft — raises RuntimeError on failure
     loaded, draft_content, error = _load_nova_draft(artifact_path)
     if not loaded:
-        err = RuntimeError(f"draft_load_failed: {error}")
-        handler._log("ERROR", f"[{collab_id}] draft_load_failed: {error}")
-        raise err
+        raise RuntimeError(f"draft_load_failed: {error}")
 
     handler._log("EXEC", f"[{collab_id}] Nova draft loaded: {len(draft_content)} chars")
 
