@@ -5,8 +5,9 @@ Sends workflow messages to Nova via NATS gov.collab.command subject.
 """
 
 import json
-import os
 import threading
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -24,14 +25,14 @@ def _load_config() -> dict:
 
 _cfg = _load_config()
 _TELEGRAM_BOT_TOKEN = _cfg.get('telegram_bot_token', '')
-_TELEGRAM_API_URL = f"https://api.telegram.org/bot{_TELEGRAM_BOT_TOKEN}" if _TELEGRAM_BOT_TOKEN else None
+_TELEGRAM_API_URL = (
+    f"https://api.telegram.org/bot{_TELEGRAM_BOT_TOKEN}"
+    if _TELEGRAM_BOT_TOKEN else None
+)
 
 
 def _send_telegram_sync(message: str, chat_id: str = "8231866924") -> bool:
-    """
-    Send a Telegram message via Bot HTTP API.
-    Returns True if sent successfully, False otherwise.
-    """
+    """Send a Telegram message via Bot HTTP API. Returns True on success."""
     if not _TELEGRAM_BOT_TOKEN:
         print("[NOTIFY] Telegram bot token not configured in collab_config.json")
         return False
@@ -55,37 +56,25 @@ def _send_telegram_sync(message: str, chat_id: str = "8231866924") -> bool:
             if result.get("ok"):
                 print(f"[NOTIFY] Telegram sent OK: {message[:60]}...")
                 return True
-            else:
-                print(f"[NOTIFY] Telegram API error: {result}")
-                return False
+            print(f"[NOTIFY] Telegram API error: {result}")
+            return False
     except Exception as e:
         print(f"[NOTIFY] Telegram send failed: {e}")
         return False
 
 
 def send_telegram_notification(message: str, chat_id: str = "8231866924") -> bool:
-    """
-    Send a Telegram notification.
-    Called from daemon context (executor) when a "must notify" event occurs.
-    """
+    """Send a Telegram notification (blocking)."""
     return _send_telegram_sync(message, chat_id)
 
 
 def send_telegram_notification_async(message: str, chat_id: str = "8231866924"):
-    """
-    Fire-and-forget version: send Telegram notification without blocking.
-    Runs in a background thread.
-    """
+    """Send a Telegram notification without blocking (background thread)."""
     t = threading.Thread(target=_send_telegram_sync, args=(message, chat_id))
     t.start()
 
 
-# ── NATS Outbound helpers ──────────────────────────────────────────────────────
-
-import asyncio
-import urllib.request
-import urllib.error
-
+# ── NATS outbound helpers ────────────────────────────────────────────────────────
 
 async def send_review_response_to_nova(
     nc,
@@ -100,9 +89,7 @@ async def send_review_response_to_nova(
     subject: str = "gov.collab.command"
 ) -> bool:
     """
-    Send review_response from Jarvis back to Nova via NATS command subject.
-    review_response is a real workflow state-transition message — Nova consumes it
-    as the next business step.
+    Send review_response from Jarvis back to Nova via NATS gov.collab.command.
     """
     payload = {
         "message_type": "review_response",
@@ -120,10 +107,8 @@ async def send_review_response_to_nova(
         }
     }
 
-    data = json.dumps(payload).encode("utf-8")
-
     try:
-        await nc.publish(subject, data)
+        await nc.publish(subject, json.dumps(payload).encode("utf-8"))
         await nc.flush()
         print(f"[NOTIFY] review_response sent to {to_agent}: {review_result}")
         return True
