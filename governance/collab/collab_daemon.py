@@ -335,12 +335,12 @@ class CollabDaemon:
                 artifact_type=getattr(envelope, 'artifact_type', None) or '',
                 artifact_path=getattr(envelope, 'artifact_path', None) or '',
             )
-            # Write daemon-owned fields: instance identity tracking
+            # Daemon-only bookkeeping fields — do NOT overwrite workflow state (last_event is set by handler)
             self.store.update_collab(envelope.collab_id,
                 last_message_id=envelope.message_id,
-                last_event='event_acknowledged',
                 last_processed_by=self.instance_id,
             )
+            # last_event must NOT be set here — handler.handle_inbound owns it
 
             self._log("INFO", f"  -> [EVENT_DRIVEN] {envelope.message_type} dispatched")
 
