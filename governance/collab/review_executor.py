@@ -28,10 +28,10 @@ _SHAREFOLDER_BASE = r"\\192.168.31.124\Nova-Jarvis-Shared"
 
 
 def _to_sharefolder_path(artifact_path: str) -> str:
-    """
+    r"""
     Convert macOS local sharefolder path to Windows/Unix sharefolder path.
     e.g. /Users/alex/Nova-Jarvis-Shared/... -> \\192.168.31.124\Nova-Jarvis-Shared\...
-    
+
     Also handles already-sharefolder paths (no-op).
     """
     if not artifact_path:
@@ -89,8 +89,8 @@ def _load_doctrine(doctrine_loading_set: list) -> dict:
 
 
 def _load_nova_draft(artifact_path: str) -> Tuple[bool, str, Optional[str]]:
-    """Load Nova's Foundation draft from artifact_path.
-    
+    r"""Load Nova's Foundation draft from artifact_path.
+
     Handles cross-platform path conversion:
     - macOS /Users/alex/... -> \\192.168.31.124\Nova-Jarvis-Shared\...
     - Already-sharefolder paths pass through unchanged
