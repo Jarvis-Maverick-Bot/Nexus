@@ -3,9 +3,12 @@ NATS Collaboration Mechanism - Message Handler
 Event-driven skill dispatch from listener callback.
 Phase 2: handlers are concrete, worker is recovery sweep only.
 
-Layer C binding for: "Start V2.0 Foundation Create" command.
-Command intent: start_foundation_delivery
-Workflow: v2_0 / stage: foundation_create
+Three-layer architecture:
+  Layer 1: Contract (governance boundary — 写死)
+  Layer 2: Reasoning (AI model — bounded by contract, outputs DomainResult)
+  Layer 3: Execution (runtime validates + converts DomainResult to CollabEnvelope)
+
+This module implements the unified handler pipeline for all Foundation Create message types.
 """
 
 import asyncio
@@ -14,7 +17,7 @@ import re
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable, Optional, Dict, Any
+from typing import Callable, Optional, Dict, Any, List
 from .envelope import CollabEnvelope, AckEnvelope, VALID_MESSAGE_TYPES
 from .state_store import CollabStateStore
 
@@ -36,215 +39,75 @@ class _SubjectDict(dict):
 SUBJECTS = _SubjectDict(_SUBJECTS)
 
 
-# ── Skill Handler Registry (Phase 2) ─────────────────────────────────────────
-# Maps message_type → async handler function.
-# Each handler: async def handler(handler: CollabHandler, envelope: CollabEnvelope) -> str
-# Returns a result description string.
+# ─────────────────────────────────────────────────────────────────────────────
+# Layer 3: Pipeline Infrastructure
+# ─────────────────────────────────────────────────────────────────────────────
 
-async def _handle_open(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
-    """Handle 'open' — create new collab, no further action."""
-    handler.store.update_collab(
-        envelope.collab_id,
-        status='open',
-        current_owner=envelope.from_
-    )
-    return 'collab_opened'
-
-
-async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
+def _is_exited(collab_id: str, store: CollabStateStore) -> bool:
     """
-    Handle 'start_foundation_create' — initiates V2.0 Foundation delivery workflow.
-    Layer C binding for: "Start V2.0 Foundation Create" command.
-    Command intent: start_foundation_delivery
-
-    Ownership model (corrected):
-    - Nova is primary owner — collab owned by 'nova' (from_ field)
-    - Jarvis receives the message but does NOT own this workflow
-    - pending_action = 'awaiting_foundation_draft' means Nova must produce the draft
-    - artifact_path is NOT set here — comes from review_request payload
-
-    Completion criteria:
-    - collab.status = 'open'
-    - collab.current_owner = 'nova' (from Alex's kickoff, not Jarvis)
-    - collab.pending_action = 'awaiting_foundation_draft'
-    - collab.last_event = 'foundation_create_started'
-    - collab.artifact_path = '' (unset — comes from review_request)
+    Runtime gate: check if collab is in exited state.
+    All business messages for an exited collab must be rejected.
     """
-    handler.store.update_collab(
-        envelope.collab_id,
-        status='open',
-        current_owner=envelope.from_,  # Nova owns this workflow
-        artifact_type='foundation',
-        artifact_path='',  # No artifact yet — draft path comes from review_request
-        pending_action='awaiting_foundation_draft',
-        last_event='foundation_create_started'
-    )
-    handler.store.emit_event(
-        envelope.collab_id,
-        'foundation_create_started',
-        message_id=envelope.message_id,
-        artifact_type='foundation',
-        from_=envelope.from_
-    )
-    return 'foundation_create_started'
+    state = store.get_collab(collab_id)
+    return state is not None and state.status == 'exited'
 
 
-async def _handle_foundation_draft_ready(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
+def _get_next_receiver(domain, contract) -> str:
     """
-    Handle 'foundation_draft_ready' — Nova signals draft is complete.
-    artifact_path comes from payload, not hardcoded.
+    Determine who receives the next message.
+    to 字段必须来自 contract 或 collab routing，禁止 from_ 反推。
+
+    Logic:
+    - Use contract.next_step's executor if next_step exists
+    - Fall back to current_owner mapping
+    - Never infer from domain.from_
     """
-    payload = envelope.payload or {}
-    artifact_path = payload.get('artifact_path', '')
+    from .runtime_contract_map import get_contract
 
-    handler.store.update_collab(
-        envelope.collab_id,
-        status='in_progress',
-        pending_action='',
-        last_event='foundation_draft_ready',
-        artifact_path=artifact_path
-    )
-    handler.store.emit_event(
-        envelope.collab_id,
-        'foundation_draft_ready',
-        message_id=envelope.message_id,
-        artifact_type='foundation',
-        artifact_path=artifact_path
-    )
-    return 'foundation_draft_ready'
+    if contract.next_step:
+        next_contract = get_contract(contract.next_step)
+        if next_contract:
+            return next_contract.executor
+
+    if contract.current_owner == 'jarvis':
+        return 'nova'
+    elif contract.current_owner == 'nova':
+        return 'jarvis'
+
+    raise ValueError(f"Cannot determine 'to' receiver for {contract.message_type}")
 
 
-async def _handle_review_request(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
+def _domain_to_envelope(domain, contract) -> CollabEnvelope:
     """
-    Handle 'review_request' — Nova hands over draft to Jarvis for review.
+    把 DomainResult 转成 transport CollabEnvelope。
+    Model 不直接产生 envelope。Runtime 负责转换。
 
-    Contract-driven: mandatory_output from runtime_contract_map is review_response.
-    This handler MUST produce that as a command-channel message, not just ACK.
-
-    Steps:
-    1. Update state to in_progress/jarvis
-    2. Execute review inline (await executor)
-    3. Send mandatory_output (review_response) to Nova via command channel
-    4. Update state based on result
-    5. Telegram notify per contract.notify_policy
+    to 字段来自 _get_next_receiver()，禁止 from_ 反推。
     """
-    from governance.collab.runtime_contract_map import get_contract
-    from governance.collab.review_executor import execute_review
+    to_receiver = _get_next_receiver(domain, contract)
 
-    # ── Contract validation ─────────────────────────────────────────
-    contract = get_contract('review_request')
-    mandatory_output = contract.mandatory_output if contract else 'review_response'
+    payload = {
+        'result': domain.result,
+        'notes': domain.notes,
+        'judgment_path': getattr(domain, 'judgment_path', ''),
+        'workflow': getattr(domain, 'workflow', ''),
+        'stage': getattr(domain, 'stage', ''),
+        **getattr(domain, 'extra', {})
+    }
 
-    payload = envelope.payload or {}
-    artifact_path = payload.get('artifact_path', '')
-    review_scope = payload.get('review_scope', 'foundation completeness and governance alignment')
-    workflow = payload.get('workflow', 'v2_0')
-    stage = payload.get('stage', 'foundation_create_review')
+    # Remove None values
+    payload = {k: v for k, v in payload.items() if v is not None and v != ''}
 
-    handler.store.update_collab(
-        envelope.collab_id,
-        status='in_progress',
-        current_owner=handler.my_id,  # Jarvis owns the review stage
-        artifact_type=payload.get('artifact_type', 'foundation'),
-        artifact_path=artifact_path,
-        pending_action='awaiting_review_execution',
-        last_event='review_handover_received'
+    return CollabEnvelope(
+        message_id=f"msg-{uuid.uuid4().hex[:12]}",
+        collab_id=domain.collab_id,
+        message_type=contract.mandatory_output,
+        from_=domain.from_,
+        to=to_receiver,
+        payload=payload,
+        summary=f"{contract.message_type}: {domain.result}",
+        timestamp=datetime.now(timezone.utc).isoformat()
     )
-    handler.store.emit_event(
-        envelope.collab_id,
-        'review_handover_received',
-        message_id=envelope.message_id,
-        skill='review_request',
-        summary=envelope.summary,
-        artifact_path=artifact_path,
-        review_scope=review_scope,
-        workflow=workflow,
-        stage=stage
-    )
-
-    # ── Step 2: Execute review inline (not via worker) ─────────────
-    result = await execute_review(
-        handler,
-        collab_id=envelope.collab_id,
-        artifact_path=artifact_path,
-        review_scope=review_scope,
-        doctrine_loading_set=['v2_0_foundation_baseline', 'v2_0_scope', 'v2_0_prd']
-    )
-
-    if not result.get('ok'):
-        # Doctrine/draft failure: notify Nova, set pending_action for revision
-        handler.store.update_collab(
-            envelope.collab_id,
-            status='in_progress',
-            pending_action='awaiting_revision',
-            last_event=f"review_{result['error_type']}"
-        )
-        handler.store.emit_event(envelope.collab_id, f"review_{result['error_type']}",
-                                error=result.get('error'))
-        # Still send a review_response to Nova so she knows
-        review_resp = _build_envelope(
-            message_type='review_response',
-            collab_id=envelope.collab_id,
-            from_='jarvis',
-            to='nova',
-            payload={
-                'review_result': 'revision_required',
-                'review_notes': f"Review failed: {result.get('error')}",
-                'review_artifact_path': '',
-                'workflow': workflow,
-                'stage': stage
-            },
-            summary=f'Foundation review failed: {result.get("error_type")}'
-        )
-        await _send_envelope(handler, review_resp)
-        return f"review_{result['error_type']}"
-
-    # ── Step 3: Send review_response to Nova ───────────────────────
-    review_resp = _build_envelope(
-        message_type='review_response',
-        collab_id=envelope.collab_id,
-        from_='jarvis',
-        to='nova',
-        payload={
-            'review_result': result['review_result'],
-            'review_notes': result['judgment'][:500],
-            'review_artifact_path': result.get('judgment_path', ''),
-            'workflow': workflow,
-            'stage': stage
-        },
-        summary=f'Foundation review: {result["review_result"]}'
-    )
-    await _send_envelope(handler, review_resp)
-
-    # ── Step 4: Update state ────────────────────────────────────────
-    handler.store.update_collab(
-        envelope.collab_id,
-        status='completed',
-        pending_action='',
-        last_event='review_completed'
-    )
-    handler.store.emit_event(
-        envelope.collab_id,
-        'review_completed',
-        review_result=result['review_result'],
-        review_judgment_path=result.get('judgment_path', ''),
-        draft_chars=result.get('draft_chars', 0)
-    )
-
-    # ── Step 5: Notify Alex via Telegram ───────────────────────────
-    try:
-        from governance.collab.notify import send_telegram_notification_async
-        send_telegram_notification_async(
-            f"*Foundation Review Complete*\n"
-            f"Collab: `{envelope.collab_id}`\n"
-            f"Draft: {result.get('draft_chars', 0)} chars\n"
-            f"Result: *{result['review_result'].upper()}*\n"
-            f"Judgment: {result.get('judgment_path', 'N/A')}"
-        )
-    except Exception as e:
-        handler._log("WARN", f"[{envelope.collab_id}] Telegram notification failed: {e}")
-
-    return 'review_completed'
 
 
 def _build_envelope(
@@ -272,53 +135,417 @@ def _build_envelope(
     )
 
 
-async def _send_envelope(handler: 'CollabHandler', envelope: CollabEnvelope,
-                          subject: str = 'gov.collab.command') -> bool:
+async def _apply_notify_policy(handler: 'CollabHandler', contract, domain, envelope: CollabEnvelope):
     """
-    Send a CollabEnvelope via NATS and wait for ACK.
-    Returns True if ACK received within timeout, False otherwise.
+    Send Telegram notifications per contract.notify_policy.
+    Failures are logged but do not block pipeline.
     """
-    key = f"{envelope.collab_id}:{envelope.message_id}"
-    loop = asyncio.get_event_loop()
-    future = loop.create_future()
-    handler._pending_ack[key] = future
+    for policy in contract.notify_policy:
+        if policy.channel not in ('telegram', 'both'):
+            continue
+        try:
+            from governance.collab.notify import send_telegram_notification_async
+
+            template = policy.template
+            # Replace placeholders
+            template = template.replace('{collab_id}', envelope.collab_id)
+            template = template.replace('{review_result}', getattr(domain, 'result', ''))
+            template = template.replace('{from_}', envelope.from_)
+            template = template.replace('{reason}', envelope.payload.get('reason', '') if envelope.payload else '')
+
+            send_telegram_notification_async(template)
+            handler._log("NOTIFY", f"[{envelope.collab_id}] Telegram sent to {policy.recipient}")
+        except Exception as e:
+            handler._log("WARN", f"[{envelope.collab_id}] Telegram notify failed: {e}")
+
+
+async def _handle_failure(
+    handler: 'CollabHandler',
+    envelope: CollabEnvelope,
+    contract,
+    failure_type: str,
+    errors: List[str],
+    domain_result=None
+):
+    """
+    Unified failure handler per failure matrix.
+
+    Failure types:
+    - doctrine_build_failed: doctrine context build 失败
+    - reasoning_failed: reasoning step 失败
+    - reasoning_validation_failed: reasoning output validation 失败
+    - envelope_build_failed: envelope 构建 失败
+    - nats_send_failed: NATS 发送失败（重试3次后）
+    - persist_failed: state persist 失败
+
+    State behavior per matrix:
+    - doctrine_build_failed: pending_action 保持, last_event=failure_type
+    - reasoning_failed: pending_action 保持, last_event=failure_type
+    - reasoning_validation_failed: pending_action=awaiting_revision, last_event=failure_type
+    - envelope_build_failed: status=failed, last_event=failure_type
+    - nats_send_failed: status=failed, last_event=failure_type
+    - persist_failed: status=failed, last_event=failure_type
+
+    All failures write last_event。失败状态必须精确（包含 failure_type）。
+    """
+    handler._log("ERROR", f"[{envelope.collab_id}] {failure_type}: {errors}")
+
+    # Determine state behavior per failure matrix
+    failure_state_map = {
+        'doctrine_build_failed': {'status': 'in_progress', 'pending_action': '', 'last_event': failure_type},
+        'reasoning_failed':      {'status': 'in_progress', 'pending_action': '', 'last_event': failure_type},
+        'reasoning_validation_failed': {'status': 'in_progress', 'pending_action': 'awaiting_revision', 'last_event': failure_type},
+        'envelope_build_failed': {'status': 'failed', 'pending_action': '', 'last_event': failure_type},
+        'nats_send_failed':      {'status': 'failed', 'pending_action': '', 'last_event': failure_type},
+        'persist_failed':         {'status': 'failed', 'pending_action': '', 'last_event': failure_type},
+    }
+
+    state_update = failure_state_map.get(failure_type, {'status': 'failed', 'pending_action': '', 'last_event': failure_type})
 
     try:
-        await handler.nc.publish(subject, envelope.to_json())
-        await handler.nc.flush()
-        handler._log("SEND", f"[{envelope.collab_id}] {envelope.message_type} sent -> {envelope.to}")
+        handler.store.update_collab(envelope.collab_id, **state_update)
     except Exception as e:
-        handler._log("ERROR", f"[{envelope.collab_id}] send failed: {e}")
-        return False
+        handler._log("ERROR", f"[{envelope.collab_id}] persist_failed during failure handling: {e}")
 
+    handler.store.emit_event(envelope.collab_id, failure_type, errors=errors)
+
+    # Telegram notify for all failures (Alex must see)
     try:
-        await asyncio.wait_for(future, timeout=15.0)
-        handler._log("ACK", f"[{envelope.collab_id}] ACK received for {envelope.message_type}")
-        return True
-    except asyncio.TimeoutError:
-        handler._log("WARN", f"[{envelope.collab_id}] ACK timeout for {envelope.message_type}")
-        return False
-    finally:
-        handler._pending_ack.pop(key, None)
+        from governance.collab.notify import send_telegram_notification_async
+        send_telegram_notification_async(
+            f"*Pipeline Failure*\nCollab: `{envelope.collab_id}`\n"
+            f"Type: {failure_type}\nErrors: {'; '.join(errors)}"
+        )
+    except Exception:
+        pass
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Unified Handler Pipeline
+# ─────────────────────────────────────────────────────────────────────────────
+
+ReasoningFn = Callable[['CollabHandler', CollabEnvelope, Any], Any]
+"""Async function: (handler, envelope, doctrine_context) -> DomainResult"""
+
+
+async def run_pipeline(
+    handler: 'CollabHandler',
+    envelope: CollabEnvelope,
+    contract,
+    reasoning_fn: Optional[ReasoningFn] = None,
+    doctrine_loading_set: Optional[List[str]] = None,
+    workflow: str = 'v2_0',
+    stage: str = ''
+) -> str:
+    """
+    Unified handler execution pipeline.
+
+    Step 1: Check state=exited runtime gate
+    Step 2: Build doctrine context (给 reasoning 用)
+    Step 3: Call reasoning_fn (if provided — None for terminal steps)
+    Step 4: A层校验 (reasoning output validation)
+    Step 5: 构建 CollabEnvelope → B层校验 (envelope validation)
+    Step 6: 发送消息 + 更新状态 + 通知
+
+    Args:
+        handler: CollabHandler instance
+        envelope: inbound CollabEnvelope
+        contract: StepContract for this message_type
+        reasoning_fn: async fn(handler, envelope, doctrine_context) -> DomainResult
+                      None for terminal steps (complete, exit)
+        doctrine_loading_set: list of doctrine names to load
+        workflow: workflow identifier
+        stage: stage identifier
+
+    Returns:
+        result string: 'completed' | failure_type
+    """
+    from .runtime_contract_map import runtime_validate, validate_envelope, DomainResult
+    from .doctrine_bridge import build_doctrine_context
+
+    # ── Step 0: state=exited gate ───────────────────────────────────
+    if _is_exited(envelope.collab_id, handler.store):
+        handler._log("WARN", f"[{envelope.collab_id}] rejecting message — collab is exited")
+        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
+        return "rejected_exited"
+
+    # ── Step 2: Build doctrine context ───────────────────────────────
+    doctrine_ctx = None
+    if doctrine_loading_set:
+        try:
+            doctrine_ctx = build_doctrine_context(doctrine_loading_set, workflow, stage)
+        except Exception as e:
+            await _handle_failure(handler, envelope, contract, 'doctrine_build_failed', [str(e)])
+            return "doctrine_build_failed"
+
+    # ── Step 3: Call reasoning_fn ───────────────────────────────────
+    domain_result = None
+    if reasoning_fn is not None:
+        try:
+            domain_result = await reasoning_fn(handler, envelope, doctrine_ctx)
+        except Exception as e:
+            await _handle_failure(handler, envelope, contract, 'reasoning_failed', [str(e)])
+            return "reasoning_failed"
+    else:
+        # Terminal step: no reasoning needed, create minimal DomainResult
+        domain_result = DomainResult(
+            message_type=contract.mandatory_output or envelope.message_type,
+            collab_id=envelope.collab_id,
+            from_=handler.my_id,
+            result='',
+            notes='',
+            workflow=workflow,
+            stage=stage
+        )
+
+    # ── Step 4: A层校验 ─────────────────────────────────────────────
+    reasoning_check = runtime_validate(envelope.message_type, domain_result)
+    if not reasoning_check.valid:
+        await _handle_failure(
+            handler, envelope, contract,
+            'reasoning_validation_failed',
+            reasoning_check.errors,
+            domain_result
+        )
+        return "reasoning_validation_failed"
+
+    # ── Step 5: 构建 envelope + B层校验 ─────────────────────────────
+    try:
+        outbound_envelope = _domain_to_envelope(domain_result, contract)
+    except Exception as e:
+        await _handle_failure(handler, envelope, contract, 'envelope_build_failed', [str(e)])
+        return "envelope_build_failed"
+
+    envelope_check = validate_envelope(outbound_envelope)
+    if not envelope_check.valid:
+        await _handle_failure(
+            handler, envelope, contract,
+            'envelope_build_failed',
+            envelope_check.errors
+        )
+        return "envelope_build_failed"
+
+    # ── Step 6: 发送 + 状态 + 通知 ─────────────────────────────────
+    # Send NATS message
+    sent = await _send_envelope(handler, outbound_envelope)
+    if not sent:
+        # NATS send failed — retry logic handled inside _send_envelope
+        # After retries exhausted, _send_envelope returns False
+        await _handle_failure(
+            handler, envelope, contract,
+            'nats_send_failed',
+            [f"ACK not received after retries for {outbound_envelope.message_type}"]
+        )
+        return "nats_send_failed"
+
+    # Update state
+    handler.store.update_collab(
+        envelope.collab_id,
+        status='in_progress',
+        pending_action='',
+        last_event=f"{envelope.message_type}_completed"
+    )
+
+    # Apply notify policy
+    await _apply_notify_policy(handler, contract, domain_result, outbound_envelope)
+
+    return "completed"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Foundation Create Handlers (5 message types)
+# ─────────────────────────────────────────────────────────────────────────────
+
+async def _handle_open(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
+    """Handle 'open' — create new collab, no further action."""
+    if _is_exited(envelope.collab_id, handler.store):
+        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
+        return "rejected_exited"
+
+    handler.store.update_collab(
+        envelope.collab_id,
+        status='open',
+        current_owner=envelope.from_
+    )
+    return 'collab_opened'
+
+
+async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
+    """
+    Handle 'start_foundation_create' — Nova initiates Foundation delivery.
+
+    Terminal-ish: Nova is owner, no model reasoning here.
+    This handler sets up the collab for Nova to produce draft.
+    """
+    from .runtime_contract_map import get_contract
+
+    if _is_exited(envelope.collab_id, handler.store):
+        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
+        return "rejected_exited"
+
+    contract = get_contract('start_foundation_create')
+    payload = envelope.payload or {}
+
+    handler.store.update_collab(
+        envelope.collab_id,
+        status='open',
+        current_owner='nova',
+        artifact_type='foundation',
+        artifact_path='',
+        pending_action='awaiting_foundation_draft',
+        last_event='foundation_create_started'
+    )
+    handler.store.emit_event(
+        envelope.collab_id,
+        'foundation_create_started',
+        message_id=envelope.message_id,
+        artifact_type='foundation',
+        from_=envelope.from_
+    )
+    return 'foundation_create_started'
+
+
+async def _handle_foundation_draft_ready(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
+    """
+    Handle 'foundation_draft_ready' — Nova signals draft is complete.
+    artifact_path comes from payload.
+    """
+    if _is_exited(envelope.collab_id, handler.store):
+        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
+        return "rejected_exited"
+
+    payload = envelope.payload or {}
+    artifact_path = payload.get('artifact_path', '')
+
+    handler.store.update_collab(
+        envelope.collab_id,
+        status='in_progress',
+        pending_action='',
+        last_event='foundation_draft_ready',
+        artifact_path=artifact_path
+    )
+    handler.store.emit_event(
+        envelope.collab_id,
+        'foundation_draft_ready',
+        message_id=envelope.message_id,
+        artifact_type='foundation',
+        artifact_path=artifact_path
+    )
+    return 'foundation_draft_ready'
+
+
+async def _handle_review_request(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
+    """
+    Handle 'review_request' — Nova hands over draft to Jarvis for review.
+
+    Contract-driven: mandatory_output = review_response.
+    Pipeline: run_pipeline with execute_review as reasoning_fn.
+    """
+    from .runtime_contract_map import get_contract
+    from .review_executor import execute_review
+
+    if _is_exited(envelope.collab_id, handler.store):
+        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
+        return "rejected_exited"
+
+    contract = get_contract('review_request')
+    payload = envelope.payload or {}
+    artifact_path = payload.get('artifact_path', '')
+    review_scope = payload.get('review_scope', 'foundation completeness and governance alignment')
+    workflow = payload.get('workflow', 'v2_0')
+    stage = payload.get('stage', 'foundation_create_review')
+
+    # Update state: Jarvis owns the review stage
+    handler.store.update_collab(
+        envelope.collab_id,
+        status='in_progress',
+        current_owner='jarvis',
+        artifact_type=payload.get('artifact_type', 'foundation'),
+        artifact_path=artifact_path,
+        pending_action='awaiting_review_execution',
+        last_event='review_handover_received'
+    )
+    handler.store.emit_event(
+        envelope.collab_id,
+        'review_handover_received',
+        message_id=envelope.message_id,
+        skill='review_request',
+        summary=envelope.summary,
+        artifact_path=artifact_path,
+        review_scope=review_scope,
+        workflow=workflow,
+        stage=stage
+    )
+
+    # Define reasoning_fn inline
+    async def reasoning_fn(h, env, doctrine_ctx):
+        result = await execute_review(
+            h,
+            collab_id=env.collab_id,
+            artifact_path=artifact_path,
+            review_scope=review_scope,
+            doctrine_loading_set=contract.doctrine_loading_set
+        )
+        if not result.get('ok'):
+            from .runtime_contract_map import DomainResult
+            return DomainResult(
+                message_type='review_response',
+                collab_id=env.collab_id,
+                from_='jarvis',
+                result='revision_required',
+                notes=f"Review execution failed: {result.get('error')}",
+                workflow=workflow,
+                stage=stage
+            )
+        from .runtime_contract_map import DomainResult
+        return DomainResult(
+            message_type='review_response',
+            collab_id=env.collab_id,
+            from_='jarvis',
+            result=result['review_result'],
+            notes=result['judgment'],
+            judgment_path=result.get('judgment_path', ''),
+            workflow=workflow,
+            stage=stage
+        )
+
+    result = await run_pipeline(
+        handler=handler,
+        envelope=envelope,
+        contract=contract,
+        reasoning_fn=reasoning_fn,
+        doctrine_loading_set=contract.doctrine_loading_set,
+        workflow=workflow,
+        stage=stage
+    )
+
+    if result == 'completed':
+        handler.store.update_collab(
+            envelope.collab_id,
+            status='completed',
+            pending_action='',
+            last_event='review_completed'
+        )
+
+    return result
 
 
 async def _handle_review_response(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
     """
-    Handle 'review_response' — record review result.
+    Handle 'review_response' — Nova receives Jarvis's judgment.
 
     Behavior differs by agent:
-    - Jarvis receives review_response from Nova (should not happen in normal flow)
-    - Nova receives review_response from Jarvis: auto-decide next step based on review_result
-
-    Nova auto-follow-up logic (review_result-based):
-    - approved: send complete to Jarvis + Telegram notify Alex
-    - revision_required: update state for Nova's next draft iteration
-    - blocked: Telegram notify Alex with blocker summary
+    - Jarvis receives: record, no auto-follow-up (Jarvis is not the primary)
+    - Nova receives: auto-decide next step based on review_result
     """
+    if _is_exited(envelope.collab_id, handler.store):
+        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
+        return "rejected_exited"
+
     payload = envelope.payload or {}
-    review_result = payload.get('review_result', 'unknown')
-    review_notes = payload.get('review_notes', '')
-    review_judgment_path = payload.get('review_artifact_path', '')
+    review_result = payload.get('result', 'unknown')
+    review_notes = payload.get('notes', '')
+    review_judgment_path = payload.get('judgment_path', '')
 
     handler.store.update_collab(
         envelope.collab_id,
@@ -335,7 +562,6 @@ async def _handle_review_response(handler: 'CollabHandler', envelope: CollabEnve
 
     if handler.my_id == 'nova':
         if review_result == 'approved':
-            # Step 6: send complete to Jarvis using unified envelope
             complete_env = _build_envelope(
                 message_type='complete',
                 collab_id=envelope.collab_id,
@@ -350,33 +576,31 @@ async def _handle_review_response(handler: 'CollabHandler', envelope: CollabEnve
                 }
             )
             await _send_envelope(handler, complete_env)
-
-            # Step 7: Telegram notify Alex
             try:
                 from governance.collab.notify import send_telegram_notification_async
                 send_telegram_notification_async(
                     f"*Foundation Create — Complete*\n"
                     f"Collab: `{envelope.collab_id}`\n"
                     f"Result: *APPROVED*\n"
-                    f"Review judgment: {review_judgment_path or 'N/A'}\n"
-                    f"Status: Ready for next stage"
+                    f"Review judgment: {review_judgment_path or 'N/A'}"
                 )
-            except Exception as e:
-                handler._log("WARN", f"[{envelope.collab_id}] Telegram notification failed: {e}")
-
+            except Exception:
+                pass
         elif review_result == 'revision_required':
-            handler.store.update_collab(envelope.collab_id, status='in_progress', pending_action='awaiting_revision')
+            handler.store.update_collab(
+                envelope.collab_id,
+                status='in_progress',
+                pending_action='awaiting_revision'
+            )
             try:
                 from governance.collab.notify import send_telegram_notification_async
                 send_telegram_notification_async(
                     f"*Foundation Create — Revision Required*\n"
                     f"Collab: `{envelope.collab_id}`\n"
-                    f"Notes: {review_notes[:200]}\n"
-                    f"Next: Nova revises draft and re-hands over"
+                    f"Notes: {review_notes[:200]}"
                 )
             except Exception:
                 pass
-
         elif review_result == 'blocked':
             try:
                 from governance.collab.notify import send_telegram_notification_async
@@ -392,8 +616,105 @@ async def _handle_review_response(handler: 'CollabHandler', envelope: CollabEnve
     return 'review_received'
 
 
+async def _handle_complete(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
+    """
+    Handle 'complete' — mark collab completed.
+    Terminal step: no reasoning needed.
+    """
+    from .runtime_contract_map import get_contract
+
+    if _is_exited(envelope.collab_id, handler.store):
+        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
+        return "rejected_exited"
+
+    contract = get_contract('complete')
+
+    handler.store.update_collab(
+        envelope.collab_id,
+        status='completed',
+        pending_action='',
+        last_event='collab_completed'
+    )
+    handler.store.emit_event(
+        envelope.collab_id,
+        'collab_completed',
+        message_id=envelope.message_id
+    )
+
+    # Apply notify policy for complete
+    from .runtime_contract_map import DomainResult
+    domain = DomainResult(
+        message_type='complete',
+        collab_id=envelope.collab_id,
+        from_=envelope.from_,
+        result='',
+        notes='',
+        workflow='v2_0',
+        stage='foundation_create'
+    )
+    await _apply_notify_policy(handler, contract, domain, envelope)
+
+    return 'collab_completed'
+
+
+async def _handle_exit(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
+    """
+    Handle 'exit' — special termination path.
+
+    Semantic (全部写死):
+    1. Immediately interrupt ALL pending pipeline work
+    2. State → 'exited', pending_action cleared
+    3. Worker sweep must skip this collab (state=exited is a runtime gate)
+    4. Send processed ACK (NOT business message)
+    5. Telegram notify Alex (mandatory)
+    6. Reject all subsequent business messages (state=exited is a runtime gate)
+
+    This is NOT a normal handler template. Exit is special.
+    """
+    from .runtime_contract_map import get_contract
+
+    handler._log("EXEC", f"[{envelope.collab_id}] exit triggered — interrupting pipeline")
+
+    # Rule 2: State → exited
+    handler.store.update_collab(
+        envelope.collab_id,
+        status='exited',
+        pending_action='',
+        last_event=f'collab_exited_by_{envelope.from_}'
+    )
+
+    # Rule 3: Emit event
+    handler.store.emit_event(
+        envelope.collab_id,
+        'collab_exited',
+        from_=envelope.from_,
+        reason=envelope.payload.get('reason', '') if envelope.payload else ''
+    )
+
+    # Rule 4: Send processed ACK (not business message)
+    await _send_ack(handler, envelope, 'processed', result='')
+
+    # Rule 5: Telegram notify (mandatory)
+    try:
+        from governance.collab.notify import send_telegram_notification_async
+        send_telegram_notification_async(
+            f"*Foundation Create — EXITED*\n"
+            f"Collab: `{envelope.collab_id}`\n"
+            f"By: {envelope.from_}\n"
+            f"Reason: {envelope.payload.get('reason', 'No reason') if envelope.payload else 'No reason'}"
+        )
+    except Exception as e:
+        handler._log("WARN", f"[{envelope.collab_id}] Telegram notification failed: {e}")
+
+    return 'collab_exited'
+
+
 async def _handle_decision_proposal(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
     """Handle 'decision_proposal' — record proposal, set pending_action."""
+    if _is_exited(envelope.collab_id, handler.store):
+        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
+        return "rejected_exited"
+
     handler.store.update_collab(
         envelope.collab_id,
         last_event='decision_proposed',
@@ -409,6 +730,10 @@ async def _handle_decision_proposal(handler: 'CollabHandler', envelope: CollabEn
 
 async def _handle_decision_response(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
     """Handle 'decision_response' — record decision, clear pending_action."""
+    if _is_exited(envelope.collab_id, handler.store):
+        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
+        return "rejected_exited"
+
     handler.store.update_collab(
         envelope.collab_id,
         last_event='decision_received',
@@ -422,52 +747,12 @@ async def _handle_decision_response(handler: 'CollabHandler', envelope: CollabEn
     return 'decision_received'
 
 
-async def _handle_complete(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
-    """Handle 'complete' — mark collab completed."""
-    handler.store.update_collab(
-        envelope.collab_id,
-        status='completed',
-        last_event='collab_completed',
-        pending_action=''
-    )
-    handler.store.emit_event(
-        envelope.collab_id,
-        'collab_completed',
-        message_id=envelope.message_id
-    )
-    return 'collab_completed'
-
-
-async def _handle_exit(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
-    """Handle 'exit' — mark collab exited with Telegram notification."""
-    handler.store.update_collab(
-        envelope.collab_id,
-        status='exited',
-        last_event='collab_exited',
-        pending_action=''
-    )
-    handler.store.emit_event(
-        envelope.collab_id,
-        'collab_exited',
-        message_id=envelope.message_id
-    )
-    # Notify Alex: human-visible termination signal
-    try:
-        from governance.collab.notify import send_telegram_notification_async
-        exit_note = envelope.payload.get('reason', '') if envelope.payload else ''
-        send_telegram_notification_async(
-            f"*Foundation Create — EXITED*\n"
-            f"Collab: `{envelope.collab_id}`\n"
-            f"By: {envelope.from_}\n"
-            f"Reason: {exit_note or 'No reason provided'}"
-        )
-    except Exception as e:
-        handler._log("WARN", f"[{envelope.collab_id}] Telegram notification failed: {e}")
-    return 'collab_exited'
-
-
 async def _handle_notify(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
     """Handle 'notify' — log notification, no state change needed."""
+    if _is_exited(envelope.collab_id, handler.store):
+        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
+        return "rejected_exited"
+
     handler.store.emit_event(
         envelope.collab_id,
         'notification_sent',
@@ -484,6 +769,10 @@ async def _handle_ping(handler: 'CollabHandler', envelope: CollabEnvelope) -> st
 
 async def _handle_unknown(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
     """Fallback for unknown message types."""
+    if _is_exited(envelope.collab_id, handler.store):
+        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
+        return "rejected_exited"
+
     handler.store.emit_event(
         envelope.collab_id,
         'unknown_message_type',
@@ -529,7 +818,7 @@ class CollabHandler:
         self._pending_ack: Dict[str, asyncio.Future] = {}
 
     def _log(self, level: str, line: str):
-        """Log via daemon's log path (uses store's log path)."""
+        """Log via daemon's log path."""
         from governance.collab.collab_daemon import _log_to_file, _paths
         try:
             p = _paths()
@@ -578,11 +867,12 @@ class CollabHandler:
         return False
 
     async def _send_ack(self, envelope: CollabEnvelope, ack_type: str, result: str = ''):
-        """Emit an ACK for this envelope.
-        
+        """
+        Emit an ACK for this envelope.
+
         ack_type: 'received' or 'processed'
-        For 'received': use AckEnvelope.received() — acknowledges receipt
-        For 'processed': use AckEnvelope.processed() — acknowledges business logic completion
+        For 'received': use AckEnvelope.received()
+        For 'processed': use AckEnvelope.processed()
         """
         if ack_type == 'received':
             ack = AckEnvelope.received(envelope, envelope.from_)
@@ -594,3 +884,45 @@ class CollabHandler:
             self._log("ACK", f"[{envelope.collab_id}] sent {ack_type} ACK for {envelope.message_id} -> {envelope.from_}")
         except Exception as e:
             self._log("ERROR", f"Failed to send ACK: {e}")
+
+
+async def _send_envelope(handler: 'CollabHandler', envelope: CollabEnvelope,
+                          subject: str = 'gov.collab.command') -> bool:
+    """
+    Send a CollabEnvelope via NATS and wait for ACK.
+    Returns True if ACK received within timeout, False otherwise.
+
+    Retry policy: 3 attempts, 5s interval. After all retries fail → return False.
+    """
+    key = f"{envelope.collab_id}:{envelope.message_id}"
+    loop = asyncio.get_event_loop()
+
+    for attempt in range(3):
+        future = loop.create_future()
+        handler._pending_ack[key] = future
+
+        try:
+            await handler.nc.publish(subject, envelope.to_json())
+            await handler.nc.flush()
+            handler._log("SEND", f"[{envelope.collab_id}] {envelope.message_type} sent -> {envelope.to} (attempt {attempt + 1})")
+        except Exception as e:
+            handler._log("ERROR", f"[{envelope.collab_id}] send failed (attempt {attempt + 1}): {e}")
+            handler._pending_ack.pop(key, None)
+            if attempt == 2:
+                return False
+            await asyncio.sleep(5)
+            continue
+
+        try:
+            await asyncio.wait_for(future, timeout=15.0)
+            handler._log("ACK", f"[{envelope.collab_id}] ACK received for {envelope.message_type}")
+            return True
+        except asyncio.TimeoutError:
+            handler._log("WARN", f"[{envelope.collab_id}] ACK timeout for {envelope.message_type} (attempt {attempt + 1})")
+            handler._pending_ack.pop(key, None)
+            if attempt == 2:
+                return False
+            await asyncio.sleep(5)
+            continue
+
+    return False
