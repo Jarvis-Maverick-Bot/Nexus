@@ -98,32 +98,6 @@ class CollabStateStore:
             return CollabState.from_dict(data[collab_id])
         return None
 
-    def open_collab(self, collab_id: str, opened_by: str,
-                    artifact_type: Optional[str] = None,
-                    artifact_path: Optional[str] = None) -> CollabState:
-        """Open a new collaboration."""
-        data = self._read_state()
-        now = datetime.now(timezone.utc).isoformat()
-        state = CollabState(
-            collab_id=collab_id,
-            status='open',
-            artifact_type=artifact_type,
-            artifact_path=artifact_path,
-            opened_by=opened_by,
-            current_owner=opened_by,
-            created_at=now,
-            updated_at=now
-        )
-        data[collab_id] = state.to_dict()
-        self._write_state(data)
-        self._append_log({
-            "event": "collab_opened",
-            "collab_id": collab_id,
-            "opened_by": opened_by,
-            "timestamp": now
-        })
-        return state
-
     def update_collab(self, collab_id: str, **kwargs) -> Optional[CollabState]:
         """Update collaboration fields."""
         data = self._read_state()
