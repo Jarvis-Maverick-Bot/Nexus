@@ -181,45 +181,6 @@ async def _handle_unknown(handler: 'CollabHandler', envelope: CollabEnvelope) ->
     return 'unknown_message_type'
 
 
-async def _handle_foundation_create(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
-    """
-    Handle 'foundation_create' — creates a foundation artifact.
-    Loaded from workflow_registry.json: command_intent=start_foundation_delivery.
-    """
-    handler.store.update_collab(
-        envelope.collab_id,
-        status='in_progress',
-        current_owner=handler.my_id,
-        pending_action='awaiting_artifact',
-        last_event='foundation_create_received'
-    )
-    handler.store.emit_event(
-        envelope.collab_id,
-        'foundation_create_received',
-        message_id=envelope.message_id,
-        command_intent=envelope.payload.get('command_intent'),
-        artifact_type='foundation',
-        artifact_path=envelope.artifact_path
-    )
-    return 'foundation_create_started'
-
-
-async def _handle_foundation_response(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
-    """Handle 'foundation_response' — confirms foundation delivery."""
-    handler.store.update_collab(
-        envelope.collab_id,
-        status='completed',
-        last_event='foundation_delivered',
-        pending_action=''
-    )
-    handler.store.emit_event(
-        envelope.collab_id,
-        'foundation_delivered',
-        message_id=envelope.message_id
-    )
-    return 'foundation_delivered'
-
-
 # Registry — maps message_type to skill handler
 SKILL_REGISTRY: Dict[str, Callable] = {
     'open': _handle_open,
@@ -232,8 +193,6 @@ SKILL_REGISTRY: Dict[str, Callable] = {
     'notify': _handle_notify,
     'ping': _handle_ping,
     'pong': _handle_ping,
-    'foundation_create': _handle_foundation_create,
-    'foundation_response': _handle_foundation_response,
     # 'ack' is handled via handle_ack, not here
 }
 
@@ -314,28 +273,9 @@ class CollabHandler:
 
     async def _skill_dispatch(self, envelope: CollabEnvelope) -> str:
         """
-        Phase 2: Look up handler from registry using command_intent.
-        Falls back to message_type if command_intent not present.
-        Handler binding comes from workflow_registry.json.
+        Phase 2: Look up handler from registry and dispatch.
+        Returns result string from the skill handler.
         """
-        # Load workflow registry
-        registry_path = Path(__file__).parent / "workflow_registry.json"
-        registry = {}
-        if registry_path.exists():
-            with open(registry_path, 'r') as f:
-                registry = json.load(f)
-
-        # Try command_intent first (workflow-driven dispatch)
-        command_intent = envelope.payload.get('command_intent')
-        if command_intent:
-            for wf_name, wf_data in registry.get('workflows', {}).items():
-                for stage_name, stage_data in wf_data.get('stages', {}).items():
-                    if stage_data.get('command_intent') == command_intent:
-                        handler_name = stage_data.get('skill_handler_binding', {}).get('handler')
-                        if handler_name and handler_name in SKILL_REGISTRY:
-                            return await SKILL_REGISTRY[handler_name](self, envelope)
-
-        # Fall back to message_type dispatch
         msg_type = envelope.message_type
         handler_fn = SKILL_REGISTRY.get(msg_type, _handle_unknown)
         return await handler_fn(self, envelope)
