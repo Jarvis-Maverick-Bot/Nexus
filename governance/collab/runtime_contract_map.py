@@ -11,11 +11,82 @@ Each message_type is a contract with explicit:
 
 This is the source of truth for runtime behavior.
 Loaded at startup; consulted by handlers on every message.
+
+Three-layer architecture:
+  Layer 1: Contract (governance boundary — 写死)
+  Layer 2: Reasoning (AI model — bounded by contract, outputs DomainResult)
+  Layer 3: Execution (runtime validates + converts DomainResult to CollabEnvelope)
 """
 
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Layer 2: Reasoning Output Objects
+# ─────────────────────────────────────────────────────────────────────────────
+
+@dataclass
+class DomainResult:
+    """
+    Reasoning layer 的标准输出对象。不是 transport envelope.
+    Model 输出这个，Runtime 把它转成 CollabEnvelope。
+    """
+    message_type: str              # contract.mandatory_output
+    collab_id: str
+    from_: str
+    result: str                   # enum: allowed_results 之一
+    notes: str                    # 模型推理内容
+    judgment_path: str = ""       # artifact 路径
+    workflow: str = ""
+    stage: str = ""
+    extra: dict = field(default_factory=dict)  # 扩展字段
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Layer 3: Validation Objects
+# ─────────────────────────────────────────────────────────────────────────────
+
+@dataclass
+class ReasoningValidation:
+    """
+    A层 — Reasoning output validation
+    检查业务输出是否合法。
+    """
+    valid: bool
+    result_enum_legal: bool        # result in allowed_results
+    required_fields_present: bool
+    errors: List[str] = field(default_factory=list)
+    warnings: List[str] = field(default_factory=list)
+
+
+@dataclass
+class EnvelopeValidation:
+    """
+    B层 — Transport/envelope validation
+    检查协议边界是否合规。
+    """
+    valid: bool
+    schema_compliant: bool          # CollabEnvelope 字段齐全
+    protocol_compliant: bool       # from/to/collab_id/message_type 合法
+    errors: List[str] = field(default_factory=list)
+
+
+@dataclass
+class ValidationResult:
+    """
+    两层校验合并结果。
+    """
+    reasoning: ReasoningValidation
+    envelope: EnvelopeValidation
+
+    def is_valid(self) -> bool:
+        return self.reasoning.valid and self.envelope.valid
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Contract Schema
+# ─────────────────────────────────────────────────────────────────────────────
 
 @dataclass
 class NotifyPolicy:
@@ -52,8 +123,8 @@ CONTRACTS: dict[str, StepContract] = {
         description="Alex kicks off V2.0 Foundation Create. Nova is primary owner.",
         executor="nova",
         current_owner="nova",
-        mandatory_output="review_request",       # Nova must produce draft AND hand over
-        allowed_results=["review_request"],       # only one valid output path
+        mandatory_output="review_request",
+        allowed_results=["review_request"],
         completion_condition="review_request emitted on gov.collab.command to jarvis",
         notify_policy=[],
         auto_continue=True,
@@ -66,7 +137,7 @@ CONTRACTS: dict[str, StepContract] = {
         description="Nova hands over Foundation draft to Jarvis for review.",
         executor="jarvis",
         current_owner="jarvis",
-        mandatory_output="review_response",       # Jarvis MUST respond with judgment
+        mandatory_output="review_response",
         allowed_results=["approved", "revision_required", "blocked"],
         completion_condition="review_response delivered on gov.collab.command to nova",
         notify_policy=[
@@ -75,7 +146,7 @@ CONTRACTS: dict[str, StepContract] = {
                          template="*Foundation Review Complete*\nCollab: `{collab_id}`\nResult: *{review_result}*")
         ],
         auto_continue=True,
-        next_step=None,                           # Nova decides based on result
+        next_step=None,
         doctrine_loading_set=["v2_0_foundation_baseline", "v2_0_scope", "v2_0_prd"],
         artifact_type="foundation",
     ),
@@ -85,7 +156,7 @@ CONTRACTS: dict[str, StepContract] = {
         description="Jarvis delivers review judgment. Nova acts based on result.",
         executor="nova",
         current_owner="nova",
-        mandatory_output="complete",               # Nova closes workflow after approval
+        mandatory_output="complete",
         allowed_results=["approved", "revision_required", "blocked"],
         completion_condition="complete delivered OR revised draft re-submitted",
         notify_policy=[
@@ -99,7 +170,7 @@ CONTRACTS: dict[str, StepContract] = {
                          trigger="on_blocked",
                          template="*Foundation — BLOCKED*\nCollab: `{collab_id}`\nReason: {reason}"),
         ],
-        auto_continue=False,                      # Nova must decide next action
+        auto_continue=False,
         next_step=None,
     ),
 
@@ -108,7 +179,7 @@ CONTRACTS: dict[str, StepContract] = {
         description="Nova signals workflow complete. Jarvis acknowledges.",
         executor="jarvis",
         current_owner="nova",
-        mandatory_output=None,                     # terminal step
+        mandatory_output=None,
         allowed_results=[],
         completion_condition="state marked completed",
         notify_policy=[
@@ -168,6 +239,8 @@ CONTRACTS: dict[str, StepContract] = {
 }
 
 
+# ── Contract Lookup ───────────────────────────────────────────────────────────
+
 def get_contract(message_type: str) -> Optional[StepContract]:
     """Look up the contract for a message type. Returns None if not found."""
     return CONTRACTS.get(message_type)
@@ -177,3 +250,101 @@ def is_terminal(message_type: str) -> bool:
     """True if this message type has no mandatory next output."""
     contract = get_contract(message_type)
     return contract is not None and contract.mandatory_output is None
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Layer 3: Runtime Validation Functions
+# ─────────────────────────────────────────────────────────────────────────────
+
+def runtime_validate(message_type: str, domain_result: DomainResult) -> ReasoningValidation:
+    """
+    A层 — Reasoning output validation
+    校验模型输出是否符合 contract boundary。
+
+    检查项：
+    1. result 是否在 allowed_results
+    2. required fields 是否齐全（collab_id, from_, message_type, result）
+    """
+    contract = get_contract(message_type)
+    errors = []
+
+    if contract is None:
+        return ReasoningValidation(
+            valid=False,
+            result_enum_legal=False,
+            required_fields_present=False,
+            errors=[f"unknown message_type: {message_type}"]
+        )
+
+    # Rule 1: result must be in allowed_results
+    if domain_result.result not in contract.allowed_results:
+        errors.append(
+            f"result '{domain_result.result}' not in allowed_results for {message_type} "
+            f"(allowed: {contract.allowed_results})"
+        )
+
+    # Rule 2: required fields must be present
+    for field_name in ['collab_id', 'from_', 'message_type', 'result']:
+        if not getattr(domain_result, field_name, None):
+            errors.append(f"required field '{field_name}' is missing")
+
+    return ReasoningValidation(
+        valid=len(errors) == 0,
+        result_enum_legal=domain_result.result in contract.allowed_results,
+        required_fields_present=len(errors) == 0,
+        errors=errors
+    )
+
+
+def validate_envelope(envelope) -> EnvelopeValidation:
+    """
+    B层 — Transport/envelope validation
+    校验 CollabEnvelope 是否符合协议边界。
+
+    检查项：
+    1. message_id / collab_id / from_ / to 是否齐全
+    2. from_ 和 to 是否在 protocol 合法范围内（nova | jarvis）
+    """
+    errors = []
+
+    if not getattr(envelope, 'message_id', None):
+        errors.append("envelope.message_id is required")
+    if not getattr(envelope, 'collab_id', None):
+        errors.append("envelope.collab_id is required")
+    if not getattr(envelope, 'from_', None):
+        errors.append("envelope.from_ is required")
+    if not getattr(envelope, 'to', None):
+        errors.append("envelope.to is required")
+
+    from_ = getattr(envelope, 'from_', None)
+    to = getattr(envelope, 'to', None)
+
+    if from_ and from_ not in ('nova', 'jarvis'):
+        errors.append(f"envelope.from_ '{from_}' not in protocol (must be nova or jarvis)")
+    if to and to not in ('nova', 'jarvis'):
+        errors.append(f"envelope.to '{to}' not in protocol (must be nova or jarvis)")
+
+    return EnvelopeValidation(
+        valid=len(errors) == 0,
+        schema_compliant=all([
+            getattr(envelope, 'message_id', None),
+            getattr(envelope, 'collab_id', None),
+            getattr(envelope, 'from_', None),
+            getattr(envelope, 'to', None),
+        ]),
+        protocol_compliant=(
+            (from_ is None or from_ in ('nova', 'jarvis')) and
+            (to is None or to in ('nova', 'jarvis'))
+        ),
+        errors=errors
+    )
+
+
+def validate_two_layer(message_type: str, domain_result: DomainResult, envelope) -> ValidationResult:
+    """
+    合并两层校验。
+    先做 A层（reasoning），再做 B层（envelope）。
+    """
+    reasoning = runtime_validate(message_type, domain_result)
+    envelope_check = validate_envelope(envelope)
+    return ValidationResult(reasoning=reasoning, envelope=envelope_check)
