@@ -44,6 +44,9 @@ class CollabState:
     last_acknowledged_message_id: str = ""
     last_event: str = ""
     pending_action: str = ""
+    review_round: int = 0          # current review round (0 = not started)
+    max_review_rounds: int = 3     # governance limit — auto-stop after 3 rounds
+    termination_reason: str = ""   # set when review stops due to max rounds
     created_at: str = ""
     updated_at: str = ""
     last_processed_by: str = ""   # written by daemon on each command/ack

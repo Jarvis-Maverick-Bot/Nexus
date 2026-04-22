@@ -525,6 +525,34 @@ async def _handle_review_request(handler: 'CollabHandler', envelope: CollabEnvel
         pending_action='awaiting_review_execution',
         last_event='review_handover_received'
     )
+
+    # ── Round control: enforce max_review_rounds ────────────────────────
+    state = handler.store.get_collab(envelope.collab_id)
+    current_round = getattr(state, 'review_round', 0) or 0
+    max_rounds = getattr(state, 'max_review_rounds', 3) or 3
+
+    if current_round >= max_rounds:
+        # Max rounds exceeded — reject with BLOCKED, stop auto-loop
+        handler.store.update_collab(
+            envelope.collab_id,
+            status='blocked',
+            pending_action='',
+            termination_reason='max_review_rounds_exceeded',
+            last_event='review_blocked_max_rounds'
+        )
+        handler.store.emit_event(
+            envelope.collab_id,
+            'review_blocked_max_rounds',
+            review_round=current_round,
+            max_review_rounds=max_rounds,
+            termination_reason='max_review_rounds_exceeded'
+        )
+        handler._log("WARN", f"[{envelope.collab_id}] review_round={current_round} >= max={max_rounds} — BLOCKED")
+        await handler._send_ack(envelope, 'processed', result='rejected_max_rounds_exceeded')
+        return "max_review_rounds_exceeded"
+
+    # Increment round counter
+    handler.store.update_collab(envelope.collab_id, review_round=current_round + 1)
     handler.store.emit_event(
         envelope.collab_id,
         'review_handover_received',

@@ -31,12 +31,17 @@ class DomainResult:
     """
     Reasoning layer 的标准输出对象。不是 transport envelope.
     Model 输出这个，Runtime 把它转成 CollabEnvelope。
+
+    V0.2 update: added reasons + required_changes for three-field LLM output.
+    Backward-compatible: result + notes remain for existing callers.
     """
     message_type: str              # contract.mandatory_output
     collab_id: str
     from_: str
     result: str                   # enum: allowed_results 之一
-    notes: str                    # 模型推理内容
+    notes: str                    # kept for backward compatibility
+    reasons: str = ""            # V0.2: factual findings (from LLMOutput.reasons)
+    required_changes: str = ""    # V0.2: actionable items (from LLMOutput.required_changes)
     judgment_path: str = ""       # artifact 路径
     workflow: str = ""
     stage: str = ""

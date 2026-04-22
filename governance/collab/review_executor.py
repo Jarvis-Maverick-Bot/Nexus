@@ -1,103 +1,289 @@
 """
-Foundation Review Executor — Doctrine-Driven Reasoning Producer
-Jarvis reviews Nova's Foundation draft and returns DomainResult.
+Foundation Review Executor — V0.2 LLM Review Contract
+Rule layer + Evidence packer + LLM adapter call.
 
-Pure reasoning producer:
-- Loads doctrine + draft
-- Produces doctrine-driven judgment
-- Returns DomainResult
-
-Does NOT: send NATS messages, update state, notify.
-Caller (CollabHandler pipeline) owns message sending and state update.
+Principles:
+- review_executor.py never imports urllib / httpx / boto3 directly
+- llm_adapter.py owns all LLM provider interaction
+- Rule layer fires before LLM call (fast-fail)
+- Runtime validates output and rewrites if needed
 """
 
 import json
 import re
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Optional, Tuple, Dict, Any, List
+
 from governance.collab.runtime_contract_map import DomainResult
+from governance.collab.llm_adapter import create_llm_adapter, LLMOutput
 
 
-# Paths for doctrine loading — resolved from V2.0 shared drive structure
+# ── Paths ─────────────────────────────────────────────────────────────────────
+
 _SHARED_ROOT = Path(r"\\192.168.31.124\Nova-Jarvis-Shared\working\01-projects\Nexus\V2.0")
-
-# macOS sharefolder mount base — convert to sharefolder path for Windows/Unix cross-compatibility
 _MACOS_SHAREFOLDER_BASE = "/Users/alex/Nova-Jarvis-Shared"
 _SHAREFOLDER_BASE = r"\\192.168.31.124\Nova-Jarvis-Shared"
 
-
-def _to_sharefolder_path(artifact_path: str) -> str:
-    r"""
-    Convert macOS local sharefolder path to Windows/Unix sharefolder path.
-    e.g. /Users/alex/Nova-Jarvis-Shared/... -> \\192.168.31.124\Nova-Jarvis-Shared\...
-
-    Also handles already-sharefolder paths (no-op).
-    """
-    if not artifact_path:
-        return artifact_path
-    if artifact_path.startswith(_SHAREFOLDER_BASE.replace('\\\\', '\\')):
-        # Already in sharefolder format
-        return artifact_path
-    if artifact_path.startswith(_MACOS_SHAREFOLDER_BASE):
-        return artifact_path.replace(_MACOS_SHAREFOLDER_BASE, _SHAREFOLDER_BASE.replace('\\', '\\\\'))
-    return artifact_path
 _FOUNDATION_BASELINE = _SHARED_ROOT / "01-release-definition" / "V2_0_FOUNDATION_V0_2.md"
 _SCOPE_DOC = _SHARED_ROOT / "01-release-definition" / "V2_0_SCOPE_V0_2.md"
 _PRD_DOC = _SHARED_ROOT / "01-release-definition" / "V2_0_PRD_V0_2.md"
 
 
-def _load_doctrine(doctrine_loading_set: list) -> dict:
-    """
-    Load doctrine files from paths in doctrine_loading_set.
-    Returns doctrine_snapshot dict.
-    Raises RuntimeError if ALL doctrine files fail to load.
-    Partial failures are logged but allowed (doctrine_loaded=False returned).
-    """
-    loaded = {}
-    errors = []
+# ── Cross-platform path ────────────────────────────────────────────────────────
 
+def _to_sharefolder_path(artifact_path: str) -> str:
+    """Convert macOS local path to Windows/Unix sharefolder path."""
+    if not artifact_path:
+        return artifact_path
+    if artifact_path.startswith(_SHAREFOLDER_BASE.replace('\\\\', '\\')):
+        return artifact_path
+    if artifact_path.startswith(_MACOS_SHAREFOLDER_BASE):
+        return artifact_path.replace(_MACOS_SHAREFOLDER_BASE, _SHAREFOLDER_BASE.replace('\\', '\\\\'))
+    return artifact_path
+
+
+# ── Config reader ─────────────────────────────────────────────────────────────
+
+def _load_llm_config() -> dict:
+    """Load LLM config from collab_config.json."""
+    config_path = Path(__file__).parent / "collab_config.json"
+    if config_path.exists():
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        return config.get("llm", {})
+    return {}
+
+
+# ── Rule Layer ────────────────────────────────────────────────────────────────
+
+@dataclass
+class RuleResult:
+    """Result from rule layer — pass or fast-fail."""
+    passed: bool          # True = LLM call needed; False = fast-fail
+    verdict: str          # only meaningful when passed=False
+    reasons: str
+    required_changes: str
+    rule_name: str        # which rule triggered the fast-fail
+
+
+def _check_rule_draft_not_accessible(artifact_path: str) -> Optional[RuleResult]:
+    """Rule: draft_not_accessible — artifact path is unreachable."""
+    if not artifact_path:
+        return RuleResult(
+            passed=False,
+            verdict="revision_required",
+            reasons=f"artifact_path is empty — cannot locate draft",
+            required_changes="Provide an accessible sharefolder path to the Foundation draft.",
+            rule_name="draft_not_accessible"
+        )
+    sharefolder_path = _to_sharefolder_path(artifact_path)
+    path = Path(sharefolder_path)
+    if not path.exists():
+        return RuleResult(
+            passed=False,
+            verdict="revision_required",
+            reasons=f"Draft file not found at: {sharefolder_path}",
+            required_changes="Provide an accessible sharefolder path to the Foundation draft.",
+            rule_name="draft_not_accessible"
+        )
+    return None  # passed
+
+
+def _check_rule_draft_empty(content: str) -> Optional[RuleResult]:
+    """Rule: draft_empty — draft content is too short."""
+    if content and len(content.strip()) < 50:
+        return RuleResult(
+            passed=False,
+            verdict="blocked",
+            reasons="Draft content is empty or too short (< 50 chars) — cannot review",
+            required_changes="Submit a non-empty Foundation draft.",
+            rule_name="draft_empty"
+        )
+    return None  # passed
+
+
+def _check_rule_max_rounds_exceeded(review_round: int, max_review_rounds: int) -> Optional[RuleResult]:
+    """Rule: max_rounds_exceeded — review_round > max_review_rounds."""
+    if review_round > max_review_rounds:
+        return RuleResult(
+            passed=False,
+            verdict="blocked",
+            reasons=f"review_round ({review_round}) exceeds max_review_rounds ({max_review_rounds})",
+            required_changes="",
+            rule_name="max_rounds_exceeded"
+        )
+    return None  # passed
+
+
+def _run_rule_layer(
+    artifact_path: str,
+    draft_content: str,
+    review_round: int,
+    max_review_rounds: int
+) -> Optional[RuleResult]:
+    """
+    Run all rule-layer checks before LLM call.
+    Returns None if all passed (LLM call needed).
+    Returns RuleResult if any rule triggered fast-fail.
+    """
+    checks = [
+        _check_rule_draft_not_accessible(artifact_path),
+        _check_rule_draft_empty(draft_content),
+        _check_rule_max_rounds_exceeded(review_round, max_review_rounds),
+    ]
+    for result in checks:
+        if result is not None and not result.passed:
+            return result
+    return None  # all passed
+
+
+# ── Evidence Packer ───────────────────────────────────────────────────────────
+
+EVIDENCE_FULL_TEXT_MAX_CHARS = 8000  # default; overridden by config
+
+
+def _load_doctrine_files(doctrine_loading_set: list) -> Dict[str, str]:
+    """Load doctrine files. Returns {name: content}. Missing files logged as warnings."""
+    loaded = {}
     path_map = {
         "v2_0_foundation_baseline": _FOUNDATION_BASELINE,
         "v2_0_scope": _SCOPE_DOC,
         "v2_0_prd": _PRD_DOC,
     }
-
     for name in doctrine_loading_set:
         path = path_map.get(name)
         if not path:
-            errors.append(f"no path mapping for doctrine: {name}")
             continue
         if not path.exists():
-            errors.append(f"doctrine file not found: {path}")
             continue
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 loaded[name] = f.read()
-        except Exception as e:
-            errors.append(f"failed to load {name}: {e}")
+        except Exception:
+            continue
+    return loaded
 
-    if not loaded:
-        raise RuntimeError(f"doctrine_load_failed: all files failed — {errors}")
+
+def _pack_draft(draft_content: str, max_chars: int = EVIDENCE_FULL_TEXT_MAX_CHARS) -> str:
+    """Pack draft: full text if short enough, else extractive summary."""
+    if len(draft_content) <= max_chars:
+        return draft_content
+    # Extractive: first N chars + note that it was truncated
+    return draft_content[:max_chars] + f"\n\n[... TRUNCATED — original length: {len(draft_content)} chars]"
+
+
+def _pack_doctrine(doctrine_snapshot: Dict[str, str], max_chars: int = EVIDENCE_FULL_TEXT_MAX_CHARS) -> Dict[str, str]:
+    """Pack each doctrine file: full if short, excerpted if long."""
+    packed = {}
+    for name, content in doctrine_snapshot.items():
+        if len(content) <= max_chars:
+            packed[name] = content
+        else:
+            packed[name] = content[:max_chars] + f"\n\n[... TRUNCATED — original length: {len(content)} chars]"
+    return packed
+
+
+def build_evidence_packet(
+    draft_content: str,
+    doctrine_snapshot: Dict[str, str],
+    review_round: int,
+    max_review_rounds: int,
+    collab_id: str,
+    is_final_round: bool,
+    max_chars: int = EVIDENCE_FULL_TEXT_MAX_CHARS
+) -> dict:
+    """
+    Build Layer B evidence packet per V0.2 contract.
+
+    Decision authority: evidence_packer (rules engine, not hardcoded byte threshold).
+    Threshold read from config: evidence_full_text_max_chars.
+    """
+    packed_doctrine = _pack_doctrine(doctrine_snapshot, max_chars)
+
+    baseline = packed_doctrine.get("v2_0_foundation_baseline", "")
+    scope = packed_doctrine.get("v2_0_scope", "")
+    prd = packed_doctrine.get("v2_0_prd", "")
+
+    review_context_parts = [
+        f"Collab ID: {collab_id}",
+        f"Review round: {review_round} of {max_review_rounds}",
+    ]
+    if is_final_round:
+        review_context_parts.append("WARNING: This is the FINAL round. Max review rounds will be exhausted after this review.")
+    review_context = "\n".join(review_context_parts)
 
     return {
-        "doctrine_loaded": True,
-        "doctrine_snapshot": loaded,
-        "warnings": errors if errors else None,
-        "loaded_at": datetime.now(timezone.utc).isoformat()
+        "draft_text": _pack_draft(draft_content, max_chars),
+        "baseline_excerpt": baseline,
+        "scope_excerpt": scope,
+        "prd_excerpt": prd,
+        "review_context": review_context
     }
 
 
-def _load_nova_draft(artifact_path: str) -> Tuple[bool, str, Optional[str]]:
-    r"""Load Nova's Foundation draft from artifact_path.
+# ── System Prompt Builder ─────────────────────────────────────────────────────
 
-    Handles cross-platform path conversion:
-    - macOS /Users/alex/... -> \\192.168.31.124\Nova-Jarvis-Shared\...
-    - Already-sharefolder paths pass through unchanged
-    """
+def _build_system_prompt(is_final_round: bool) -> str:
+    """Build V0.2 system prompt for Foundation review judge."""
+    final_round_note = (
+        "\n\nIMPORTANT — FINAL ROUND WARNING:\n"
+        "This is the FINAL review round. If you return REVISION_REQUIRED or BLOCKED, "
+        "Nova will need to resubmit a revised draft. Be precise and actionable."
+    ) if is_final_round else ""
+
+    return f"""You are a strict V2.0 Foundation review judge. Your task is to review Nova's Foundation draft against the approved doctrine (Baseline, Scope, PRD) and return a precise judgment.
+
+RULES:
+- Output MUST be exactly three lines in the format:
+  VERDICT: [APPROVED|REVISION_REQUIRED|BLOCKED]
+  REASONS: [specific factual findings explaining your decision]
+  REQUIRED_CHANGES: [concrete actionable items Nova must address — write 'NONE' if APPROVED]
+- Never refuse to judge. Always produce a verdict.
+- APPROVED: draft covers baseline meaningfully, addresses core scope, meets minimum PRD requirements
+- REVISION_REQUIRED: draft covers baseline but has specific, actionable gaps
+- BLOCKED: draft fails to adequately cover baseline sections or is fundamentally incomplete
+
+Review Criteria:
+- Baseline: draft must cover >= 60% of baseline sections meaningfully
+- Scope: draft must address >= 50% of scope areas
+- PRD: draft must cover >= 40% of PRD requirements
+
+{final_round_note}"""
+
+
+def _build_user_prompt(review_packet: dict, evidence_packet: dict) -> str:
+    """Build user prompt for LLM."""
+    return f"""Review the following Foundation draft for V2.0.
+
+== NOVA'S FOUNDATION DRAFT TO REVIEW ==
+{evidence_packet['draft_text']}
+
+== FOUNDATION BASELINE (approved doctrine) ==
+{evidence_packet['baseline_excerpt']}
+
+== SCOPE (approved doctrine) ==
+{evidence_packet['scope_excerpt']}
+
+== PRD (approved doctrine) ==
+{evidence_packet['prd_excerpt']}
+
+== REVIEW CONTEXT ==
+{evidence_packet['review_context']}
+
+Respond with your judgment in the required three-line format:
+VERDICT: [APPROVED|REVISION_REQUIRED|BLOCKED]
+REASONS: [specific factual findings]
+REQUIRED_CHANGES: [concrete actionable items — NONE if APPROVED]"""
+
+
+# ── Doctrine Loading ───────────────────────────────────────────────────────────
+
+def _load_nova_draft(artifact_path: str) -> Tuple[bool, str, Optional[str]]:
+    """Load Nova's Foundation draft. Returns (loaded, content, error)."""
     if not artifact_path:
         return False, "", "artifact_path is empty"
-    # Convert macOS local path to sharefolder path
     sharefolder_path = _to_sharefolder_path(artifact_path)
     path = Path(sharefolder_path)
     if not path.exists():
@@ -110,188 +296,119 @@ def _load_nova_draft(artifact_path: str) -> Tuple[bool, str, Optional[str]]:
         return False, "", f"failed to read draft: {e}"
 
 
-def _extract_sections(text: str) -> Dict[str, str]:
-    """Extract markdown sections from text. Returns {section_name: section_content}."""
-    sections = {}
-    if not text:
-        return sections
-    lines = text.split('\n')
-    current_heading = None
-    current_content = []
-    for line in lines:
-        m = re.match(r'^##?\s+(.+)$', line)
-        if m:
-            if current_heading:
-                sections[current_heading] = '\n'.join(current_content).strip()
-            current_heading = m.group(1).strip()
-            current_content = []
-        else:
-            current_content.append(line)
-    if current_heading:
-        sections[current_heading] = '\n'.join(current_content).strip()
-    return sections
+def _load_doctrine(doctrine_loading_set: list) -> dict:
+    """Load doctrine files. Returns doctrine_snapshot dict."""
+    loaded = _load_doctrine_files(doctrine_loading_set)
+    if not loaded:
+        return {"doctrine_loaded": False, "errors": ["no doctrine files found"]}
+    return {
+        "doctrine_loaded": True,
+        "doctrine_snapshot": loaded,
+        "loaded_at": datetime.now(timezone.utc).isoformat()
+    }
 
+
+# ── Review Judgment Producer ──────────────────────────────────────────────────
 
 def _produce_review_judgment(
     collab_id: str,
     draft_content: str,
     doctrine_snapshot: dict,
-    review_scope: str
-) -> Tuple[str, str]:
+    review_round: int,
+    max_review_rounds: int,
+    is_final_round: bool,
+    llm_config: dict
+) -> LLMOutput:
     """
-    Doctrine-driven review judgment.
-    Compares Nova's draft against three doctrine sources and produces analysis.
+    Produce review judgment via LLM adapter.
+    Returns LLMOutput with verdict/reasons/required_changes/raw.
     """
-    baseline = doctrine_snapshot.get("v2_0_foundation_baseline", "")
-    scope_doc = doctrine_snapshot.get("v2_0_scope", "")
-    prd_doc = doctrine_snapshot.get("v2_0_prd", "")
+    evidence_packet = build_evidence_packet(
+        draft_content=draft_content,
+        doctrine_snapshot=doctrine_snapshot,
+        review_round=review_round,
+        max_review_rounds=max_review_rounds,
+        collab_id=collab_id,
+        is_final_round=is_final_round,
+        max_chars=llm_config.get("evidence_full_text_max_chars", EVIDENCE_FULL_TEXT_MAX_CHARS)
+    )
 
-    baseline_sections = _extract_sections(baseline)
-    scope_sections = _extract_sections(scope_doc)
-    prd_sections = _extract_sections(prd_doc)
+    system_prompt = _build_system_prompt(is_final_round)
+    user_prompt = _build_user_prompt(
+        review_packet={},
+        evidence_packet=evidence_packet
+    )
 
-    draft_sections = _extract_sections(draft_content)
-    draft_len = len(draft_content) if draft_content else 0
+    adapter = create_llm_adapter(
+        provider=llm_config.get("provider", "minimax"),
+        api_key_profile=llm_config.get("api_key_profile", "minimax:global"),
+        model=llm_config.get("model"),
+        timeout_seconds=llm_config.get("timeout_seconds", 60),
+        max_retries=llm_config.get("max_retries", 2)
+    )
 
-    # Baseline alignment check
-    baseline_checks = []
-    for bs_name, bs_content in baseline_sections.items():
-        if len(bs_content) < 20:
-            continue
-        draft_lower = draft_content.lower()
-        keywords = [w for w in bs_name.lower().split() if len(w) > 3]
-        matched = any(kw in draft_lower for kw in keywords) if keywords else False
-        baseline_checks.append({"doctrine_section": bs_name, "present_in_draft": matched, "chars": len(bs_content)})
+    return adapter.judge(system_prompt, user_prompt)
 
-    baseline_covered = sum(1 for c in baseline_checks if c["present_in_draft"])
-    baseline_total = len(baseline_checks)
 
-    # Scope coverage check
-    scope_checks = []
-    for sc_name, sc_content in scope_sections.items():
-        if len(sc_content) < 20:
-            continue
-        draft_lower = draft_content.lower()
-        keywords = [w for w in sc_name.lower().split() if len(w) > 3]
-        matched = any(kw in draft_lower for kw in keywords) if keywords else False
-        scope_checks.append({"doctrine_section": sc_name, "covered_in_draft": matched, "chars": len(sc_content)})
+# ── Judgment Artifact Writer ──────────────────────────────────────────────────
 
-    scope_covered = sum(1 for c in scope_checks if c["covered_in_draft"])
-    scope_total = len(scope_checks)
+def _write_judgment_artifact(
+    collab_id: str,
+    verdict: str,
+    reasons: str,
+    required_changes: str,
+    review_round: int,
+    max_review_rounds: int
+) -> Optional[str]:
+    """Write judgment artifact to governance/docs/ and shared drive."""
+    import urllib.parse
 
-    # PRD requirement coverage
-    prd_checks = []
-    for pr_name, pr_content in prd_sections.items():
-        if len(pr_content) < 30:
-            continue
-        requirement_phrases = [
-            re.sub(r'^[\s\-\*]+', '', line).strip()
-            for line in pr_content.split('\n')
-            if len(line.strip()) > 10 and len(line.strip()) < 100
-        ]
-        matched_count = sum(
-            1 for phrase in requirement_phrases
-            if phrase.lower() in draft_content.lower()
-        )
-        coverage_pct = (matched_count / len(requirement_phrases) * 100) if requirement_phrases else 0
-        prd_checks.append({
-            "prd_section": pr_name,
-            "requirements_in_section": len(requirement_phrases),
-            "requirements_matched": matched_count,
-            "coverage_pct": round(coverage_pct, 1)
-        })
-
-    prd_total_requirements = sum(c["requirements_in_section"] for c in prd_checks)
-    prd_matched_requirements = sum(c["requirements_matched"] for c in prd_checks)
-    prd_coverage_pct = (prd_matched_requirements / prd_total_requirements * 100) if prd_total_requirements else 0
-
-    # Determine review_result
-    baseline_ok = baseline_covered / baseline_total >= 0.6 if baseline_total else False
-    scope_ok = scope_covered / scope_total >= 0.5 if scope_total else False
-    prd_ok = prd_coverage_pct >= 40 if prd_total_requirements else False
-
-    if baseline_ok and scope_ok and prd_ok:
-        review_result = "approved"
-    elif baseline_ok and (scope_ok or prd_ok):
-        review_result = "revision_required"
-    else:
-        review_result = "blocked"
-
-    # Build judgment report
-    judgment = f"""# Foundation Review Judgment
+    judgment_content = f"""# Foundation Review Judgment
 
 **Collab ID:** {collab_id}
-**Review Scope:** {review_scope}
-**Reviewed at:** {datetime.now(timezone.utc).isoformat()}
-**Method:** Doctrine-driven analysis (baseline + scope + PRD comparison)
+**Round:** {review_round} / {max_review_rounds}
+**Result:** {verdict.upper()}
+**Date:** {datetime.now(timezone.utc).isoformat()}
+**Method:** V0.2 LLM Review Contract — MiniMax M2.7
 
 ---
 
-## Baseline Alignment ({baseline_covered}/{baseline_total} sections covered)
+## Verdict
+{verdict.upper()}
 
-| Doctrine Section | Present in Draft |
-|------------------|-----------------|
-"""
-    for c in baseline_checks:
-        status = "YES" if c["present_in_draft"] else "NO"
-        judgment += f"| {c['doctrine_section']} | {status} |\n"
+## Reasons
+{reasons}
 
-    judgment += f"\n**Baseline coverage: {baseline_covered}/{baseline_total} ({baseline_covered/baseline_total*100:.0f}%)**\n\n"
-
-    judgment += f"""## Scope Coverage ({scope_covered}/{scope_total} sections addressed)
-
-| Doctrine Section | Addressed in Draft |
-|------------------|-------------------|
-"""
-    for c in scope_checks:
-        status = "YES" if c["covered_in_draft"] else "NO"
-        judgment += f"| {c['doctrine_section']} | {status} |\n"
-
-    judgment += f"\n**Scope coverage: {scope_covered}/{scope_total} ({scope_covered/scope_total*100:.0f}%)**\n\n"
-
-    judgment += f"""## PRD Requirement Coverage ({prd_matched_requirements}/{prd_total_requirements} requirements matched)
-
-| PRD Section | Requirements | Matched | Coverage |
-|-------------|--------------|---------|----------|
-"""
-    for c in prd_checks:
-        judgment += f"| {c['prd_section']} | {c['requirements_in_section']} | {c['requirements_matched']} | {c['coverage_pct']:.0f}% |\n"
-
-    judgment += f"\n**Overall PRD coverage: {prd_matched_requirements}/{prd_total_requirements} ({prd_coverage_pct:.0f}%)**\n\n"
-
-    judgment += f"""## Overall Assessment
-
-| Dimension | Threshold | Actual | Result |
-|-----------|-----------|--------|--------|
-| Baseline alignment | >=60% | {baseline_covered/baseline_total*100:.0f}% | {'PASS' if baseline_ok else 'FAIL'} |
-| Scope coverage | >=50% | {scope_covered/scope_total*100:.0f}% | {'PASS' if scope_ok else 'FAIL'} |
-| PRD requirements | >=40% | {prd_coverage_pct:.0f}% | {'PASS' if prd_ok else 'FAIL'} |
+## Required Changes
+{required_changes if required_changes else 'NONE'}
 
 ---
 
-**Review Result: {review_result.upper()}**
-
-Draft length: {draft_len} chars
-
+*Generated by Nexus Governed Execution Loop — V0.2 LLM Review Contract*
 """
-    if review_result == 'approved':
-        judgment += "The draft adequately covers the V2.0 Foundation baseline, addresses core scope areas, and satisfies minimum PRD requirements. Ready for progression."
-    elif review_result == 'revision_required':
-        gaps = []
-        if not baseline_ok:
-            gaps.append(f"baseline ({baseline_covered/baseline_total*100:.0f}% < 60%)")
-        if not scope_ok:
-            gaps.append(f"scope ({scope_covered/scope_total*100:.0f}% < 50%)")
-        if not prd_ok:
-            gaps.append(f"PRD ({prd_coverage_pct:.0f}% < 40%)")
-        judgment += f"Revision needed — gaps in: {', '.join(gaps)}. Please address these areas before re-submission."
-    else:
-        judgment += "Foundation draft has critical deficiencies across multiple doctrine dimensions. Significant rework required before further review."
 
-    judgment += "\n\n*Generated by Nexus Governed Execution Loop — Doctrine-driven review*\n"
+    repo_root = Path(__file__).parent.parent.parent
+    local_path = repo_root / "governance" / "docs" / f"review_{collab_id}.md"
+    try:
+        local_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(local_path, 'w', encoding='utf-8') as f:
+            f.write(judgment_content)
+    except Exception:
+        local_path = None
 
-    return review_result, judgment
+    # Shared drive primary path
+    shared_path = _SHARED_ROOT / "reviews" / f"{collab_id}_review.md"
+    try:
+        shared_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(shared_path, 'w', encoding='utf-8') as f:
+            f.write(judgment_content)
+    except Exception:
+        pass  # Non-fatal — local cache still written
 
+    return str(local_path) if local_path else None
+
+
+# ── Main Executor ─────────────────────────────────────────────────────────────
 
 async def execute_review(
     handler: 'CollabHandler',
@@ -301,83 +418,147 @@ async def execute_review(
     doctrine_loading_set: list
 ) -> DomainResult:
     """
-    Execute the Foundation review task (doctrine-driven reasoning producer).
+    Execute V0.2 Foundation review task.
 
-    Pure reasoning: loads doctrine + draft, produces judgment.
-    Returns DomainResult on success.
-    Raises RuntimeError on doctrine_load_failed or draft_load_failed.
+    Pipeline:
+    1. Load doctrine
+    2. Load Nova's draft
+    3. Rule layer fast-fail checks (no LLM call)
+    4. LLM call via adapter (if rules passed)
+    5. Map LLMOutput → DomainResult
+    6. Write judgment artifact
+    7. Return DomainResult
 
     Does NOT: send NATS messages, update state, notify.
     Caller (CollabHandler pipeline) owns those.
     """
-    handler._log("EXEC", f"[{collab_id}] starting doctrine-driven foundation_review")
+    handler._log("EXEC", f"[{collab_id}] starting V0.2 review_executor")
 
-    # 1. Load doctrine — returns dict with doctrine_loaded status
+    # Load LLM config
+    llm_config = _load_llm_config()
+    max_review_rounds = llm_config.get("max_review_rounds", 3)
+
+    # Get current review round from state
+    state = handler.store.get_collab(collab_id)
+    review_round = getattr(state, 'review_round', 0) or 0
+    is_final_round = (review_round == max_review_rounds)
+
+    # 1. Load doctrine
     doctrine_result = _load_doctrine(doctrine_loading_set)
     if not doctrine_result.get("doctrine_loaded"):
-        # Doctrine load failure — return revision_required DomainResult
-        # This is a business-level outcome, not an exception
-        handler._log("ERROR", f"[{collab_id}] doctrine_load_failed: {doctrine_result.get('errors')}")
+        handler._log("ERROR", f"[{collab_id}] doctrine_load_failed")
         return DomainResult(
             message_type='review_response',
             collab_id=collab_id,
             from_='jarvis',
             result='revision_required',
-            notes=f"Review cannot proceed: doctrine files unavailable — {doctrine_result.get('errors')}",
+            notes=f"Review cannot proceed: doctrine files unavailable",
+            reasons=f"Doctrine load failed for: {doctrine_loading_set}",
+            required_changes="Ensure doctrine files are accessible at configured paths",
             workflow='v2_0',
             stage='foundation_create_review'
         )
-    handler._log("EXEC", f"[{collab_id}] doctrine loaded OK: {list(doctrine_result.get('doctrine_snapshot', {}).keys())}")
 
-    # 2. Load Nova's draft — return revision_required DomainResult on failure
+    handler._log("EXEC", f"[{collab_id}] doctrine loaded: {list(doctrine_result['doctrine_snapshot'].keys())}")
+
+    # 2. Load Nova's draft
     loaded, draft_content, error = _load_nova_draft(artifact_path)
     if not loaded:
-        # Draft load failure — return revision_required DomainResult
-        # Pipeline will send review_response to Nova with revision_required
         handler._log("ERROR", f"[{collab_id}] draft_load_failed: {error}")
         return DomainResult(
             message_type='review_response',
             collab_id=collab_id,
             from_='jarvis',
             result='revision_required',
-            notes=f"Review cannot proceed: draft not found at {artifact_path}",
+            notes=f"Review cannot proceed: draft not found",
+            reasons=f"Draft not accessible at: {artifact_path}",
+            required_changes="Provide an accessible sharefolder path to the Foundation draft.",
             workflow='v2_0',
             stage='foundation_create_review'
         )
 
-    handler._log("EXEC", f"[{collab_id}] Nova draft loaded: {len(draft_content)} chars")
+    handler._log("EXEC", f"[{collab_id}] draft loaded: {len(draft_content)} chars")
 
-    # 3. Produce doctrine-driven review judgment
-    review_result_str, judgment = _produce_review_judgment(
-        collab_id,
-        draft_content,
-        doctrine_result.get("doctrine_snapshot", {}),
-        review_scope
+    # 3. Rule layer — fast-fail before LLM call
+    rule_result = _run_rule_layer(
+        artifact_path=artifact_path,
+        draft_content=draft_content,
+        review_round=review_round,
+        max_review_rounds=max_review_rounds
     )
-    handler._log("EXEC", f"[{collab_id}] review judgment produced: {review_result_str}")
 
-    # 4. Save judgment artifact
-    repo_root = Path(__file__).parent.parent.parent
-    judgment_path = repo_root / "governance" / "docs" / f"review_{collab_id}.md"
-    try:
-        judgment_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(judgment_path, 'w', encoding='utf-8') as f:
-            f.write(judgment)
-        handler._log("EXEC", f"[{collab_id}] review judgment written: {judgment_path}")
-    except Exception as e:
-        handler._log("ERROR", f"[{collab_id}] failed to write review judgment: {e}")
-        judgment_path = None
+    if rule_result is not None:
+        # Fast-fail: rule triggered, no LLM call
+        handler._log("EXEC", f"[{collab_id}] rule_layer fast-fail: {rule_result.rule_name} -> verdict={rule_result.verdict}")
 
-    handler._log("EXEC", f"[{collab_id}] doctrine-driven foundation_review COMPLETE — result={review_result_str}")
+        # If max_rounds_exceeded, also update termination_reason in state
+        if rule_result.rule_name == "max_rounds_exceeded":
+            handler.store.update_collab(
+                collab_id,
+                status='blocked',
+                pending_action='',
+                termination_reason='max_review_rounds_exceeded'
+            )
 
-    # Return DomainResult — pipeline expects DomainResult
+        judgment_path = _write_judgment_artifact(
+            collab_id=collab_id,
+            verdict=rule_result.verdict,
+            reasons=rule_result.reasons,
+            required_changes=rule_result.required_changes,
+            review_round=review_round,
+            max_review_rounds=max_review_rounds
+        )
+
+        return DomainResult(
+            message_type='review_response',
+            collab_id=collab_id,
+            from_='jarvis',
+            result=rule_result.verdict,
+            notes=rule_result.reasons,  # backward compat
+            reasons=rule_result.reasons,
+            required_changes=rule_result.required_changes,
+            judgment_path=judgment_path or '',
+            workflow='v2_0',
+            stage='foundation_create_review'
+        )
+
+    handler._log("EXEC", f"[{collab_id}] rule_layer passed — calling LLM")
+
+    # 4. LLM call via adapter
+    llm_output = _produce_review_judgment(
+        collab_id=collab_id,
+        draft_content=draft_content,
+        doctrine_snapshot=doctrine_result["doctrine_snapshot"],
+        review_round=review_round,
+        max_review_rounds=max_review_rounds,
+        is_final_round=is_final_round,
+        llm_config=llm_config
+    )
+
+    handler._log("EXEC", f"[{collab_id}] LLM returned: verdict={llm_output.verdict}")
+
+    # 5. Map LLMOutput → DomainResult
+    judgment_path = _write_judgment_artifact(
+        collab_id=collab_id,
+        verdict=llm_output.verdict,
+        reasons=llm_output.reasons,
+        required_changes=llm_output.required_changes,
+        review_round=review_round,
+        max_review_rounds=max_review_rounds
+    )
+
+    handler._log("EXEC", f"[{collab_id}] review judgment written: {judgment_path}")
+    handler._log("EXEC", f"[{collab_id}] V0.2 review_executor COMPLETE — result={llm_output.verdict}")
+
     return DomainResult(
         message_type='review_response',
         collab_id=collab_id,
         from_='jarvis',
-        result=review_result_str,
-        notes=judgment,
-        judgment_path=str(judgment_path) if judgment_path else '',
+        result=llm_output.verdict,          # approved | revision_required | blocked | review_execution_error
+        notes=llm_output.reasons,           # backward compat
+        reasons=llm_output.reasons,
+        required_changes=llm_output.required_changes,
+        judgment_path=judgment_path or '',
         workflow='v2_0',
         stage='foundation_create_review'
     )
