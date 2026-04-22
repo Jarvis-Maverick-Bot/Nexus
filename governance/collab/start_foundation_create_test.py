@@ -117,8 +117,7 @@ async def main():
         print(f"\n[TC1] Kickoff delivered. Waiting for TC1 continuation...")
         print(f"[TC1] Nova's handle_ack() should now trigger foundation delivery + review_request")
         print(f"[TC1] Monitor collab_state.json and message log for evidence.")
-        print(f"\nVerify Jarvis state:")
-        print(f"  python -c \"import json; print(json.dumps(json.load(open('D:\\\\\\\\Projects\\\\\\\\Nexus\\\\\\\\governance\\\\\\\\data\\\\\\\\collab_state.json')).get('{collab_id}', {}), indent=2))\"")
+        print(f"[TC1] collab_id for this run: {collab_id}")
     except asyncio.TimeoutError:
         print(f"\n[FAIL] No ACK received within 10 seconds")
         print(f"[FAIL] ACKs received before timeout: {len(acks_received)}")
