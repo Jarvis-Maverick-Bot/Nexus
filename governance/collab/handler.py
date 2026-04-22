@@ -636,92 +636,108 @@ async def _handle_workflow_started(handler: 'CollabHandler', envelope: CollabEnv
 
 async def _handle_review_request(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
     """
-    Handle 'review_response' — Nova receives Jarvis's judgment.
+    Handle 'review_request' — Nova hands over draft to Jarvis for review.
 
-    Behavior differs by agent:
-    - Jarvis receives: record, no auto-follow-up (Jarvis is not the primary)
-    - Nova receives: auto-decide next step based on review_result
+    Contract-driven: mandatory_output = review_response.
+    Pipeline: run_pipeline with execute_review as reasoning_fn.
     """
+    from .runtime_contract_map import get_contract
+    from .review_executor import execute_review, _to_sharefolder_path
+
     if _is_exited(envelope.collab_id, handler.store):
         await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
         return "rejected_exited"
 
+    contract = get_contract('review_request')
     payload = envelope.payload or {}
-    review_result = payload.get('result', 'unknown')
-    review_notes = payload.get('notes', '')
-    review_judgment_path = payload.get('judgment_path', '')
+    raw_artifact_path = payload.get('artifact_path', '')
+    artifact_path = _to_sharefolder_path(raw_artifact_path)
+    review_scope = payload.get('review_scope', 'foundation completeness and governance alignment')
+    workflow = payload.get('workflow', 'v2_0')
+    stage = payload.get('stage', 'foundation_create_review')
 
+    # Update state: Jarvis owns the review stage
     handler.store.update_collab(
         envelope.collab_id,
-        last_event='review_received',
-        pending_action='',
+        status='in_progress',
+        current_owner='jarvis',
+        receiver='nova',
+        artifact_type=payload.get('artifact_type', 'foundation'),
+        artifact_path=artifact_path,
+        pending_action='awaiting_review_execution',
+        last_event='review_handover_received',
         last_processed_by=handler.my_id
     )
+
+    # Round control: enforce max_review_rounds
+    state = handler.store.get_collab(envelope.collab_id)
+    current_round = getattr(state, 'review_round', 0) or 0
+    max_rounds = getattr(state, 'max_review_rounds', 3) or 3
+
+    if current_round >= max_rounds:
+        handler.store.update_collab(
+            envelope.collab_id,
+            status='blocked',
+            pending_action='',
+            termination_reason='max_review_rounds_exceeded',
+            last_event='review_blocked_max_rounds'
+        )
+        handler.store.emit_event(
+            envelope.collab_id,
+            'review_blocked_max_rounds',
+            review_round=current_round,
+            max_review_rounds=max_rounds,
+            termination_reason='max_review_rounds_exceeded'
+        )
+        handler._log("WARN", f"[{envelope.collab_id}] review_round={current_round} >= max={max_rounds} — BLOCKED")
+        await handler._send_ack(envelope, 'processed', result='rejected_max_rounds_exceeded')
+        return "max_review_rounds_exceeded"
+
+    handler.store.update_collab(envelope.collab_id, review_round=current_round + 1)
     handler.store.emit_event(
         envelope.collab_id,
-        'review_received',
+        'review_handover_received',
         message_id=envelope.message_id,
-        review_result=review_result,
-        review_notes=review_notes
+        skill='review_request',
+        summary=envelope.summary,
+        artifact_path=artifact_path,
+        review_scope=review_scope,
+        workflow=workflow,
+        stage=stage
     )
 
-    if handler.my_id == 'nova':
-        if review_result == 'approved':
-            complete_env = _build_envelope(
-                message_type='complete',
-                collab_id=envelope.collab_id,
-                from_='nova',
-                to='jarvis',
-                summary='Foundation Create workflow complete — approved by Jarvis review',
-                payload={
-                    'workflow': 'v2_0',
-                    'stage': 'foundation_create_review',
-                    'review_result': review_result,
-                    'review_judgment_path': review_judgment_path
-                }
-            )
-            await _send_envelope(handler, complete_env)
-            try:
-                from governance.collab.notify import send_telegram_notification_async
-                send_telegram_notification_async(
-                    f"*Foundation Create — Complete*\n"
-                    f"Collab: `{envelope.collab_id}`\n"
-                    f"Result: *APPROVED*\n"
-                    f"Review judgment: {review_judgment_path or 'N/A'}"
-                )
-            except Exception:
-                pass
-        elif review_result == 'revision_required':
-            handler.store.update_collab(
-                envelope.collab_id,
-                status='in_progress',
-                pending_action='awaiting_revision'
-            )
-            try:
-                from governance.collab.notify import send_telegram_notification_async
-                send_telegram_notification_async(
-                    f"*Foundation Create — Revision Required*\n"
-                    f"Collab: `{envelope.collab_id}`\n"
-                    f"Notes: {review_notes[:200]}"
-                )
-            except Exception:
-                pass
-        elif review_result == 'blocked':
-            try:
-                from governance.collab.notify import send_telegram_notification_async
-                send_telegram_notification_async(
-                    f"*Foundation Create — BLOCKED*\n"
-                    f"Collab: `{envelope.collab_id}`\n"
-                    f"Reason: {review_notes[:200]}\n"
-                    f"Human decision required"
-                )
-            except Exception:
-                pass
+    async def reasoning_fn(h, env, doctrine_ctx):
+        result = await execute_review(
+            h,
+            collab_id=env.collab_id,
+            artifact_path=artifact_path,
+            review_scope=review_scope,
+            doctrine_loading_set=contract.doctrine_loading_set
+        )
+        return result
 
-    return 'review_received'
+    result = await run_pipeline(
+        handler=handler,
+        envelope=envelope,
+        contract=contract,
+        reasoning_fn=reasoning_fn,
+        doctrine_loading_set=contract.doctrine_loading_set,
+        workflow=workflow,
+        stage=stage
+    )
+
+    if result == 'completed':
+        handler.store.update_collab(
+            envelope.collab_id,
+            status='completed',
+            pending_action='',
+            last_event='review_completed'
+        )
+
+    return result
 
 
-async def _handle_complete(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
+async def _handle_review_response(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
     """
     Handle 'complete' — mark collab completed.
     Terminal step: no reasoning needed.

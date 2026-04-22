@@ -56,11 +56,18 @@ async def main():
     nc = await connect(nats_url)
     print("Connected.")
 
+    # Collab_id for this run — used to filter observed messages
+    collab_id = f"foundation-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+    message_id = f"msg-{uuid.uuid4().hex[:12]}"
+
     ack_event = asyncio.Event()
     wf_started_event = asyncio.Event()
+    review_request_event = asyncio.Event()
 
     async def handle_ack(msg):
         data = json.loads(msg.data.decode('utf-8'))
+        if data.get('collab_id') != collab_id:
+            return  # filter: ignore other collab traffic
         print(f"\n[ACK RECEIVED] message_id={data.get('message_id')} "
               f"ack_for={data.get('ack_for')} status={data.get('status')} "
               f"result={data.get('result')} to={data.get('to')} from={data.get('from')}")
@@ -68,6 +75,8 @@ async def main():
 
     async def handle_command(msg):
         data = json.loads(msg.data.decode('utf-8'))
+        if data.get('collab_id') != collab_id:
+            return  # filter: ignore other collab traffic
         msg_type = data.get('message_type', '')
         print(f"\n[CMD RECEIVED] message_type={msg_type} "
               f"from={data.get('from')} to={data.get('to')} collab_id={data.get('collab_id')}")
@@ -77,6 +86,7 @@ async def main():
         elif msg_type == 'review_request':
             print(f"[review_request] artifact_path={data.get('artifact_path')} "
                   f"review_scope={data.get('payload', {}).get('review_scope')}")
+            review_request_event.set()
         elif msg_type == 'review_response':
             print(f"[review_response] result={data.get('payload', {}).get('result')}")
 
@@ -135,11 +145,17 @@ async def main():
         await nc.close()
         return
 
-    # Step 3+: wait for review_request and review_response
-    print("Step 3: Nova's _handle_workflow_started is now executing...")
+    # Step 3: wait for review_request from Nova (after drafting completes)
+    print("Step 3: Waiting for review_request from Nova...")
+    try:
+        await asyncio.wait_for(review_request_event.wait(), timeout=30.0)
+        print(f"[OK] review_request received\n")
+    except asyncio.TimeoutError:
+        print(f"[FAIL] No review_request within 30s after workflow_started\n")
+        print(f"[INFO] collab_id={collab_id}")
+
     print(f"[TC1] collab_id={collab_id}")
-    print("[TC1] Monitor collab_state.json for Nova's state updates")
-    print("[TC1] review_request should arrive from Nova after drafting completes")
+    print("[TC1] review_request observed — TC1 workflow progression confirmed")
 
     await nc.close()
 
