@@ -739,43 +739,91 @@ async def _handle_review_request(handler: 'CollabHandler', envelope: CollabEnvel
 
 async def _handle_review_response(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
     """
-    Handle 'complete' — mark collab completed.
-    Terminal step: no reasoning needed.
-    """
-    from .runtime_contract_map import get_contract
+    Handle 'review_response' — Nova receives Jarvis's judgment.
 
+    Behavior differs by agent:
+    - Jarvis receives: record, no auto-follow-up (Jarvis is not the primary)
+    - Nova receives: auto-decide next step based on review_result
+    """
     if _is_exited(envelope.collab_id, handler.store):
         await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
         return "rejected_exited"
 
-    contract = get_contract('complete')
+    payload = envelope.payload or {}
+    review_result = payload.get('result', 'unknown')
+    review_notes = payload.get('notes', '')
+    review_judgment_path = payload.get('judgment_path', '')
 
     handler.store.update_collab(
         envelope.collab_id,
-        status='completed',
+        last_event='review_received',
         pending_action='',
-        last_event='collab_completed'
+        last_processed_by=handler.my_id
     )
     handler.store.emit_event(
         envelope.collab_id,
-        'collab_completed',
-        message_id=envelope.message_id
+        'review_received',
+        message_id=envelope.message_id,
+        review_result=review_result,
+        review_notes=review_notes
     )
 
-    # Apply notify policy for complete
-    from .runtime_contract_map import DomainResult
-    domain = DomainResult(
-        message_type='complete',
-        collab_id=envelope.collab_id,
-        from_=envelope.from_,
-        result='',
-        notes='',
-        workflow='v2_0',
-        stage='foundation_create'
-    )
-    await _apply_notify_policy(handler, contract, domain, envelope)
+    if handler.my_id == 'nova':
+        if review_result == 'approved':
+            complete_env = CollabEnvelope(
+                message_id=f"msg-{uuid.uuid4().hex[:12]}",
+                collab_id=envelope.collab_id,
+                message_type='complete',
+                from_='nova',
+                to='jarvis',
+                summary='Foundation Create workflow complete — approved by Jarvis review',
+                payload={
+                    'workflow': 'v2_0',
+                    'stage': 'foundation_create_review',
+                    'review_result': review_result,
+                    'review_judgment_path': review_judgment_path
+                }
+            )
+            await handler.nc.publish('gov.collab.command', complete_env.to_json())
+            handler.store.log_message(complete_env.as_dict(), 'OUT')
+            try:
+                from governance.collab.notify import send_telegram_notification_async
+                send_telegram_notification_async(
+                    f"*Foundation Create — Complete*\n"
+                    f"Collab: `{envelope.collab_id}`\n"
+                    f"Result: *APPROVED*\n"
+                    f"Review judgment: {review_judgment_path or 'N/A'}"
+                )
+            except Exception:
+                pass
+        elif review_result == 'revision_required':
+            handler.store.update_collab(
+                envelope.collab_id,
+                status='in_progress',
+                pending_action='awaiting_revision'
+            )
+            try:
+                from governance.collab.notify import send_telegram_notification_async
+                send_telegram_notification_async(
+                    f"*Foundation Create — Revision Required*\n"
+                    f"Collab: `{envelope.collab_id}`\n"
+                    f"Notes: {review_notes[:200]}"
+                )
+            except Exception:
+                pass
+        elif review_result == 'blocked':
+            try:
+                from governance.collab.notify import send_telegram_notification_async
+                send_telegram_notification_async(
+                    f"*Foundation Create — BLOCKED*\n"
+                    f"Collab: `{envelope.collab_id}`\n"
+                    f"Reason: {review_notes[:200]}\n"
+                    f"Human decision required"
+                )
+            except Exception:
+                pass
 
-    return 'collab_completed'
+    return 'review_received'
 
 
 async def _handle_exit(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
