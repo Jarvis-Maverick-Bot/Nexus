@@ -128,12 +128,12 @@ CONTRACTS: dict[str, StepContract] = {
         description="Alex kicks off V2.0 Foundation Create. Nova is primary owner.",
         executor="nova",
         current_owner="nova",
-        mandatory_output="review_request",
-        allowed_results=["review_request"],
-        completion_condition="review_request emitted on gov.collab.command to jarvis",
+        mandatory_output=None,  # kickoff only — no automatic business message output
+        allowed_results=[],       # no result validation — handler returns 'foundation_create_started'
+        completion_condition="collab opened, owner=nova, pending_action=awaiting_foundation_draft, ACK sent",
         notify_policy=[],
-        auto_continue=True,
-        next_step="review_request",
+        auto_continue=False,      # Nova sends review_request manually after drafting
+        next_step=None,           # no automatic next step — Nova owns the drafting phase
         doctrine_loading_set=["v2_0_foundation_baseline", "v2_0_scope", "v2_0_prd"],
     ),
 

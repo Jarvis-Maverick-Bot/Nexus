@@ -396,13 +396,12 @@ class CollabDaemon:
                 self._log("ERROR", f"Worker loop error: {e}")
 
     async def _poll_workers(self):
-        """Worker loop: checks for collabs with pending_action and executes tasks.
+        """Worker loop: recovery sweep only.
 
-        Option B: worker triggers executor (not a separate sub-agent).
-        When pending_action is set, worker constructs task context and calls executor.
-        Worker does NOT execute business logic itself — it triggers the defined execution path.
+        Current approved model: Foundation drafting is owner-side work (Nova),
+        not daemon automation. The daemon does not auto-execute drafting.
+        Worker sweep is for recovery/monitoring only.
         """
-        from governance.collab.foundation_executor import execute_foundation_delivery, get_task_context
 
         collabs = self.store.list_collabs(status=None)  # all collabs, filter by pending_action
         if not collabs:
@@ -413,13 +412,13 @@ class CollabDaemon:
 
             if action == 'awaiting_foundation_draft':
                 # Foundation drafting belongs to Nova as primary executor.
-                # No auto-trigger here — Nova sends review_request manually
+                # No auto-trigger here — Nova drafts, then sends review_request manually
                 # only after the artifact is truly complete and reviewable.
                 self._log("WORKER", f"[SKIP] collab_id={c.collab_id} pending_action={action} — Nova drafts then sends review_request manually")
 
             elif action == 'awaiting_review_execution':
-                # Handler owns this — do not process in worker sweep
-                # Only a recovery case if handler missed it (check last_processed_by)
+                # Handler owns this — do not process in worker sweep.
+                # Only a recovery case if handler missed it.
                 self._log("WORKER", f"[SKIP] collab_id={c.collab_id} pending_action={action} — handler owns review execution")
 
             elif action == 'awaiting_artifact':
