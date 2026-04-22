@@ -5,6 +5,7 @@ Sends workflow messages to Nova via NATS gov.collab.command subject.
 """
 
 import json
+import os
 import threading
 import urllib.error
 import urllib.request

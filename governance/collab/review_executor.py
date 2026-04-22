@@ -104,7 +104,7 @@ def _check_rule_draft_not_accessible(artifact_path: str) -> Optional[RuleResult]
 
 def _check_rule_draft_empty(content: str) -> Optional[RuleResult]:
     """Rule: draft_empty — draft content is too short."""
-    if content and len(content.strip()) < 50:
+    if content is None or len(content.strip()) < 50:
         return RuleResult(
             passed=False,
             verdict="blocked",

@@ -101,6 +101,8 @@ def _domain_to_envelope(domain, contract, store=None) -> CollabEnvelope:
     payload = {
         'result': domain.result,
         'notes': domain.notes,
+        'reasons': getattr(domain, 'reasons', '') or '',
+        'required_changes': getattr(domain, 'required_changes', '') or '',
         'judgment_path': getattr(domain, 'judgment_path', ''),
         'workflow': getattr(domain, 'workflow', ''),
         'stage': getattr(domain, 'stage', ''),
