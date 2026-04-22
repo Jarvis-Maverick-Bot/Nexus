@@ -143,7 +143,7 @@ CONTRACTS: dict[str, StepContract] = {
         executor="jarvis",
         current_owner="jarvis",
         mandatory_output="review_response",
-        allowed_results=["approved", "revision_required", "blocked"],
+        allowed_results=["approved", "revision_required", "blocked", "review_execution_error"],
         completion_condition="review_response delivered on gov.collab.command to nova",
         notify_policy=[
             NotifyPolicy(channel="telegram", recipient="alex",

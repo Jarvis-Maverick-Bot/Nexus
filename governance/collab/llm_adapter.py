@@ -140,52 +140,71 @@ class MiniMaxAdapter:
                 raw=fallback_raw
             )
 
-        lines = raw.strip().split("\n")
+        sections = self._find_sections(raw)
 
-        verdict = None
-        reasons = None
-        required_changes = None
-
-        for line in lines:
-            upper = line.strip().upper()
-            if upper.startswith("VERDICT:"):
-                verdict = line.split(":", 1)[1].strip().upper()
-            elif upper.startswith("REASONS:"):
-                idx = lines.index(line)
-                reasons = "\n".join(lines[idx + 1:]).strip() if idx + 1 < len(lines) else ""
-            elif upper.startswith("REQUIRED_CHANGES:"):
-                idx = lines.index(line)
-                required_changes = "\n".join(lines[idx + 1:]).strip() if idx + 1 < len(lines) else ""
+        verdict_raw = sections.get("VERDICT", "")
+        reasons_raw = sections.get("REASONS", "")
+        required_changes_raw = sections.get("REQUIRED_CHANGES", "")
 
         # Validate verdict
         allowed = {"APPROVED", "REVISION_REQUIRED", "BLOCKED"}
-        if verdict not in allowed:
+        verdict_normalized = verdict_raw.strip().upper() if verdict_raw else ""
+        if verdict_normalized not in allowed:
             return LLMOutput(
                 verdict="review_execution_error",
-                reasons=f"verdict not in allowed set — received: '{verdict}'. Raw output preserved.",
+                reasons=f"VERDICT not in allowed set — received: '{verdict_raw}'. Raw output preserved.",
                 required_changes="",
                 raw=fallback_raw
             )
 
-        # reasons and required_changes must be non-empty for non-APPROVED
-        if verdict != "APPROVED":
-            if not reasons or len(reasons) < 10:
+        # reasons must be non-empty for non-APPROVED
+        if verdict_normalized != "APPROVED":
+            if not reasons_raw or len(reasons_raw.strip()) < 10:
                 return LLMOutput(
                     verdict="review_execution_error",
-                    reasons=f"REASONS field empty or too short for verdict={verdict}. Raw output preserved.",
+                    reasons=f"REASONS field empty or too short for verdict={verdict_normalized}. Raw output preserved.",
                     required_changes="",
                     raw=fallback_raw
                 )
 
-        # Normalize verdict to lowercase
-        verdict_lower = verdict.lower()  # approved | revision_required | blocked
-
         return LLMOutput(
-            verdict=verdict_lower,
-            reasons=reasons or "",
-            required_changes=required_changes or "",
+            verdict=verdict_normalized.lower(),  # approved | revision_required | blocked
+            reasons=reasons_raw.strip(),
+            required_changes=required_changes_raw.strip() if required_changes_raw else "",
             raw=fallback_raw
         )
+
+    def _find_sections(self, raw: str) -> Dict[str, str]:
+        """
+        Find all sections in LLM output by section headers.
+        Handles multi-line content within each section.
+        Returns dict mapping section name (upper) to section content.
+        """
+        section_markers = ["VERDICT", "REASONS", "REQUIRED_CHANGES"]
+        lines = raw.strip().split("\n")
+        sections = {}
+        current_section = None
+        current_lines = []
+
+        for line in lines:
+            upper_stripped = line.strip().upper()
+            is_header = any(upper_stripped.startswith(marker + ":") for marker in section_markers)
+
+            if is_header:
+                # Save previous section
+                if current_section:
+                    sections[current_section] = "\n".join(current_lines)
+                # Start new section
+                current_section = next(m for m in section_markers if upper_stripped.startswith(m + ":"))
+                current_lines = [line.split(":", 1)[1].strip()]
+            elif current_section:
+                current_lines.append(line)
+
+        # Save last section
+        if current_section:
+            sections[current_section] = "\n".join(current_lines)
+
+        return sections
 
 
 # ── Adapter Factory ────────────────────────────────────────────────────────────

@@ -51,9 +51,20 @@ def _load_llm_config() -> dict:
     config_path = Path(__file__).parent / "collab_config.json"
     if config_path.exists():
         with open(config_path, 'r', encoding='utf-8') as f:
-            config = json.load(f)
-        return config.get("llm", {})
+            return json.load(f).get("llm", {})
     return {}
+
+
+def _load_max_review_rounds() -> int:
+    """Load max_review_rounds from top-level collab_config.json (not inside llm dict)."""
+    config_path = Path(__file__).parent / "collab_config.json"
+    if config_path.exists():
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+            val = config.get("max_review_rounds")
+            if val is not None:
+                return int(val)
+    return 3  # safe default
 
 
 # ── Rule Layer ────────────────────────────────────────────────────────────────
@@ -436,7 +447,7 @@ async def execute_review(
 
     # Load LLM config
     llm_config = _load_llm_config()
-    max_review_rounds = llm_config.get("max_review_rounds", 3)
+    max_review_rounds = _load_max_review_rounds()
 
     # Get current review round from state
     state = handler.store.get_collab(collab_id)

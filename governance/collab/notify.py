@@ -13,6 +13,40 @@ from pathlib import Path
 from typing import Optional
 
 
+def _load_telegram_bot_token() -> str:
+    """
+    Load Telegram bot token from OpenClaw auth-profiles.json.
+    Checks OPENCLAW_AUTH_PROFILES env var first, then default locations.
+    Falls back to collab_config.json for backward compatibility only.
+    """
+    # Try auth-profiles.json first (primary store)
+    candidates = [
+        Path(os.environ.get('OPENCLAW_AUTH_PROFILES',
+            Path.home() / ".openclaw" / "agents" / "main" / "agent" / "auth-profiles.json")),
+        Path.home() / ".openclaw" / "agents" / "main" / "agent" / "auth-profiles.json",
+    ]
+    for path in candidates:
+        if path.exists():
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    profiles = json.load(f).get('profiles', {})
+                entry = profiles.get('telegram:bot', {})
+                if entry.get('type') == 'api_key':
+                    return entry['key']
+            except Exception:
+                pass
+
+    # Fallback: load from collab_config.json for backward compatibility
+    # (only if auth-profiles.json does not have telegram:bot)
+    config_path = Path(__file__).parent.parent / "collab" / "collab_config.json"
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            return json.load(f).get('telegram_bot_token', '')
+    except Exception:
+        return ''
+
+
+
 def _load_config() -> dict:
     """Load collab config from governance/collab/collab_config.json."""
     config_path = Path(__file__).parent.parent / "collab" / "collab_config.json"
@@ -24,7 +58,7 @@ def _load_config() -> dict:
 
 
 _cfg = _load_config()
-_TELEGRAM_BOT_TOKEN = _cfg.get('telegram_bot_token', '')
+_TELEGRAM_BOT_TOKEN = _load_telegram_bot_token()
 _TELEGRAM_API_URL = (
     f"https://api.telegram.org/bot{_TELEGRAM_BOT_TOKEN}"
     if _TELEGRAM_BOT_TOKEN else None
