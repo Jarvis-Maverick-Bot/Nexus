@@ -1,12 +1,12 @@
 """
-Foundation Delivery Executor — Option B (near-term)
-Handler that produces V2.0 Foundation artifact directly in daemon process.
+Foundation Delivery Executor — local-config-driven process node task executor.
 
-Used by worker when pending_action = "awaiting_foundation_draft".
-Loads doctrine, produces artifact, updates state, sends notification.
+Produces the V2.0 Foundation artifact through a task context loaded from local
+configuration files and workflow registry entries.
 
-This is Option B: main Jarvis session (daemon process) as executor.
-When jarvis-core is stable, this will be replaced by Option A (sessions_spawn).
+This module is the current implementation surface for local process node task
+execution and should not hardcode workflow semantics that belong in registry or
+config.
 """
 
 import json
@@ -17,17 +17,36 @@ from typing import Optional, Dict, Any
 
 from openai import OpenAI
 
-# Paths for doctrine loading — resolved from V2.0 shared drive structure
-_SHARED_ROOT = Path(r"\\192.168.31.124\Nova-Jarvis-Shared\working\01-projects\Nexus\V2.0")
+def _load_local_config() -> dict:
+    config_path = Path(__file__).parent / "collab_config.json"
+    if config_path.exists():
+        with open(config_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
 
-# Actual existing paths in V2.0/01-release-definition
-_FOUNDATION_BASELINE = _SHARED_ROOT / "01-release-definition" / "V2_0_FOUNDATION_V0_2.md"
-_SCOPE_DOC = _SHARED_ROOT / "01-release-definition" / "V2_0_SCOPE_V0_2.md"
-_PRD_DOC = _SHARED_ROOT / "01-release-definition" / "V2_0_PRD_V0_2.md"
 
-# Doctrine registry and SKOS — these may not exist yet; executor handles gracefully
-_DOCTRINE_REGISTRY = _SHARED_ROOT / "governance" / "doctrine" / "doctrine_registry.json"
-_SKOS_SOURCE = _SHARED_ROOT / "governance" / "skos" / "SKOS_SOURCE_REGISTRY_V0_1.xlsx"
+def _shared_root_from_config(config: dict) -> Path:
+    drafting = config.get("drafting", {})
+    root = drafting.get("local_shared_root")
+    if root:
+        return Path(root) / "working" / "01-projects" / "Nexus" / "V2.0"
+    return Path(r"\\192.168.31.124\Nova-Jarvis-Shared\working\01-projects\Nexus\V2.0")
+
+
+def _build_path_map(config: dict) -> dict:
+    shared_root = _shared_root_from_config(config)
+    foundation_baseline = shared_root / "01-release-definition" / "V2_0_FOUNDATION_V0_2.md"
+    scope_doc = shared_root / "01-release-definition" / "V2_0_SCOPE_V0_2.md"
+    prd_doc = shared_root / "01-release-definition" / "V2_0_PRD_V0_2.md"
+    doctrine_registry = shared_root / "governance" / "doctrine" / "doctrine_registry.json"
+    skos_source = shared_root / "governance" / "skos" / "SKOS_SOURCE_REGISTRY_V0_1.xlsx"
+    return {
+        "v2_0_foundation_doctrine": doctrine_registry,
+        "skos_source_model": skos_source,
+        "v2_0_foundation_baseline": foundation_baseline,
+        "v2_0_scope": scope_doc,
+        "v2_0_prd": prd_doc,
+    }
 
 
 def _load_doctrine(doctrine_loading_set: list) -> dict:
@@ -40,13 +59,8 @@ def _load_doctrine(doctrine_loading_set: list) -> dict:
     warnings = []
     errors = []
 
-    path_map = {
-        "v2_0_foundation_doctrine": _DOCTRINE_REGISTRY,
-        "skos_source_model": _SKOS_SOURCE,
-        "v2_0_foundation_baseline": _FOUNDATION_BASELINE,
-        "v2_0_scope": _SCOPE_DOC,
-        "v2_0_prd": _PRD_DOC,
-    }
+    config = _load_local_config()
+    path_map = _build_path_map(config)
 
     for name in doctrine_loading_set:
         path = path_map.get(name)
@@ -164,10 +178,13 @@ Reference: PRD
 
 def _generate_foundation_draft_via_llm(task_context: dict, doctrine_snapshot: dict) -> tuple[bool, str, Optional[str]]:
     try:
+        config = _load_local_config()
+        drafting = config.get("drafting", {})
+        model = drafting.get("model") or config.get("llm", {}).get("model") or "gpt-5.4"
         client = OpenAI()
         prompt = _build_foundation_prompt(task_context, doctrine_snapshot)
         response = client.responses.create(
-            model="gpt-5.4",
+            model=model,
             input=prompt,
         )
         text = getattr(response, "output_text", "") or ""
