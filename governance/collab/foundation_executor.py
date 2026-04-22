@@ -274,13 +274,19 @@ async def execute_foundation_delivery(handler: 'CollabHandler', collab_id: str, 
 
     handler._log("EXEC", f"[{collab_id}] artifact written: {artifact_path}")
 
-    # 3. Update collab state
-    handler.store.update_collab(
+    # 3. Update collab state — must write artifact_path and artifact_type
+    updated = handler.store.update_collab(
         collab_id,
         status='in_progress',
         pending_action='',
-        last_event='foundation_draft_ready'
+        last_event='foundation_draft_ready',
+        artifact_type='foundation',
+        artifact_path=artifact_path
     )
+    if not updated:
+        handler._log("ERROR", f"[{collab_id}] foundation_draft_ready but collab state not found — cannot update")
+        return
+
     handler.store.emit_event(
         collab_id,
         'foundation_draft_ready',

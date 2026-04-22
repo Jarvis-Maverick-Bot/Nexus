@@ -563,6 +563,17 @@ async def _handle_workflow_started(handler: 'CollabHandler', envelope: CollabEnv
         )
         return "ignored"
 
+    # Pre-condition: collab state must exist and be in a valid state for continuation
+    state = handler.store.get_collab(envelope.collab_id)
+    if not state:
+        handler._log("ERROR", f"[{envelope.collab_id}] workflow_started but no collab state found — cannot continue")
+        handler.store.emit_event(envelope.collab_id, 'workflow_started_failed_no_state', message_id=envelope.message_id)
+        return 'failed_no_state'
+    if state.current_owner != 'nova':
+        handler._log("ERROR", f"[{envelope.collab_id}] workflow_started but current_owner={state.current_owner} != nova — cannot continue drafting")
+        handler.store.emit_event(envelope.collab_id, 'workflow_started_failed_wrong_owner', current_owner=state.current_owner)
+        return 'failed_wrong_owner'
+
     # Authorized continuation receiver: trigger drafting
     # Update local state to reflect workflow is active and Nova owns drafting
     handler.store.update_collab(
@@ -593,9 +604,15 @@ async def _handle_workflow_started(handler: 'CollabHandler', envelope: CollabEnv
     }
     await execute_foundation_delivery(handler, envelope.collab_id, task_context)
 
-    # Get artifact_path from state (set by executor)
+    # Verify drafting succeeded: state must show foundation_draft_ready and artifact_path must be non-empty
     state = handler.store.get_collab(envelope.collab_id)
+    if not state or state.last_event != 'foundation_draft_ready':
+        handler._log("ERROR", f"[{envelope.collab_id}] foundation delivery did not produce draft — last_event={getattr(state, 'last_event', 'unknown')}")
+        return 'foundation_delivery_failed'
     artifact_path = getattr(state, 'artifact_path', '') if state else ''
+    if not artifact_path:
+        handler._log("ERROR", f"[{envelope.collab_id}] artifact_path is empty after drafting — cannot send review_request")
+        return 'foundation_delivery_failed'
 
     # Convert local macOS path to sharefolder UNC path for Jarvis access
     artifact_path = _to_sharefolder_path(artifact_path)
@@ -639,7 +656,8 @@ async def _handle_review_request(handler: 'CollabHandler', envelope: CollabEnvel
 
     contract = get_contract('review_request')
     payload = envelope.payload or {}
-    raw_artifact_path = payload.get('artifact_path', '')
+    # Prefer top-level artifact_path (set by sender), fallback to payload for compatibility
+    raw_artifact_path = envelope.artifact_path if envelope.artifact_path else payload.get('artifact_path', '')
     artifact_path = _to_sharefolder_path(raw_artifact_path)
     review_scope = payload.get('review_scope', 'foundation completeness and governance alignment')
     workflow = payload.get('workflow', 'v2_0')
@@ -1049,7 +1067,7 @@ class CollabHandler:
                 self._log("HANDLER", f"[REJECT] from={envelope.from_} == my_id={self.my_id} — self-originated, ignoring")
                 return False
 
-            self.store.log_message(envelope.as_dict(), direction='IN')
+            # IN logging is done by the daemon layer before calling handle_inbound — do not duplicate
             await self._send_ack(envelope, 'received')
 
             handler_fn = SKILL_REGISTRY.get(envelope.message_type, _handle_unknown)
