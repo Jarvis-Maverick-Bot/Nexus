@@ -96,9 +96,6 @@ async def main():
     await nc.flush()
     print("Subscription active. Now publishing start_foundation_create.\n")
 
-    collab_id = f"foundation-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-    message_id = f"msg-{uuid.uuid4().hex[:12]}"
-
     envelope = {
         "message_id": message_id,
         "collab_id": collab_id,

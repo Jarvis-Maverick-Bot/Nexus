@@ -23,7 +23,9 @@
           "skill_handler_binding": {
             "handler": "_handle_start_foundation_create",
             "executor": "foundation_executor.execute_foundation_delivery",
-            "skill": "foundation_delivery"
+            "skill": "foundation_delivery",
+            "authorized_receiver": "jarvis",
+            "continuation_message": "workflow_started"
           },
           "expected_output": {
             "message_type": "foundation_draft_ready",

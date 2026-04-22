@@ -326,25 +326,32 @@ class CollabDaemon:
                 self._log("SKIP", f"CMD [{envelope.collab_id}] to={envelope.to} (not me)")
                 return
 
+            # Critical guard: reject self-originated kickoff on owner side.
+            # Nova may publish start_foundation_create to Jarvis, but Nova daemon must
+            # never consume that kickoff as if it were its own inbound business step.
+            if (
+                envelope.message_type == 'start_foundation_create'
+                and self.my_id == 'nova'
+                and envelope.from_ == 'nova'
+            ):
+                self._log("SKIP", f"CMD [{envelope.collab_id}] self-originated kickoff rejected on Nova")
+                return
+
             self._log("CMD", f"[{envelope.collab_id}] {envelope.message_type}: {envelope.summary}")
 
             # Log IN before any processing
             self.store.log_message(envelope.as_dict(), 'IN')
 
-            # Ensure collab exists before writing daemon-owned fields
-            self.store.get_or_create_collab(
-                envelope.collab_id,
-                opened_by=envelope.from_,
-                artifact_type=getattr(envelope, 'artifact_type', None) or '',
-                artifact_path=getattr(envelope, 'artifact_path', None) or '',
-                receiver=envelope.to,
-            )
-            # Daemon-only bookkeeping fields — do NOT overwrite workflow state (last_event is set by handler)
-            self.store.update_collab(envelope.collab_id,
-                last_message_id=envelope.message_id,
-                last_processed_by=self.instance_id,
-            )
-            # last_event must NOT be set here — handler.handle_inbound owns it
+            # Do not pre-create collab state here.
+            # Business handlers own creation and workflow-state mutation so the wrong side
+            # cannot dirty local state before routing/contract checks finish.
+            existing = self.store.get_collab(envelope.collab_id)
+            if existing:
+                self.store.update_collab(
+                    envelope.collab_id,
+                    last_message_id=envelope.message_id,
+                    last_processed_by=self.instance_id,
+                )
 
             self._log("INFO", f"  -> [EVENT_DRIVEN] {envelope.message_type} dispatched")
 

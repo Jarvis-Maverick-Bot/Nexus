@@ -52,6 +52,30 @@ def _is_exited(collab_id: str, store: CollabStateStore) -> bool:
     return state is not None and state.status == 'exited'
 
 
+def _load_workflow_registry() -> dict:
+    """Load workflow registry JSON for runtime routing/authorization hints."""
+    from pathlib import Path
+    import json
+
+    registry_path = Path(__file__).parent / 'workflow_registry.json'
+    try:
+        with open(registry_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _get_stage_binding(workflow: str, stage: str) -> dict:
+    registry = _load_workflow_registry()
+    return (
+        registry.get('workflows', {})
+        .get(workflow, {})
+        .get('stages', {})
+        .get(stage, {})
+        .get('skill_handler_binding', {})
+    ) or {}
+
+
 def _get_next_receiver(domain, contract, store=None, fallback_from: str = None) -> str:
     """
     Determine who receives the next message.
@@ -430,85 +454,43 @@ async def _handle_open(handler: 'CollabHandler', envelope: CollabEnvelope) -> st
 
 async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
     """
-    Handle 'start_foundation_create' — Nova initiates Foundation delivery.
+    Handle 'start_foundation_create' — Jarvis-side kickoff handler only.
 
-    my_id == 'nova' (owner side):
-      → record state
-      → call execute_foundation_delivery (produce draft artifact)
-      → send review_request to jarvis
+    Approved TC1 semantics:
+      Nova -> start_foundation_create -> Jarvis
+      Jarvis records kickoff state and sends workflow_started
+      Nova continues only from workflow_started
 
-    my_id == 'jarvis' (collaborator side):
-      → record state (owner=nova, pending=awaiting_foundation_draft)
-      → no auto-trigger (drafting belongs to Nova)
+    Nova must NOT execute drafting directly from this message type.
     """
-    from .foundation_executor import execute_foundation_delivery
-    from .review_executor import _to_sharefolder_path
-
     if _is_exited(envelope.collab_id, handler.store):
         await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
         return "rejected_exited"
 
-    # ── Nova owner side: trigger drafting + review handoff ─────────────────
-    if handler.my_id == 'nova':
-        handler.store.update_collab(
+    workflow = ((envelope.payload or {}).get('workflow')) or 'v2_0'
+    stage = ((envelope.payload or {}).get('stage')) or 'foundation_create'
+    binding = _get_stage_binding(workflow, stage)
+    authorized_receiver = binding.get('authorized_receiver', 'jarvis')
+
+    if handler.my_id != authorized_receiver:
+        handler._log(
+            "WARN",
+            f"[{envelope.collab_id}] start_foundation_create received by unauthorized agent "
+            f"my_id={handler.my_id} authorized_receiver={authorized_receiver}, ignoring"
+        )
+        return "ignored"
+
+    existing = handler.store.get_collab(envelope.collab_id)
+    if existing is None:
+        handler.store.open_collab(
             collab_id=envelope.collab_id,
-            status='in_progress',
-            current_owner='nova',
-            receiver='jarvis',
-            artifact_type='foundation',
+            opened_by=envelope.from_,
+            artifact_type=getattr(envelope, 'artifact_type', None) or 'foundation',
             artifact_path=getattr(envelope, 'artifact_path', None) or '',
-            pending_action='drafting_in_progress',
-            last_event='foundation_create_started',
-            last_processed_by=handler.my_id
-        )
-        handler.store.emit_event(
-            collab_id=envelope.collab_id,
-            event='foundation_create_started',
-            message_id=envelope.message_id,
-            artifact_type='foundation',
-            from_=envelope.from_
+            receiver='nova',
         )
 
-        # Execute Foundation delivery (produces draft artifact)
-        task_context = {
-            "collab_id": envelope.collab_id,
-            "command_intent": "start_foundation_delivery",
-            "doctrine_loading_set": ["v2_0_foundation_baseline", "v2_0_scope", "v2_0_prd"],
-            "artifact_binding": {"output_path": "governance/docs/V2_0_FOUNDATION.md"},
-            "payload": getattr(envelope, 'payload', {}) or {}
-        }
-        await execute_foundation_delivery(handler, envelope.collab_id, task_context)
-
-        # Get artifact_path from state (set by executor)
-        state = handler.store.get_collab(envelope.collab_id)
-        artifact_path = getattr(state, 'artifact_path', '') if state else ''
-
-        # Convert local macOS path to sharefolder UNC path for Jarvis access
-        artifact_path = _to_sharefolder_path(artifact_path)
-
-        # Send review_request to Jarvis
-        import uuid
-        review_envelope = CollabEnvelope(
-            message_id=f"msg-{uuid.uuid4().hex[:12]}",
-            collab_id=envelope.collab_id,
-            message_type="review_request",
-            from_="nova",
-            to="jarvis",
-            artifact_type='foundation',
-            artifact_path=artifact_path,
-            payload={
-                "review_scope": "foundation completeness and governance alignment",
-                "workflow": "v2_0",
-                "stage": "foundation_create_review"
-            },
-            summary=f"Foundation draft ready for review — {envelope.collab_id}"
-        )
-        handler.store.log_message(review_envelope.as_dict(), 'OUT')
-        await handler.nc.publish('gov.collab.command', review_envelope.to_json())
-        handler._log("HANDLER", f"[{envelope.collab_id}] review_request published (nova→jarvis)")
-        return 'foundation_create_started'
-
-    # ── Jarvis collaborator side: record state + send workflow_started ─────
+    # Jarvis collaborator side: record kickoff state + send workflow_started
     handler.store.update_collab(
         collab_id=envelope.collab_id,
         status='open',
@@ -528,8 +510,6 @@ async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: Co
         from_=envelope.from_
     )
 
-    # Send workflow_started to Nova — this is the business confirmation that triggers
-    # Nova's drafting continuation. ACK alone is insufficient as TC1 proof.
     import uuid
     wf_started_envelope = CollabEnvelope(
         message_id=f"msg-{uuid.uuid4().hex[:12]}",
@@ -570,11 +550,20 @@ async def _handle_workflow_started(handler: 'CollabHandler', envelope: CollabEnv
         await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
         return "rejected_exited"
 
-    if handler.my_id != 'nova':
-        handler._log("WARN", f"[{envelope.collab_id}] workflow_started received by non-Nova agent, ignoring")
+    workflow = ((envelope.payload or {}).get('workflow')) or 'v2_0'
+    stage = ((envelope.payload or {}).get('stage')) or 'foundation_create'
+    binding = _get_stage_binding(workflow, stage)
+    continuation_receiver = envelope.to or 'nova'
+
+    if handler.my_id != continuation_receiver:
+        handler._log(
+            "WARN",
+            f"[{envelope.collab_id}] workflow_started received by unauthorized agent "
+            f"my_id={handler.my_id} continuation_receiver={continuation_receiver}, ignoring"
+        )
         return "ignored"
 
-    # Nova: this is the TC1 continuation trigger
+    # Authorized continuation receiver: trigger drafting
     # Update local state to reflect workflow is active and Nova owns drafting
     handler.store.update_collab(
         collab_id=envelope.collab_id,
