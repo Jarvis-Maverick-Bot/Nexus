@@ -826,6 +826,47 @@ async def _handle_review_response(handler: 'CollabHandler', envelope: CollabEnve
     return 'review_received'
 
 
+async def _handle_complete(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
+    """
+    Handle 'complete' — mark collab completed.
+    Terminal step: no reasoning needed.
+    """
+    from .runtime_contract_map import get_contract
+
+    if _is_exited(envelope.collab_id, handler.store):
+        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
+        return "rejected_exited"
+
+    contract = get_contract('complete')
+
+    handler.store.update_collab(
+        envelope.collab_id,
+        status='completed',
+        pending_action='',
+        last_event='collab_completed'
+    )
+    handler.store.emit_event(
+        envelope.collab_id,
+        'collab_completed',
+        message_id=envelope.message_id
+    )
+
+    # Apply notify policy for complete
+    from .runtime_contract_map import DomainResult
+    domain = DomainResult(
+        message_type='complete',
+        collab_id=envelope.collab_id,
+        from_=envelope.from_,
+        result='',
+        notes='',
+        workflow='v2_0',
+        stage='foundation_create'
+    )
+    await _apply_notify_policy(handler, contract, domain, envelope)
+
+    return 'collab_completed'
+
+
 async def _handle_exit(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
     """
     Handle 'exit' — special termination path.
