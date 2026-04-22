@@ -462,11 +462,77 @@ async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: Co
     return 'foundation_create_started'
 
 
-async def _handle_foundation_draft_ready(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
+async def _handle_foundation_drafting_started(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
     """
-    Handle 'foundation_draft_ready' — Nova signals draft is complete.
-    artifact_path comes from payload.
+    Handle 'foundation_drafting_started' — Nova notifies that drafting has begun.
+
+    This is the signal that Nova has entered the drafting phase.
+    Triggers executor to produce the Foundation draft artifact,
+    then automatically sends review_request to Jarvis.
+
+    State: drafting_in_progress → executor runs → review_request emitted.
     """
+    if _is_exited(envelope.collab_id, handler.store):
+        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
+        return "rejected_exited"
+
+    # Update state to reflect active drafting
+    handler.store.update_collab(
+        collab_id=envelope.collab_id,
+        status='in_progress',
+        current_owner='nova',
+        pending_action='drafting_in_progress',
+        last_event='foundation_drafting_started'
+    )
+    handler.store.emit_event(
+        collab_id=envelope.collab_id,
+        event='foundation_drafting_started',
+        message_id=envelope.message_id,
+        from_=envelope.from_
+    )
+
+    # Execute Foundation delivery (produces draft artifact)
+    task_context = {
+        "collab_id": envelope.collab_id,
+        "command_intent": "start_foundation_delivery",
+        "doctrine_loading_set": ["v2_0_foundation_baseline", "v2_0_scope", "v2_0_prd"],
+        "artifact_binding": {
+            "output_path": "governance/docs/V2_0_FOUNDATION.md"
+        },
+        "payload": getattr(envelope, 'payload', {}) or {}
+    }
+    await execute_foundation_delivery(handler, envelope.collab_id, task_context)
+
+    # After executor completes, send review_request to Jarvis
+    import uuid
+    artifact_path = getattr(envelope, 'artifact_path', None) or ''
+    # Get artifact_path from state (may have been set by executor)
+    state = handler.store.get_collab(envelope.collab_id)
+    if state:
+        artifact_path = getattr(state, 'artifact_path', '') or artifact_path
+
+    review_envelope = CollabEnvelope(
+        message_id=f"msg-{uuid.uuid4().hex[:12]}",
+        collab_id=envelope.collab_id,
+        message_type="review_request",
+        from_="nova",
+        to="jarvis",
+        artifact_type='foundation',
+        artifact_path=artifact_path,
+        payload={
+            "review_scope": "foundation completeness and governance alignment",
+            "workflow": "v2_0",
+            "stage": "foundation_create_review"
+        },
+        summary=f"Foundation draft ready for review — {envelope.collab_id}"
+    )
+    handler.store.log_message(review_envelope.as_dict(), 'OUT')
+    await handler.nc.publish('gov.collab.command', review_envelope.to_json())
+    handler._log("HANDLER", f"[{envelope.collab_id}] review_request published to gov.collab.command (nova→jarvis)")
+
+    return 'foundation_drafting_started'
+
+
     if _is_exited(envelope.collab_id, handler.store):
         await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
         return "rejected_exited"
@@ -861,7 +927,7 @@ async def _handle_unknown(handler: 'CollabHandler', envelope: CollabEnvelope) ->
 SKILL_REGISTRY: Dict[str, Callable] = {
     'open': _handle_open,
     'start_foundation_create': _handle_start_foundation_create,
-    'foundation_draft_ready': _handle_foundation_draft_ready,
+    'foundation_drafting_started': _handle_foundation_drafting_started,
     'review_request': _handle_review_request,
     'review_response': _handle_review_response,
     'decision_proposal': _handle_decision_proposal,
