@@ -432,16 +432,77 @@ async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: Co
     """
     Handle 'start_foundation_create' — Nova initiates Foundation delivery.
 
-    kickoff only: records state and returns.
-    Drafting = Nova's responsibility, review_request sent only after
-    Nova has a real reviewable artifact. No auto-trigger.
+    my_id == 'nova' (owner side):
+      → record state
+      → call execute_foundation_delivery (produce draft artifact)
+      → send review_request to jarvis
 
-    State = open, owner = nova, pending_action = awaiting_foundation_draft.
+    my_id == 'jarvis' (collaborator side):
+      → record state (owner=nova, pending=awaiting_foundation_draft)
+      → no auto-trigger (drafting belongs to Nova)
     """
+    from .foundation_executor import execute_foundation_delivery
+
     if _is_exited(envelope.collab_id, handler.store):
         await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
         return "rejected_exited"
 
+    # ── Nova owner side: trigger drafting + review handoff ─────────────────
+    if handler.my_id == 'nova':
+        handler.store.update_collab(
+            collab_id=envelope.collab_id,
+            status='in_progress',
+            current_owner='nova',
+            artifact_type='foundation',
+            artifact_path=getattr(envelope, 'artifact_path', None) or '',
+            pending_action='drafting_in_progress',
+            last_event='foundation_create_started'
+        )
+        handler.store.emit_event(
+            collab_id=envelope.collab_id,
+            event='foundation_create_started',
+            message_id=envelope.message_id,
+            artifact_type='foundation',
+            from_=envelope.from_
+        )
+
+        # Execute Foundation delivery (produces draft artifact)
+        task_context = {
+            "collab_id": envelope.collab_id,
+            "command_intent": "start_foundation_delivery",
+            "doctrine_loading_set": ["v2_0_foundation_baseline", "v2_0_scope", "v2_0_prd"],
+            "artifact_binding": {"output_path": "governance/docs/V2_0_FOUNDATION.md"},
+            "payload": getattr(envelope, 'payload', {}) or {}
+        }
+        await execute_foundation_delivery(handler, envelope.collab_id, task_context)
+
+        # Get artifact_path from state (set by executor)
+        state = handler.store.get_collab(envelope.collab_id)
+        artifact_path = getattr(state, 'artifact_path', '') if state else ''
+
+        # Send review_request to Jarvis
+        import uuid
+        review_envelope = CollabEnvelope(
+            message_id=f"msg-{uuid.uuid4().hex[:12]}",
+            collab_id=envelope.collab_id,
+            message_type="review_request",
+            from_="nova",
+            to="jarvis",
+            artifact_type='foundation',
+            artifact_path=artifact_path,
+            payload={
+                "review_scope": "foundation completeness and governance alignment",
+                "workflow": "v2_0",
+                "stage": "foundation_create_review"
+            },
+            summary=f"Foundation draft ready for review — {envelope.collab_id}"
+        )
+        handler.store.log_message(review_envelope.as_dict(), 'OUT')
+        await handler.nc.publish('gov.collab.command', review_envelope.to_json())
+        handler._log("HANDLER", f"[{envelope.collab_id}] review_request published (nova→jarvis)")
+        return 'foundation_create_started'
+
+    # ── Jarvis collaborator side: record state only, no auto-trigger ───────
     handler.store.update_collab(
         collab_id=envelope.collab_id,
         status='open',
@@ -458,7 +519,6 @@ async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: Co
         artifact_type='foundation',
         from_=envelope.from_
     )
-
     return 'foundation_create_started'
 
 
@@ -886,7 +946,6 @@ async def _handle_unknown(handler: 'CollabHandler', envelope: CollabEnvelope) ->
 SKILL_REGISTRY: Dict[str, Callable] = {
     'open': _handle_open,
     'start_foundation_create': _handle_start_foundation_create,
-    'foundation_drafting_started': _handle_foundation_drafting_started,
     'review_request': _handle_review_request,
     'review_response': _handle_review_response,
     'decision_proposal': _handle_decision_proposal,
