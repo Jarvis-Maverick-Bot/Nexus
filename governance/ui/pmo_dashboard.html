@@ -42,6 +42,8 @@
         .status-in_progress { background: #2a2a1a; color: #facc15; }
         .status-completed { background: #1a2a3a; color: #60a5fa; }
         .status-exited { background: #2a1a1a; color: #f87171; }
+        .status-failed { background: #3a1a1a; color: #ff6b6b; }
+        .status-blocked { background: #3a2a1a; color: #ff9800; }
 
         .pending-action { font-size: 11px; color: #facc15; font-style: italic; }
         .owner { color: #888; }
@@ -87,6 +89,8 @@
                 <option value="open">Open</option>
                 <option value="in_progress">In Progress</option>
                 <option value="completed">Completed</option>
+                <option value="failed">Failed</option>
+                <option value="blocked">Blocked</option>
                 <option value="exited">Exited</option>
             </select>
             <select id="filter-owner">
@@ -141,10 +145,32 @@ let allCollabs = [];
 let allMessages = [];
 
 function isStale(collab) {
-    // Stale = last_message_id != last_acknowledged_message_id
-    // means a message arrived but this node hasn't acknowledged it
-    return collab.last_message_id && collab.last_acknowledged_message_id &&
-           collab.last_message_id !== collab.last_acknowledged_message_id;
+    // Separate "pending" (sent, no ACK yet) from "stale" (timed out)
+    // pending: last_message_id exists but no ACK received yet
+    if (collab.last_message_id && !collab.last_acknowledged_message_id) {
+        return false; // not stale, but pending — handled separately in msgStatus
+    }
+    // stale: in_progress but no update in >60 seconds
+    const STALE_THRESHOLD_MS = 60000;
+    if (collab.status === 'in_progress') {
+        const updated = new Date(collab.updated_at || 0).getTime();
+        return (Date.now() - updated) > STALE_THRESHOLD_MS;
+    }
+    return false;
+}
+
+function getMsgStatus(collab) {
+    // Separate pending (unacked) from stale (timed out)
+    if (collab.last_message_id && !collab.last_acknowledged_message_id) {
+        return { cls: 'pending', label: 'PENDING' };
+    }
+    if (isStale(collab)) {
+        return { cls: 'stale', label: 'STALE' };
+    }
+    if (collab.last_acknowledged_message_id) {
+        return { cls: 'acked', label: 'ACKED' };
+    }
+    return { cls: '', label: '—' };
 }
 
 async function load() {
@@ -196,8 +222,8 @@ function renderTable() {
     let html = `<table><thead><tr>
         <th>Collab ID</th>
         <th>Status</th>
-        <th>Sender</th>
-        <th>Receiver</th>
+        <th>Initiator</th>
+        <th>Next Hop</th>
         <th>Owner</th>
         <th>Pending Action</th>
         <th>Last Event</th>
@@ -208,9 +234,7 @@ function renderTable() {
     filtered.forEach(c => {
         const stale = isStale(c);
         const rowClass = stale ? 'stale' : '';
-        const staleBadge = stale ? '<span class="stale-badge">STALE</span>' : '';
-        const msgStatus = stale ? 'stale' : (c.last_acknowledged_message_id ? 'acked' : 'pending');
-        const msgStatusLabel = stale ? 'STALE' : (msgStatus === 'acked' ? 'ACKED' : 'PENDING');
+        const { cls: msgCls, label: msgLabel } = getMsgStatus(c);
         const ts = c.updated_at ? new Date(c.updated_at).toLocaleString('en-GB', {hour12: false}) : '—';
 
         html += `<tr class="${rowClass}">
@@ -221,7 +245,7 @@ function renderTable() {
             <td><span class="owner">${c.current_owner || '—'}</span></td>
             <td><span class="pending-action">${c.pending_action || '—'}</span></td>
             <td>${c.last_event || '—'}</td>
-            <td><span class="msg-status">—</span></td>
+            <td><span class="msg-status ${msgCls}">${msgLabel}</span></td>
             <td style="color:#555;font-size:11px">${ts}</td>
         </tr>`;
     });
@@ -238,7 +262,8 @@ function renderMessages() {
         try {
             const entry = JSON.parse(line);
             const ts = entry.timestamp ? new Date(entry.timestamp).toLocaleString('en-GB', {hour12: false}) : '';
-            const dir = entry.direction || 'event';
+            const rawDir = entry.direction || '';
+            const dir = rawDir === 'IN' ? 'inbound' : rawDir === 'OUT' ? 'outbound' : 'event';
             const inout = entry.direction === 'IN'
                 ? '<span class="log-inout in">IN</span>'
                 : entry.direction === 'OUT'
