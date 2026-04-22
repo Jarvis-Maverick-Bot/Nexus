@@ -454,10 +454,12 @@ async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: Co
             collab_id=envelope.collab_id,
             status='in_progress',
             current_owner='nova',
+            receiver='jarvis',
             artifact_type='foundation',
             artifact_path=getattr(envelope, 'artifact_path', None) or '',
             pending_action='drafting_in_progress',
-            last_event='foundation_create_started'
+            last_event='foundation_create_started',
+            last_processed_by=handler.my_id
         )
         handler.store.emit_event(
             collab_id=envelope.collab_id,
@@ -511,10 +513,12 @@ async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: Co
         collab_id=envelope.collab_id,
         status='open',
         current_owner='nova',
+        receiver='nova',
         artifact_type='foundation',
         artifact_path=getattr(envelope, 'artifact_path', None) or '',
         pending_action='awaiting_foundation_draft',
-        last_event='foundation_create_started'
+        last_event='foundation_create_started',
+        last_processed_by=handler.my_id
     )
     handler.store.emit_event(
         collab_id=envelope.collab_id,
@@ -524,60 +528,6 @@ async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: Co
         from_=envelope.from_
     )
     return 'foundation_create_started'
-
-
-async def _handle_foundation_drafting_started(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
-    """
-    Handle 'foundation_drafting_started' — Nova signals that drafting has begun.
-
-    Records state transition only. No auto-execution, no auto review_request.
-    Drafting remains Nova's owner-side work.
-    When Nova completes drafting, Nova sends review_request manually.
-    """
-    if _is_exited(envelope.collab_id, handler.store):
-        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
-        return "rejected_exited"
-
-    handler.store.update_collab(
-        collab_id=envelope.collab_id,
-        status='in_progress',
-        current_owner='nova',
-        pending_action='drafting_in_progress',
-        last_event='foundation_drafting_started'
-    )
-    handler.store.emit_event(
-        collab_id=envelope.collab_id,
-        event='foundation_drafting_started',
-        message_id=envelope.message_id,
-        from_=envelope.from_
-    )
-
-    handler._log("HANDLER", f"[{envelope.collab_id}] foundation_drafting_started recorded — Nova owns drafting phase")
-    return 'foundation_drafting_started'
-
-
-    if _is_exited(envelope.collab_id, handler.store):
-        await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
-        return "rejected_exited"
-
-    payload = envelope.payload or {}
-    artifact_path = payload.get('artifact_path', '')
-
-    handler.store.update_collab(
-        envelope.collab_id,
-        status='in_progress',
-        pending_action='',
-        last_event='foundation_draft_ready',
-        artifact_path=artifact_path
-    )
-    handler.store.emit_event(
-        envelope.collab_id,
-        'foundation_draft_ready',
-        message_id=envelope.message_id,
-        artifact_type='foundation',
-        artifact_path=artifact_path
-    )
-    return 'foundation_draft_ready'
 
 
 async def _handle_review_request(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
@@ -613,7 +563,8 @@ async def _handle_review_request(handler: 'CollabHandler', envelope: CollabEnvel
         artifact_type=payload.get('artifact_type', 'foundation'),
         artifact_path=artifact_path,
         pending_action='awaiting_review_execution',
-        last_event='review_handover_received'
+        last_event='review_handover_received',
+        last_processed_by=handler.my_id
     )
 
     # ── Round control: enforce max_review_rounds ────────────────────────
@@ -714,7 +665,8 @@ async def _handle_review_response(handler: 'CollabHandler', envelope: CollabEnve
     handler.store.update_collab(
         envelope.collab_id,
         last_event='review_received',
-        pending_action=''
+        pending_action='',
+        last_processed_by=handler.my_id
     )
     handler.store.emit_event(
         envelope.collab_id,

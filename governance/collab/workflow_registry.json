@@ -33,8 +33,8 @@
           "completion_criteria": {
             "success": {
               "status": "in_progress",
-              "pending_action": "",
-              "last_event": "foundation_draft_ready"
+              "pending_action": "review_pending",
+              "last_event": "review_request_sent"
             },
             "failure": {
               "status": "failed",

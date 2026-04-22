@@ -31,7 +31,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 return
 
         if self.path == "/api/collabs" or self.path == "/data/collab_state.json":
-            self.send_json(json.loads(STATE_FILE.read_text()))
+            raw = STATE_FILE.read_text() if STATE_FILE.exists() else "{}"
+            try:
+                state = json.loads(raw) if raw.strip() else {}
+            except json.JSONDecodeError:
+                state = {}
+            self.send_json(state)
             return
 
         if self.path == "/api/messages" or self.path == "/data/collab_messages.jsonl":
