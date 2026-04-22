@@ -432,9 +432,11 @@ async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: Co
     """
     Handle 'start_foundation_create' — Nova initiates Foundation delivery.
 
+    kickoff only: records state and returns.
+    Drafting = Nova's responsibility, review_request sent only after
+    Nova has a real reviewable artifact. No auto-trigger.
+
     State = open, owner = nova, pending_action = awaiting_foundation_draft.
-    Actual continuation (artifact monitoring → review_request) lives in
-    the owner-side worker sweep. Not in this handler.
     """
     if _is_exited(envelope.collab_id, handler.store):
         await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')

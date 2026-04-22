@@ -412,50 +412,10 @@ class CollabDaemon:
             action = c.pending_action
 
             if action == 'awaiting_foundation_draft':
-                # ── Model A auto-continuation ──────────────────────────────────
-                # Only the owner-side worker (my_id == current_owner) monitors
-                # for draft completion and publishes the real bus message.
-                # Jarvis-side worker skips — it only receives the downstream
-                # review_request that arrives via NATS.
-                owner = getattr(c, 'current_owner', None) or ''
-                if self.my_id != owner:
-                    # Not our collab — other agent owns it, we only receive messages
-                    self._log("WORKER", f"[SKIP] collab_id={c.collab_id} pending_action={action} — owned by {owner}, not {self.my_id}")
-                else:
-                    # We own this collab — check if artifact is now available
-                    artifact_path = getattr(c, 'artifact_path', None) or ''
-                    if not artifact_path:
-                        self._log("WORKER", f"[WAIT] collab_id={c.collab_id} pending_action={action} — no artifact_path set yet")
-                    else:
-                        from pathlib import Path
-                        if not Path(artifact_path).exists():
-                            self._log("WORKER", f"[WAIT] collab_id={c.collab_id} pending_action={action} — artifact not found at {artifact_path}")
-                        else:
-                            # Artifact is available — publish real review_request on NATS bus.
-                            # This is nova → jarvis, published from Nova's own worker.
-                            import uuid
-                            from governance.collab.envelope import CollabEnvelope
-                            self._log("WORKER", f"[AUTO-TRIGGER] collab_id={c.collab_id} artifact found — publishing review_request")
-                            review_envelope = CollabEnvelope(
-                                message_id=f"msg-{uuid.uuid4().hex[:12]}",
-                                collab_id=c.collab_id,
-                                message_type="review_request",
-                                from_=self.my_id,   # nova → jarvis (correct direction)
-                                to="jarvis",
-                                artifact_type=getattr(c, 'artifact_type', None) or 'foundation',
-                                artifact_path=artifact_path,
-                                payload={
-                                    "review_scope": "foundation completeness and governance alignment",
-                                    "workflow": getattr(c, 'workflow', None) or 'v2_0',
-                                    "stage": "foundation_create_review"
-                                },
-                                summary=f"Auto-triggered review_request for {c.collab_id}"
-                            )
-                            # Log OUT so message history reflects real bus publish
-                            self.store.log_message(review_envelope.as_dict(), 'OUT')
-                            # Publish on real NATS — goes to jarvis
-                            await self.nc.publish('gov.collab.command', review_envelope.to_json())
-                            self._log("WORKER", f"[AUTO-TRIGGER] collab_id={c.collab_id} review_request published to gov.collab.command ({self.my_id}→jarvis)")
+                # Foundation drafting belongs to Nova as primary executor.
+                # No auto-trigger here — Nova sends review_request manually
+                # only after the artifact is truly complete and reviewable.
+                self._log("WORKER", f"[SKIP] collab_id={c.collab_id} pending_action={action} — Nova drafts then sends review_request manually")
 
             elif action == 'awaiting_review_execution':
                 # Handler owns this — do not process in worker sweep
