@@ -1,20 +1,38 @@
 {
   "_comment": "Template for collab_config.json — copy to collab_config.json and fill in real values",
-  "my_id": "",
-  "sender_id": "",
-  "target_id": "",
-  "nats_url": "",
+  "my_id": "nova_or_jarvis",
+  "sender_id": "nova",
+  "target_id": "jarvis",
+  "nats_url": "nats://127.0.0.1:4222",
   "subjects": {
-    "command": "",
-    "ack": "",
-    "event": "",
-    "notify": ""
+    "command": "gov.collab.command",
+    "ack": "gov.collab.ack",
+    "event": "gov.collab.event",
+    "notify": "gov.collab.notify"
   },
   "poll_interval": 30,
   "heartbeat_interval": 60,
   "shutdown_grace": 30,
   "data_dir": null,
   "protocol_version": "0.2",
-  "_comment_telegram": "Telegram bot token — get from @BotFather on Telegram",
+  "max_review_rounds": 3,
+  "llm": {
+    "provider": "openai_or_other_provider",
+    "model": "model_name_here",
+    "api_key_profile": "provider:profile",
+    "timeout_seconds": 60,
+    "max_retries": 2,
+    "evidence_full_text_max_chars": 8000
+  },
+  "drafting": {
+    "provider": "openai_or_other_provider",
+    "model": "model_name_here",
+    "api_key_profile": "provider:profile",
+    "timeout_seconds": 60,
+    "max_retries": 2,
+    "sharefolder_root": "\\\\host\\share\\Nova-Jarvis-Shared",
+    "local_shared_root": "/Users/alex/Nova-Jarvis-Shared"
+  },
+  "_comment_telegram": "Telegram bot token — leave empty in template; real local token stays only in untracked collab_config.json or auth profile",
   "telegram_bot_token": ""
 }
