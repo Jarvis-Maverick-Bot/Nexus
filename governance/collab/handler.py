@@ -980,13 +980,59 @@ class CollabHandler:
         """
         Handle an ACK message — complete the pending Future.
         Returns True if this ACK was expected and matched, False otherwise.
+
+        TC1 continuation trigger: when Nova receives ACK for start_foundation_create,
+        trigger the foundation delivery + review_request handoff.
         """
         key = f"{ack.collab_id}:{ack.ack_for}"
-        if key in self._pending_ack:
+        ack_matched = key in self._pending_ack
+        if ack_matched:
             self._pending_ack[key].set_result(ack)
             del self._pending_ack[key]
-            return True
-        return False
+
+        # TC1 continuation: Nova triggers drafting after kickoff ACK
+        # Works whether or not there was a pending Future (ack_matched),
+        # as long as the collab state shows foundation_create_started with no pending action.
+        if self.my_id == 'nova':
+            state = self.store.get_collab(ack.collab_id)
+            if (state and
+                    state.last_event == 'foundation_create_started' and
+                    not state.pending_action):
+                from .foundation_executor import execute_foundation_delivery
+                from .review_executor import _to_sharefolder_path
+                task_context = {
+                    "collab_id": ack.collab_id,
+                    "command_intent": "start_foundation_delivery",
+                    "doctrine_loading_set": ["v2_0_foundation_baseline", "v2_0_scope", "v2_0_prd"],
+                    "artifact_binding": {"output_path": "governance/docs/V2_0_FOUNDATION.md"},
+                    "payload": {}
+                }
+                self._log("ACK", f"[{ack.collab_id}] TC1 continuation: starting foundation delivery")
+                await execute_foundation_delivery(self, ack.collab_id, task_context)
+                state2 = self.store.get_collab(ack.collab_id)
+                artifact_path = getattr(state2, 'artifact_path', '') if state2 else ''
+                artifact_path = _to_sharefolder_path(artifact_path)
+                import uuid
+                review_envelope = CollabEnvelope(
+                    message_id=f"msg-{uuid.uuid4().hex[:12]}",
+                    collab_id=ack.collab_id,
+                    message_type="review_request",
+                    from_="nova",
+                    to="jarvis",
+                    artifact_type='foundation',
+                    artifact_path=artifact_path,
+                    payload={
+                        "review_scope": "foundation completeness and governance alignment",
+                        "workflow": "v2_0",
+                        "stage": "foundation_create_review"
+                    },
+                    summary=f"Foundation draft ready for review — {ack.collab_id}"
+                )
+                self.store.log_message(review_envelope.as_dict(), 'OUT')
+                await self.nc.publish('gov.collab.command', review_envelope.to_json())
+                self._log("ACK", f"[{ack.collab_id}] review_request published via TC1 continuation")
+
+        return ack_matched
 
     async def _send_ack(self, envelope: CollabEnvelope, ack_type: str, result: str = ''):
         """
