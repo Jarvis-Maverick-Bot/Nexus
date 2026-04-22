@@ -448,7 +448,7 @@ async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: Co
         status='open',
         current_owner='nova',
         artifact_type='foundation',
-        artifact_path='',
+        artifact_path=getattr(envelope, 'artifact_path', None) or '',
         pending_action='awaiting_foundation_draft',
         last_event='foundation_create_started'
     )
