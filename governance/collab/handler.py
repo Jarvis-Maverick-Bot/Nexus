@@ -464,19 +464,16 @@ async def _handle_start_foundation_create(handler: 'CollabHandler', envelope: Co
 
 async def _handle_foundation_drafting_started(handler: 'CollabHandler', envelope: CollabEnvelope) -> str:
     """
-    Handle 'foundation_drafting_started' — Nova notifies that drafting has begun.
+    Handle 'foundation_drafting_started' — Nova signals that drafting has begun.
 
-    This is the signal that Nova has entered the drafting phase.
-    Triggers executor to produce the Foundation draft artifact,
-    then automatically sends review_request to Jarvis.
-
-    State: drafting_in_progress → executor runs → review_request emitted.
+    Records state transition only. No auto-execution, no auto review_request.
+    Drafting remains Nova's owner-side work.
+    When Nova completes drafting, Nova sends review_request manually.
     """
     if _is_exited(envelope.collab_id, handler.store):
         await _send_ack(handler, envelope, 'received', result='rejected_collab_exited')
         return "rejected_exited"
 
-    # Update state to reflect active drafting
     handler.store.update_collab(
         collab_id=envelope.collab_id,
         status='in_progress',
@@ -491,45 +488,7 @@ async def _handle_foundation_drafting_started(handler: 'CollabHandler', envelope
         from_=envelope.from_
     )
 
-    # Execute Foundation delivery (produces draft artifact)
-    task_context = {
-        "collab_id": envelope.collab_id,
-        "command_intent": "start_foundation_delivery",
-        "doctrine_loading_set": ["v2_0_foundation_baseline", "v2_0_scope", "v2_0_prd"],
-        "artifact_binding": {
-            "output_path": "governance/docs/V2_0_FOUNDATION.md"
-        },
-        "payload": getattr(envelope, 'payload', {}) or {}
-    }
-    await execute_foundation_delivery(handler, envelope.collab_id, task_context)
-
-    # After executor completes, send review_request to Jarvis
-    import uuid
-    artifact_path = getattr(envelope, 'artifact_path', None) or ''
-    # Get artifact_path from state (may have been set by executor)
-    state = handler.store.get_collab(envelope.collab_id)
-    if state:
-        artifact_path = getattr(state, 'artifact_path', '') or artifact_path
-
-    review_envelope = CollabEnvelope(
-        message_id=f"msg-{uuid.uuid4().hex[:12]}",
-        collab_id=envelope.collab_id,
-        message_type="review_request",
-        from_="nova",
-        to="jarvis",
-        artifact_type='foundation',
-        artifact_path=artifact_path,
-        payload={
-            "review_scope": "foundation completeness and governance alignment",
-            "workflow": "v2_0",
-            "stage": "foundation_create_review"
-        },
-        summary=f"Foundation draft ready for review — {envelope.collab_id}"
-    )
-    handler.store.log_message(review_envelope.as_dict(), 'OUT')
-    await handler.nc.publish('gov.collab.command', review_envelope.to_json())
-    handler._log("HANDLER", f"[{envelope.collab_id}] review_request published to gov.collab.command (nova→jarvis)")
-
+    handler._log("HANDLER", f"[{envelope.collab_id}] foundation_drafting_started recorded — Nova owns drafting phase")
     return 'foundation_drafting_started'
 
 
