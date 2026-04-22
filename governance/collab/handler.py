@@ -1053,6 +1053,13 @@ class CollabHandler:
                 self._log("HANDLER", f"[REJECT] to={envelope.to} != my_id={self.my_id} — not for this daemon")
                 return False
 
+            # ── from 自检 ──────────────────────────────────────────────────────
+            # 拒绝处理自己发出的消息（from == my_id）
+            # 防止本地 daemon 把发出的消息当入站消息处理
+            if envelope.from_ == self.my_id:
+                self._log("HANDLER", f"[REJECT] from={envelope.from_} == my_id={self.my_id} — self-originated, ignoring")
+                return False
+
             self.store.log_message(envelope.as_dict(), direction='IN')
             await self._send_ack(envelope, 'received')
 
