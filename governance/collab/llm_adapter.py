@@ -11,15 +11,17 @@ import os
 import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 
 
 # ── Auth Profiles ──────────────────────────────────────────────────────────────
 
-def _load_auth_profile(api_key_profile: str) -> str:
+def _load_auth_profile(api_key_profile: str) -> dict:
     """
-    Load API key from OpenClaw auth-profiles.json.
+    Load auth entry from OpenClaw auth-profiles.json.
     Profile format: 'namespace:profile-name' e.g. 'minimax:global'
+    Returns the full entry dict so callers can inspect type (api_key vs oauth).
+    Raises ValueError if profile not found.
     """
     # OpenClaw auth-profiles.json locations (checked in order)
     candidates = [
@@ -33,9 +35,7 @@ def _load_auth_profile(api_key_profile: str) -> str:
             with open(path, 'r', encoding='utf-8') as f:
                 profiles = json.load(f).get('profiles', {})
             if api_key_profile in profiles:
-                entry = profiles[api_key_profile]
-                if entry.get('type') == 'api_key':
-                    return entry['key']
+                return profiles[api_key_profile]
 
     raise ValueError(f"api_key_profile '{api_key_profile}' not found in any auth-profiles.json")
 
@@ -256,6 +256,203 @@ class MiniMaxAdapter:
         return False, "", f"llm_generation_failed: {last_error}"
 
 
+# ── OpenAI Provider ───────────────────────────────────────────────────────────
+
+_OPENAI_BASE_URL = "http://localhost:18789/v1"  # OpenClaw gateway proxy
+
+
+class OpenAIAdapter:
+    """
+    OpenAI LLM provider adapter via OpenClaw gateway proxy.
+    Handles OAuth + API key auth transparently through the gateway.
+    """
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "gpt-4o",
+        timeout_seconds: int = 60,
+        max_retries: int = 2
+    ):
+        # Use a dummy API key — the gateway handles real auth via OAuth/browser session
+        self.api_key = api_key or "placeholder"
+        self.model = model
+        self.timeout_seconds = timeout_seconds
+        self.max_retries = max_retries
+
+    def _call(self, payload: dict) -> dict:
+        """Make HTTP call via urllib, with retries."""
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        data = json.dumps(payload).encode("utf-8")
+        last_error = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                req = urllib.request.Request(
+                    f"{_OPENAI_BASE_URL}/chat/completions",
+                    data=data,
+                    headers=headers,
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=self.timeout_seconds) as resp:
+                    return json.loads(resp.read().decode("utf-8"))
+            except Exception as e:
+                last_error = str(e)
+                if attempt < self.max_retries:
+                    import time; time.sleep(1 * (attempt + 1))
+        raise RuntimeError(f"OpenAI API failed after {self.max_retries + 1} attempts: {last_error}")
+
+    def _call_responses(self, payload: dict) -> dict:
+        """Call OpenAI Responses API (newer endpoint)."""
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        data = json.dumps(payload).encode("utf-8")
+        last_error = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                req = urllib.request.Request(
+                    f"{_OPENAI_BASE_URL}/responses",
+                    data=data,
+                    headers=headers,
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=self.timeout_seconds) as resp:
+                    return json.loads(resp.read().decode("utf-8"))
+            except Exception as e:
+                last_error = str(e)
+                if attempt < self.max_retries:
+                    import time; time.sleep(1 * (attempt + 1))
+        raise RuntimeError(f"OpenAI Responses API failed after {self.max_retries + 1} attempts: {last_error}")
+
+    def generate(
+        self,
+        system_prompt: str,
+        user_prompt: str
+    ) -> tuple[bool, str, Optional[str]]:
+        """
+        Plain text generation call — returns (ok, text, error).
+        Tries Responses API first, falls back to Chat Completions.
+        """
+        payload = {
+            "model": self.model,
+            "max_tokens": 4096,
+            "instructions": system_prompt,
+            "input": user_prompt,
+        }
+        try:
+            result = self._call_responses(payload)
+            # Responses API shape: output[].content[].text
+            output = result.get("output", [])
+            for item in output:
+                if item.get("type") == "message":
+                    for content in item.get("content", []):
+                        if content.get("type") == "output_text":
+                            text = content.get("text", "")
+                            if text.strip():
+                                return True, text, None
+            # Fallback: try Chat Completions shape
+            return self._generate_via_chat(system_prompt, user_prompt)
+        except Exception as e:
+            # Fallback to Chat Completions
+            try:
+                ok, text, err = self._generate_via_chat(system_prompt, user_prompt)
+                return ok, text, err
+            except Exception:
+                return False, "", f"openai_generation_failed: {e}"
+
+    def _generate_via_chat(self, system_prompt: str, user_prompt: str) -> tuple[bool, str, Optional[str]]:
+        payload = {
+            "model": self.model,
+            "max_tokens": 4096,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ]
+        }
+        result = self._call(payload)
+        choices = result.get("choices", [])
+        if choices:
+            text = choices[0].get("message", {}).get("content", "")
+            if text.strip():
+                return True, text, None
+        return False, "", "openai_empty_response"
+
+    def judge(self, system_prompt: str, user_prompt: str) -> LLMOutput:
+        """
+        Structured judgment call via Chat Completions (V0.2 contract format).
+        Returns LLMOutput with parsed verdict/reasons/required_changes.
+        """
+        _, text, err = self._generate_via_chat(system_prompt, user_prompt)
+        if err:
+            return LLMOutput(
+                verdict="review_execution_error",
+                reasons=f"OpenAI judge call failed: {err}",
+                required_changes="",
+                raw=""
+            )
+        return self._parse_judge_output(text, fallback_raw=text)
+
+    def _parse_judge_output(self, raw: str, fallback_raw: str) -> LLMOutput:
+        """Parse V0.2 three-line verdict from OpenAI response."""
+        if not raw or not raw.strip():
+            return LLMOutput(
+                verdict="review_execution_error",
+                reasons="parse failure: empty response",
+                required_changes="",
+                raw=fallback_raw
+            )
+        sections = self._find_sections(raw)
+        verdict_raw = sections.get("VERDICT", "")
+        reasons_raw = sections.get("REASONS", "")
+        required_changes_raw = sections.get("REQUIRED_CHANGES", "")
+        allowed = {"APPROVED", "REVISION_REQUIRED", "BLOCKED"}
+        verdict_normalized = verdict_raw.strip().upper() if verdict_raw else ""
+        if verdict_normalized not in allowed:
+            return LLMOutput(
+                verdict="review_execution_error",
+                reasons=f"VERDICT not in allowed set — received: '{verdict_raw}'",
+                required_changes="",
+                raw=fallback_raw
+            )
+        if verdict_normalized != "APPROVED":
+            if not reasons_raw or len(reasons_raw.strip()) < 10:
+                return LLMOutput(
+                    verdict="review_execution_error",
+                    reasons=f"REASONS too short for verdict={verdict_normalized}",
+                    required_changes="",
+                    raw=fallback_raw
+                )
+        return LLMOutput(
+            verdict=verdict_normalized.lower(),
+            reasons=reasons_raw.strip(),
+            required_changes=required_changes_raw.strip() if required_changes_raw else "",
+            raw=fallback_raw
+        )
+
+    def _find_sections(self, raw: str) -> Dict[str, str]:
+        section_markers = ["VERDICT", "REASONS", "REQUIRED_CHANGES"]
+        lines = raw.strip().split("\n")
+        sections = {}
+        current_section = None
+        current_lines = []
+        for line in lines:
+            upper_stripped = line.strip().upper()
+            is_header = any(upper_stripped.startswith(m + ":") for m in section_markers)
+            if is_header:
+                if current_section:
+                    sections[current_section] = "\n".join(current_lines)
+                current_section = next(m for m in section_markers if upper_stripped.startswith(m + ":"))
+                current_lines = [line.split(":", 1)[1].strip()]
+            elif current_section:
+                current_lines.append(line)
+        if current_section:
+            sections[current_section] = "\n".join(current_lines)
+        return sections
+
+
 # ── Adapter Factory ────────────────────────────────────────────────────────────
 
 def create_llm_adapter(
@@ -264,16 +461,29 @@ def create_llm_adapter(
     model: Optional[str] = None,
     timeout_seconds: int = 60,
     max_retries: int = 2
-) -> MiniMaxAdapter:
+) -> Union[MiniMaxAdapter, OpenAIAdapter]:
     """
     Factory: create an LLM adapter from config.
-    Currently supports MiniMax only. Extensible for OpenAI/Anthropic later.
+    Supports 'minimax' and 'openai' (via OpenClaw gateway proxy).
     """
     if provider == "minimax":
-        api_key = _load_auth_profile(api_key_profile)
+        entry = _load_auth_profile(api_key_profile)
+        api_key = entry.get("key") or ""
         return MiniMaxAdapter(
             api_key=api_key,
             model=model or _MINIMAX_MODEL,
+            timeout_seconds=timeout_seconds,
+            max_retries=max_retries
+        )
+    elif provider in ("openai", "openai-codex"):
+        # OAuth profiles don't expose a raw key — gateway handles auth transparently
+        # Use the profile name as api_key placeholder (gateway resolves it from session)
+        entry = _load_auth_profile(api_key_profile)
+        # api_key is a placeholder; real auth is handled by the gateway OAuth session
+        api_key = entry.get("key") or "placeholder"
+        return OpenAIAdapter(
+            api_key=api_key,
+            model=model or "gpt-4o",
             timeout_seconds=timeout_seconds,
             max_retries=max_retries
         )
