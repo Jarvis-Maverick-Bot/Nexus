@@ -1,5 +1,6 @@
 {
   "_comment": "Template for collab_config.json — copy to collab_config.json and fill in real values",
+  "_comment_nats": "NATS connection",
   "my_id": "nova_or_jarvis",
   "sender_id": "nova",
   "target_id": "jarvis",
@@ -16,23 +17,27 @@
   "data_dir": null,
   "protocol_version": "0.2",
   "max_review_rounds": 3,
+
+  "_comment_paths": "Path configuration — at least one of local_shared_root / transport_shared_root must be set",
+  "paths": {
+    "_comment_1": "local_shared_root: this machine's native path to the shared drive (macOS: /Users/..., Windows: \\\\UNC\\...)",
+    "_comment_2": "transport_shared_root: the UNC/sharefolder path both machines can access",
+    "_comment_3": "project_rel_root: relative path from shared drive root to V2.0 project root",
+    "local_shared_root": null,
+    "transport_shared_root": "\\\\192.168.31.124\\Nova-Jarvis-Shared",
+    "project_rel_root": "working/01-projects/Nexus/V2.0"
+  },
+
   "llm": {
-    "provider": "openai_or_other_provider",
-    "model": "model_name_here",
-    "api_key_profile": "provider:profile",
+    "_comment": "LLM config used by review_executor and foundation_executor",
+    "provider": "minimax",
+    "model": "MiniMax-M2.7",
+    "api_key_profile": "minimax:global",
     "timeout_seconds": 60,
     "max_retries": 2,
     "evidence_full_text_max_chars": 8000
   },
-  "drafting": {
-    "provider": "openai_or_other_provider",
-    "model": "model_name_here",
-    "api_key_profile": "provider:profile",
-    "timeout_seconds": 60,
-    "max_retries": 2,
-    "sharefolder_root": "\\\\host\\share\\Nova-Jarvis-Shared",
-    "local_shared_root": "/Users/alex/Nova-Jarvis-Shared"
-  },
-  "_comment_telegram": "Telegram bot token — leave empty in template; real local token stays only in untracked collab_config.json or auth profile",
+
+  "_comment_telegram": "Telegram bot token — leave empty in template; real token stays only in untracked collab_config.json or auth profile",
   "telegram_bot_token": ""
 }
