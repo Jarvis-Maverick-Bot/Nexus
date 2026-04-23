@@ -25,7 +25,7 @@ def _load_local_config() -> dict:
     return {}
 
 
-def _shared_root_from_config(config: dict) -> Path:
+def _get_effective_roots(config: dict) -> tuple[Path, Path]:
     paths_cfg = config.get("paths", {})
     local_root = paths_cfg.get("local_shared_root")
     transport_root = paths_cfg.get("transport_shared_root")
@@ -34,11 +34,17 @@ def _shared_root_from_config(config: dict) -> Path:
             "collab_config.json paths.local_shared_root and paths.transport_shared_root "
             "are both null — at least one must be set"
         )
-    effective = Path(local_root) if local_root else Path(transport_root)
-    rel_root = paths_cfg.get("project_rel_root", "")
+    effective_local = Path(local_root) if local_root else Path(transport_root)
+    effective_transport = Path(transport_root) if transport_root else Path(local_root)
+    return effective_local, effective_transport
+
+
+def _shared_root_from_config(config: dict) -> Path:
+    effective_local, _ = _get_effective_roots(config)
+    rel_root = config.get("paths", {}).get("project_rel_root", "")
     if rel_root:
-        return effective / rel_root
-    return effective
+        return effective_local / rel_root
+    return effective_local
 
 
 def _build_path_map(config: dict) -> dict:
@@ -210,13 +216,23 @@ def _generate_foundation_draft_via_llm(task_context: dict, doctrine_snapshot: di
 def _produce_foundation_draft(task_context: dict) -> tuple[bool, str, Optional[str]]:
     """
     Produce the V2.0 Foundation draft artifact.
-    Returns (success, artifact_path, error_message).
+
+    Write the draft to:
+    1. local repo workspace copy (for Nova local inspection)
+    2. local sharefolder project copy (for cross-machine handoff)
+
+    Returns (success, artifact_path_for_handoff, error_message).
+    The returned path must be the sharefolder-backed path that can be converted
+    into a transport path for Jarvis-side review access.
     """
     artifact_binding = task_context.get("artifact_binding", {})
     output_path_str = artifact_binding.get("output_path", "governance/docs/V2_0_FOUNDATION.md")
 
+    config = _load_local_config()
     repo_root = Path(__file__).parent.parent.parent
-    artifact_path = repo_root / output_path_str
+    repo_artifact_path = repo_root / output_path_str
+    shared_project_root = _shared_root_from_config(config)
+    shared_artifact_path = shared_project_root / output_path_str
 
     doctrine = _load_doctrine(task_context.get("doctrine_loading_set", []))
     if not doctrine.get("doctrine_loaded"):
@@ -229,10 +245,15 @@ def _produce_foundation_draft(task_context: dict) -> tuple[bool, str, Optional[s
         return False, "", err
 
     try:
-        artifact_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(artifact_path, 'w', encoding='utf-8') as f:
+        repo_artifact_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(repo_artifact_path, 'w', encoding='utf-8') as f:
             f.write(draft_content)
-        return True, str(artifact_path), None
+
+        shared_artifact_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(shared_artifact_path, 'w', encoding='utf-8') as f:
+            f.write(draft_content)
+
+        return True, str(shared_artifact_path), None
     except Exception as e:
         return False, "", f"artifact_write_failed: {e}"
 

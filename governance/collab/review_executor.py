@@ -96,16 +96,24 @@ def _init_paths():
 def _to_sharefolder_path(artifact_path: str) -> str:
     """Convert artifact_path to a transport-accessible path for the remote side.
     Uses effective_transport_root as the target base.
+
+    Important: return a real runtime path string, not a JSON-escaped display form.
+    For UNC paths this means normal double-leading backslashes (e.g. \\server\share\file)
+    and consistent backslash separators throughout.
     """
     if not artifact_path:
         return artifact_path
     _init_paths()
-    sharefolder_escaped = _SHAREFOLDER_BASE.replace('\\', '\\\\')
-    if artifact_path.startswith(sharefolder_escaped):
-        return artifact_path
-    if _MACOS_SHAREFOLDER_BASE and artifact_path.startswith(_MACOS_SHAREFOLDER_BASE):
-        return artifact_path.replace(_MACOS_SHAREFOLDER_BASE, _SHAREFOLDER_BASE.replace('\\', '\\\\'))
-    return artifact_path
+
+    normalized_input = artifact_path.replace('/', '\\')
+    normalized_transport = _SHAREFOLDER_BASE.replace('/', '\\')
+    normalized_local = _MACOS_SHAREFOLDER_BASE.replace('/', '\\') if _MACOS_SHAREFOLDER_BASE else ""
+
+    if normalized_input.startswith(normalized_transport):
+        return normalized_input
+    if normalized_local and normalized_input.startswith(normalized_local):
+        return normalized_input.replace(normalized_local, normalized_transport, 1)
+    return normalized_input
 
 
 # ── Config reader ─────────────────────────────────────────────────────────────
