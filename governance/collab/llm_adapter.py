@@ -206,6 +206,55 @@ class MiniMaxAdapter:
 
         return sections
 
+    def generate(
+        self,
+        system_prompt: str,
+        user_prompt: str
+    ) -> tuple[bool, str, Optional[str]]:
+        """
+        Plain text generation call — returns (ok, text, error).
+        Used by foundation_executor for draft generation.
+        """
+        payload = json.dumps({
+            "model": self.model,
+            "max_tokens": 4096,
+            "system": system_prompt,
+            "messages": [{"role": "user", "content": user_prompt}]
+        }).encode("utf-8")
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+            "anthropic-version": "2023-06-01",
+        }
+
+        last_error = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                req = urllib.request.Request(
+                    _MINIMAX_BASE_URL,
+                    data=payload,
+                    headers=headers,
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=self.timeout_seconds) as resp:
+                    result_data = json.loads(resp.read().decode("utf-8"))
+                    content = result_data.get("content", [])
+                    if isinstance(content, list) and len(content) > 0:
+                        text = content[0].get("text", "")
+                    else:
+                        text = str(content)
+                    if not text.strip():
+                        return False, "", "llm_empty_output"
+                    return True, text, None
+            except Exception as e:
+                last_error = str(e)
+                if attempt < self.max_retries:
+                    import time
+                    time.sleep(1 * (attempt + 1))
+
+        return False, "", f"llm_generation_failed: {last_error}"
+
 
 # ── Adapter Factory ────────────────────────────────────────────────────────────
 

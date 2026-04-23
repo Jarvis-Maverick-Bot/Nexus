@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Dict, Any
 
-from openai import OpenAI
+from governance.collab.llm_adapter import create_llm_adapter
 
 def _load_local_config() -> dict:
     config_path = Path(__file__).parent / "collab_config.json"
@@ -187,17 +187,21 @@ Reference: PRD
 def _generate_foundation_draft_via_llm(task_context: dict, doctrine_snapshot: dict) -> tuple[bool, str, Optional[str]]:
     try:
         config = _load_local_config()
-        drafting = config.get("drafting", {})
-        model = drafting.get("model") or config.get("llm", {}).get("model") or "gpt-5.4"
-        client = OpenAI()
-        prompt = _build_foundation_prompt(task_context, doctrine_snapshot)
-        response = client.responses.create(
-            model=model,
-            input=prompt,
+        llm_cfg = config.get("llm", {})
+        adapter = create_llm_adapter(
+            provider=llm_cfg.get("provider", "minimax"),
+            api_key_profile=llm_cfg.get("api_key_profile", "minimax:global"),
+            model=llm_cfg.get("model"),
+            timeout_seconds=llm_cfg.get("timeout_seconds", 60),
+            max_retries=llm_cfg.get("max_retries", 2)
         )
-        text = getattr(response, "output_text", "") or ""
-        if not text.strip():
-            return False, "", "llm_empty_output"
+        prompt = _build_foundation_prompt(task_context, doctrine_snapshot)
+        ok, text, err = adapter.generate(
+            system_prompt="You are a business document drafting assistant.",
+            user_prompt=prompt
+        )
+        if not ok:
+            return False, "", err
         return True, text, None
     except Exception as e:
         return False, "", f"llm_generation_failed: {e}"
@@ -276,7 +280,7 @@ async def execute_foundation_delivery(handler: 'CollabHandler', collab_id: str, 
             last_event=error,
             pending_action=''
         )
-        handler.store.emit_event(collab_id, error, collab_id=collab_id)
+        handler.store.emit_event(collab_id, error)
         handler._log("ERROR", f"[{collab_id}] {error}")
         return
 
