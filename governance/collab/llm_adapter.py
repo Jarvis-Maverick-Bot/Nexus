@@ -40,6 +40,25 @@ def _load_auth_profile(api_key_profile: str) -> dict:
     raise ValueError(f"api_key_profile '{api_key_profile}' not found in any auth-profiles.json")
 
 
+def _load_gateway_token() -> str:
+    """
+    Load the local OpenClaw gateway shared token.
+    The OpenAI-compatible HTTP surface authenticates with gateway.auth.token,
+    not with the upstream provider OAuth access token.
+    """
+    config_path = Path(os.environ.get('OPENCLAW_CONFIG_PATH', Path.home() / '.openclaw' / 'openclaw.json'))
+    if not config_path.exists():
+        raise ValueError(f"OpenClaw config not found: {config_path}")
+
+    with open(config_path, 'r', encoding='utf-8') as f:
+        cfg = json.load(f)
+
+    token = cfg.get('gateway', {}).get('auth', {}).get('token', '')
+    if not token:
+        raise ValueError('gateway.auth.token not found in OpenClaw config')
+    return token
+
+
 # ── Output Schema ─────────────────────────────────────────────────────────────
 
 @dataclass
@@ -259,23 +278,24 @@ class MiniMaxAdapter:
 # ── OpenAI Provider ───────────────────────────────────────────────────────────
 
 _OPENAI_BASE_URL = "http://localhost:18789/v1"  # OpenClaw gateway proxy
+_OPENAI_GATEWAY_MODEL = "openclaw/main"
 
 
 class OpenAIAdapter:
     """
-    OpenAI LLM provider adapter via OpenClaw gateway proxy.
-    Handles OAuth + API key auth transparently through the gateway.
+    OpenAI LLM provider adapter via the local OpenClaw gateway HTTP surface.
+    This path authenticates with the gateway shared token and targets gateway
+    model ids such as `openclaw/main` rather than raw upstream model ids.
     """
     def __init__(
         self,
         api_key: str,
-        model: str = "gpt-4o",
+        model: str = _OPENAI_GATEWAY_MODEL,
         timeout_seconds: int = 60,
         max_retries: int = 2
     ):
-        # Use a dummy API key — the gateway handles real auth via OAuth/browser session
-        self.api_key = api_key or "placeholder"
-        self.model = model
+        self.api_key = api_key
+        self.model = model if model and model.startswith('openclaw') else _OPENAI_GATEWAY_MODEL
         self.timeout_seconds = timeout_seconds
         self.max_retries = max_retries
 
@@ -334,34 +354,13 @@ class OpenAIAdapter:
     ) -> tuple[bool, str, Optional[str]]:
         """
         Plain text generation call — returns (ok, text, error).
-        Tries Responses API first, falls back to Chat Completions.
+        Use Chat Completions as the primary path because that is the confirmed
+        enabled gateway HTTP surface on Nova's machine.
         """
-        payload = {
-            "model": self.model,
-            "max_tokens": 4096,
-            "instructions": system_prompt,
-            "input": user_prompt,
-        }
         try:
-            result = self._call_responses(payload)
-            # Responses API shape: output[].content[].text
-            output = result.get("output", [])
-            for item in output:
-                if item.get("type") == "message":
-                    for content in item.get("content", []):
-                        if content.get("type") == "output_text":
-                            text = content.get("text", "")
-                            if text.strip():
-                                return True, text, None
-            # Fallback: try Chat Completions shape
             return self._generate_via_chat(system_prompt, user_prompt)
         except Exception as e:
-            # Fallback to Chat Completions
-            try:
-                ok, text, err = self._generate_via_chat(system_prompt, user_prompt)
-                return ok, text, err
-            except Exception:
-                return False, "", f"openai_generation_failed: {e}"
+            return False, "", f"openai_generation_failed: {e}"
 
     def _generate_via_chat(self, system_prompt: str, user_prompt: str) -> tuple[bool, str, Optional[str]]:
         payload = {
@@ -476,14 +475,13 @@ def create_llm_adapter(
             max_retries=max_retries
         )
     elif provider in ("openai", "openai-codex"):
-        # OAuth profiles don't expose a raw key — gateway handles auth transparently
-        # Use the profile name as api_key placeholder (gateway resolves it from session)
-        entry = _load_auth_profile(api_key_profile)
-        # api_key is a placeholder; real auth is handled by the gateway OAuth session
-        api_key = entry.get("key") or "placeholder"
+        # Validate that the requested local OpenClaw profile exists, but authenticate
+        # to the gateway HTTP surface with the gateway shared token.
+        _load_auth_profile(api_key_profile)
+        gateway_token = _load_gateway_token()
         return OpenAIAdapter(
-            api_key=api_key,
-            model=model or "gpt-4o",
+            api_key=gateway_token,
+            model=model or _OPENAI_GATEWAY_MODEL,
             timeout_seconds=timeout_seconds,
             max_retries=max_retries
         )
