@@ -1,2 +1,8 @@
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
 # Local machine-specific identity config — never commit
 governance/collab/collab_config.json
