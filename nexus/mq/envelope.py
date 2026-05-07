@@ -11,6 +11,8 @@ from datetime import datetime, timezone
 import uuid
 from typing import Optional, Any
 
+SUPPORTED_SCHEMA_VERSION = "1.0"
+
 
 @dataclass
 class EnvelopeValidationResult:
@@ -41,7 +43,7 @@ class MessageEnvelope:
     message_id: str = field(default_factory=lambda: f"env-{uuid.uuid4().hex[:12]}")
     message_type: str = ""
     message_class: str = ""
-    schema_version: str = "1.0"
+    schema_version: str = SUPPORTED_SCHEMA_VERSION
     idempotency_key: str = ""
     workflow_instance_id: str = ""
     workflow_type: str = ""
@@ -78,6 +80,10 @@ class MessageEnvelope:
 
         if not self.schema_version:
             errors.append("MISSING_REQUIRED_FIELD: schema_version")
+        elif self.schema_version != SUPPORTED_SCHEMA_VERSION:
+            errors.append(
+                f"SCHEMA_VERSION_MISMATCH: expected {SUPPORTED_SCHEMA_VERSION}, got {self.schema_version}"
+            )
 
         if not self.idempotency_key:
             errors.append("MISSING_REQUIRED_FIELD: idempotency_key")
@@ -88,11 +94,20 @@ class MessageEnvelope:
         if not self.workflow_type:
             errors.append("MISSING_WORKFLOW_REFS: workflow_type")
 
+        if not self.workflow_version:
+            errors.append("MISSING_WORKFLOW_REFS: workflow_version")
+
+        if not self.correlation_id:
+            errors.append("MISSING_REQUIRED_FIELD: correlation_id")
+
         if not self.producer:
             errors.append("MISSING_REQUIRED_FIELD: producer")
 
         if not self.created_at:
             errors.append("MISSING_REQUIRED_FIELD: created_at")
+
+        if self.payload is None:
+            errors.append("MISSING_REQUIRED_FIELD: payload")
 
         return EnvelopeValidationResult(valid=len(errors) == 0, errors=errors)
 
@@ -168,6 +183,7 @@ def build_envelope(
     """
     import uuid
     key = idempotency_key or f"{message_type}:{workflow_instance_id}:{uuid.uuid4().hex[:8]}"
+    corr_id = correlation_id or f"corr-{uuid.uuid4().hex[:12]}"
 
     # Infer message_class from message_type if not provided
     if not message_class:
@@ -189,6 +205,6 @@ def build_envelope(
         workflow_version=workflow_version,
         producer=producer,
         idempotency_key=key,
-        correlation_id=correlation_id,
+        correlation_id=corr_id,
         payload=payload,
     )

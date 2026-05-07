@@ -99,13 +99,32 @@ class CommandHandler:
         evidence_refs = result_candidate.get("evidence_refs", []) if result_candidate else []
         transition_request = result_candidate.get("transition_request", {"new_state": "processing"}) if result_candidate else {"new_state": "processing"}
 
+        commit_result = self._commit_boundary.try_commit(
+            workflow_instance_id=workflow_instance_id,
+            evidence_refs=evidence_refs,
+            state_transition=transition_request,
+        )
+
+        status = "committed" if commit_result.accepted else "rejected"
+        error = commit_result.error if not commit_result.accepted else None
+
+        if commit_result.accepted:
+            self._idempotency_store.record_processed(
+                idempotency_key=idempotency_key,
+                message_id=message_id,
+                workflow_instance_id=workflow_instance_id,
+                result="processed",
+                result_detail=commit_result.commit_id,
+            )
+
         response = HandlerResponse(
             workflow_instance_id=workflow_instance_id,
             message_id=message_id,
             result_candidate=result_candidate,
             evidence_refs=evidence_refs,
             transition_request=transition_request,
-            status="candidate",
+            status=status,
+            error=error,
         )
         self._responses.append(response)
         return response

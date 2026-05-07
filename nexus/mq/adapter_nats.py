@@ -20,6 +20,7 @@ from typing import Optional, Callable
 import asyncio
 import json
 import time
+import threading
 import uuid
 
 try:
@@ -121,6 +122,8 @@ class MqAdapterNats:
         self._connected = False
         self._pull_sub = None  # shared pull subscription (reused on reconnect)
         self._loop = None      # persistent event loop for sync methods
+        self._loop_thread = None
+        self._loop_ready = None
         self._consumer_name = "nexus-mq-consumer"  # durable consumer name (shared across instances)
 
     # ── connection ───────────────────────────────────────────────────────────
@@ -178,51 +181,37 @@ class MqAdapterNats:
 
     # ── publish ─────────────────────────────────────────────────────────────
 
-    async def publish(self, envelope: dict) -> dict:
-        """
-        Publish a message to NATS JetStream.
-        Returns an ACK event at broker_received level.
-        """
-        await self._ensure_connection()
+    def _ensure_loop(self) -> asyncio.AbstractEventLoop:
+        """Create one dedicated background event loop for all sync operations."""
+        if self._loop is not None and not self._loop.is_closed() and self._loop_thread and self._loop_thread.is_alive():
+            return self._loop
 
-        subject = f"{self._subject_prefix}.{envelope.get('message_type', 'unknown').lower()}"
-        payload_bytes = json.dumps(envelope, ensure_ascii=False).encode('utf-8')
+        self._loop = asyncio.new_event_loop()
+        self._loop_ready = threading.Event()
 
-        # Publish with message_id as JetStream message-ID for dedup
-        msg_id = envelope.get("message_id", "")
-        ack = await self._js.publish(
-            subject,
-            payload=payload_bytes,
-            headers={"message_id": msg_id} if msg_id else {},
-            timeout=5,
+        def _run_loop():
+            asyncio.set_event_loop(self._loop)
+            self._loop_ready.set()
+            self._loop.run_forever()
+
+        self._loop_thread = threading.Thread(
+            target=_run_loop,
+            name="MqAdapterNatsLoop",
+            daemon=True,
         )
-
-        ack_result = {
-            "ack_level": "broker_received",
-            "message_id": msg_id,
-            "workflow_instance_id": envelope.get("workflow_instance_id", ""),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "nats_seq": ack.seq,
-        }
-        self._ack_log.append(ack_result)
-        return ack_result
-
-    def _get_loop(self) -> asyncio.AbstractEventLoop:
-        """Return the appropriate event loop: running loop takes priority over persistent one."""
-        try:
-            running = asyncio.get_running_loop()
-            return running
-        except RuntimeError:
-            pass
-        # No running loop — use persistent one, creating if needed
-        if self._loop is None or self._loop.is_closed():
-            self._loop = asyncio.new_event_loop()
+        self._loop_thread.start()
+        self._loop_ready.wait()
         return self._loop
+
+    def _run_sync(self, coro):
+        """Run adapter coroutines on the dedicated background loop from any caller context."""
+        loop = self._ensure_loop()
+        future = asyncio.run_coroutine_threadsafe(coro, loop)
+        return future.result()
 
     def publish(self, envelope: dict) -> dict:
         """Sync wrapper for publish (delegates to async implementation)."""
-        loop = self._get_loop()
-        return loop.run_until_complete(self._publish_impl(envelope))
+        return self._run_sync(self._publish_impl(envelope))
 
     async def _publish_impl(self, envelope: dict) -> dict:
         await self._ensure_connection()
@@ -283,16 +272,14 @@ class MqAdapterNats:
 
     def consume(self, timeout_ms: int = 5000) -> Optional[dict]:
         """Consume the next available message. Returns None if queue is empty."""
-        loop = self._get_loop()
-        return loop.run_until_complete(self._consume_impl(timeout_ms))
+        return self._run_sync(self._consume_impl(timeout_ms))
 
     def consume_by_id(self, message_id: str) -> Optional[dict]:
         """
         Consume a specific message by message_id using JetStream get_msg by sequence.
         Scans stream from the end (most recent first).
         """
-        loop = self._get_loop()
-        return loop.run_until_complete(self._consume_by_id_impl(message_id))
+        return self._run_sync(self._consume_by_id_impl(message_id))
 
     async def _consume_by_id_impl(self, message_id: str) -> Optional[dict]:
         await self._ensure_connection()
@@ -335,8 +322,7 @@ class MqAdapterNats:
         Issue an ACK at the specified level.
         Design rule: ACK means intake only — never workflow state change.
         """
-        loop = self._get_loop()
-        return loop.run_until_complete(self._ack_impl(message_id, level))
+        return self._run_sync(self._ack_impl(message_id, level))
 
     # ── retry with DLQ ───────────────────────────────────────────────────────
 
@@ -352,8 +338,7 @@ class MqAdapterNats:
         Emit a Dead Letter Queue event to the DLQ subject.
         Also logs locally for accessor methods.
         """
-        loop = self._get_loop()
-        loop.run_until_complete(self._emit_dlq_impl(message_id, workflow_instance_id, attempts, last_error, original_payload))
+        self._run_sync(self._emit_dlq_impl(message_id, workflow_instance_id, attempts, last_error, original_payload))
 
         event = DlqEvent(
             message_id=message_id,
@@ -464,8 +449,7 @@ class MqAdapterNats:
 
     def replay(self) -> list[dict]:
         """Replay all messages from the stream (for recovery scenarios)."""
-        loop = self._get_loop()
-        return loop.run_until_complete(self._replay_impl())
+        return self._run_sync(self._replay_impl())
 
     # ── accessors ────────────────────────────────────────────────────────────
 
@@ -477,35 +461,22 @@ class MqAdapterNats:
 
     # ── close ────────────────────────────────────────────────────────────────
 
-    def close(self):
-        """Close the NATS connection and delete the stream (sync wrapper)."""
-        if self._nc is None:
-            return
-        try:
-            async def _do_close():
-                # Delete the stream so the next adapter starts with a completely
-                # empty stream. This prevents any stale messages from leaking.
-                if self._nc and self._js:
-                    try:
-                        await self._js.delete_stream(self._stream_name)
-                    except Exception:
-                        pass  # stream may not exist
-                if self._pull_sub:
-                    try:
-                        await self._pull_sub.unsubscribe()
-                    except Exception:
-                        pass
-                    self._pull_sub = None
-                if self._nc:
-                    await self._nc.close()
-
-            # Always use a dedicated short-lived loop for close,
-            # so it runs to completion regardless of the caller's loop state.
-            close_loop = asyncio.new_event_loop()
+    async def _close_impl(self):
+        """Release local adapter resources without mutating shared broker state."""
+        if self._pull_sub:
             try:
-                close_loop.run_until_complete(_do_close())
-            finally:
-                close_loop.close()
+                await self._pull_sub.unsubscribe()
+            except Exception:
+                pass
+            self._pull_sub = None
+        if self._nc:
+            await self._nc.close()
+
+    def close(self):
+        """Close the adapter connection and local loop resources."""
+        try:
+            if self._nc is not None:
+                self._run_sync(self._close_impl())
         except Exception:
             pass
         finally:
@@ -513,3 +484,12 @@ class MqAdapterNats:
             self._nc = None
             self._js = None
             self._pull_sub = None
+            if self._loop is not None and not self._loop.is_closed():
+                self._loop.call_soon_threadsafe(self._loop.stop)
+            if self._loop_thread and self._loop_thread.is_alive():
+                self._loop_thread.join(timeout=2)
+            if self._loop is not None and not self._loop.is_closed():
+                self._loop.close()
+            self._loop = None
+            self._loop_thread = None
+            self._loop_ready = None

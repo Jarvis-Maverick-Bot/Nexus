@@ -61,6 +61,120 @@ def test_envelope_valid_full():
     print("PASS: test_envelope_valid_full")
 
 
+def test_envelope_schema_version_mismatch():
+    """Unsupported schema_version must fail validation."""
+    env = build_envelope(
+        message_type="Command_Message",
+        workflow_instance_id="wf-schema-001",
+        workflow_type="test",
+        workflow_version="1.0",
+        producer="test-producer",
+        payload={"command": "test"},
+        idempotency_key="idem-schema-001",
+    )
+    env.schema_version = "2.0"
+    result = env.validate()
+    assert result.valid is False, "Unsupported schema_version must fail validation"
+    assert any("SCHEMA_VERSION_MISMATCH" in e for e in result.errors)
+    print("PASS: test_envelope_schema_version_mismatch")
+
+
+def test_command_handler_commit_and_idempotency():
+    """Command handler must commit and record idempotency only after accepted commit."""
+    from nexus.mq.idempotency_store import IdempotencyStore
+    from nexus.mq.ack_policy import AckPolicy
+
+    idempotency_store = IdempotencyStore()
+    commit_boundary = CommitBoundary()
+    handler = CommandHandler(idempotency_store, commit_boundary, AckPolicy())
+
+    env = build_envelope(
+        message_type="Command_Message",
+        workflow_instance_id="wf-handler-001",
+        workflow_type="test",
+        workflow_version="1.0",
+        producer="handler-test",
+        payload={"command": "do-work"},
+        idempotency_key="idem-handler-001",
+    ).to_dict()
+
+    def _execute(_payload):
+        return {
+            "ok": True,
+            "evidence_refs": ["evidence/handler-001.json"],
+            "transition_request": {"new_state": "completed"},
+        }
+
+    first = handler.handle(env, execute_command=_execute)
+    assert first.status == "committed"
+    assert commit_boundary.get_current_state("wf-handler-001") == "completed"
+    assert idempotency_store.get_record("idem-handler-001") is not None
+
+    second = handler.handle(env, execute_command=_execute)
+    assert second.status == "rejected"
+    assert "IDEMPOTENCY_CONFLICT" in (second.error or "")
+    print("PASS: test_command_handler_commit_and_idempotency")
+
+
+def test_hitl_feedback_dedup_and_resume_gate():
+    """Approve may resume; Revise/Reject may not; duplicates must be rejected."""
+    from datetime import datetime, timezone
+
+    handler = HitlFeedbackHandler()
+
+    approve_wait = handler.create_authority_wait("wf-hitl-gate", "ckpt-approve")
+    approve = handler.validate_feedback(
+        feedback_id="fb-approve-001",
+        authority_wait_id=approve_wait.wait_id,
+        reviewer_actor_id="alex",
+        reviewer_role="reviewer",
+        action="Approve",
+        feedback_text=None,
+        submitted_at=datetime.now(timezone.utc).isoformat(),
+    )
+    assert approve.valid is True
+    assert handler.can_resume(approve_wait.wait_id) is True
+
+    duplicate = handler.validate_feedback(
+        feedback_id="fb-approve-001",
+        authority_wait_id=approve_wait.wait_id,
+        reviewer_actor_id="alex",
+        reviewer_role="reviewer",
+        action="Approve",
+        feedback_text=None,
+        submitted_at=datetime.now(timezone.utc).isoformat(),
+    )
+    assert duplicate.valid is False
+    assert any("DUPLICATE_FEEDBACK" in e for e in duplicate.errors)
+
+    revise_wait = handler.create_authority_wait("wf-hitl-gate", "ckpt-revise")
+    revise = handler.validate_feedback(
+        feedback_id="fb-revise-001",
+        authority_wait_id=revise_wait.wait_id,
+        reviewer_actor_id="nova",
+        reviewer_role="reviewer",
+        action="Revise",
+        feedback_text="Needs changes.",
+        submitted_at=datetime.now(timezone.utc).isoformat(),
+    )
+    assert revise.valid is True
+    assert handler.can_resume(revise_wait.wait_id) is False
+
+    reject_wait = handler.create_authority_wait("wf-hitl-gate", "ckpt-reject")
+    reject = handler.validate_feedback(
+        feedback_id="fb-reject-001",
+        authority_wait_id=reject_wait.wait_id,
+        reviewer_actor_id="alex",
+        reviewer_role="reviewer",
+        action="Reject",
+        feedback_text=None,
+        submitted_at=datetime.now(timezone.utc).isoformat(),
+    )
+    assert reject.valid is True
+    assert handler.can_resume(reject_wait.wait_id) is False
+    print("PASS: test_hitl_feedback_dedup_and_resume_gate")
+
+
 def run_all_tests():
     print("=" * 60)
     print("MQ SKELETON TESTS — 3.5 Implementation")
@@ -71,6 +185,7 @@ def run_all_tests():
         test_envelope_required_fields,
         test_envelope_workflow_refs,
         test_envelope_valid_full,
+        test_envelope_schema_version_mismatch,
 
         # ACK policy
         ("test_ack_means_intake_only", test_ack_means_intake_only),
@@ -96,6 +211,10 @@ def run_all_tests():
 
         # Review queue
         ("test_review_task_publish_requires_wait_state", test_review_task_publish_requires_wait_state),
+
+        # Cross-module behavior
+        test_command_handler_commit_and_idempotency,
+        test_hitl_feedback_dedup_and_resume_gate,
     ]
 
     passed = 0

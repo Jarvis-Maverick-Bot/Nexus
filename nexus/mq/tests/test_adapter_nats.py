@@ -21,13 +21,25 @@ import os
 import asyncio
 import time
 
+try:
+    import pytest
+except ImportError:
+    pytest = None
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from nexus.mq.adapter_nats import MqAdapterNats, RetryConfig, DlqEvent, HAS_NATS
 from nexus.mq.envelope import build_envelope
 
 
-_NATS_URL = "nats://192.168.31.64:4222"
+_NATS_URL = os.getenv("NATS_URL", "nats://127.0.0.1:4222")
+
+
+def _skip(reason: str):
+    if pytest is not None:
+        pytest.skip(reason)
+    print(f"SKIP: {reason}")
+    return
 
 
 def _has_nats_running(url: str = None, timeout: float = 2.0) -> bool:
@@ -74,8 +86,7 @@ def test_publish_consume_roundtrip():
     Only runs if NATS is running.
     """
     if not NATS_RUNNING:
-        print("SKIP: test_publish_consume_roundtrip (NATS not running)")
-        return
+        _skip(f"test_publish_consume_roundtrip (NATS not running at {_NATS_URL})")
 
     adapter = MqAdapterNats(nats_url=_NATS_URL)
     try:
@@ -111,8 +122,7 @@ def test_publish_consume_roundtrip():
 def test_consume_empty_queue_returns_none():
     """Consume on empty queue returns None (not an error)."""
     if not NATS_RUNNING:
-        print("SKIP: test_consume_empty_queue_returns_none (NATS not running)")
-        return
+        _skip(f"test_consume_empty_queue_returns_none (NATS not running at {_NATS_URL})")
 
     adapter = MqAdapterNats(nats_url=_NATS_URL)
     try:
@@ -126,8 +136,7 @@ def test_consume_empty_queue_returns_none():
 def test_ack_logged():
     """ACK is logged with correct level."""
     if not NATS_RUNNING:
-        print("SKIP: test_ack_logged (NATS not running)")
-        return
+        _skip(f"test_ack_logged (NATS not running at {_NATS_URL})")
 
     adapter = MqAdapterNats(nats_url=_NATS_URL)
     try:
@@ -234,8 +243,7 @@ def test_compute_backoff_linear():
 def test_replay_returns_messages():
     """replay() returns all messages from the stream."""
     if not NATS_RUNNING:
-        print("SKIP: test_replay_returns_messages (NATS not running)")
-        return
+        _skip(f"test_replay_returns_messages (NATS not running at {_NATS_URL})")
 
     adapter = MqAdapterNats(nats_url=_NATS_URL)
     try:
@@ -258,6 +266,34 @@ def test_replay_returns_messages():
         print(f"PASS: test_replay_returns_messages ({len(messages)} messages)")
     finally:
         adapter.close()
+
+
+def test_sync_wrappers_safe_inside_async_context():
+    """Sync wrappers should work even when called from inside an active event loop."""
+    if not NATS_RUNNING:
+        _skip(f"test_sync_wrappers_safe_inside_async_context (NATS not running at {_NATS_URL})")
+
+    async def _exercise():
+        adapter = MqAdapterNats(nats_url=_NATS_URL)
+        try:
+            envelope = build_envelope(
+                message_type="Command_Message",
+                workflow_instance_id="wf-async-context",
+                workflow_type="test",
+                workflow_version="1.0",
+                producer="nats-async-test",
+                payload={"command": "inside-async"},
+                idempotency_key="idem-async-001",
+            )
+            ack = adapter.publish(envelope.to_dict())
+            assert ack["ack_level"] == "broker_received"
+            consumed = adapter.consume(timeout_ms=3000)
+            assert consumed is not None
+            assert consumed["envelope"]["message_id"] == envelope.message_id
+        finally:
+            adapter.close()
+
+    asyncio.run(_exercise())
 
 
 def run_all_tests():

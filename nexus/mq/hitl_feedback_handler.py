@@ -38,6 +38,7 @@ class FeedbackValidationResult:
 class HitlDecisionRecord:
     """Normalized HITL decision record — the only thing that authorizes workflow resume."""
     record_id: str = field(default_factory=lambda: f"hitl-dr-{uuid.uuid4().hex[:12]}")
+    feedback_id: str = ""
     workflow_instance_id: str = ""
     authority_wait_id: str = ""
     reviewer_actor_id: str = ""
@@ -76,6 +77,8 @@ class HitlFeedbackHandler:
         self._authority_waits: dict[str, AuthorityWaitState] = {}  # wait_id → wait state
         self._decision_records: list[HitlDecisionRecord] = []
         self._feedback_log: list[FeedbackValidationResult] = []
+        self._seen_feedback: set[tuple[str, str]] = set()
+        self._resume_ready_waits: set[str] = set()
 
     def create_authority_wait(
         self,
@@ -132,6 +135,13 @@ class HitlFeedbackHandler:
             if wait.wait_state in ("resolved", "escalated"):
                 errors.append(f"FEEDBACK_STALE: authority_wait is {wait.wait_state}")
 
+        # Rule 3.5: feedback must not be processed twice
+        dedupe_key = (feedback_id, authority_wait_id)
+        if dedupe_key in self._seen_feedback:
+            errors.append(
+                f"DUPLICATE_FEEDBACK: feedback_id={feedback_id} already recorded for authority_wait_id={authority_wait_id}"
+            )
+
         # Rule 4: reviewer must be authorized
         if reviewer_actor_id not in authorized_reviewers:
             errors.append(f"REVIEWER_NOT_AUTHORIZED: {reviewer_actor_id} not in authorized set")
@@ -156,6 +166,7 @@ class HitlFeedbackHandler:
                 submitted_at=submitted_at,
                 reviewed_artifact_refs=reviewed_artifact_refs or [],
             )
+            self._seen_feedback.add(dedupe_key)
             result.normalized_decision = decision.__dict__
 
         return result
@@ -177,6 +188,7 @@ class HitlFeedbackHandler:
         workflow_instance_id = wait.workflow_instance_id if wait else ""
 
         record = HitlDecisionRecord(
+            feedback_id=feedback_id,
             workflow_instance_id=workflow_instance_id,
             authority_wait_id=authority_wait_id,
             reviewer_actor_id=reviewer_actor_id,
@@ -192,15 +204,17 @@ class HitlFeedbackHandler:
         if wait:
             wait.wait_state = "responded"
             wait.responded_at = datetime.now(timezone.utc).isoformat()
+            if action == "Approve":
+                self._resume_ready_waits.add(authority_wait_id)
 
         return record
 
     def can_resume(self, authority_wait_id: str) -> bool:
-        """Check if workflow can resume after HITL decision."""
+        """Approve authorizes resume; Reject/Revise remain governed return paths."""
         if authority_wait_id not in self._authority_waits:
             return False
         wait = self._authority_waits[authority_wait_id]
-        return wait.wait_state == "responded"
+        return wait.wait_state == "responded" and authority_wait_id in self._resume_ready_waits
 
     def get_decision_record(self, authority_wait_id: str) -> Optional[HitlDecisionRecord]:
         """Get the decision record for a given authority wait."""
@@ -213,6 +227,8 @@ class HitlFeedbackHandler:
         self._authority_waits.clear()
         self._decision_records.clear()
         self._feedback_log.clear()
+        self._seen_feedback.clear()
+        self._resume_ready_waits.clear()
 
 
 def test_feedback_reject_stale() -> bool:
