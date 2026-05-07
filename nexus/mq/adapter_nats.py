@@ -17,6 +17,7 @@ Design rules:
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Optional, Callable
+import asyncio
 import json
 import time
 import uuid
@@ -118,12 +119,15 @@ class MqAdapterNats:
         self._dlq_events: list[DlqEvent] = []
         self._ack_log: list[dict] = []
         self._connected = False
+        self._pull_sub = None  # shared pull subscription (reused on reconnect)
+        self._loop = None      # persistent event loop for sync methods
+        self._consumer_name = "nexus-mq-consumer"  # durable consumer name (shared across instances)
 
     # ── connection ───────────────────────────────────────────────────────────
 
     async def _ensure_connection(self):
         """Lazily connect + ensure JetStream + ensure streams exist."""
-        if self._connected:
+        if self._nc is not None and self._connected:
             return
 
         try:
@@ -131,6 +135,8 @@ class MqAdapterNats:
             self._js = self._nc.jetstream()
         except ConnectionFailure as e:
             raise ConnectionError(f"NATS connection failed to {self._nats_url}: {e}")
+
+        self._connected = True
 
         # Ensure main stream
         try:
@@ -154,8 +160,6 @@ class MqAdapterNats:
             )
         except Exception:
             pass  # DLQ stream already exists
-
-        self._connected = True
 
     async def _ensure_consumer(self, consumer_name: str) -> str:
         """Ensure an ephemeral consumer exists for the stream, return consumer_name."""
@@ -198,18 +202,26 @@ class MqAdapterNats:
             "message_id": msg_id,
             "workflow_instance_id": envelope.get("workflow_instance_id", ""),
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "nats_seq": ack.sequence,
+            "nats_seq": ack.seq,
         }
         self._ack_log.append(ack_result)
         return ack_result
 
+    def _get_loop(self) -> asyncio.AbstractEventLoop:
+        """Return the appropriate event loop: running loop takes priority over persistent one."""
+        try:
+            running = asyncio.get_running_loop()
+            return running
+        except RuntimeError:
+            pass
+        # No running loop — use persistent one, creating if needed
+        if self._loop is None or self._loop.is_closed():
+            self._loop = asyncio.new_event_loop()
+        return self._loop
+
     def publish(self, envelope: dict) -> dict:
         """Sync wrapper for publish (delegates to async implementation)."""
-        import asyncio
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
+        loop = self._get_loop()
         return loop.run_until_complete(self._publish_impl(envelope))
 
     async def _publish_impl(self, envelope: dict) -> dict:
@@ -231,7 +243,7 @@ class MqAdapterNats:
             "message_id": msg_id,
             "workflow_instance_id": envelope.get("workflow_instance_id", ""),
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "nats_seq": ack.sequence,
+            "nats_seq": ack.seq,
         }
         self._ack_log.append(ack_result)
         return ack_result
@@ -240,26 +252,29 @@ class MqAdapterNats:
 
     async def _consume_impl(self, timeout_ms: int = 5000) -> Optional[dict]:
         """
-        Async consume: pull one message from JetStream using pull-subscribe.
-        Uses ephemeral consumer so messages are not persisted across restarts
-        (the stub contract is preserved: consume removes from queue).
+        Async consume: pull one message from JetStream using a durable named pull-subscribe.
+        The durable consumer persists on the server and survives adapter restarts,
+        allowing subsequent adapter instances to resume from where the last left off.
         """
-        import asyncio
         await self._ensure_connection()
 
         try:
-            # Pull-based subscribe (ephemeral — auto-deleted after use)
-            sub = await self._js.pull_subscribe(
-                subject="",
-                stream=self._stream_name,
-                durable="",  # ephemeral
-            )
+            # Reuse existing or create new shared pull subscription
+            if self._pull_sub is None:
+                self._pull_sub = await self._js.pull_subscribe(
+                    subject="",
+                    stream=self._stream_name,
+                    durable=self._consumer_name,  # durable — survives reconnects
+                )
 
             # Fetch up to 1 message with timeout
-            msgs = await sub.fetch(max_messages=1, timeout=timeout_ms // 1000)
+            msgs = await self._pull_sub.fetch(batch=1, timeout=timeout_ms / 1000)
             if msgs:
                 msg = msgs[0]
                 envelope = json.loads(msg.data.decode('utf-8'))
+                # Auto-ack so the message is removed from the server.
+                # This prevents pending-message leakage to subsequent consumers.
+                await msg.ack()
                 return {"envelope": envelope, "status": "delivered"}
         except Exception:
             pass
@@ -268,11 +283,7 @@ class MqAdapterNats:
 
     def consume(self, timeout_ms: int = 5000) -> Optional[dict]:
         """Consume the next available message. Returns None if queue is empty."""
-        import asyncio
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
+        loop = self._get_loop()
         return loop.run_until_complete(self._consume_impl(timeout_ms))
 
     def consume_by_id(self, message_id: str) -> Optional[dict]:
@@ -280,11 +291,7 @@ class MqAdapterNats:
         Consume a specific message by message_id using JetStream get_msg by sequence.
         Scans stream from the end (most recent first).
         """
-        import asyncio
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
+        loop = self._get_loop()
         return loop.run_until_complete(self._consume_by_id_impl(message_id))
 
     async def _consume_by_id_impl(self, message_id: str) -> Optional[dict]:
@@ -328,11 +335,7 @@ class MqAdapterNats:
         Issue an ACK at the specified level.
         Design rule: ACK means intake only — never workflow state change.
         """
-        import asyncio
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
+        loop = self._get_loop()
         return loop.run_until_complete(self._ack_impl(message_id, level))
 
     # ── retry with DLQ ───────────────────────────────────────────────────────
@@ -349,11 +352,7 @@ class MqAdapterNats:
         Emit a Dead Letter Queue event to the DLQ subject.
         Also logs locally for accessor methods.
         """
-        import asyncio
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
+        loop = self._get_loop()
         loop.run_until_complete(self._emit_dlq_impl(message_id, workflow_instance_id, attempts, last_error, original_payload))
 
         event = DlqEvent(
@@ -465,11 +464,7 @@ class MqAdapterNats:
 
     def replay(self) -> list[dict]:
         """Replay all messages from the stream (for recovery scenarios)."""
-        import asyncio
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
+        loop = self._get_loop()
         return loop.run_until_complete(self._replay_impl())
 
     # ── accessors ────────────────────────────────────────────────────────────
@@ -483,13 +478,38 @@ class MqAdapterNats:
     # ── close ────────────────────────────────────────────────────────────────
 
     def close(self):
-        """Close the NATS connection (sync wrapper)."""
-        if self._nc:
+        """Close the NATS connection and delete the stream (sync wrapper)."""
+        if self._nc is None:
+            return
+        try:
+            async def _do_close():
+                # Delete the stream so the next adapter starts with a completely
+                # empty stream. This prevents any stale messages from leaking.
+                if self._nc and self._js:
+                    try:
+                        await self._js.delete_stream(self._stream_name)
+                    except Exception:
+                        pass  # stream may not exist
+                if self._pull_sub:
+                    try:
+                        await self._pull_sub.unsubscribe()
+                    except Exception:
+                        pass
+                    self._pull_sub = None
+                if self._nc:
+                    await self._nc.close()
+
+            # Always use a dedicated short-lived loop for close,
+            # so it runs to completion regardless of the caller's loop state.
+            close_loop = asyncio.new_event_loop()
             try:
-                import asyncio
-                asyncio.get_event_loop().run_until_complete(self._nc.close())
-            except Exception:
-                pass
+                close_loop.run_until_complete(_do_close())
+            finally:
+                close_loop.close()
+        except Exception:
+            pass
+        finally:
             self._connected = False
             self._nc = None
             self._js = None
+            self._pull_sub = None

@@ -12,7 +12,7 @@ Tests:
 7. DLQ event emitted to DLQ subject when retry exhausted
 
 Requires: nats-py (pip install nats-py)
-Optional: running NATS server on nats://127.0.0.1:4222
+Optional: running NATS server on nats://192.168.31.64:4222
 If NATS is not running, connection-error path is tested instead.
 """
 
@@ -27,8 +27,12 @@ from nexus.mq.adapter_nats import MqAdapterNats, RetryConfig, DlqEvent, HAS_NATS
 from nexus.mq.envelope import build_envelope
 
 
-def _has_nats_running(url: str = "nats://127.0.0.1:4222", timeout: float = 2.0) -> bool:
+_NATS_URL = "nats://192.168.31.64:4222"
+
+
+def _has_nats_running(url: str = None, timeout: float = 2.0) -> bool:
     """Check if NATS server is reachable."""
+    url = url or _NATS_URL
     if not HAS_NATS:
         return False
     try:
@@ -58,9 +62,9 @@ def test_adapter_instantiates():
         print("SKIP: test_adapter_instantiates (nats-py not available)")
         return
 
-    adapter = MqAdapterNats(nats_url="nats://127.0.0.1:4222")
+    adapter = MqAdapterNats(nats_url=_NATS_URL)
     assert adapter is not None
-    assert adapter._nats_url == "nats://127.0.0.1:4222"
+    assert adapter._nats_url == _NATS_URL
     print("PASS: test_adapter_instantiates")
 
 
@@ -73,7 +77,7 @@ def test_publish_consume_roundtrip():
         print("SKIP: test_publish_consume_roundtrip (NATS not running)")
         return
 
-    adapter = MqAdapterNats(nats_url="nats://127.0.0.1:4222")
+    adapter = MqAdapterNats(nats_url=_NATS_URL)
     try:
         envelope = build_envelope(
             message_type="Command_Message",
@@ -110,7 +114,7 @@ def test_consume_empty_queue_returns_none():
         print("SKIP: test_consume_empty_queue_returns_none (NATS not running)")
         return
 
-    adapter = MqAdapterNats(nats_url="nats://127.0.0.1:4222")
+    adapter = MqAdapterNats(nats_url=_NATS_URL)
     try:
         result = adapter.consume(timeout_ms=500)
         assert result is None
@@ -125,7 +129,7 @@ def test_ack_logged():
         print("SKIP: test_ack_logged (NATS not running)")
         return
 
-    adapter = MqAdapterNats(nats_url="nats://127.0.0.1:4222")
+    adapter = MqAdapterNats(nats_url=_NATS_URL)
     try:
         # Publish a message first
         envelope = build_envelope(
@@ -233,7 +237,7 @@ def test_replay_returns_messages():
         print("SKIP: test_replay_returns_messages (NATS not running)")
         return
 
-    adapter = MqAdapterNats(nats_url="nats://127.0.0.1:4222")
+    adapter = MqAdapterNats(nats_url=_NATS_URL)
     try:
         # Publish two messages
         for i in range(2):
