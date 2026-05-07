@@ -20,6 +20,7 @@ import sys
 import os
 import asyncio
 import time
+import uuid
 
 try:
     import pytest
@@ -40,6 +41,18 @@ def _skip(reason: str):
         pytest.skip(reason)
     print(f"SKIP: {reason}")
     return
+
+
+def _make_adapter() -> MqAdapterNats:
+    """Create an adapter bound to a unique stream for test isolation."""
+    suffix = uuid.uuid4().hex[:8]
+    subject_prefix = f"codex.mq.test.{suffix}"
+    return MqAdapterNats(
+        nats_url=_NATS_URL,
+        subject_prefix=subject_prefix,
+        stream_name=f"nexus-mq-test-{suffix}",
+        dlq_stream_name=f"nexus-mq-dlq-test-{suffix}",
+    )
 
 
 def _has_nats_running(url: str = None, timeout: float = 2.0) -> bool:
@@ -74,7 +87,7 @@ def test_adapter_instantiates():
         print("SKIP: test_adapter_instantiates (nats-py not available)")
         return
 
-    adapter = MqAdapterNats(nats_url=_NATS_URL)
+    adapter = _make_adapter()
     assert adapter is not None
     assert adapter._nats_url == _NATS_URL
     print("PASS: test_adapter_instantiates")
@@ -88,7 +101,7 @@ def test_publish_consume_roundtrip():
     if not NATS_RUNNING:
         _skip(f"test_publish_consume_roundtrip (NATS not running at {_NATS_URL})")
 
-    adapter = MqAdapterNats(nats_url=_NATS_URL)
+    adapter = _make_adapter()
     try:
         envelope = build_envelope(
             message_type="Command_Message",
@@ -124,7 +137,7 @@ def test_consume_empty_queue_returns_none():
     if not NATS_RUNNING:
         _skip(f"test_consume_empty_queue_returns_none (NATS not running at {_NATS_URL})")
 
-    adapter = MqAdapterNats(nats_url=_NATS_URL)
+    adapter = _make_adapter()
     try:
         result = adapter.consume(timeout_ms=500)
         assert result is None
@@ -175,7 +188,8 @@ def test_dlq_on_retry_exhaustion():
         print("SKIP: test_dlq_on_retry_exhaustion (nats-py not available)")
         return
 
-    adapter = MqAdapterNats(retry_config=RetryConfig(max_attempts=3, backoff_type="linear"))
+    adapter = _make_adapter()
+    adapter._retry_config = RetryConfig(max_attempts=3, backoff_type="linear")
 
     msg_id = "msg-nats-retry-test"
     wf_id = "wf-nats-retry-test"
@@ -201,12 +215,13 @@ def test_compute_backoff_exponential():
         print("SKIP: test_compute_backoff_exponential (nats-py not available)")
         return
 
-    adapter = MqAdapterNats(retry_config=RetryConfig(
+    adapter = _make_adapter()
+    adapter._retry_config = RetryConfig(
         max_attempts=3,
         initial_backoff_ms=1000,
         backoff_multiplier=2.0,
         backoff_type="exponential",
-    ))
+    )
 
     # attempt 1: 1000ms
     assert abs(adapter.compute_backoff(1) - 1.0) < 0.001
@@ -224,11 +239,12 @@ def test_compute_backoff_linear():
         print("SKIP: test_compute_backoff_linear (nats-py not available)")
         return
 
-    adapter = MqAdapterNats(retry_config=RetryConfig(
+    adapter = _make_adapter()
+    adapter._retry_config = RetryConfig(
         max_attempts=3,
         initial_backoff_ms=1000,
         backoff_type="linear",
-    ))
+    )
 
     # attempt 1: 1000ms
     assert abs(adapter.compute_backoff(1) - 1.0) < 0.001
@@ -245,7 +261,7 @@ def test_replay_returns_messages():
     if not NATS_RUNNING:
         _skip(f"test_replay_returns_messages (NATS not running at {_NATS_URL})")
 
-    adapter = MqAdapterNats(nats_url=_NATS_URL)
+    adapter = _make_adapter()
     try:
         # Publish two messages
         for i in range(2):
@@ -274,7 +290,7 @@ def test_sync_wrappers_safe_inside_async_context():
         _skip(f"test_sync_wrappers_safe_inside_async_context (NATS not running at {_NATS_URL})")
 
     async def _exercise():
-        adapter = MqAdapterNats(nats_url=_NATS_URL)
+        adapter = _make_adapter()
         try:
             envelope = build_envelope(
                 message_type="Command_Message",
