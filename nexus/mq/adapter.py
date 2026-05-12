@@ -26,6 +26,9 @@ from enum import Enum
 import time
 import uuid
 
+from nexus.mq.protocol import ProtocolEnvelope
+from nexus.mq.protocol_routing import route_execution_envelope_dict, route_protocol_envelope
+
 
 class AckLevel(Enum):
     BROKER_RECEIVED = "broker_received"
@@ -82,8 +85,10 @@ class MqAdapterStub:
         Publish a message to the stub broker.
         Returns an ACK event at broker_received level.
         """
+        subject = self._resolve_subject(envelope)
         msg_with_meta = {
             "envelope": envelope,
+            "subject": subject,
             "cursor": len(self._messages),
             "status": "queued",
         }
@@ -97,6 +102,18 @@ class MqAdapterStub:
         }
         self._ack_log.append(ack)
         return ack
+
+    def _resolve_subject(self, envelope: dict) -> str:
+        if envelope.get("protocol_version"):
+            protocol_envelope = ProtocolEnvelope.from_dict(envelope)
+            routed = route_protocol_envelope(protocol_envelope)
+            if routed.valid and routed.subject:
+                return routed.subject
+        if envelope.get("message_type"):
+            routed = route_execution_envelope_dict(envelope)
+            if routed.valid and routed.subject:
+                return routed.subject
+        return envelope.get("subject", "stub.local")
 
     # --- consume ---
 
@@ -129,6 +146,17 @@ class MqAdapterStub:
         ack = {
             "ack_level": level.value,
             "message_id": message_id,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        self._ack_log.append(ack)
+        return ack
+
+    def nak(self, message_id: str, reason: str = "consumer_retry") -> dict:
+        """Issue a negative ACK so the broker may redeliver the delivery."""
+        ack = {
+            "ack_level": "consumer_nak",
+            "message_id": message_id,
+            "reason": reason,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
         self._ack_log.append(ack)

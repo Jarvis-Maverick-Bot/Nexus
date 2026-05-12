@@ -1,33 +1,90 @@
-# V1.5 Agent and Workflow Configuration
-# All agent and workflow definitions live here — no hardcoding allowed.
-# For V2.0: add new agents and workflows by editing this file.
-#
-# IMPORTANT: Match actual registered agentIds in OpenClaw config exactly.
-# Do NOT guess or normalize — check openclaw.json agents.list[] for truth.
+# V1.6 Agent, workflow, and protocol identity configuration
+# This file remains the local source of truth for agent metadata, but now
+# includes the minimum identity/trust fields required by the MQ protocol
+# skeleton.
 
 agents:
-  # Primary delivery agent — handles BA, SA, DEV, QA roles internally
   viper:
     agent_id: "viper"
-    role: "Viper Delivery Agent"
-    description: "Full-stack delivery: BA, SA, DEV, QA — role determined by task context"
-    stages: ["BA", "SA", "DEV", "QA"]  # workflow stages this agent can handle
+    display_name: "Viper"
+    role: "viper"
+    description: "Full-stack delivery agent covering BA, SA, DEV, and QA execution."
+    runtime_instance_id: "viper-windows-main-20260507"
+    machine_id: "windows-main"
+    environment: "local"
+    status: "active"
+    capabilities:
+      - "delivery.ba"
+      - "delivery.sa"
+      - "delivery.dev"
+      - "delivery.qa"
+      - "workflow.command"
+      - "workflow.result"
+    authority_scopes:
+      - "workflow.command"
+      - "workflow.result"
+      - "workflow.review.request"
+      - "workflow.feedback"
+    trusted_subject_prefixes:
+      - "agent.viper."
+      - "agent.maverick."
+      - "workflow."
+      - "review."
+      - "feedback."
+      - "ops."
+    trust_material:
+      skeleton_shared_secret_ref: "local:nats-agent-protocol"
+      signature_key_ref:
+      expires_at: "2026-12-31T00:00:00Z"
+    last_rotated_at: "2026-05-07T00:00:00Z"
+    stages:
+      - "BA"
+      - "SA"
+      - "DEV"
+      - "QA"
 
-  # V2.0: separate agent entries when multi-agent spawn is needed
-
-  # PMO / scheduling agent
   maverick:
     agent_id: "maverick"
-    role: "PMO Coordinator"
-    description: "Flexible scheduler — routes work to known agents based on context"
+    display_name: "Maverick"
+    role: "maverick"
+    description: "Coordination and workflow-orchestration agent."
+    runtime_instance_id: "maverick-windows-main-20260507"
+    machine_id: "windows-main"
+    environment: "local"
+    status: "active"
+    capabilities:
+      - "workflow.command"
+      - "workflow.review.request"
+      - "workflow.feedback"
+      - "coordination.dispatch"
+    authority_scopes:
+      - "workflow.command"
+      - "workflow.review.request"
+      - "workflow.feedback"
+      - "workflow.callback"
+    trusted_subject_prefixes:
+      - "agent.viper."
+      - "agent.maverick."
+      - "workflow."
+      - "review."
+      - "feedback."
+      - "ops."
+    trust_material:
+      skeleton_shared_secret_ref: "local:nats-agent-protocol"
+      signature_key_ref:
+      expires_at: "2026-12-31T00:00:00Z"
+    last_rotated_at: "2026-05-07T00:00:00Z"
 
 workflows:
-  # V1.5: BA→SA→DEV→QA governed reference path
   standard_delivery:
-    stages: ["BA", "SA", "DEV", "QA"]
+    stages:
+      - "BA"
+      - "SA"
+      - "DEV"
+      - "QA"
     description: "Standard governed delivery path"
 
-  # V2.0 — fast track
   fast_track:
-    stages: ["QA"]
+    stages:
+      - "QA"
     description: "QA-only fast track"

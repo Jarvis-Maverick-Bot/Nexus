@@ -1,0 +1,92 @@
+# UAT cross-machine agent identity configuration
+# Purpose:
+# - keep project-local `maverick` / `viper` identities stable for Nexus internal tests
+# - provide a dedicated `jarvis` / `nova` backend for UAT and cross-machine runtime validation
+# - serve as the transition point before promoting agent-collaboration identity to an org-level module
+
+agents:
+  jarvis:
+    agent_id: "jarvis"
+    display_name: "Jarvis"
+    role: "jarvis"
+    description: "Cross-machine coordination and workflow orchestration agent for UAT."
+    runtime_instance_id: "jarvis-uat-main-20260508"
+    machine_id: "uat-jarvis-node"
+    environment: "uat"
+    status: "active"
+    capabilities:
+      - "workflow.command"
+      - "workflow.review.request"
+      - "workflow.feedback"
+      - "workflow.callback"
+      - "coordination.dispatch"
+    authority_scopes:
+      - "workflow.command"
+      - "workflow.review.request"
+      - "workflow.feedback"
+      - "workflow.callback"
+      - "workflow.anomaly"
+      - "workflow.timeout"
+    trusted_subject_prefixes:
+      - "agent.jarvis."
+      - "agent.nova."
+      - "workflow."
+      - "review."
+      - "feedback."
+      - "ops."
+    trust_material:
+      skeleton_shared_secret_ref: "uat:nats-agent-protocol"
+      signature_key_ref:
+      expires_at: "2026-12-31T00:00:00Z"
+    last_rotated_at: "2026-05-08T00:00:00Z"
+
+  nova:
+    agent_id: "nova"
+    display_name: "Nova"
+    role: "nova"
+    description: "Cross-machine delivery and collaboration agent for UAT."
+    runtime_instance_id: "nova-uat-main-20260508"
+    machine_id: "uat-nova-node"
+    environment: "uat"
+    status: "active"
+    capabilities:
+      - "delivery.ba"
+      - "delivery.sa"
+      - "delivery.dev"
+      - "delivery.qa"
+      - "workflow.command"
+      - "workflow.result"
+      - "workflow.callback"
+    authority_scopes:
+      - "workflow.command"
+      - "workflow.result"
+      - "workflow.feedback"
+      - "workflow.callback"
+      - "workflow.anomaly"
+      - "workflow.timeout"
+    trusted_subject_prefixes:
+      - "agent.jarvis."
+      - "agent.nova."
+      - "workflow."
+      - "review."
+      - "feedback."
+      - "ops."
+    trust_material:
+      skeleton_shared_secret_ref: "uat:nats-agent-protocol"
+      signature_key_ref:
+      expires_at: "2026-12-31T00:00:00Z"
+    last_rotated_at: "2026-05-08T00:00:00Z"
+    stages:
+      - "BA"
+      - "SA"
+      - "DEV"
+      - "QA"
+
+workflows:
+  cross_machine_uat:
+    stages:
+      - "BA"
+      - "SA"
+      - "DEV"
+      - "QA"
+    description: "UAT workflow for cross-machine Jarvis/Nova coordination."
