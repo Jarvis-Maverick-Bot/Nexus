@@ -286,3 +286,58 @@ def test_listener_runtime_from_paths_supports_uat_identity_config(tmp_path):
     assert result.status == "message_intake"
     assert stored is not None
     assert stored.reply_to_subject == "agent.nova.callbacks"
+
+
+def test_listener_executes_bounded_phase3_hello_world_uat_command(tmp_path):
+    adapter = MqAdapterStub()
+    listener = ListenerRuntime.from_paths(
+        adapter=adapter,
+        runtime_id="jarvis-runtime-uat-exec",
+        agent_id="jarvis",
+        role="jarvis",
+        db_path=tmp_path / "jarvis-uat-exec.sqlite3",
+        identity_yaml_path=_uat_identity_config_path(),
+        config=ListenerRuntimeConfig(),
+    )
+    listener.startup()
+    artifact_path = tmp_path / "artifact" / "hello-world.html"
+    request = build_protocol_envelope(
+        message_type="command",
+        source_agent_id="nova",
+        source_runtime_instance_id="nova-uat-main-20260508",
+        source_role="nova",
+        authority_scope="workflow.command",
+        payload={
+            "command": "phase3_minimal_hello_world",
+            "artifact_path": str(artifact_path),
+            "title": "Hello, World!",
+            "body": "Hello, World!",
+        },
+        target_agent_id="jarvis",
+        reply_to_subject="agent.nova.callbacks",
+        causation_id=None,
+        expires_at=_future_iso(),
+    )
+    adapter.publish(request.to_dict())
+
+    result = listener.poll_once()
+    task = listener.runtime.state_store.get_pending_task(f"task-{request.message_id}")
+    inbox = listener.runtime.state_store.get_envelope_inbox(request.message_id)
+    records = listener.runtime.state_store.list_phase3_runtime_records("phase3_uat_command_execution_record")
+    outbox = listener.runtime.state_store.list_outbox_requiring_reconciliation()
+    listener.close()
+
+    assert result.status == "command_executed"
+    assert result.acked is True
+    assert result.artifact_path == str(artifact_path)
+    assert artifact_path.exists()
+    assert "Hello, World!" in artifact_path.read_text(encoding="utf-8")
+    assert task is not None
+    assert task.state == "COMPLETED"
+    assert task.result_payload["artifact_path"] == str(artifact_path)
+    assert inbox is not None
+    assert inbox.state == "completed"
+    assert len(records) == 1
+    assert records[0].status == "artifact_generated"
+    assert records[0].related_message_id == request.message_id
+    assert outbox == []

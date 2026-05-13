@@ -67,6 +67,18 @@
         .log-inout.in { background: #1a3a1a; color: #4ade80; }
         .log-inout.out { background: #1a2a3a; color: #60a5fa; }
 
+        .mq-panel { background: #101820; border: 1px solid #1f3440; border-radius: 10px; padding: 14px; margin: 18px 0 8px; }
+        .mq-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .mq-title { color: #9ddcff; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .mq-status { font-size: 11px; padding: 3px 8px; border-radius: 999px; background: #2a1a1a; color: #ff6b6b; }
+        .mq-status.ok { background: #123323; color: #4ade80; }
+        .mq-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+        .mq-card { background: #0d131a; border: 1px solid #1d2a36; border-radius: 8px; padding: 10px; }
+        .mq-card .label { color: #607080; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; }
+        .mq-card .value { color: #e5f7ff; font-size: 18px; font-weight: 700; overflow-wrap: anywhere; }
+        .mq-meta { color: #708090; font-size: 11px; margin-top: 10px; line-height: 1.5; }
+        .mq-error { color: #ff8a8a; font-size: 12px; padding: 10px; background: #221516; border-radius: 8px; }
+
         #clear-panel { display: none; background: #161b22; border: 1px solid #ff6b6b; border-radius: 8px; padding: 16px; margin-top: 12px; }
         #clear-panel.show { display: block; }
         #clear-panel h3 { color: #ff6b6b; font-size: 14px; margin-bottom: 12px; }
@@ -123,6 +135,14 @@
         <div class="value" id="stat-pending">—</div>
         <div class="label">Pending Action</div>
     </div>
+</div>
+
+<div class="mq-panel">
+    <div class="mq-header">
+        <div class="mq-title">Phase 3 MQ / JetStream Status</div>
+        <span id="mq-status" class="mq-status">Loading</span>
+    </div>
+    <div id="mq-content">Loading MQ status...</div>
 </div>
 
 <div id="clear-panel">
@@ -191,6 +211,40 @@ async function load() {
         renderMessages();
     } catch(e) {
         document.getElementById('collab-table').innerHTML = '<div style="color:#f87171;padding:12px">Failed to load data: ' + e.message + '</div>';
+    }
+    loadMqStatus();
+}
+
+async function loadMqStatus() {
+    const badge = document.getElementById('mq-status');
+    const content = document.getElementById('mq-content');
+    try {
+        const res = await fetch('/api/mq/phase3-status');
+        const data = await res.json();
+        badge.textContent = data.ok ? 'Connected' : 'Unavailable';
+        badge.className = data.ok ? 'mq-status ok' : 'mq-status';
+        if (!data.ok) {
+            content.innerHTML = `<div class="mq-error">${data.error_type || 'Error'}: ${data.error || 'Unable to query MQ status'}</div>
+                <div class="mq-meta">Broker: ${data.nats_url || 'unknown'} · Stream: ${data.stream || 'unknown'} · Consumer: ${data.consumer || 'unknown'} · Checked: ${data.checked_at || ''}</div>`;
+            return;
+        }
+        const stream = data.stream_state || {};
+        const consumer = data.consumer_state || {};
+        content.innerHTML = `<div class="mq-grid">
+            <div class="mq-card"><div class="label">Stream Messages</div><div class="value">${stream.messages ?? '-'}</div></div>
+            <div class="mq-card"><div class="label">Last Sequence</div><div class="value">${stream.last_seq ?? '-'}</div></div>
+            <div class="mq-card"><div class="label">Consumer Delivered</div><div class="value">${consumer.delivered_stream_seq ?? '-'}</div></div>
+            <div class="mq-card"><div class="label">Pending</div><div class="value">${consumer.num_pending ?? '-'}</div></div>
+            <div class="mq-card"><div class="label">Ack Pending</div><div class="value">${consumer.num_ack_pending ?? '-'}</div></div>
+            <div class="mq-card"><div class="label">Ack Floor</div><div class="value">${consumer.ack_floor_stream_seq ?? '-'}</div></div>
+            <div class="mq-card"><div class="label">Filter Subject</div><div class="value" style="font-size:13px">${consumer.filter_subject || '-'}</div></div>
+            <div class="mq-card"><div class="label">Consumer</div><div class="value" style="font-size:13px">${data.consumer}</div></div>
+        </div>
+        <div class="mq-meta">Broker: ${data.nats_url} · Stream: ${data.stream} · Checked: ${data.checked_at}</div>`;
+    } catch(e) {
+        badge.textContent = 'Unavailable';
+        badge.className = 'mq-status';
+        content.innerHTML = '<div class="mq-error">Failed to load MQ status: ' + e.message + '</div>';
     }
 }
 

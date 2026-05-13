@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 from nexus.mq.coordination_runtime import CoordinationRuntime
+from nexus.mq.phase3_uat_command_bridge import Phase3UatCommandBridge
 from nexus.mq.protocol import ProtocolEnvelope
 from nexus.mq.protocol_boundary import ProtocolMessageBoundary
 from nexus.mq.protocol_routing import build_ops_anomaly_subject
@@ -35,6 +36,8 @@ class ListenerPollResult:
     consumed_message_id: Optional[str] = None
     acked: bool = False
     anomaly_published: bool = False
+    artifact_path: Optional[str] = None
+    runtime_record_id: Optional[str] = None
     errors: list[str] | None = None
 
 
@@ -58,6 +61,7 @@ class ListenerRuntime:
         self.runtime = coordination_runtime
         self.config = config or ListenerRuntimeConfig()
         self.boundary = ProtocolMessageBoundary(self.runtime.identity_store)
+        self.phase3_uat_bridge = Phase3UatCommandBridge(self.runtime)
 
     @classmethod
     def from_paths(
@@ -174,6 +178,19 @@ class ListenerRuntime:
         result = self.runtime.intake_inbound_message(subject, raw_envelope)
         if result.valid and result.envelope is not None and result.ack_allowed:
             self.adapter.ack(result.envelope.message_id)
+            bridge_result = self.phase3_uat_bridge.execute_if_supported(
+                pending_task=result.pending_task,
+                envelope=result.envelope,
+            ) if result.pending_task is not None else None
+            if bridge_result is not None and bridge_result.executed:
+                return ListenerPollResult(
+                    status="command_executed" if bridge_result.status == "artifact_generated" else "command_execution_failed",
+                    consumed_message_id=result.envelope.message_id,
+                    acked=True,
+                    artifact_path=bridge_result.artifact_path,
+                    runtime_record_id=bridge_result.runtime_record_id,
+                    errors=[bridge_result.error] if bridge_result.error else None,
+                )
             return ListenerPollResult(
                 status=self._intake_status_for_execution_type(execution_type),
                 consumed_message_id=result.envelope.message_id,
