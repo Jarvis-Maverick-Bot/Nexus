@@ -23,6 +23,9 @@ import time
 import threading
 import uuid
 
+from nexus.mq.protocol import ProtocolEnvelope
+from nexus.mq.protocol_routing import route_execution_envelope_dict, route_protocol_envelope
+
 try:
     import nats
     from nats.errors import TimeoutError as NatsTimeoutError, NoServersError
@@ -100,6 +103,9 @@ class MqAdapterNats:
         retry_config: Optional[RetryConfig] = None,
         stream_name: str = "nexus-mq",
         dlq_stream_name: str = "nexus-mq-dlq",
+        stream_subjects: Optional[list[str]] = None,
+        consumer_name: Optional[str] = None,
+        consumer_filter_subject: Optional[str] = None,
     ):
         if not HAS_NATS:
             raise RuntimeError(
@@ -114,6 +120,8 @@ class MqAdapterNats:
         self._retry_config = retry_config or RetryConfig()
         self._stream_name = stream_name
         self._dlq_stream_name = dlq_stream_name
+        self._stream_subjects = list(stream_subjects) if stream_subjects else [f"{self._subject_prefix}.>"]
+        self._consumer_filter_subject = consumer_filter_subject
 
         self._nc = None        # nats connection
         self._js = None        # JetStream context
@@ -124,7 +132,7 @@ class MqAdapterNats:
         self._loop = None      # persistent event loop for sync methods
         self._loop_thread = None
         self._loop_ready = None
-        self._consumer_name = "nexus-mq-consumer"  # durable consumer name (shared across instances)
+        self._consumer_name = consumer_name or "nexus-mq-consumer"  # durable consumer name (shared across instances)
 
     # ── connection ───────────────────────────────────────────────────────────
 
@@ -145,7 +153,7 @@ class MqAdapterNats:
         try:
             await self._js.add_stream(
                 name=self._stream_name,
-                subjects=[f"{self._subject_prefix}.>"],
+                subjects=self._stream_subjects,
                 storage="file",
                 retention="workqueue",
                 max_bytes=10_000_000,
@@ -216,7 +224,7 @@ class MqAdapterNats:
     async def _publish_impl(self, envelope: dict) -> dict:
         await self._ensure_connection()
 
-        subject = f"{self._subject_prefix}.{envelope.get('message_type', 'unknown').lower()}"
+        subject = self._resolve_subject(envelope)
         payload_bytes = json.dumps(envelope, ensure_ascii=False).encode('utf-8')
         msg_id = envelope.get("message_id", "")
 
@@ -251,7 +259,7 @@ class MqAdapterNats:
             # Reuse existing or create new shared pull subscription
             if self._pull_sub is None:
                 self._pull_sub = await self._js.pull_subscribe(
-                    subject="",
+                    subject=self._consumer_filter_subject or "",
                     stream=self._stream_name,
                     durable=self._consumer_name,  # durable — survives reconnects
                 )
@@ -264,7 +272,7 @@ class MqAdapterNats:
                 # Auto-ack so the message is removed from the server.
                 # This prevents pending-message leakage to subsequent consumers.
                 await msg.ack()
-                return {"envelope": envelope, "status": "delivered"}
+                return {"envelope": envelope, "status": "delivered", "subject": msg.subject}
         except Exception:
             pass
 
@@ -299,7 +307,7 @@ class MqAdapterNats:
                 msg = await self._js.get_msg(self._stream_name, seq)
                 envelope = json.loads(msg.data.decode('utf-8'))
                 if envelope.get("message_id") == message_id:
-                    return {"envelope": envelope, "status": "delivered"}
+                    return {"envelope": envelope, "status": "delivered", "subject": msg.subject}
             except Exception:
                 continue
 
@@ -441,7 +449,7 @@ class MqAdapterNats:
             try:
                 msg = await self._js.get_msg(self._stream_name, seq)
                 envelope = json.loads(msg.data.decode('utf-8'))
-                messages.append({"envelope": envelope, "seq": seq})
+                messages.append({"envelope": envelope, "seq": seq, "subject": msg.subject})
             except Exception:
                 continue
 
@@ -458,6 +466,26 @@ class MqAdapterNats:
 
     def get_ack_log(self) -> list[dict]:
         return list(self._ack_log)
+
+    def _resolve_subject(self, envelope: dict) -> str:
+        if envelope.get("protocol_version"):
+            try:
+                protocol_envelope = ProtocolEnvelope.from_dict(envelope)
+                routed = route_protocol_envelope(protocol_envelope)
+                if routed.valid and routed.subject:
+                    return routed.subject
+            except Exception:
+                pass
+
+        if envelope.get("message_type"):
+            try:
+                routed = route_execution_envelope_dict(envelope)
+                if routed.valid and routed.subject:
+                    return routed.subject
+            except Exception:
+                pass
+
+        return f"{self._subject_prefix}.{envelope.get('message_type', 'unknown').lower()}"
 
     # ── close ────────────────────────────────────────────────────────────────
 
