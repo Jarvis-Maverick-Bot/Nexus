@@ -106,6 +106,7 @@ class MqAdapterNats:
         stream_subjects: Optional[list[str]] = None,
         consumer_name: Optional[str] = None,
         consumer_filter_subject: Optional[str] = None,
+        enable_protocol_subjects: bool = False,
     ):
         if not HAS_NATS:
             raise RuntimeError(
@@ -120,8 +121,22 @@ class MqAdapterNats:
         self._retry_config = retry_config or RetryConfig()
         self._stream_name = stream_name
         self._dlq_stream_name = dlq_stream_name
-        self._stream_subjects = list(stream_subjects) if stream_subjects else [f"{self._subject_prefix}.>"]
         self._consumer_filter_subject = consumer_filter_subject
+        self._enable_protocol_subjects = enable_protocol_subjects
+        if stream_subjects:
+            self._stream_subjects = list(stream_subjects)
+        else:
+            self._stream_subjects = [f"{self._subject_prefix}.>"]
+            if self._enable_protocol_subjects:
+                self._stream_subjects.extend(
+                    [
+                        "agent.>",
+                        "workflow.>",
+                        "review.>",
+                        "feedback.>",
+                        "ops.>",
+                    ]
+                )
 
         self._nc = None        # nats connection
         self._js = None        # JetStream context
@@ -149,7 +164,6 @@ class MqAdapterNats:
 
         self._connected = True
 
-        # Ensure main stream
         try:
             await self._js.add_stream(
                 name=self._stream_name,
@@ -241,9 +255,22 @@ class MqAdapterNats:
             "workflow_instance_id": envelope.get("workflow_instance_id", ""),
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "nats_seq": ack.seq,
+            "subject": subject,
         }
         self._ack_log.append(ack_result)
         return ack_result
+
+    def _resolve_subject(self, envelope: dict) -> str:
+        if envelope.get("protocol_version"):
+            protocol_envelope = ProtocolEnvelope.from_dict(envelope)
+            routed = route_protocol_envelope(protocol_envelope)
+            if routed.valid and routed.subject:
+                return routed.subject
+        if envelope.get("message_type"):
+            routed = route_execution_envelope_dict(envelope)
+            if routed.valid and routed.subject:
+                return routed.subject
+        return f"{self._subject_prefix}.{envelope.get('message_type', 'unknown').lower()}"
 
     # ── consume ───────────────────────────────────────────────────────────────
 
@@ -272,7 +299,7 @@ class MqAdapterNats:
                 # Auto-ack so the message is removed from the server.
                 # This prevents pending-message leakage to subsequent consumers.
                 await msg.ack()
-                return {"envelope": envelope, "status": "delivered", "subject": msg.subject}
+                return {"envelope": envelope, "subject": msg.subject, "status": "delivered"}
         except Exception:
             pass
 
@@ -307,7 +334,7 @@ class MqAdapterNats:
                 msg = await self._js.get_msg(self._stream_name, seq)
                 envelope = json.loads(msg.data.decode('utf-8'))
                 if envelope.get("message_id") == message_id:
-                    return {"envelope": envelope, "status": "delivered", "subject": msg.subject}
+                    return {"envelope": envelope, "subject": msg.subject, "status": "delivered"}
             except Exception:
                 continue
 
@@ -449,7 +476,7 @@ class MqAdapterNats:
             try:
                 msg = await self._js.get_msg(self._stream_name, seq)
                 envelope = json.loads(msg.data.decode('utf-8'))
-                messages.append({"envelope": envelope, "seq": seq, "subject": msg.subject})
+                messages.append({"envelope": envelope, "subject": msg.subject, "seq": seq})
             except Exception:
                 continue
 
