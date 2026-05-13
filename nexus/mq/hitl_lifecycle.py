@@ -13,7 +13,20 @@ from nexus.mq.taxonomy import DECISION_TYPES, GATE_OUTCOMES
 
 
 UTC = timezone.utc
-WAIT_STATES = ("created", "waiting", "responded", "timed_out", "escalated", "resolved", "superseded")
+WAIT_STATES = (
+    "created",
+    "waiting",
+    "publication_failed",
+    "feedback_received",
+    "validated",
+    "resumed",
+    "timed_out",
+    "stale",
+    "closed",
+    "responded",
+    "resolved",
+    "superseded",
+)
 
 
 @dataclass
@@ -213,7 +226,7 @@ class HitlExecutionLifecycle:
         wait = self._waits.get(feedback_payload.authority_wait_id)
         if wait is None:
             return HitlValidationResult(valid=False, errors=["FEEDBACK_STALE: authority_wait_state not found"]), None
-        if wait.status in {"resolved", "superseded", "timed_out", "escalated"}:
+        if wait.status in {"resolved", "superseded", "timed_out", "stale", "closed", "escalated"}:
             return HitlValidationResult(valid=False, errors=[f"FEEDBACK_STALE: authority_wait_state is {wait.status}"]), None
 
         decision_type = feedback_payload.action.lower()

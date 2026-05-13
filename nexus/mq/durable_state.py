@@ -242,6 +242,19 @@ class HitlDecisionStoreRecord:
 
 
 @dataclass
+class Phase3RuntimeRecord:
+    record_id: str
+    record_type: str
+    workflow_instance_id: Optional[str]
+    authority_wait_id: Optional[str]
+    related_message_id: Optional[str]
+    dedupe_key: Optional[str]
+    status: str
+    created_at: str
+    payload: dict
+
+
+@dataclass
 class AbnormalStateStoreRecord:
     abnormal_state_id: str
     error_event_id: str
@@ -1381,46 +1394,54 @@ class DurableStateStore:
             created_at=created_at or now_iso(),
             payload=payload,
         )
-        with self._conn:
-            self._conn.execute(
-                """
-                INSERT INTO authority_wait_state(
-                    authority_wait_id, workflow_instance_id, checkpoint_id, gate_id, requested_actor_role,
-                    status, review_task_message_id, evidence_package_id, due_at, responded_at, resolved_at,
-                    hitl_decision_id, created_at, payload
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT(authority_wait_id) DO UPDATE SET
-                    workflow_instance_id=excluded.workflow_instance_id,
-                    checkpoint_id=excluded.checkpoint_id,
-                    gate_id=excluded.gate_id,
-                    requested_actor_role=excluded.requested_actor_role,
-                    status=excluded.status,
-                    review_task_message_id=excluded.review_task_message_id,
-                    evidence_package_id=excluded.evidence_package_id,
-                    due_at=excluded.due_at,
-                    responded_at=excluded.responded_at,
-                    resolved_at=excluded.resolved_at,
-                    hitl_decision_id=excluded.hitl_decision_id,
-                    created_at=excluded.created_at,
-                    payload=excluded.payload
-                """,
-                (
-                    record.authority_wait_id,
-                    record.workflow_instance_id,
-                    record.checkpoint_id,
-                    record.gate_id,
-                    record.requested_actor_role,
-                    record.status,
-                    record.review_task_message_id,
-                    record.evidence_package_id,
-                    record.due_at,
-                    record.responded_at,
-                    record.resolved_at,
-                    record.hitl_decision_id,
-                    record.created_at,
-                    _json_dumps(record.payload or {}),
-                ),
-            )
+        try:
+            with self._conn:
+                self._conn.execute(
+                    """
+                    INSERT INTO authority_wait_state(
+                        authority_wait_id, workflow_instance_id, checkpoint_id, gate_id, requested_actor_role,
+                        status, review_task_message_id, evidence_package_id, due_at, responded_at, resolved_at,
+                        hitl_decision_id, created_at, payload
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(authority_wait_id) DO UPDATE SET
+                        workflow_instance_id=excluded.workflow_instance_id,
+                        checkpoint_id=excluded.checkpoint_id,
+                        gate_id=excluded.gate_id,
+                        requested_actor_role=excluded.requested_actor_role,
+                        status=excluded.status,
+                        review_task_message_id=excluded.review_task_message_id,
+                        evidence_package_id=excluded.evidence_package_id,
+                        due_at=excluded.due_at,
+                        responded_at=excluded.responded_at,
+                        resolved_at=excluded.resolved_at,
+                        hitl_decision_id=excluded.hitl_decision_id,
+                        created_at=excluded.created_at,
+                        payload=excluded.payload
+                    """,
+                    (
+                        record.authority_wait_id,
+                        record.workflow_instance_id,
+                        record.checkpoint_id,
+                        record.gate_id,
+                        record.requested_actor_role,
+                        record.status,
+                        record.review_task_message_id,
+                        record.evidence_package_id,
+                        record.due_at,
+                        record.responded_at,
+                        record.resolved_at,
+                        record.hitl_decision_id,
+                        record.created_at,
+                        _json_dumps(record.payload or {}),
+                    ),
+                )
+        except sqlite3.IntegrityError as exc:
+            if "idx_authority_wait_active_unique" in str(exc) or "UNIQUE constraint failed" in str(exc):
+                raise ValueError(
+                    "ACTIVE_WAIT_UNIQUENESS_CONFLICT: one active wait already exists for "
+                    f"{workflow_instance_id}/{checkpoint_id}/{gate_id}"
+                ) from exc
+            raise
         return record
 
     def get_authority_wait_state(self, authority_wait_id: str) -> Optional[AuthorityWaitStateRecord]:
@@ -1460,7 +1481,10 @@ class DurableStateStore:
                    status, review_task_message_id, evidence_package_id, due_at, responded_at, resolved_at,
                    hitl_decision_id, created_at, payload
             FROM authority_wait_state
-            WHERE status IN ('created', 'waiting', 'responded')
+            WHERE status IN (
+                'created', 'waiting', 'publication_failed', 'feedback_received',
+                'validated', 'resumed', 'responded'
+            )
             ORDER BY created_at ASC
             """
         ).fetchall()
@@ -1574,8 +1598,161 @@ class DurableStateStore:
                     record.created_at,
                     _json_dumps(record.payload),
                 ),
+        )
+        return record
+
+    def find_active_authority_wait(
+        self,
+        workflow_instance_id: str,
+        checkpoint_id: str,
+        gate_id: str,
+    ) -> Optional[AuthorityWaitStateRecord]:
+        row = self._conn.execute(
+            """
+            SELECT authority_wait_id, workflow_instance_id, checkpoint_id, gate_id, requested_actor_role,
+                   status, review_task_message_id, evidence_package_id, due_at, responded_at, resolved_at,
+                   hitl_decision_id, created_at, payload
+            FROM authority_wait_state
+            WHERE workflow_instance_id = ?
+              AND checkpoint_id = ?
+              AND gate_id = ?
+              AND status IN ('waiting', 'publication_failed', 'feedback_received')
+            ORDER BY created_at DESC
+            LIMIT 1
+            """,
+            (workflow_instance_id, checkpoint_id, gate_id),
+        ).fetchone()
+        if row is None:
+            return None
+        return AuthorityWaitStateRecord(
+            authority_wait_id=row["authority_wait_id"],
+            workflow_instance_id=row["workflow_instance_id"],
+            checkpoint_id=row["checkpoint_id"],
+            gate_id=row["gate_id"],
+            requested_actor_role=row["requested_actor_role"],
+            status=row["status"],
+            review_task_message_id=row["review_task_message_id"],
+            evidence_package_id=row["evidence_package_id"],
+            due_at=row["due_at"],
+            responded_at=row["responded_at"],
+            resolved_at=row["resolved_at"],
+            hitl_decision_id=row["hitl_decision_id"],
+            created_at=row["created_at"],
+            payload=_json_loads(row["payload"], {}),
+        )
+
+    def create_phase3_runtime_record(
+        self,
+        record_type: str,
+        status: str,
+        payload: dict,
+        workflow_instance_id: Optional[str] = None,
+        authority_wait_id: Optional[str] = None,
+        related_message_id: Optional[str] = None,
+        dedupe_key: Optional[str] = None,
+        created_at: Optional[str] = None,
+    ) -> Phase3RuntimeRecord:
+        record = Phase3RuntimeRecord(
+            record_id=f"p3-{uuid.uuid4().hex[:12]}",
+            record_type=record_type,
+            workflow_instance_id=workflow_instance_id,
+            authority_wait_id=authority_wait_id,
+            related_message_id=related_message_id,
+            dedupe_key=dedupe_key,
+            status=status,
+            created_at=created_at or now_iso(),
+            payload=payload,
+        )
+        with self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO phase3_runtime_record(
+                    record_id, record_type, workflow_instance_id, authority_wait_id,
+                    related_message_id, dedupe_key, status, created_at, payload
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    record.record_id,
+                    record.record_type,
+                    record.workflow_instance_id,
+                    record.authority_wait_id,
+                    record.related_message_id,
+                    record.dedupe_key,
+                    record.status,
+                    record.created_at,
+                    _json_dumps(record.payload),
+                ),
             )
         return record
+
+    def find_phase3_runtime_record(
+        self,
+        record_type: str,
+        dedupe_key: str,
+    ) -> Optional[Phase3RuntimeRecord]:
+        row = self._conn.execute(
+            """
+            SELECT record_id, record_type, workflow_instance_id, authority_wait_id,
+                   related_message_id, dedupe_key, status, created_at, payload
+            FROM phase3_runtime_record
+            WHERE record_type = ? AND dedupe_key = ?
+            ORDER BY created_at DESC
+            LIMIT 1
+            """,
+            (record_type, dedupe_key),
+        ).fetchone()
+        if row is None:
+            return None
+        return Phase3RuntimeRecord(
+            record_id=row["record_id"],
+            record_type=row["record_type"],
+            workflow_instance_id=row["workflow_instance_id"],
+            authority_wait_id=row["authority_wait_id"],
+            related_message_id=row["related_message_id"],
+            dedupe_key=row["dedupe_key"],
+            status=row["status"],
+            created_at=row["created_at"],
+            payload=_json_loads(row["payload"], {}),
+        )
+
+    def list_phase3_runtime_records(
+        self,
+        record_type: Optional[str] = None,
+        authority_wait_id: Optional[str] = None,
+    ) -> list[Phase3RuntimeRecord]:
+        clauses: list[str] = []
+        params: list[str] = []
+        if record_type:
+            clauses.append("record_type = ?")
+            params.append(record_type)
+        if authority_wait_id:
+            clauses.append("authority_wait_id = ?")
+            params.append(authority_wait_id)
+        where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
+        rows = self._conn.execute(
+            f"""
+            SELECT record_id, record_type, workflow_instance_id, authority_wait_id,
+                   related_message_id, dedupe_key, status, created_at, payload
+            FROM phase3_runtime_record
+            {where}
+            ORDER BY created_at ASC
+            """,
+            tuple(params),
+        ).fetchall()
+        return [
+            Phase3RuntimeRecord(
+                record_id=row["record_id"],
+                record_type=row["record_type"],
+                workflow_instance_id=row["workflow_instance_id"],
+                authority_wait_id=row["authority_wait_id"],
+                related_message_id=row["related_message_id"],
+                dedupe_key=row["dedupe_key"],
+                status=row["status"],
+                created_at=row["created_at"],
+                payload=_json_loads(row["payload"], {}),
+            )
+            for row in rows
+        ]
 
     def get_hitl_decision_record(self, decision_id: str) -> Optional[HitlDecisionStoreRecord]:
         row = self._conn.execute(
@@ -1963,6 +2140,19 @@ class DurableStateStore:
                     payload TEXT NOT NULL
                 );
 
+                CREATE TABLE IF NOT EXISTS phase3_runtime_record (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    record_id TEXT NOT NULL UNIQUE,
+                    record_type TEXT NOT NULL,
+                    workflow_instance_id TEXT,
+                    authority_wait_id TEXT,
+                    related_message_id TEXT,
+                    dedupe_key TEXT,
+                    status TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    payload TEXT NOT NULL
+                );
+
                 CREATE TABLE IF NOT EXISTS abnormal_state_record (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     abnormal_state_id TEXT NOT NULL UNIQUE,
@@ -2016,7 +2206,13 @@ class DurableStateStore:
                 CREATE INDEX IF NOT EXISTS idx_idempotency_workflow_id ON durable_idempotency(workflow_id);
                 CREATE INDEX IF NOT EXISTS idx_authority_wait_state_status ON authority_wait_state(status);
                 CREATE INDEX IF NOT EXISTS idx_authority_wait_due_at ON authority_wait_state(due_at);
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_authority_wait_active_unique
+                ON authority_wait_state(workflow_instance_id, checkpoint_id, gate_id)
+                WHERE status IN ('waiting', 'publication_failed', 'feedback_received');
                 CREATE INDEX IF NOT EXISTS idx_hitl_decision_wait ON hitl_decision_record(authority_wait_id);
+                CREATE INDEX IF NOT EXISTS idx_phase3_runtime_record_type ON phase3_runtime_record(record_type);
+                CREATE INDEX IF NOT EXISTS idx_phase3_runtime_record_wait ON phase3_runtime_record(authority_wait_id);
+                CREATE INDEX IF NOT EXISTS idx_phase3_runtime_record_dedupe ON phase3_runtime_record(record_type, dedupe_key);
                 CREATE INDEX IF NOT EXISTS idx_abnormal_state_resolved ON abnormal_state_record(resolved);
                 CREATE INDEX IF NOT EXISTS idx_abnormal_state_workflow ON abnormal_state_record(workflow_instance_id);
                 CREATE INDEX IF NOT EXISTS idx_escalation_timer_due_at ON escalation_timer(due_at);

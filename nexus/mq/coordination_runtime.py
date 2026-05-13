@@ -99,6 +99,11 @@ class FeedbackReceiveResult:
     ack_allowed: bool
     decision: Optional[HitlDecisionRecordV03] = None
     authority_wait: Optional[AuthorityWaitStateV03] = None
+    outcome: Optional[str] = None
+    raw_feedback_record: Optional[Any] = None
+    normalized_decision_record: Optional[Any] = None
+    resume_request_record: Optional[Any] = None
+    duplicate_resolution_record: Optional[Any] = None
     envelope: Optional[ExecutionMessageEnvelope] = None
     intake_record: Optional[Any] = None
     broker_action: Optional[str] = None
@@ -244,17 +249,47 @@ class CoordinationRuntime:
             due_at=due_at,
         )
         self._persist_authority_wait_state(wait)
+        self.state_store.create_phase3_runtime_record(
+            record_type="active_wait_record",
+            workflow_instance_id=workflow_instance_id,
+            authority_wait_id=wait.authority_wait_id,
+            related_message_id=None,
+            dedupe_key=f"{workflow_instance_id}:{checkpoint_id}:{gate_id}",
+            status="created",
+            payload={
+                "workflow_instance_id": workflow_instance_id,
+                "checkpoint_id": checkpoint_id,
+                "gate_id": gate_id,
+                "requested_actor_role": requested_actor_role,
+                "due_at": due_at,
+            },
+        )
         return wait
 
     def register_review_task_message(
         self,
         authority_wait_id: str,
         review_task_message_id: str,
+        review_task_id: Optional[str] = None,
+        published: bool = False,
+        publication_error: Optional[str] = None,
+        resume_from_ref: Optional[str] = None,
     ) -> AuthorityWaitStateV03:
         wait = self._require_wait(authority_wait_id)
         payload = dict(getattr(wait, "payload", {}) or {})
         payload["review_task_message_id"] = review_task_message_id
+        if review_task_id:
+            payload["review_task_id"] = review_task_id
+        if resume_from_ref:
+            payload["resume_from_ref"] = resume_from_ref
+        payload["publication_status"] = "published" if published else "pending"
+        if publication_error:
+            payload["publication_error"] = publication_error
         wait.payload = payload
+        if published:
+            wait.status = "waiting"
+        elif publication_error:
+            wait.status = "publication_failed"
         stored = self.state_store.create_authority_wait_state(
             authority_wait_id=wait.authority_wait_id,
             workflow_instance_id=wait.workflow_instance_id,
@@ -272,6 +307,64 @@ class CoordinationRuntime:
             payload=wait.payload,
         )
         return self._load_wait_from_store(stored)
+
+    def record_review_task_publication(
+        self,
+        authority_wait_id: str,
+        review_task_message_id: str,
+        review_task_id: str,
+        resume_from_ref: Optional[str],
+    ) -> Any:
+        wait = self.register_review_task_message(
+            authority_wait_id=authority_wait_id,
+            review_task_message_id=review_task_message_id,
+            review_task_id=review_task_id,
+            published=True,
+            resume_from_ref=resume_from_ref,
+        )
+        return self.state_store.create_phase3_runtime_record(
+            record_type="review_task_publication_record",
+            workflow_instance_id=wait.workflow_instance_id,
+            authority_wait_id=wait.authority_wait_id,
+            related_message_id=review_task_message_id,
+            dedupe_key=review_task_message_id,
+            status="published",
+            payload={
+                "review_task_id": review_task_id,
+                "review_task_message_id": review_task_message_id,
+                "correlation_id": wait.authority_wait_id,
+                "resume_from_ref": resume_from_ref,
+                "due_at": wait.due_at,
+            },
+        )
+
+    def record_review_task_publication_failure(
+        self,
+        authority_wait_id: str,
+        review_task_message_id: str,
+        review_task_id: str,
+        error: str,
+    ) -> Any:
+        wait = self.register_review_task_message(
+            authority_wait_id=authority_wait_id,
+            review_task_message_id=review_task_message_id,
+            review_task_id=review_task_id,
+            published=False,
+            publication_error=error,
+        )
+        return self.state_store.create_phase3_runtime_record(
+            record_type="review_task_publication_failure_record",
+            workflow_instance_id=wait.workflow_instance_id,
+            authority_wait_id=wait.authority_wait_id,
+            related_message_id=review_task_message_id,
+            dedupe_key=review_task_message_id,
+            status="publication_failed",
+            payload={
+                "review_task_id": review_task_id,
+                "review_task_message_id": review_task_message_id,
+                "error": error,
+            },
+        )
 
     def record_outbox_publish(self, envelope: Any) -> SideEffectOutboxRecord:
         payload = envelope.to_dict() if hasattr(envelope, "to_dict") else dict(envelope)
@@ -467,6 +560,7 @@ class CoordinationRuntime:
                 broker_action=terminal.broker_action,
                 failure_class=terminal.failure_class,
             )
+
         contract = validate_execution_message(envelope_dict, require_runtime_overlay=True)
         envelope = ExecutionMessageEnvelope.from_dict(envelope_dict)
         if not contract.valid or envelope.message_type != "Feedback_Message":
@@ -514,7 +608,9 @@ class CoordinationRuntime:
                 failure_subclass="expired_feedback" if failure_class == "IF-04" else "authority_scope_mismatch",
                 broker_action=broker_action,
                 terminal_outcome="retry" if broker_action == "NAK" else "terminal",
-                anomaly_code=None if broker_action == "NAK" else ("authority_stall" if failure_class == "IF-03" else self._anomaly_code_for_expiry(subject, envelope.message_type)),
+                anomaly_code=None if broker_action == "NAK" else (
+                    "authority_stall" if failure_class == "IF-03" else self._anomaly_code_for_expiry(subject, envelope.message_type)
+                ),
                 abnormal_error_class="authority_unresolved" if failure_class == "IF-03" else None,
                 workflow_instance_id=envelope.workflow_instance_id,
                 message_id=envelope.message_id,
@@ -563,7 +659,26 @@ class CoordinationRuntime:
             )
 
         stored_wait = self.state_store.get_authority_wait_state(payload_contract.authority_wait_id)
+        raw_feedback_status = "received"
+        raw_feedback_payload = {
+            "feedback_id": payload_contract.feedback_id,
+            "review_task_id": payload_contract.review_task_id,
+            "correlation_id": envelope.correlation_id,
+            "causation_id": envelope.causation_id,
+            "reviewer_actor_id": payload_contract.reviewer_actor_id,
+            "reviewer_role": payload_contract.reviewer_role,
+            "action": payload_contract.action,
+        }
         if stored_wait is None:
+            raw_feedback_record = self.state_store.create_phase3_runtime_record(
+                record_type="raw_feedback_intake_record",
+                workflow_instance_id=envelope.workflow_instance_id,
+                authority_wait_id=payload_contract.authority_wait_id,
+                related_message_id=envelope.message_id,
+                dedupe_key=f"{payload_contract.authority_wait_id}:{payload_contract.feedback_id}:{envelope.message_id}",
+                status="feedback_rejected_stale",
+                payload=raw_feedback_payload,
+            )
             terminal = self._record_terminal_intake_failure(
                 subject=subject,
                 raw_inbound=envelope_dict,
@@ -585,54 +700,63 @@ class CoordinationRuntime:
             return FeedbackReceiveResult(
                 valid=False,
                 ack_allowed=False,
+                outcome="feedback_rejected_stale",
+                raw_feedback_record=raw_feedback_record,
                 errors=[f"FEEDBACK_STALE: authority_wait_state not found: {payload_contract.authority_wait_id}"],
-                envelope=envelope,
-                intake_record=terminal.intake_record,
-                broker_action=terminal.broker_action,
-                failure_class=terminal.failure_class,
-            )
-        if stored_wait.status in {"resolved", "superseded", "timed_out", "escalated"}:
-            terminal = self._record_terminal_intake_failure(
-                subject=subject,
-                raw_inbound=envelope_dict,
-                normalized_envelope=envelope.to_dict(),
-                errors=[f"FEEDBACK_STALE: authority_wait_state is {stored_wait.status}"],
-                failure_class="IF-08",
-                failure_subclass="invalid_hitl_callback",
-                broker_action="REJECT",
-                terminal_outcome="terminal",
-                anomaly_code="authority_stall",
-                abnormal_error_class="authority_unresolved",
-                workflow_instance_id=envelope.workflow_instance_id,
-                message_id=envelope.message_id,
-                causation_id=envelope.causation_id,
-                correlation_id=envelope.correlation_id,
-                source_agent_id=envelope.source_agent_id,
-                target_agent_id=envelope.target_agent_id,
-            )
-            return FeedbackReceiveResult(
-                valid=False,
-                ack_allowed=False,
-                errors=[f"FEEDBACK_STALE: authority_wait_state is {stored_wait.status}"],
                 envelope=envelope,
                 intake_record=terminal.intake_record,
                 broker_action=terminal.broker_action,
                 failure_class=terminal.failure_class,
             )
 
-        wait = self._load_wait_from_store(stored_wait)
-        correlation = self.hitl_lifecycle.validate_feedback_correlation(
-            authority_wait_id=wait.authority_wait_id,
-            correlation_id=envelope.correlation_id,
-            review_task_message_id=stored_wait.review_task_message_id or payload_contract.review_task_id,
-            causation_id=envelope.causation_id,
+        raw_feedback_record = self.state_store.create_phase3_runtime_record(
+            record_type="raw_feedback_intake_record",
+            workflow_instance_id=envelope.workflow_instance_id,
+            authority_wait_id=stored_wait.authority_wait_id,
+            related_message_id=envelope.message_id,
+            dedupe_key=f"{stored_wait.authority_wait_id}:{payload_contract.feedback_id}:{envelope.message_id}",
+            status=raw_feedback_status,
+            payload=raw_feedback_payload,
         )
-        if not correlation.valid:
+        duplicate_key = f"{stored_wait.authority_wait_id}:{payload_contract.feedback_id}:{payload_contract.action}"
+        prior_decision_record = self.state_store.find_phase3_runtime_record(
+            record_type="normalized_decision_record",
+            dedupe_key=duplicate_key,
+        )
+        if prior_decision_record is not None:
+            duplicate_resolution_record = self.state_store.create_phase3_runtime_record(
+                record_type="duplicate_feedback_resolution_record",
+                workflow_instance_id=stored_wait.workflow_instance_id,
+                authority_wait_id=stored_wait.authority_wait_id,
+                related_message_id=envelope.message_id,
+                dedupe_key=f"{stored_wait.authority_wait_id}:{payload_contract.feedback_id}",
+                status="feedback_accepted_duplicate",
+                payload={
+                    "prior_decision_record_id": prior_decision_record.record_id,
+                    "prior_decision_id": prior_decision_record.payload.get("decision_id"),
+                    "feedback_id": payload_contract.feedback_id,
+                },
+            )
+            decision_payload = prior_decision_record.payload.get("decision_payload", {})
+            return FeedbackReceiveResult(
+                valid=True,
+                ack_allowed=True,
+                decision=HitlDecisionRecordV03(**decision_payload) if decision_payload else None,
+                authority_wait=self._load_wait_from_store(stored_wait),
+                outcome="feedback_accepted_duplicate",
+                raw_feedback_record=raw_feedback_record,
+                normalized_decision_record=prior_decision_record,
+                duplicate_resolution_record=duplicate_resolution_record,
+                envelope=envelope,
+                broker_action="ACK",
+            )
+
+        if stored_wait.status in {"resolved", "superseded", "timed_out", "escalated", "stale"}:
             terminal = self._record_terminal_intake_failure(
                 subject=subject,
                 raw_inbound=envelope_dict,
                 normalized_envelope=envelope.to_dict(),
-                errors=correlation.errors,
+                errors=[f"FEEDBACK_STALE: authority_wait_state is {stored_wait.status}"],
                 failure_class="IF-08",
                 failure_subclass="invalid_hitl_callback",
                 broker_action="REJECT",
@@ -649,7 +773,71 @@ class CoordinationRuntime:
             return FeedbackReceiveResult(
                 valid=False,
                 ack_allowed=False,
-                errors=correlation.errors,
+                outcome="feedback_rejected_stale",
+                raw_feedback_record=raw_feedback_record,
+                errors=[f"FEEDBACK_STALE: authority_wait_state is {stored_wait.status}"],
+                envelope=envelope,
+                intake_record=terminal.intake_record,
+                broker_action=terminal.broker_action,
+                failure_class=terminal.failure_class,
+            )
+        if stored_wait.status == "closed":
+            return FeedbackReceiveResult(
+                valid=False,
+                ack_allowed=True,
+                outcome="feedback_rejected_closed",
+                raw_feedback_record=raw_feedback_record,
+                errors=["FEEDBACK_CLOSED: authority_wait_state is closed"],
+                envelope=envelope,
+                broker_action="ACK",
+                failure_class="HITL-CLOSED",
+            )
+
+        wait = self._load_wait_from_store(stored_wait)
+        expected_review_task_id = (stored_wait.payload or {}).get("review_task_id")
+        validation_errors: list[str] = []
+        if not stored_wait.review_task_message_id or stored_wait.status == "publication_failed":
+            validation_errors.append("REVIEW_TASK_NOT_PUBLISHED")
+        if expected_review_task_id and expected_review_task_id != payload_contract.review_task_id:
+            validation_errors.append("INVALID_REVIEW_TASK_LINKAGE")
+        if stored_wait.requested_actor_role not in {"", "reviewer"} and payload_contract.reviewer_role != stored_wait.requested_actor_role:
+            validation_errors.append("INVALID_FEEDBACK_ACTOR_SCOPE")
+        if payload_contract.reviewer_actor_id != envelope.source_agent_id:
+            validation_errors.append("INVALID_FEEDBACK_ACTOR_ID")
+
+        correlation = self.hitl_lifecycle.validate_feedback_correlation(
+            authority_wait_id=wait.authority_wait_id,
+            correlation_id=envelope.correlation_id,
+            review_task_message_id=stored_wait.review_task_message_id or payload_contract.review_task_id,
+            causation_id=envelope.causation_id,
+        )
+        validation_errors.extend(correlation.errors)
+
+        if validation_errors:
+            terminal = self._record_terminal_intake_failure(
+                subject=subject,
+                raw_inbound=envelope_dict,
+                normalized_envelope=envelope.to_dict(),
+                errors=validation_errors,
+                failure_class="IF-08",
+                failure_subclass="invalid_hitl_callback",
+                broker_action="REJECT",
+                terminal_outcome="terminal",
+                anomaly_code="authority_stall",
+                abnormal_error_class="authority_unresolved",
+                workflow_instance_id=envelope.workflow_instance_id,
+                message_id=envelope.message_id,
+                causation_id=envelope.causation_id,
+                correlation_id=envelope.correlation_id,
+                source_agent_id=envelope.source_agent_id,
+                target_agent_id=envelope.target_agent_id,
+            )
+            return FeedbackReceiveResult(
+                valid=False,
+                ack_allowed=False,
+                outcome="feedback_rejected_invalid",
+                raw_feedback_record=raw_feedback_record,
+                errors=validation_errors,
                 envelope=envelope,
                 intake_record=terminal.intake_record,
                 broker_action=terminal.broker_action,
@@ -686,6 +874,8 @@ class CoordinationRuntime:
             return FeedbackReceiveResult(
                 valid=False,
                 ack_allowed=False,
+                outcome="feedback_rejected_invalid",
+                raw_feedback_record=raw_feedback_record,
                 errors=validation.errors,
                 envelope=envelope,
                 intake_record=terminal.intake_record,
@@ -705,7 +895,11 @@ class CoordinationRuntime:
             source_agent_id=envelope.source_agent_id,
             target_agent_id=envelope.target_agent_id,
         )
-        self.state_store.create_hitl_decision_record(
+        phase3_managed = (stored_wait.payload or {}).get("publication_status") == "published"
+        if phase3_managed:
+            wait.status = "feedback_received"
+            self._persist_authority_wait_state(wait)
+        normalized_store_record = self.state_store.create_hitl_decision_record(
             decision_id=decision.decision_id,
             authority_wait_id=decision.authority_wait_id,
             workflow_instance_id=decision.workflow_instance_id,
@@ -720,15 +914,118 @@ class CoordinationRuntime:
             created_at=decision.created_at,
             payload=asdict(decision),
         )
-        self._persist_authority_wait_state(self._require_wait(wait.authority_wait_id))
+        normalized_decision_record = self.state_store.create_phase3_runtime_record(
+            record_type="normalized_decision_record",
+            workflow_instance_id=decision.workflow_instance_id,
+            authority_wait_id=decision.authority_wait_id,
+            related_message_id=envelope.message_id,
+            dedupe_key=duplicate_key,
+            status="validated",
+            payload={
+                "decision_id": decision.decision_id,
+                "decision_payload": asdict(decision),
+                "feedback_id": payload_contract.feedback_id,
+                "state_transition_allowed": decision.state_transition_allowed,
+            },
+        )
+        if not phase3_managed:
+            self._persist_authority_wait_state(wait)
+            self.state_store.complete_envelope_inbox(envelope.message_id)
+            return FeedbackReceiveResult(
+                valid=True,
+                ack_allowed=True,
+                decision=decision,
+                authority_wait=self._require_wait(wait.authority_wait_id),
+                outcome="feedback_accepted",
+                raw_feedback_record=raw_feedback_record,
+                normalized_decision_record=normalized_decision_record,
+                envelope=envelope,
+                broker_action="ACK",
+            )
+
+        wait.status = "validated"
+        self._persist_authority_wait_state(wait)
+
+        resume_request_record = None
+        close_reason = "decision_recorded"
+        if decision.state_transition_allowed:
+            resume_request_record = self.state_store.create_phase3_runtime_record(
+                record_type="bounded_resume_request_record",
+                workflow_instance_id=decision.workflow_instance_id,
+                authority_wait_id=decision.authority_wait_id,
+                related_message_id=envelope.message_id,
+                dedupe_key=decision.decision_id,
+                status="resumed",
+                payload={
+                    "decision_id": decision.decision_id,
+                    "resume_from_ref": (stored_wait.payload or {}).get("resume_from_ref"),
+                    "gate_id": stored_wait.gate_id,
+                    "checkpoint_id": stored_wait.checkpoint_id,
+                },
+            )
+            wait.status = "resumed"
+            close_reason = "accepted_feedback"
+
+        wait.status = "closed"
+        wait.resolved_at = datetime.now(UTC).isoformat()
+        self._persist_authority_wait_state(wait)
+        self.state_store.create_phase3_runtime_record(
+            record_type="wait_closure_record",
+            workflow_instance_id=decision.workflow_instance_id,
+            authority_wait_id=decision.authority_wait_id,
+            related_message_id=envelope.message_id,
+            dedupe_key=decision.decision_id,
+            status="closed",
+            payload={
+                "decision_id": decision.decision_id,
+                "close_reason": close_reason,
+            },
+        )
         self.state_store.complete_envelope_inbox(envelope.message_id)
         return FeedbackReceiveResult(
             valid=True,
             ack_allowed=True,
             decision=decision,
             authority_wait=self._require_wait(wait.authority_wait_id),
+            outcome="feedback_accepted",
+            raw_feedback_record=raw_feedback_record,
+            normalized_decision_record=normalized_decision_record,
+            resume_request_record=resume_request_record,
             envelope=envelope,
             broker_action="ACK",
+        )
+
+    def record_timeout_dispatch_evidence(self, envelope: ExecutionMessageEnvelope) -> Any:
+        return self.state_store.create_phase3_runtime_record(
+            record_type="timeout_dispatch_evidence_record",
+            workflow_instance_id=envelope.workflow_instance_id,
+            authority_wait_id=envelope.correlation_id,
+            related_message_id=envelope.message_id,
+            dedupe_key=envelope.message_id,
+            status="timeout_recorded",
+            payload=envelope.to_dict(),
+        )
+
+    def record_retry_dispatch_evidence(self, envelope: ExecutionMessageEnvelope) -> Any:
+        return self.state_store.create_phase3_runtime_record(
+            record_type="retry_dispatch_evidence_record",
+            workflow_instance_id=envelope.workflow_instance_id,
+            authority_wait_id=envelope.correlation_id,
+            related_message_id=envelope.message_id,
+            dedupe_key=envelope.message_id,
+            status="retry_recorded",
+            payload=envelope.to_dict(),
+        )
+
+    def record_dead_letter_dispatch_evidence(self, envelope: ExecutionMessageEnvelope) -> Any:
+        return self.state_store.create_phase3_runtime_record(
+            record_type="dead_letter_dispatch_evidence_record",
+            workflow_instance_id=envelope.workflow_instance_id,
+            authority_wait_id=envelope.correlation_id,
+            related_message_id=envelope.message_id,
+            dedupe_key=envelope.message_id,
+            status="dead_letter_recorded",
+            payload=envelope.to_dict(),
         )
 
     def scan_timeouts(self, now_at: Optional[str] = None) -> TimeoutScanResult:
@@ -791,6 +1088,7 @@ class CoordinationRuntime:
         for stored_wait in overdue_waits:
             wait = self._load_wait_from_store(stored_wait)
             wait, decision, abnormal = self.hitl_lifecycle.handle_no_response_timeout(wait.authority_wait_id)
+            wait.status = "timed_out"
             self.state_store.create_hitl_decision_record(
                 decision_id=decision.decision_id,
                 authority_wait_id=decision.authority_wait_id,
@@ -844,23 +1142,23 @@ class CoordinationRuntime:
                     "decision_id": decision.decision_id,
                 },
             )
-            authority_wait_timeouts.append(
-                build_execution_envelope(
-                    message_type="Timeout_Message",
-                    workflow_instance_id=wait.workflow_instance_id,
-                    workflow_type="hitl",
-                    workflow_version="0.3",
-                    producer=self.agent_id,
-                    payload=timeout_payload,
-                    correlation_id=wait.authority_wait_id,
-                    causation_id=stored_wait.review_task_message_id or wait.authority_wait_id,
-                    source_agent_id=self.agent_id,
-                    source_runtime_instance_id=self._runtime_instance_id,
-                    source_role=self.role,
-                    authority_scope="workflow.timeout",
-                    target_agent_id=self.agent_id,
-                )
+            timeout_envelope = build_execution_envelope(
+                message_type="Timeout_Message",
+                workflow_instance_id=wait.workflow_instance_id,
+                workflow_type="hitl",
+                workflow_version="0.3",
+                producer=self.agent_id,
+                payload=timeout_payload,
+                correlation_id=wait.authority_wait_id,
+                causation_id=stored_wait.review_task_message_id or wait.authority_wait_id,
+                source_agent_id=self.agent_id,
+                source_runtime_instance_id=self._runtime_instance_id,
+                source_role=self.role,
+                authority_scope="workflow.timeout",
+                target_agent_id=self.agent_id,
             )
+            self.record_timeout_dispatch_evidence(timeout_envelope)
+            authority_wait_timeouts.append(timeout_envelope)
 
         return TimeoutScanResult(
             task_timeout_envelopes=task_timeouts,

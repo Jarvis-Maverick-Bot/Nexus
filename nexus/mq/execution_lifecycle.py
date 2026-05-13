@@ -39,6 +39,30 @@ class FinalizeHitlResult:
     route: HitlRouteResult
 
 
+@dataclass
+class DispatchResult:
+    family: str
+    status: str
+    review_request: Optional[ReviewRequestResult] = None
+    feedback: Optional[object] = None
+    evidence_record: Optional[object] = None
+
+
+class SyntheticReviewTaskSink:
+    """Fixture sink for bounded Review_Task publication."""
+
+    def __init__(self):
+        self.published: list[ExecutionMessageEnvelope] = []
+        self.fail_next: Optional[str] = None
+
+    def publish(self, envelope: ExecutionMessageEnvelope) -> None:
+        if self.fail_next:
+            error = self.fail_next
+            self.fail_next = None
+            raise RuntimeError(error)
+        self.published.append(envelope)
+
+
 class ExecutionLifecycleCoordinator:
     """
     Skeleton execution lifecycle coordinator.
@@ -55,10 +79,12 @@ class ExecutionLifecycleCoordinator:
         runtime: CoordinationRuntime,
         commit_boundary: Optional[CommitBoundary] = None,
         business_emitter: Optional[BusinessMessageEmitter] = None,
+        review_sink: Optional[SyntheticReviewTaskSink] = None,
     ):
         self.runtime = runtime
         self.commit_boundary = commit_boundary or CommitBoundary()
         self.business_emitter = business_emitter or BusinessMessageEmitter()
+        self.review_sink = review_sink or SyntheticReviewTaskSink()
 
     def create_review_request(
         self,
@@ -121,6 +147,65 @@ class ExecutionLifecycleCoordinator:
             review_envelope=review_envelope,
             review_payload=review_payload,
         )
+
+    def publish_review_request(self, request: ReviewRequestResult, resume_from_ref: Optional[str]) -> object:
+        try:
+            self.review_sink.publish(request.review_envelope)
+        except RuntimeError as exc:
+            return self.runtime.record_review_task_publication_failure(
+                authority_wait_id=request.authority_wait_id,
+                review_task_message_id=request.review_envelope.message_id,
+                review_task_id=request.review_payload.review_task_id,
+                error=str(exc),
+            )
+        return self.runtime.record_review_task_publication(
+            authority_wait_id=request.authority_wait_id,
+            review_task_message_id=request.review_envelope.message_id,
+            review_task_id=request.review_payload.review_task_id,
+            resume_from_ref=resume_from_ref,
+        )
+
+    def dispatch_runtime_message(
+        self,
+        envelope: ExecutionMessageEnvelope,
+        *,
+        review_request: Optional[ReviewRequestResult] = None,
+        resume_from_ref: Optional[str] = None,
+    ) -> DispatchResult:
+        family = envelope.message_type
+        if family == "Command_Message":
+            if review_request is None:
+                return DispatchResult(family=family, status="command_recorded")
+            evidence = self.publish_review_request(review_request, resume_from_ref=resume_from_ref)
+            status = evidence.status if hasattr(evidence, "status") else "review_dispatched"
+            return DispatchResult(
+                family=family,
+                status=status,
+                review_request=review_request,
+                evidence_record=evidence,
+            )
+        if family == "Review_Task":
+            if review_request is None:
+                raise ValueError("REVIEW_REQUEST_REQUIRED")
+            evidence = self.publish_review_request(review_request, resume_from_ref=resume_from_ref)
+            status = evidence.status if hasattr(evidence, "status") else "review_dispatched"
+            return DispatchResult(family=family, status=status, review_request=review_request, evidence_record=evidence)
+        if family == "Feedback_Message":
+            feedback = self.runtime.receive_feedback(
+                envelope.reply_to_subject or "agent.maverick.callbacks",
+                envelope.to_dict(),
+            )
+            return DispatchResult(family=family, status=feedback.outcome or ("feedback_accepted" if feedback.valid else "feedback_rejected"), feedback=feedback)
+        if family == "Timeout_Message":
+            evidence = self.runtime.record_timeout_dispatch_evidence(envelope)
+            return DispatchResult(family=family, status=evidence.status, evidence_record=evidence)
+        if family == "Retry_Message":
+            evidence = self.runtime.record_retry_dispatch_evidence(envelope)
+            return DispatchResult(family=family, status=evidence.status, evidence_record=evidence)
+        if family == "Dead_Letter_Message":
+            evidence = self.runtime.record_dead_letter_dispatch_evidence(envelope)
+            return DispatchResult(family=family, status=evidence.status, evidence_record=evidence)
+        raise ValueError(f"UNSUPPORTED_PHASE3_FAMILY: {family}")
 
     def finalize_success(
         self,
