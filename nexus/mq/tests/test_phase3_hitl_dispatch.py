@@ -266,6 +266,27 @@ def test_hitl_07_publication_failure_records_durable_failure_evidence(tmp_path):
     runtime.close()
 
 
+def test_hitl_07b_feedback_is_rejected_when_review_task_was_never_published(tmp_path):
+    runtime, coordinator, _ = _make_coordinator(tmp_path)
+    request = _make_review_request(coordinator)
+    feedback = _make_feedback(
+        request.authority_wait_id,
+        request.review_payload.review_task_id,
+        request.review_envelope.message_id,
+        feedback_id="feedback-unpublished-001",
+    )
+
+    result = coordinator.dispatch_runtime_message(feedback)
+    decisions = runtime.state_store.list_phase3_runtime_records("normalized_decision_record", request.authority_wait_id)
+    resumes = runtime.state_store.list_phase3_runtime_records("bounded_resume_request_record", request.authority_wait_id)
+
+    assert result.status == "feedback_rejected_invalid"
+    assert "REVIEW_TASK_NOT_PUBLISHED" in result.feedback.errors
+    assert decisions == []
+    assert resumes == []
+    runtime.close()
+
+
 def test_hitl_08_duplicate_feedback_returns_prior_decision_without_second_resume(tmp_path):
     runtime, coordinator, _ = _make_coordinator(tmp_path)
     request = _make_review_request(coordinator)
@@ -291,6 +312,42 @@ def test_hitl_08_duplicate_feedback_returns_prior_decision_without_second_resume
     assert second.status == "feedback_accepted_duplicate"
     assert second.feedback.decision.decision_id == first.feedback.decision.decision_id
     assert len(resumes) == 1
+    runtime.close()
+
+
+def test_hitl_08b_duplicate_feedback_with_invalid_current_linkage_is_rejected(tmp_path):
+    runtime, coordinator, _ = _make_coordinator(tmp_path)
+    request = _make_review_request(coordinator)
+    coordinator.dispatch_runtime_message(_make_command(), review_request=request, resume_from_ref="resume://checkpoint-001")
+    feedback = _make_feedback(
+        request.authority_wait_id,
+        request.review_payload.review_task_id,
+        request.review_envelope.message_id,
+        feedback_id="feedback-dup-invalid-001",
+    )
+    coordinator.dispatch_runtime_message(feedback)
+    invalid_duplicate = _make_feedback(
+        request.authority_wait_id,
+        request.review_payload.review_task_id,
+        "bad-causation",
+        feedback_id="feedback-dup-invalid-001",
+        correlation_id="bad-correlation",
+        reviewer_role="bad-role",
+    )
+
+    result = coordinator.dispatch_runtime_message(invalid_duplicate)
+    duplicate_records = runtime.state_store.list_phase3_runtime_records("duplicate_feedback_resolution_record", request.authority_wait_id)
+
+    assert result.status == "feedback_rejected_invalid"
+    assert any(
+        marker in result.feedback.errors
+        for marker in (
+            "INVALID_FEEDBACK_CORRELATION: correlation_id must equal authority_wait_id",
+            "INVALID_FEEDBACK_CAUSATION: causation_id must equal Review_Task.message_id",
+            "INVALID_FEEDBACK_ACTOR_SCOPE",
+        )
+    )
+    assert duplicate_records == []
     runtime.close()
 
 

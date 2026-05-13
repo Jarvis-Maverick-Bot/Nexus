@@ -271,6 +271,7 @@ class CoordinationRuntime:
         authority_wait_id: str,
         review_task_message_id: str,
         review_task_id: Optional[str] = None,
+        managed: bool = False,
         published: bool = False,
         publication_error: Optional[str] = None,
         resume_from_ref: Optional[str] = None,
@@ -280,6 +281,8 @@ class CoordinationRuntime:
         payload["review_task_message_id"] = review_task_message_id
         if review_task_id:
             payload["review_task_id"] = review_task_id
+        if managed:
+            payload["phase3_managed"] = True
         if resume_from_ref:
             payload["resume_from_ref"] = resume_from_ref
         payload["publication_status"] = "published" if published else "pending"
@@ -319,6 +322,7 @@ class CoordinationRuntime:
             authority_wait_id=authority_wait_id,
             review_task_message_id=review_task_message_id,
             review_task_id=review_task_id,
+            managed=True,
             published=True,
             resume_from_ref=resume_from_ref,
         )
@@ -349,6 +353,7 @@ class CoordinationRuntime:
             authority_wait_id=authority_wait_id,
             review_task_message_id=review_task_message_id,
             review_task_id=review_task_id,
+            managed=True,
             published=False,
             publication_error=error,
         )
@@ -718,6 +723,62 @@ class CoordinationRuntime:
             status=raw_feedback_status,
             payload=raw_feedback_payload,
         )
+
+        wait = self._load_wait_from_store(stored_wait)
+        expected_review_task_id = (stored_wait.payload or {}).get("review_task_id")
+        publication_status = (stored_wait.payload or {}).get("publication_status")
+        phase3_managed = bool((stored_wait.payload or {}).get("phase3_managed"))
+        validation_errors: list[str] = []
+        if not stored_wait.review_task_message_id or stored_wait.status == "publication_failed":
+            validation_errors.append("REVIEW_TASK_NOT_PUBLISHED")
+        if phase3_managed and publication_status != "published":
+            validation_errors.append("REVIEW_TASK_NOT_PUBLISHED")
+        if expected_review_task_id and expected_review_task_id != payload_contract.review_task_id:
+            validation_errors.append("INVALID_REVIEW_TASK_LINKAGE")
+        if stored_wait.requested_actor_role not in {"", "reviewer"} and payload_contract.reviewer_role != stored_wait.requested_actor_role:
+            validation_errors.append("INVALID_FEEDBACK_ACTOR_SCOPE")
+        if payload_contract.reviewer_actor_id != envelope.source_agent_id:
+            validation_errors.append("INVALID_FEEDBACK_ACTOR_ID")
+
+        correlation = self.hitl_lifecycle.validate_feedback_correlation(
+            authority_wait_id=wait.authority_wait_id,
+            correlation_id=envelope.correlation_id,
+            review_task_message_id=stored_wait.review_task_message_id or payload_contract.review_task_id,
+            causation_id=envelope.causation_id,
+        )
+        validation_errors.extend(correlation.errors)
+
+        if validation_errors:
+            terminal = self._record_terminal_intake_failure(
+                subject=subject,
+                raw_inbound=envelope_dict,
+                normalized_envelope=envelope.to_dict(),
+                errors=validation_errors,
+                failure_class="IF-08",
+                failure_subclass="invalid_hitl_callback",
+                broker_action="REJECT",
+                terminal_outcome="terminal",
+                anomaly_code="authority_stall",
+                abnormal_error_class="authority_unresolved",
+                workflow_instance_id=envelope.workflow_instance_id,
+                message_id=envelope.message_id,
+                causation_id=envelope.causation_id,
+                correlation_id=envelope.correlation_id,
+                source_agent_id=envelope.source_agent_id,
+                target_agent_id=envelope.target_agent_id,
+            )
+            return FeedbackReceiveResult(
+                valid=False,
+                ack_allowed=False,
+                outcome="feedback_rejected_invalid",
+                raw_feedback_record=raw_feedback_record,
+                errors=validation_errors,
+                envelope=envelope,
+                intake_record=terminal.intake_record,
+                broker_action=terminal.broker_action,
+                failure_class=terminal.failure_class,
+            )
+
         duplicate_key = f"{stored_wait.authority_wait_id}:{payload_contract.feedback_id}:{payload_contract.action}"
         prior_decision_record = self.state_store.find_phase3_runtime_record(
             record_type="normalized_decision_record",
@@ -742,7 +803,7 @@ class CoordinationRuntime:
                 valid=True,
                 ack_allowed=True,
                 decision=HitlDecisionRecordV03(**decision_payload) if decision_payload else None,
-                authority_wait=self._load_wait_from_store(stored_wait),
+                authority_wait=wait,
                 outcome="feedback_accepted_duplicate",
                 raw_feedback_record=raw_feedback_record,
                 normalized_decision_record=prior_decision_record,
@@ -791,57 +852,6 @@ class CoordinationRuntime:
                 envelope=envelope,
                 broker_action="ACK",
                 failure_class="HITL-CLOSED",
-            )
-
-        wait = self._load_wait_from_store(stored_wait)
-        expected_review_task_id = (stored_wait.payload or {}).get("review_task_id")
-        validation_errors: list[str] = []
-        if not stored_wait.review_task_message_id or stored_wait.status == "publication_failed":
-            validation_errors.append("REVIEW_TASK_NOT_PUBLISHED")
-        if expected_review_task_id and expected_review_task_id != payload_contract.review_task_id:
-            validation_errors.append("INVALID_REVIEW_TASK_LINKAGE")
-        if stored_wait.requested_actor_role not in {"", "reviewer"} and payload_contract.reviewer_role != stored_wait.requested_actor_role:
-            validation_errors.append("INVALID_FEEDBACK_ACTOR_SCOPE")
-        if payload_contract.reviewer_actor_id != envelope.source_agent_id:
-            validation_errors.append("INVALID_FEEDBACK_ACTOR_ID")
-
-        correlation = self.hitl_lifecycle.validate_feedback_correlation(
-            authority_wait_id=wait.authority_wait_id,
-            correlation_id=envelope.correlation_id,
-            review_task_message_id=stored_wait.review_task_message_id or payload_contract.review_task_id,
-            causation_id=envelope.causation_id,
-        )
-        validation_errors.extend(correlation.errors)
-
-        if validation_errors:
-            terminal = self._record_terminal_intake_failure(
-                subject=subject,
-                raw_inbound=envelope_dict,
-                normalized_envelope=envelope.to_dict(),
-                errors=validation_errors,
-                failure_class="IF-08",
-                failure_subclass="invalid_hitl_callback",
-                broker_action="REJECT",
-                terminal_outcome="terminal",
-                anomaly_code="authority_stall",
-                abnormal_error_class="authority_unresolved",
-                workflow_instance_id=envelope.workflow_instance_id,
-                message_id=envelope.message_id,
-                causation_id=envelope.causation_id,
-                correlation_id=envelope.correlation_id,
-                source_agent_id=envelope.source_agent_id,
-                target_agent_id=envelope.target_agent_id,
-            )
-            return FeedbackReceiveResult(
-                valid=False,
-                ack_allowed=False,
-                outcome="feedback_rejected_invalid",
-                raw_feedback_record=raw_feedback_record,
-                errors=validation_errors,
-                envelope=envelope,
-                intake_record=terminal.intake_record,
-                broker_action=terminal.broker_action,
-                failure_class=terminal.failure_class,
             )
 
         validation, decision = self.hitl_lifecycle.normalize_feedback(
@@ -895,7 +905,6 @@ class CoordinationRuntime:
             source_agent_id=envelope.source_agent_id,
             target_agent_id=envelope.target_agent_id,
         )
-        phase3_managed = (stored_wait.payload or {}).get("publication_status") == "published"
         if phase3_managed:
             wait.status = "feedback_received"
             self._persist_authority_wait_state(wait)

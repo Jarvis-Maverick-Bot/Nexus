@@ -122,6 +122,7 @@ def test_evaluate_hitl_outcome_routes_revise_to_return_package(tmp_path):
         evidence_package_id="pkg-003",
         due_at=_future_iso(),
     )
+    coordinator.publish_review_request(review, resume_from_ref="resume://checkpoint-003")
     feedback = build_execution_envelope(
         message_type="Feedback_Message",
         workflow_instance_id="wf-hitl-003",

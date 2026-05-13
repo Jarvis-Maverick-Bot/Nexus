@@ -121,6 +121,7 @@ def test_a2_feedback_approve_routes_to_transition_ready(tmp_path):
         target_agent_id="viper",
         reply_to_subject="agent.maverick.callbacks",
     )
+    coordinator.publish_review_request(review, resume_from_ref="resume://a2")
     feedback = build_execution_envelope(
         message_type="Feedback_Message",
         workflow_instance_id="wf-a2-001",
@@ -186,6 +187,7 @@ def test_a3_feedback_revise_routes_to_return_package(tmp_path):
         target_agent_id="viper",
         reply_to_subject="agent.maverick.callbacks",
     )
+    coordinator.publish_review_request(review, resume_from_ref="resume://a3")
     feedback = build_execution_envelope(
         message_type="Feedback_Message",
         workflow_instance_id="wf-a3-001",
@@ -251,6 +253,7 @@ def test_a4_feedback_reject_routes_to_blocked_return_package(tmp_path):
         target_agent_id="viper",
         reply_to_subject="agent.maverick.callbacks",
     )
+    coordinator.publish_review_request(review, resume_from_ref="resume://a4")
     feedback = build_execution_envelope(
         message_type="Feedback_Message",
         workflow_instance_id="wf-a4-001",

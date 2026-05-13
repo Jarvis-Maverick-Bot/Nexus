@@ -141,7 +141,12 @@ class ExecutionLifecycleCoordinator:
             expires_at=due_at,
             correlation_id=wait.authority_wait_id,
         )
-        self.runtime.register_review_task_message(wait.authority_wait_id, review_envelope.message_id)
+        self.runtime.register_review_task_message(
+            wait.authority_wait_id,
+            review_envelope.message_id,
+            review_task_id=review_payload.review_task_id,
+            managed=True,
+        )
         return ReviewRequestResult(
             authority_wait_id=wait.authority_wait_id,
             review_envelope=review_envelope,
