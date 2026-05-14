@@ -205,10 +205,34 @@ class ExecutionLifecycleCoordinator:
             evidence = self.runtime.record_timeout_dispatch_evidence(envelope)
             return DispatchResult(family=family, status=evidence.status, evidence_record=evidence)
         if family == "Retry_Message":
+            retry_payload = envelope.payload if isinstance(envelope.payload, RetryMessagePayload) else None
+            if retry_payload is not None:
+                self.runtime.record_retry_decision(
+                    original_message_id=retry_payload.original_message_id,
+                    original_idempotency_key=retry_payload.original_idempotency_key,
+                    workflow_instance_id=envelope.workflow_instance_id,
+                    message_family=retry_payload.original_message_type,
+                    failure_class="retry_exhausted" if retry_payload.retry_count >= retry_payload.max_retries else "mechanism_stall",
+                    attempt_count=retry_payload.retry_count,
+                    max_attempts=retry_payload.max_retries,
+                    retry_actor="application_retry_message",
+                    failure_cause=retry_payload.last_error or retry_payload.retry_reason,
+                )
             evidence = self.runtime.record_retry_dispatch_evidence(envelope)
             return DispatchResult(family=family, status=evidence.status, evidence_record=evidence)
         if family == "Dead_Letter_Message":
             evidence = self.runtime.record_dead_letter_dispatch_evidence(envelope)
+            dead_payload = envelope.payload if isinstance(envelope.payload, DeadLetterMessagePayload) else None
+            if dead_payload is not None:
+                self.runtime.record_terminal_abnormal(
+                    dedupe_key=f"terminal:dlq:{dead_payload.original_message_id}",
+                    workflow_instance_id=envelope.workflow_instance_id,
+                    error_event_id=f"DLQ:{dead_payload.original_message_id}",
+                    error_class="mechanism_stall",
+                    affected_ref=dead_payload.original_message_id,
+                    failure_cause=dead_payload.last_error or dead_payload.dead_letter_reason,
+                    evidence_refs=[evidence.record_id],
+                )
             return DispatchResult(family=family, status=evidence.status, evidence_record=evidence)
         raise ValueError(f"UNSUPPORTED_PHASE3_FAMILY: {family}")
 

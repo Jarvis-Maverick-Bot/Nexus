@@ -118,6 +118,24 @@ class TimeoutScanResult:
     authority_wait_timeout_envelopes: list[Any] = field(default_factory=list)
 
 
+RECOVERY_STATES = {
+    "intake_committed",
+    "handler_running",
+    "handler_retry_pending",
+    "handler_exhausted",
+    "timeout_recorded",
+    "retry_queued",
+    "retry_published",
+    "dlq_recorded",
+    "recovery_unresolved",
+    "recovery_reconciled",
+}
+
+BROKER_RETRY_FAMILIES = {"Feedback_Message", "Review_Task", "Timeout_Message"}
+APPLICATION_RETRY_FAMILIES = {"Command_Message", "Timeout_Message", "Retry_Message"}
+DLQ_ELIGIBLE_FAILURE_CLASSES = {"IF-04", "mechanism_stall", "non_retryable", "retry_exhausted"}
+
+
 class CoordinationRuntime:
     """Small durable coordination layer for the accepted always-on runtime."""
 
@@ -386,6 +404,53 @@ class CoordinationRuntime:
     def confirm_outbox_publish(self, outbox_id: str) -> SideEffectOutboxRecord:
         published = self.state_store.mark_outbox_published(outbox_id)
         return self.state_store.mark_outbox_confirmed(published.outbox_id, confirmed_by=self.runtime_id)
+
+    def create_phase4_record(
+        self,
+        record_type: str,
+        dedupe_key: str,
+        status: str,
+        payload: dict,
+        workflow_instance_id: Optional[str] = None,
+        authority_wait_id: Optional[str] = None,
+        related_message_id: Optional[str] = None,
+    ) -> Any:
+        existing = self.state_store.find_phase3_runtime_record(record_type, dedupe_key)
+        if existing is not None:
+            return existing
+        return self.state_store.create_phase3_runtime_record(
+            record_type=record_type,
+            workflow_instance_id=workflow_instance_id,
+            authority_wait_id=authority_wait_id,
+            related_message_id=related_message_id,
+            dedupe_key=dedupe_key,
+            status=status,
+            payload=payload,
+        )
+
+    def record_stale_feedback_rejection(
+        self,
+        *,
+        envelope: ExecutionMessageEnvelope,
+        authority_wait_id: str,
+        reason: str,
+        status: str = "feedback_rejected_stale",
+    ) -> Any:
+        return self.create_phase4_record(
+            record_type="stale_feedback_rejection_record",
+            workflow_instance_id=envelope.workflow_instance_id,
+            authority_wait_id=authority_wait_id,
+            related_message_id=envelope.message_id,
+            dedupe_key=f"{authority_wait_id}:{envelope.message_id}:{reason}",
+            status=status,
+            payload={
+                "feedback_message_id": envelope.message_id,
+                "authority_wait_id": authority_wait_id,
+                "correlation_id": envelope.correlation_id,
+                "causation_id": envelope.causation_id,
+                "reason": reason,
+            },
+        )
 
     def receive_callback(self, subject: str, envelope_dict: dict) -> CallbackReceiveResult:
         if not isinstance(envelope_dict, dict):
@@ -684,6 +749,11 @@ class CoordinationRuntime:
                 status="feedback_rejected_stale",
                 payload=raw_feedback_payload,
             )
+            stale_record = self.record_stale_feedback_rejection(
+                envelope=envelope,
+                authority_wait_id=payload_contract.authority_wait_id,
+                reason="authority_wait_state_not_found",
+            )
             terminal = self._record_terminal_intake_failure(
                 subject=subject,
                 raw_inbound=envelope_dict,
@@ -707,6 +777,7 @@ class CoordinationRuntime:
                 ack_allowed=False,
                 outcome="feedback_rejected_stale",
                 raw_feedback_record=raw_feedback_record,
+                normalized_decision_record=stale_record,
                 errors=[f"FEEDBACK_STALE: authority_wait_state not found: {payload_contract.authority_wait_id}"],
                 envelope=envelope,
                 intake_record=terminal.intake_record,
@@ -813,6 +884,11 @@ class CoordinationRuntime:
             )
 
         if stored_wait.status in {"resolved", "superseded", "timed_out", "escalated", "stale"}:
+            stale_record = self.record_stale_feedback_rejection(
+                envelope=envelope,
+                authority_wait_id=stored_wait.authority_wait_id,
+                reason=f"authority_wait_state_{stored_wait.status}",
+            )
             terminal = self._record_terminal_intake_failure(
                 subject=subject,
                 raw_inbound=envelope_dict,
@@ -836,6 +912,7 @@ class CoordinationRuntime:
                 ack_allowed=False,
                 outcome="feedback_rejected_stale",
                 raw_feedback_record=raw_feedback_record,
+                normalized_decision_record=stale_record,
                 errors=[f"FEEDBACK_STALE: authority_wait_state is {stored_wait.status}"],
                 envelope=envelope,
                 intake_record=terminal.intake_record,
@@ -843,11 +920,18 @@ class CoordinationRuntime:
                 failure_class=terminal.failure_class,
             )
         if stored_wait.status == "closed":
+            stale_record = self.record_stale_feedback_rejection(
+                envelope=envelope,
+                authority_wait_id=stored_wait.authority_wait_id,
+                reason="authority_wait_state_closed",
+                status="feedback_rejected_closed",
+            )
             return FeedbackReceiveResult(
                 valid=False,
                 ack_allowed=True,
                 outcome="feedback_rejected_closed",
                 raw_feedback_record=raw_feedback_record,
+                normalized_decision_record=stale_record,
                 errors=["FEEDBACK_CLOSED: authority_wait_state is closed"],
                 envelope=envelope,
                 broker_action="ACK",
@@ -1005,7 +1089,7 @@ class CoordinationRuntime:
         )
 
     def record_timeout_dispatch_evidence(self, envelope: ExecutionMessageEnvelope) -> Any:
-        return self.state_store.create_phase3_runtime_record(
+        return self.create_phase4_record(
             record_type="timeout_dispatch_evidence_record",
             workflow_instance_id=envelope.workflow_instance_id,
             authority_wait_id=envelope.correlation_id,
@@ -1016,7 +1100,16 @@ class CoordinationRuntime:
         )
 
     def record_retry_dispatch_evidence(self, envelope: ExecutionMessageEnvelope) -> Any:
-        return self.state_store.create_phase3_runtime_record(
+        self.create_phase4_record(
+            record_type="retry_outbox_record",
+            workflow_instance_id=envelope.workflow_instance_id,
+            authority_wait_id=envelope.correlation_id,
+            related_message_id=envelope.message_id,
+            dedupe_key=f"retry_outbox:{envelope.message_id}",
+            status="retry_queued",
+            payload=envelope.to_dict(),
+        )
+        return self.create_phase4_record(
             record_type="retry_dispatch_evidence_record",
             workflow_instance_id=envelope.workflow_instance_id,
             authority_wait_id=envelope.correlation_id,
@@ -1027,7 +1120,19 @@ class CoordinationRuntime:
         )
 
     def record_dead_letter_dispatch_evidence(self, envelope: ExecutionMessageEnvelope) -> Any:
-        return self.state_store.create_phase3_runtime_record(
+        payload_dict = envelope.to_dict()
+        dead_letter = getattr(envelope, "payload", None)
+        original_message_id = getattr(dead_letter, "original_message_id", envelope.causation_id)
+        self.create_phase4_record(
+            record_type="dead_letter_record",
+            workflow_instance_id=envelope.workflow_instance_id,
+            authority_wait_id=envelope.correlation_id,
+            related_message_id=original_message_id,
+            dedupe_key=f"dlq:{original_message_id}",
+            status="dlq_recorded",
+            payload=payload_dict,
+        )
+        return self.create_phase4_record(
             record_type="dead_letter_dispatch_evidence_record",
             workflow_instance_id=envelope.workflow_instance_id,
             authority_wait_id=envelope.correlation_id,
@@ -1095,6 +1200,9 @@ class CoordinationRuntime:
                 )
 
         for stored_wait in overdue_waits:
+            timeout_dedupe_key = f"authority_wait:{stored_wait.authority_wait_id}:{stored_wait.due_at}"
+            if self.state_store.find_phase3_runtime_record("timeout_record", timeout_dedupe_key) is not None:
+                continue
             wait = self._load_wait_from_store(stored_wait)
             wait, decision, abnormal = self.hitl_lifecycle.handle_no_response_timeout(wait.authority_wait_id)
             wait.status = "timed_out"
@@ -1149,6 +1257,28 @@ class CoordinationRuntime:
                     "authority_wait_id": wait.authority_wait_id,
                     "abnormal_state_id": abnormal.abnormal_state_id,
                     "decision_id": decision.decision_id,
+                },
+            )
+            self.create_phase4_record(
+                record_type="timeout_record",
+                workflow_instance_id=wait.workflow_instance_id,
+                authority_wait_id=wait.authority_wait_id,
+                related_message_id=stored_wait.review_task_message_id or wait.authority_wait_id,
+                dedupe_key=timeout_dedupe_key,
+                status="timeout_recorded",
+                payload={
+                    "timeout_id": timeout_payload.timeout_id,
+                    "target_record_type": "authority_wait",
+                    "target_record_id": wait.authority_wait_id,
+                    "authority_wait_id": wait.authority_wait_id,
+                    "review_task_message_id": stored_wait.review_task_message_id,
+                    "correlation_id": wait.authority_wait_id,
+                    "due_at": wait.due_at,
+                    "detected_at": abnormal.detected_at,
+                    "timeout_reason": timeout_payload.reason,
+                    "abnormal_state_id": abnormal.abnormal_state_id,
+                    "decision_id": decision.decision_id,
+                    "recovery_state": "timeout_recorded",
                 },
             )
             timeout_envelope = build_execution_envelope(
@@ -1256,6 +1386,38 @@ class CoordinationRuntime:
                 envelope_id=envelope_id,
                 abnormal_state_id=abnormal.abnormal_state_id,
             )
+            handler_record = self.create_phase4_record(
+                record_type="handler_exhausted_record",
+                workflow_instance_id=record.workflow_instance_id,
+                related_message_id=envelope_id,
+                dedupe_key=f"handler_exhausted:{envelope_id}",
+                status="handler_exhausted",
+                payload={
+                    "envelope_id": envelope_id,
+                    "abnormal_state_id": abnormal.abnormal_state_id,
+                    "failure_cause": error,
+                    "recovery_state": "handler_exhausted",
+                    "dlq_subject_involved": False,
+                    "resolution_expectation": "manual_or_governed_reemit_required",
+                },
+            )
+            self.create_phase4_record(
+                record_type="terminal_abnormal_record",
+                workflow_instance_id=record.workflow_instance_id,
+                related_message_id=envelope_id,
+                dedupe_key=f"terminal:handler_exhausted:{envelope_id}",
+                status="active",
+                payload={
+                    "abnormal_state_id": abnormal.abnormal_state_id,
+                    "abnormal_class": abnormal.abnormal_class,
+                    "error_class": abnormal.error_class,
+                    "affected_ref": envelope_id,
+                    "failure_cause": error,
+                    "evidence_refs": [handler_record.record_id],
+                    "blocking_expectation": "blocks_business_progress_while_active",
+                    "resolution_expectation": "manual_or_governed_reemit_required",
+                },
+            )
         return record
 
     def list_local_recovery_candidates(self):
@@ -1286,6 +1448,212 @@ class CoordinationRuntime:
             error=reason,
             abnormal_state_id=abnormal.abnormal_state_id,
         )
+
+    def record_terminal_abnormal(
+        self,
+        *,
+        dedupe_key: str,
+        workflow_instance_id: Optional[str],
+        error_event_id: str,
+        error_class: str,
+        affected_ref: str,
+        failure_cause: str,
+        evidence_refs: Optional[list[str]] = None,
+    ) -> Any:
+        existing = self.state_store.find_phase3_runtime_record("terminal_abnormal_record", dedupe_key)
+        if existing is not None:
+            return existing
+        abnormal = classify_abnormal_state(
+            error_event_id=error_event_id,
+            error_class=error_class,
+            workflow_instance_id=workflow_instance_id,
+        )
+        self.state_store.create_abnormal_state_record(
+            abnormal_state_id=abnormal.abnormal_state_id,
+            error_event_id=abnormal.error_event_id,
+            workflow_instance_id=abnormal.workflow_instance_id,
+            error_class=abnormal.error_class,
+            abnormal_class=abnormal.abnormal_class,
+            resolved=abnormal.resolved,
+            notification_sent=abnormal.notification_sent,
+            resolution_record_id=abnormal.resolution_record_id,
+            escalation_timer_id=abnormal.escalation_timer_id,
+            detected_at=abnormal.detected_at,
+            resolved_at=abnormal.resolved_at,
+            payload=asdict(abnormal),
+        )
+        return self.create_phase4_record(
+            record_type="terminal_abnormal_record",
+            workflow_instance_id=workflow_instance_id,
+            related_message_id=affected_ref,
+            dedupe_key=dedupe_key,
+            status="active",
+            payload={
+                "abnormal_state_id": abnormal.abnormal_state_id,
+                "abnormal_class": abnormal.abnormal_class,
+                "error_class": abnormal.error_class,
+                "affected_ref": affected_ref,
+                "failure_cause": failure_cause,
+                "evidence_refs": list(evidence_refs or []),
+                "blocking_expectation": "blocks_business_progress_while_active",
+                "resolution_expectation": "manual_or_governed_resolution_required",
+            },
+        )
+
+    def evaluate_retry_policy(
+        self,
+        *,
+        failure_class: str,
+        message_family: str,
+        attempt_count: int,
+        max_attempts: int,
+        retry_actor: str,
+    ) -> dict:
+        if retry_actor == "broker_pre_ack":
+            path = "broker_retry" if message_family in BROKER_RETRY_FAMILIES else "no_broker_retry"
+        elif retry_actor == "local_post_ack":
+            path = "local_recovery"
+        else:
+            path = "application_retry_message" if message_family in APPLICATION_RETRY_FAMILIES else "no_application_retry"
+        exhausted = attempt_count >= max_attempts
+        retryable = not exhausted and path in {"broker_retry", "local_recovery", "application_retry_message"}
+        dlq_eligible = failure_class in DLQ_ELIGIBLE_FAILURE_CLASSES and retry_actor != "local_post_ack"
+        if exhausted and retry_actor == "local_post_ack":
+            outcome = "handler_exhausted"
+        elif exhausted and dlq_eligible:
+            outcome = "dlq_recorded"
+        elif retryable:
+            outcome = "retry_queued" if path == "application_retry_message" else "handler_retry_pending"
+        else:
+            outcome = "terminal_abnormal"
+        return {
+            "failure_class": failure_class,
+            "message_family": message_family,
+            "attempt_count": attempt_count,
+            "max_attempts": max_attempts,
+            "retry_actor": retry_actor,
+            "path": path,
+            "retryable": retryable,
+            "exhausted": exhausted,
+            "dlq_eligible": dlq_eligible,
+            "outcome": outcome,
+        }
+
+    def record_retry_decision(
+        self,
+        *,
+        original_message_id: str,
+        original_idempotency_key: str,
+        workflow_instance_id: Optional[str],
+        message_family: str,
+        failure_class: str,
+        attempt_count: int,
+        max_attempts: int,
+        retry_actor: str,
+        failure_cause: str,
+    ) -> Any:
+        decision = self.evaluate_retry_policy(
+            failure_class=failure_class,
+            message_family=message_family,
+            attempt_count=attempt_count,
+            max_attempts=max_attempts,
+            retry_actor=retry_actor,
+        )
+        dedupe_key = f"retry_decision:{original_message_id}:{retry_actor}:{attempt_count}:{max_attempts}:{failure_class}"
+        record = self.create_phase4_record(
+            record_type="retry_decision_record",
+            workflow_instance_id=workflow_instance_id,
+            related_message_id=original_message_id,
+            dedupe_key=dedupe_key,
+            status=decision["outcome"],
+            payload={
+                **decision,
+                "original_message_id": original_message_id,
+                "original_idempotency_key": original_idempotency_key,
+                "failure_cause": failure_cause,
+            },
+        )
+        if decision["outcome"] == "dlq_recorded":
+            self.create_phase4_record(
+                record_type="dead_letter_record",
+                workflow_instance_id=workflow_instance_id,
+                related_message_id=original_message_id,
+                dedupe_key=f"dlq:{original_message_id}:{failure_class}",
+                status="dlq_recorded",
+                payload={
+                    "original_message_id": original_message_id,
+                    "original_message_type": message_family,
+                    "original_idempotency_key": original_idempotency_key,
+                    "attempts_exhausted": attempt_count,
+                    "failure_class": failure_class,
+                    "dead_letter_reason": failure_cause,
+                    "recovery_state": "dlq_recorded",
+                },
+            )
+            self.record_terminal_abnormal(
+                dedupe_key=f"terminal:{original_message_id}:{failure_class}",
+                workflow_instance_id=workflow_instance_id,
+                error_event_id=f"{failure_class}:{original_message_id}",
+                error_class="mechanism_stall",
+                affected_ref=original_message_id,
+                failure_cause=failure_cause,
+                evidence_refs=[record.record_id],
+            )
+        return record
+
+    def reconcile_phase4_recovery(self) -> Any:
+        envelope_candidates = self.state_store.list_envelope_inbox_for_local_recovery()
+        outbox_candidates = self.state_store.list_outbox_requiring_reconciliation()
+        envelope_ids = sorted(record.envelope_id for record in envelope_candidates)
+        outbox_ids = sorted(record.outbox_id for record in outbox_candidates)
+        candidate_signature = "|".join(envelope_ids + outbox_ids) or "none"
+        scan = self.create_phase4_record(
+            record_type="recovery_scan_record",
+            workflow_instance_id=None,
+            dedupe_key=f"recovery_scan:{self.runtime_id}:{candidate_signature}",
+            status="recovery_unresolved" if envelope_candidates or outbox_candidates else "recovery_reconciled",
+            payload={
+                "runtime_id": self.runtime_id,
+                "envelope_candidates": envelope_ids,
+                "outbox_candidates": outbox_ids,
+                "recovery_states": sorted(RECOVERY_STATES),
+            },
+        )
+        for record in envelope_candidates:
+            if record.state == "handler_exhausted" or record.handler_exhausted:
+                continue
+            state = "handler_retry_pending" if record.state == "failed" else record.state
+            self.create_phase4_record(
+                record_type="recovery_action_record",
+                workflow_instance_id=record.workflow_instance_id,
+                related_message_id=record.envelope_id,
+                dedupe_key=f"recovery_action:envelope:{record.envelope_id}",
+                status="recovery_unresolved",
+                payload={
+                    "candidate_type": "envelope_inbox",
+                    "candidate_id": record.envelope_id,
+                    "previous_state": record.state,
+                    "recovery_state": state,
+                    "action": "eligible_for_bounded_local_recovery",
+                },
+            )
+        for record in outbox_candidates:
+            recovery_state = "retry_published" if record.state == "PUBLISHED" else "retry_queued"
+            self.create_phase4_record(
+                record_type="recovery_action_record",
+                workflow_instance_id=None,
+                related_message_id=record.message_id,
+                dedupe_key=f"recovery_action:outbox:{record.outbox_id}",
+                status="recovery_reconciled",
+                payload={
+                    "candidate_type": "side_effect_outbox",
+                    "candidate_id": record.outbox_id,
+                    "previous_state": record.state,
+                    "recovery_state": recovery_state,
+                    "action": "reconcile_publish_idempotently",
+                },
+            )
+        return scan
 
     def _intake_protocol_message(self, subject: str, envelope_dict: dict) -> RuntimeIntakeResult:
         envelope = ProtocolEnvelope.from_dict(envelope_dict)
