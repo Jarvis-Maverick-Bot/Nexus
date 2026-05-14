@@ -129,7 +129,54 @@ RECOVERY_STATES = {
     "dlq_recorded",
     "recovery_unresolved",
     "recovery_reconciled",
+    "projection_stale",
+    "projection_corrupt",
 }
+
+CANONICAL_RECOVERY_OUTCOMES = {
+    "safe_automatic_reconciliation",
+    "bounded_retry",
+    "governed_quarantine",
+    "explicit_terminal_abnormal",
+    "manual_governed_resolution",
+    "no_go",
+}
+
+PHASE5_DURABLE_FAMILIES = {
+    "workflow_instance",
+    "intake_record",
+    "authority_wait_state",
+    "raw_feedback_intake_record",
+    "hitl_decision_record",
+    "gate_judgment_record",
+    "state_transition",
+    "gate_return_package",
+    "timer_record",
+    "retry_decision_record",
+    "side_effect_outbox_record",
+    "dead_letter_record",
+    "abnormal_state_record",
+    "resolution_record",
+    "recovery_scan_record",
+    "recovery_action_record",
+    "event_log",
+    "current_projection",
+}
+
+AUTHORITY_ORDER = [
+    "state_transition",
+    "resolution_record",
+    "gate_judgment_record",
+    "hitl_decision_record",
+    "authority_wait_state",
+    "abnormal_state_record",
+    "dead_letter_record",
+    "runtime_durable_record",
+    "event_log",
+    "current_projection",
+    "checkpoint_ref",
+    "mq_delivery_metadata",
+]
 
 BROKER_RETRY_FAMILIES = {"Feedback_Message", "Review_Task", "Timeout_Message"}
 APPLICATION_RETRY_FAMILIES = {"Command_Message", "Timeout_Message", "Retry_Message"}
@@ -427,6 +474,368 @@ class CoordinationRuntime:
             status=status,
             payload=payload,
         )
+
+    def create_phase5_record(
+        self,
+        family: str,
+        status: str,
+        payload: dict,
+        workflow_instance_id: Optional[str] = None,
+        target_ref: Optional[str] = None,
+        authority_wait_id: Optional[str] = None,
+        related_record_id: Optional[str] = None,
+        dedupe_key: Optional[str] = None,
+    ) -> Any:
+        if family not in PHASE5_DURABLE_FAMILIES:
+            raise ValueError(f"unsupported Phase 5 durable family: {family}")
+        return self.state_store.create_phase5_durable_record(
+            family=family,
+            workflow_instance_id=workflow_instance_id,
+            target_ref=target_ref,
+            authority_wait_id=authority_wait_id,
+            related_record_id=related_record_id,
+            dedupe_key=dedupe_key,
+            status=status,
+            payload={
+                "family": family,
+                "authority_order": list(AUTHORITY_ORDER),
+                **payload,
+            },
+        )
+
+    def record_phase5_event(
+        self,
+        *,
+        event_name: str,
+        workflow_instance_id: Optional[str],
+        target_ref: Optional[str],
+        payload: dict,
+    ) -> Any:
+        dedupe_target = target_ref or payload.get("dedupe_target") or uuid.uuid4().hex
+        return self.create_phase5_record(
+            family="event_log",
+            workflow_instance_id=workflow_instance_id,
+            target_ref=target_ref,
+            dedupe_key=f"event:{event_name}:{dedupe_target}",
+            status="recorded",
+            payload={
+                "event_name": event_name,
+                **payload,
+            },
+        )
+
+    def rebuild_current_projection(self, workflow_instance_id: str) -> Any:
+        transitions = self.state_store.list_phase5_durable_records(
+            family="state_transition",
+            workflow_instance_id=workflow_instance_id,
+        )
+        resolutions = self.state_store.list_phase5_durable_records(
+            family="resolution_record",
+            workflow_instance_id=workflow_instance_id,
+        )
+        abnormals = self.state_store.list_unresolved_abnormal_states(workflow_instance_id)
+        if abnormals:
+            projection_status = "projection_stale"
+            source_family = "abnormal_state_record"
+            source_record_id = abnormals[-1].abnormal_state_id
+            governed_state = "blocked_by_abnormal_state"
+        elif resolutions:
+            projection_status = "current"
+            source_family = "resolution_record"
+            source_record_id = resolutions[-1].record_id
+            governed_state = resolutions[-1].payload.get("resolved_state", "manual_resolution_recorded")
+        elif transitions:
+            projection_status = "current"
+            source_family = "state_transition"
+            source_record_id = transitions[-1].record_id
+            governed_state = transitions[-1].payload.get("to_state", transitions[-1].status)
+        else:
+            projection_status = "projection_stale"
+            source_family = None
+            source_record_id = None
+            governed_state = "unknown"
+        projection = self.state_store.upsert_current_projection(
+            workflow_instance_id=workflow_instance_id,
+            projection_status=projection_status,
+            source_record_id=source_record_id,
+            source_family=source_family,
+            payload={
+                "workflow_instance_id": workflow_instance_id,
+                "governed_state": governed_state,
+                "projection_is_derived": True,
+                "not_business_completion": True,
+                "authority_order": list(AUTHORITY_ORDER),
+            },
+        )
+        self.create_phase5_record(
+            family="current_projection",
+            workflow_instance_id=workflow_instance_id,
+            target_ref=workflow_instance_id,
+            related_record_id=source_record_id,
+            dedupe_key=f"projection_rebuild:{workflow_instance_id}:{projection.version}",
+            status=projection.projection_status,
+            payload={
+                "projection_version": projection.version,
+                "source_family": source_family,
+                "source_record_id": source_record_id,
+            },
+        )
+        return projection
+
+    def validate_manual_resolution(
+        self,
+        *,
+        workflow_instance_id: str,
+        abnormal_state_id: str,
+        resolution_record_id: Optional[str],
+        actor_id: str,
+        evidence_refs: Optional[list[str]] = None,
+    ) -> Any:
+        if not resolution_record_id or not evidence_refs:
+            return self.create_phase5_record(
+                family="recovery_action_record",
+                workflow_instance_id=workflow_instance_id,
+                target_ref=abnormal_state_id,
+                related_record_id=resolution_record_id,
+                dedupe_key=f"manual_resolution_rejected:{abnormal_state_id}:{resolution_record_id or 'missing'}",
+                status="rejected",
+                payload={
+                    "canonical_outcome": "no_go",
+                    "action_status": "failed",
+                    "actor_id": actor_id,
+                    "reason": "manual_resolution_requires_accepted_resolution_record_and_evidence",
+                    "evidence_refs": list(evidence_refs or []),
+                    "direct_human_write_allowed": False,
+                },
+            )
+        return self.create_phase5_record(
+            family="resolution_record",
+            workflow_instance_id=workflow_instance_id,
+            target_ref=abnormal_state_id,
+            related_record_id=resolution_record_id,
+            dedupe_key=f"manual_resolution_accepted:{abnormal_state_id}:{resolution_record_id}",
+            status="accepted",
+            payload={
+                "canonical_outcome": "manual_governed_resolution",
+                "actor_id": actor_id,
+                "evidence_refs": list(evidence_refs),
+                "direct_human_write_allowed": False,
+            },
+        )
+
+    def detect_gate_package_source_drift(
+        self,
+        *,
+        workflow_instance_id: str,
+        gate_package_id: str,
+        expected_source_ref: str,
+        actual_source_ref: str,
+    ) -> Any:
+        drifted = expected_source_ref != actual_source_ref
+        return self.create_phase5_record(
+            family="gate_return_package",
+            workflow_instance_id=workflow_instance_id,
+            target_ref=gate_package_id,
+            dedupe_key=f"gate_package_source:{gate_package_id}:{expected_source_ref}:{actual_source_ref}",
+            status="rejected" if drifted else "verified",
+            payload={
+                "expected_source_ref": expected_source_ref,
+                "actual_source_ref": actual_source_ref,
+                "source_drift_detected": drifted,
+                "canonical_outcome": "no_go" if drifted else "safe_automatic_reconciliation",
+            },
+        )
+
+    def read_workflow_history(self, workflow_instance_id: str) -> dict:
+        return {
+            "workflow_instance_id": workflow_instance_id,
+            "phase5_records": [
+                asdict(record)
+                for record in self.state_store.list_phase5_durable_records(
+                    workflow_instance_id=workflow_instance_id
+                )
+            ],
+            "phase4_records": [
+                asdict(record)
+                for record in self.state_store.list_phase3_runtime_records()
+                if record.workflow_instance_id == workflow_instance_id
+            ],
+            "projection": (
+                asdict(self.state_store.get_current_projection(workflow_instance_id))
+                if self.state_store.get_current_projection(workflow_instance_id) is not None
+                else None
+            ),
+            "authority_order": list(AUTHORITY_ORDER),
+        }
+
+    def classify_phase5_recovery_target(self, *, candidate_type: str, state: str, payload: Optional[dict] = None) -> dict:
+        payload = payload or {}
+        if candidate_type == "envelope_inbox" and (state == "handler_exhausted" or payload.get("handler_exhausted")):
+            outcome = "governed_quarantine"
+            action_status = "quarantined"
+        elif candidate_type == "envelope_inbox" and state in {"processing", "handler_running", "failed"}:
+            outcome = "bounded_retry"
+            action_status = "planned"
+        elif candidate_type == "side_effect_outbox" and state == "PLANNED":
+            outcome = "bounded_retry"
+            action_status = "planned"
+        elif candidate_type == "side_effect_outbox" and state == "PUBLISHED" and not payload.get("confirmation_evidence_id"):
+            outcome = "no_go"
+            action_status = "no_go"
+        elif candidate_type == "side_effect_outbox" and state == "PUBLISHED":
+            outcome = "safe_automatic_reconciliation"
+            action_status = "verified"
+        elif candidate_type in {"dead_letter_record", "terminal_abnormal_record"}:
+            outcome = "explicit_terminal_abnormal"
+            action_status = "completed"
+        elif candidate_type == "resolution_record":
+            outcome = "manual_governed_resolution"
+            action_status = "verified"
+        else:
+            outcome = "no_go"
+            action_status = "no_go"
+        return {
+            "candidate_type": candidate_type,
+            "state": state,
+            "canonical_outcome": outcome,
+            "action_status": action_status,
+            "known_outcome": outcome in CANONICAL_RECOVERY_OUTCOMES,
+        }
+
+    def run_phase5_restart_scan(self) -> Any:
+        envelope_candidates = self.state_store.list_envelope_inbox_for_local_recovery()
+        outbox_candidates = self.state_store.list_outbox_requiring_reconciliation()
+        handler_exhausted = self.state_store.list_phase3_runtime_records("handler_exhausted_record")
+        terminal_records = self.state_store.list_phase3_runtime_records("terminal_abnormal_record")
+        candidate_ids = [
+            *(record.envelope_id for record in envelope_candidates),
+            *(record.outbox_id for record in outbox_candidates),
+            *(record.related_message_id or record.record_id for record in handler_exhausted),
+            *(record.related_message_id or record.record_id for record in terminal_records),
+        ]
+        candidate_signature = "|".join(sorted(candidate_ids)) or "none"
+        scan = self.create_phase5_record(
+            family="recovery_scan_record",
+            workflow_instance_id=None,
+            target_ref=self.runtime_id,
+            dedupe_key=f"p5_restart_scan:{self.runtime_id}:{candidate_signature}",
+            status="completed" if not candidate_ids else "classified",
+            payload={
+                "scan_status": "completed" if not candidate_ids else "classified",
+                "canonical_outcomes": sorted(CANONICAL_RECOVERY_OUTCOMES),
+                "authority_order": list(AUTHORITY_ORDER),
+                "candidate_count": len(candidate_ids),
+                "candidate_ids": sorted(candidate_ids),
+            },
+        )
+        for record in envelope_candidates:
+            classification = self.classify_phase5_recovery_target(
+                candidate_type="envelope_inbox",
+                state=record.state,
+                payload={"handler_exhausted": record.handler_exhausted},
+            )
+            self.create_phase5_record(
+                family="recovery_action_record",
+                workflow_instance_id=record.workflow_instance_id,
+                target_ref=record.envelope_id,
+                related_record_id=scan.record_id,
+                dedupe_key=f"p5_recovery_action:envelope:{record.envelope_id}",
+                status=classification["action_status"],
+                payload={
+                    **classification,
+                    "previous_state": record.state,
+                    "handler_exhausted": record.handler_exhausted,
+                },
+            )
+        for record in handler_exhausted:
+            target_ref = record.related_message_id or record.record_id
+            classification = self.classify_phase5_recovery_target(
+                candidate_type="envelope_inbox",
+                state="handler_exhausted",
+                payload={"handler_exhausted": True},
+            )
+            self.create_phase5_record(
+                family="recovery_action_record",
+                workflow_instance_id=record.workflow_instance_id,
+                target_ref=target_ref,
+                related_record_id=scan.record_id,
+                dedupe_key=f"p5_recovery_action:handler_exhausted:{target_ref}",
+                status=classification["action_status"],
+                payload={
+                    **classification,
+                    "handler_exhausted_record_id": record.record_id,
+                    "auto_release_allowed": False,
+                    "broker_dlq": False,
+                },
+            )
+        for record in outbox_candidates:
+            classification = self.classify_phase5_recovery_target(
+                candidate_type="side_effect_outbox",
+                state=record.state,
+                payload=record.payload,
+            )
+            self.create_phase5_record(
+                family="recovery_action_record",
+                workflow_instance_id=record.payload.get("workflow_instance_id"),
+                target_ref=record.outbox_id,
+                related_record_id=scan.record_id,
+                dedupe_key=f"p5_recovery_action:outbox:{record.outbox_id}",
+                status=classification["action_status"],
+                payload={
+                    **classification,
+                    "message_id": record.message_id,
+                    "previous_state": record.state,
+                    "publish_allowed": record.state == "PLANNED",
+                },
+            )
+        for record in terminal_records:
+            target_ref = record.related_message_id or record.record_id
+            classification = self.classify_phase5_recovery_target(
+                candidate_type="terminal_abnormal_record",
+                state=record.status,
+                payload=record.payload,
+            )
+            self.create_phase5_record(
+                family="recovery_action_record",
+                workflow_instance_id=record.workflow_instance_id,
+                target_ref=target_ref,
+                related_record_id=scan.record_id,
+                dedupe_key=f"p5_recovery_action:terminal:{target_ref}",
+                status=classification["action_status"],
+                payload={
+                    **classification,
+                    "terminal_abnormal_record_id": record.record_id,
+                    "blocks_business_progress": True,
+                },
+            )
+        return scan
+
+    def plan_side_effect_reconciliation(self, record: SideEffectOutboxRecord) -> dict:
+        classification = self.classify_phase5_recovery_target(
+            candidate_type="side_effect_outbox",
+            state=record.state,
+            payload=record.payload,
+        )
+        action = self.create_phase5_record(
+            family="recovery_action_record",
+            workflow_instance_id=record.payload.get("workflow_instance_id"),
+            target_ref=record.outbox_id,
+            dedupe_key=f"p5_side_effect_reconcile:{record.outbox_id}:{record.state}",
+            status=classification["action_status"],
+            payload={
+                **classification,
+                "message_id": record.message_id,
+                "idempotency_key": record.payload.get("idempotency_key"),
+                "publish_allowed": record.state == "PLANNED",
+                "confirmation_required": True,
+                "not_business_completion": True,
+            },
+        )
+        return {
+            "publish_allowed": record.state == "PLANNED",
+            "classification": classification,
+            "action_record": action,
+        }
 
     def record_stale_feedback_rejection(
         self,

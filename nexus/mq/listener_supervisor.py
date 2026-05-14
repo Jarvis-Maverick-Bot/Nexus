@@ -12,6 +12,7 @@ from nexus.mq.listener_runtime import ListenerRuntime, ListenerStartupResult, Li
 class SupervisorConfig:
     timeout_every_cycles: int = 5
     reconcile_every_cycles: int = 10
+    phase5_scan_every_cycles: int = 10
     stop_on_quarantine: bool = True
 
 
@@ -21,6 +22,7 @@ class SupervisorCycleResult:
     poll_status: str
     timeout_published: int = 0
     reconciled_outbox_records: int = 0
+    phase5_recovery_scan_records: int = 0
 
 
 @dataclass
@@ -53,10 +55,17 @@ class ListenerSupervisor:
         poll = self.listener.poll_once()
         timeout_published = 0
         reconciled = 0
+        phase5_scans = 0
 
         if self._cycle_count % self.config.timeout_every_cycles == 0:
             timeout_result = self.listener.emit_timeouts_once(now_at=now_at)
             timeout_published = timeout_result.published_count
+
+        if self._cycle_count % self.config.phase5_scan_every_cycles == 0:
+            before = len(self.listener.runtime.state_store.list_phase5_durable_records("recovery_scan_record"))
+            self.listener.runtime.run_phase5_restart_scan()
+            after = len(self.listener.runtime.state_store.list_phase5_durable_records("recovery_scan_record"))
+            phase5_scans = after - before
 
         if self._cycle_count % self.config.reconcile_every_cycles == 0:
             reconciled = self.listener.reconcile_outbox_once()
@@ -66,6 +75,7 @@ class ListenerSupervisor:
             poll_status=poll.status,
             timeout_published=timeout_published,
             reconciled_outbox_records=reconciled,
+            phase5_recovery_scan_records=phase5_scans,
         )
 
     def run_cycles(self, total_cycles: int, now_at: Optional[str] = None) -> SupervisorRunSummary:

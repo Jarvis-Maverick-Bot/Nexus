@@ -255,6 +255,31 @@ class Phase3RuntimeRecord:
 
 
 @dataclass
+class Phase5DurableRecord:
+    record_id: str
+    family: str
+    workflow_instance_id: Optional[str]
+    target_ref: Optional[str]
+    authority_wait_id: Optional[str]
+    related_record_id: Optional[str]
+    dedupe_key: Optional[str]
+    status: str
+    created_at: str
+    payload: dict
+
+
+@dataclass
+class CurrentProjectionRecord:
+    workflow_instance_id: str
+    projection_status: str
+    source_record_id: Optional[str]
+    source_family: Optional[str]
+    version: int
+    rebuilt_at: str
+    payload: dict
+
+
+@dataclass
 class AbnormalStateStoreRecord:
     abnormal_state_id: str
     error_event_id: str
@@ -1754,6 +1779,181 @@ class DurableStateStore:
             for row in rows
         ]
 
+    def create_phase5_durable_record(
+        self,
+        family: str,
+        status: str,
+        payload: dict,
+        workflow_instance_id: Optional[str] = None,
+        target_ref: Optional[str] = None,
+        authority_wait_id: Optional[str] = None,
+        related_record_id: Optional[str] = None,
+        dedupe_key: Optional[str] = None,
+        created_at: Optional[str] = None,
+    ) -> Phase5DurableRecord:
+        existing = self.find_phase5_durable_record(family, dedupe_key) if dedupe_key else None
+        if existing is not None:
+            return existing
+        record = Phase5DurableRecord(
+            record_id=f"p5-{uuid.uuid4().hex[:12]}",
+            family=family,
+            workflow_instance_id=workflow_instance_id,
+            target_ref=target_ref,
+            authority_wait_id=authority_wait_id,
+            related_record_id=related_record_id,
+            dedupe_key=dedupe_key,
+            status=status,
+            created_at=created_at or now_iso(),
+            payload=payload,
+        )
+        with self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO phase5_durable_record(
+                    record_id, family, workflow_instance_id, target_ref, authority_wait_id,
+                    related_record_id, dedupe_key, status, created_at, payload
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    record.record_id,
+                    record.family,
+                    record.workflow_instance_id,
+                    record.target_ref,
+                    record.authority_wait_id,
+                    record.related_record_id,
+                    record.dedupe_key,
+                    record.status,
+                    record.created_at,
+                    _json_dumps(record.payload),
+                ),
+            )
+        return record
+
+    def find_phase5_durable_record(
+        self,
+        family: str,
+        dedupe_key: str,
+    ) -> Optional[Phase5DurableRecord]:
+        row = self._conn.execute(
+            """
+            SELECT record_id, family, workflow_instance_id, target_ref, authority_wait_id,
+                   related_record_id, dedupe_key, status, created_at, payload
+            FROM phase5_durable_record
+            WHERE family = ? AND dedupe_key = ?
+            ORDER BY created_at DESC
+            LIMIT 1
+            """,
+            (family, dedupe_key),
+        ).fetchone()
+        return self._phase5_record_from_row(row) if row is not None else None
+
+    def list_phase5_durable_records(
+        self,
+        family: Optional[str] = None,
+        workflow_instance_id: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> list[Phase5DurableRecord]:
+        clauses: list[str] = []
+        params: list[str] = []
+        if family:
+            clauses.append("family = ?")
+            params.append(family)
+        if workflow_instance_id:
+            clauses.append("workflow_instance_id = ?")
+            params.append(workflow_instance_id)
+        if status:
+            clauses.append("status = ?")
+            params.append(status)
+        where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
+        rows = self._conn.execute(
+            f"""
+            SELECT record_id, family, workflow_instance_id, target_ref, authority_wait_id,
+                   related_record_id, dedupe_key, status, created_at, payload
+            FROM phase5_durable_record
+            {where}
+            ORDER BY created_at ASC
+            """,
+            tuple(params),
+        ).fetchall()
+        return [self._phase5_record_from_row(row) for row in rows]
+
+    def upsert_current_projection(
+        self,
+        workflow_instance_id: str,
+        projection_status: str,
+        payload: dict,
+        source_record_id: Optional[str] = None,
+        source_family: Optional[str] = None,
+    ) -> CurrentProjectionRecord:
+        existing = self.get_current_projection(workflow_instance_id)
+        version = 1 if existing is None else existing.version + 1
+        rebuilt_at = now_iso()
+        with self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO current_projection(
+                    workflow_instance_id, projection_status, source_record_id, source_family,
+                    version, rebuilt_at, payload
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(workflow_instance_id) DO UPDATE SET
+                    projection_status=excluded.projection_status,
+                    source_record_id=excluded.source_record_id,
+                    source_family=excluded.source_family,
+                    version=excluded.version,
+                    rebuilt_at=excluded.rebuilt_at,
+                    payload=excluded.payload
+                """,
+                (
+                    workflow_instance_id,
+                    projection_status,
+                    source_record_id,
+                    source_family,
+                    version,
+                    rebuilt_at,
+                    _json_dumps(payload),
+                ),
+            )
+        record = self.get_current_projection(workflow_instance_id)
+        if record is None:
+            raise KeyError(f"current_projection not found after upsert: {workflow_instance_id}")
+        return record
+
+    def get_current_projection(self, workflow_instance_id: str) -> Optional[CurrentProjectionRecord]:
+        row = self._conn.execute(
+            """
+            SELECT workflow_instance_id, projection_status, source_record_id, source_family,
+                   version, rebuilt_at, payload
+            FROM current_projection
+            WHERE workflow_instance_id = ?
+            """,
+            (workflow_instance_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return CurrentProjectionRecord(
+            workflow_instance_id=row["workflow_instance_id"],
+            projection_status=row["projection_status"],
+            source_record_id=row["source_record_id"],
+            source_family=row["source_family"],
+            version=row["version"],
+            rebuilt_at=row["rebuilt_at"],
+            payload=_json_loads(row["payload"], {}),
+        )
+
+    def _phase5_record_from_row(self, row: sqlite3.Row) -> Phase5DurableRecord:
+        return Phase5DurableRecord(
+            record_id=row["record_id"],
+            family=row["family"],
+            workflow_instance_id=row["workflow_instance_id"],
+            target_ref=row["target_ref"],
+            authority_wait_id=row["authority_wait_id"],
+            related_record_id=row["related_record_id"],
+            dedupe_key=row["dedupe_key"],
+            status=row["status"],
+            created_at=row["created_at"],
+            payload=_json_loads(row["payload"], {}),
+        )
+
     def get_hitl_decision_record(self, decision_id: str) -> Optional[HitlDecisionStoreRecord]:
         row = self._conn.execute(
             """
@@ -2153,6 +2353,31 @@ class DurableStateStore:
                     payload TEXT NOT NULL
                 );
 
+                CREATE TABLE IF NOT EXISTS phase5_durable_record (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    record_id TEXT NOT NULL UNIQUE,
+                    family TEXT NOT NULL,
+                    workflow_instance_id TEXT,
+                    target_ref TEXT,
+                    authority_wait_id TEXT,
+                    related_record_id TEXT,
+                    dedupe_key TEXT,
+                    status TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    payload TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS current_projection (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    workflow_instance_id TEXT NOT NULL UNIQUE,
+                    projection_status TEXT NOT NULL,
+                    source_record_id TEXT,
+                    source_family TEXT,
+                    version INTEGER NOT NULL,
+                    rebuilt_at TEXT NOT NULL,
+                    payload TEXT NOT NULL
+                );
+
                 CREATE TABLE IF NOT EXISTS abnormal_state_record (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     abnormal_state_id TEXT NOT NULL UNIQUE,
@@ -2213,6 +2438,12 @@ class DurableStateStore:
                 CREATE INDEX IF NOT EXISTS idx_phase3_runtime_record_type ON phase3_runtime_record(record_type);
                 CREATE INDEX IF NOT EXISTS idx_phase3_runtime_record_wait ON phase3_runtime_record(authority_wait_id);
                 CREATE INDEX IF NOT EXISTS idx_phase3_runtime_record_dedupe ON phase3_runtime_record(record_type, dedupe_key);
+                CREATE INDEX IF NOT EXISTS idx_phase5_durable_record_family ON phase5_durable_record(family);
+                CREATE INDEX IF NOT EXISTS idx_phase5_durable_record_workflow ON phase5_durable_record(workflow_instance_id);
+                CREATE INDEX IF NOT EXISTS idx_phase5_durable_record_status ON phase5_durable_record(status);
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_phase5_durable_record_dedupe
+                ON phase5_durable_record(family, dedupe_key)
+                WHERE dedupe_key IS NOT NULL;
                 CREATE INDEX IF NOT EXISTS idx_abnormal_state_resolved ON abnormal_state_record(resolved);
                 CREATE INDEX IF NOT EXISTS idx_abnormal_state_workflow ON abnormal_state_record(workflow_instance_id);
                 CREATE INDEX IF NOT EXISTS idx_escalation_timer_due_at ON escalation_timer(due_at);

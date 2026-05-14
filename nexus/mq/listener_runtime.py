@@ -18,6 +18,7 @@ class ListenerRuntimeConfig:
     max_pending_tasks: int = 100
     emit_anomaly_on_invalid: bool = True
     reconcile_outbox_on_startup: bool = True
+    phase5_restart_scan_on_startup: bool = True
 
 
 @dataclass
@@ -26,6 +27,8 @@ class ListenerStartupResult:
     recovered_pending_tasks: int
     recovered_callback_waits: int
     reconciled_outbox_records: int
+    phase5_recovery_scan_records: int = 0
+    phase5_recovery_action_records: int = 0
     quarantined: bool = False
     errors: list[str] | None = None
 
@@ -88,22 +91,32 @@ class ListenerRuntime:
         recovered_pending = len(self.runtime.state_store.list_pending_tasks(states=["PENDING", "PROCESSING"]))
         recovered_callbacks = len(self.runtime.state_store.list_waiting_callbacks())
         reconciled = 0
+        phase5_scans_before = len(self.runtime.state_store.list_phase5_durable_records("recovery_scan_record"))
+        phase5_actions_before = len(self.runtime.state_store.list_phase5_durable_records("recovery_action_record"))
         if runtime_status.status == "QUARANTINED":
             return ListenerStartupResult(
                 runtime_status=runtime_status.status,
                 recovered_pending_tasks=recovered_pending,
                 recovered_callback_waits=recovered_callbacks,
                 reconciled_outbox_records=0,
+                phase5_recovery_scan_records=0,
+                phase5_recovery_action_records=0,
                 quarantined=True,
                 errors=[runtime_status.reason] if runtime_status.reason else [],
             )
+        if self.config.phase5_restart_scan_on_startup:
+            self.runtime.run_phase5_restart_scan()
         if self.config.reconcile_outbox_on_startup:
             reconciled = self.reconcile_outbox_once()
+        phase5_scans_after = len(self.runtime.state_store.list_phase5_durable_records("recovery_scan_record"))
+        phase5_actions_after = len(self.runtime.state_store.list_phase5_durable_records("recovery_action_record"))
         return ListenerStartupResult(
             runtime_status=runtime_status.status,
             recovered_pending_tasks=recovered_pending,
             recovered_callback_waits=recovered_callbacks,
             reconciled_outbox_records=reconciled,
+            phase5_recovery_scan_records=phase5_scans_after - phase5_scans_before,
+            phase5_recovery_action_records=phase5_actions_after - phase5_actions_before,
         )
 
     def poll_once(self) -> ListenerPollResult:
@@ -249,6 +262,9 @@ class ListenerRuntime:
         records = self.runtime.state_store.list_outbox_requiring_reconciliation()
         reconciled = 0
         for record in records:
+            plan = self.runtime.plan_side_effect_reconciliation(record)
+            if not plan["publish_allowed"]:
+                continue
             self.adapter.publish(record.payload)
             self.runtime.confirm_outbox_publish(record.outbox_id)
             reconciled += 1
