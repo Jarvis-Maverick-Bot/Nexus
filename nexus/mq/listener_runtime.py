@@ -226,6 +226,7 @@ class ListenerRuntime:
 
         for timeout_envelope in scan.task_timeout_envelopes:
             outbox = self.runtime.record_outbox_publish(timeout_envelope)
+            self.runtime.prepare_outbox_publish(outbox.outbox_id)
             self.adapter.publish(timeout_envelope.to_dict())
             self.runtime.confirm_outbox_publish(outbox.outbox_id)
             self.runtime.state_store.update_pending_task(
@@ -238,6 +239,7 @@ class ListenerRuntime:
 
         for timeout_envelope in scan.callback_timeout_envelopes:
             outbox = self.runtime.record_outbox_publish(timeout_envelope)
+            self.runtime.prepare_outbox_publish(outbox.outbox_id)
             self.adapter.publish(timeout_envelope.to_dict())
             self.runtime.confirm_outbox_publish(outbox.outbox_id)
             self.runtime.state_store.expire_callback_wait(
@@ -248,6 +250,7 @@ class ListenerRuntime:
 
         for timeout_envelope in scan.authority_wait_timeout_envelopes:
             outbox = self.runtime.record_outbox_publish(timeout_envelope)
+            self.runtime.prepare_outbox_publish(outbox.outbox_id)
             self.adapter.publish(timeout_envelope.to_dict())
             self.runtime.confirm_outbox_publish(outbox.outbox_id)
             published += 1
@@ -265,6 +268,7 @@ class ListenerRuntime:
             plan = self.runtime.plan_side_effect_reconciliation(record)
             if not plan["publish_allowed"]:
                 continue
+            self.runtime.prepare_outbox_publish(record.outbox_id)
             self.adapter.publish(record.payload)
             self.runtime.confirm_outbox_publish(record.outbox_id)
             reconciled += 1

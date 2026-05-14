@@ -67,6 +67,12 @@ def _record_inbox(runtime: CoordinationRuntime, envelope_id: str, state: str = "
     )
 
 
+class CrashAfterPublishAdapter(MqAdapterStub):
+    def publish(self, envelope):
+        super().publish(envelope)
+        raise RuntimeError("simulated crash after broker publish")
+
+
 def test_p5_01_restart_scan_records_no_go_for_empty_pre_intake_gap(tmp_path):
     runtime = _make_runtime(tmp_path)
 
@@ -168,6 +174,36 @@ def test_p5_07_published_without_confirmation_is_no_go_and_not_republished(tmp_p
     action = runtime.state_store.list_phase5_durable_records("recovery_action_record")[0]
     listener.close()
 
+    assert reconciled == 0
+    assert action.payload["canonical_outcome"] == "no_go"
+    assert adapter.consume() is None
+
+
+def test_p5_07_real_publish_crash_before_confirmation_does_not_republish_on_restart(tmp_path):
+    db_path = tmp_path / "runtime.sqlite3"
+    runtime = CoordinationRuntime.from_paths("maverick-runtime-p5", "maverick", "maverick", db_path, _identity_config_path())
+    runtime.startup()
+    outbox = runtime.record_outbox_publish(_envelope())
+    crashing_listener = ListenerRuntime(CrashAfterPublishAdapter(), runtime)
+
+    try:
+        crashing_listener.reconcile_outbox_once()
+    except RuntimeError:
+        pass
+    crashed_state = runtime.state_store.get_outbox_record(outbox.outbox_id)
+    runtime.close()
+
+    restarted = CoordinationRuntime.from_paths("maverick-runtime-p5", "maverick", "maverick", db_path, _identity_config_path())
+    restarted.startup()
+    adapter = MqAdapterStub()
+    listener = ListenerRuntime(adapter, restarted)
+    reconciled = listener.reconcile_outbox_once()
+    action = restarted.state_store.list_phase5_durable_records("recovery_action_record")[-1]
+    listener.close()
+
+    assert crashed_state is not None
+    assert crashed_state.state == "PUBLISHED"
+    assert crashed_state.confirmed_at is None
     assert reconciled == 0
     assert action.payload["canonical_outcome"] == "no_go"
     assert adapter.consume() is None
@@ -417,17 +453,42 @@ def test_p5_20_manual_resolution_without_authority_is_rejected(tmp_path):
 def test_p5_21_resolution_record_is_manual_governed_resolution(tmp_path):
     runtime = _make_runtime(tmp_path)
 
-    result = runtime.validate_manual_resolution(
+    bare = runtime.validate_manual_resolution(
         workflow_instance_id="wf-p5-021",
         abnormal_state_id="abnormal-p5-21",
         resolution_record_id="resolution-p5-21",
         actor_id="alex",
         evidence_refs=["evidence-p5-21"],
     )
+    terminal = runtime.record_terminal_abnormal(
+        dedupe_key="terminal:p5-21",
+        workflow_instance_id="wf-p5-021",
+        error_event_id="IF-09:msg-p5-21",
+        error_class="mechanism_stall",
+        affected_ref="msg-p5-21",
+        failure_cause="handler exhausted",
+    )
+    resolution = runtime.resolve_abnormal_state(
+        abnormal_state_id=terminal.payload["abnormal_state_id"],
+        resolved_by="alex",
+        resolution_action="governed_reemit",
+        evidence_refs=["evidence-p5-21"],
+        state_transition_id="transition-p5-21",
+    )
+    accepted = runtime.validate_manual_resolution(
+        workflow_instance_id="wf-p5-021",
+        abnormal_state_id=terminal.payload["abnormal_state_id"],
+        resolution_record_id=resolution.resolution_id,
+        actor_id="alex",
+        evidence_refs=["evidence-p5-21"],
+    )
     runtime.close()
 
-    assert result.status == "accepted"
-    assert result.payload["canonical_outcome"] == "manual_governed_resolution"
+    assert bare.status == "rejected"
+    assert "resolution_record_not_found" in bare.payload["rejection_reasons"]
+    assert accepted.status == "accepted"
+    assert accepted.payload["canonical_outcome"] == "manual_governed_resolution"
+    assert accepted.payload["state_transition_id"] == "transition-p5-21"
 
 
 def test_p5_22_gate_package_source_drift_is_no_go(tmp_path):

@@ -452,6 +452,29 @@ class CoordinationRuntime:
         published = self.state_store.mark_outbox_published(outbox_id)
         return self.state_store.mark_outbox_confirmed(published.outbox_id, confirmed_by=self.runtime_id)
 
+    def prepare_outbox_publish(self, outbox_id: str) -> SideEffectOutboxRecord:
+        attempt_id = f"publish-attempt-{uuid.uuid4().hex[:12]}"
+        published = self.state_store.mark_outbox_publish_in_flight(outbox_id, attempt_id)
+        self.create_phase5_record(
+            family="side_effect_outbox_record",
+            workflow_instance_id=published.payload.get("workflow_instance_id"),
+            target_ref=outbox_id,
+            related_record_id=published.message_id,
+            dedupe_key=f"publish_attempt:{outbox_id}:{attempt_id}",
+            status="publish_in_flight",
+            payload={
+                "outbox_id": outbox_id,
+                "message_id": published.message_id,
+                "attempt_id": attempt_id,
+                "previous_state": "PLANNED",
+                "durable_state_before_broker_publish": "PUBLISHED",
+                "confirmation_required": True,
+                "restart_without_confirmation_outcome": "no_go",
+                "not_business_completion": True,
+            },
+        )
+        return published
+
     def create_phase4_record(
         self,
         record_type: str,
@@ -591,7 +614,40 @@ class CoordinationRuntime:
         actor_id: str,
         evidence_refs: Optional[list[str]] = None,
     ) -> Any:
-        if not resolution_record_id or not evidence_refs:
+        resolution = self.state_store.get_resolution_record(resolution_record_id) if resolution_record_id else None
+        abnormal = self.state_store.get_abnormal_state_record(abnormal_state_id)
+        resolution_payload = resolution.payload if resolution is not None else {}
+        stored_evidence_refs = resolution_payload.get("evidence_refs") or []
+        requested_evidence_refs = list(evidence_refs or [])
+        has_resulting_state = bool(
+            resolution_payload.get("state_transition_id")
+            or resolution_payload.get("terminal_state")
+            or resolution_payload.get("explicit_terminal_state")
+        )
+        rejection_reasons: list[str] = []
+        if resolution_record_id is None:
+            rejection_reasons.append("missing_resolution_record_id")
+        if resolution is None:
+            rejection_reasons.append("resolution_record_not_found")
+        if abnormal is None:
+            rejection_reasons.append("abnormal_state_not_found")
+        if resolution is not None and resolution.abnormal_state_id != abnormal_state_id:
+            rejection_reasons.append("resolution_abnormal_link_mismatch")
+        if abnormal is not None and abnormal.resolution_record_id != resolution_record_id:
+            rejection_reasons.append("abnormal_state_resolution_link_mismatch")
+        if resolution is not None and resolution.workflow_instance_id != workflow_instance_id:
+            rejection_reasons.append("workflow_instance_mismatch")
+        if not requested_evidence_refs:
+            rejection_reasons.append("missing_requested_evidence_refs")
+        if not stored_evidence_refs:
+            rejection_reasons.append("missing_stored_evidence_refs")
+        if resolution is not None and not resolution.resolved_by:
+            rejection_reasons.append("missing_resolved_by")
+        if resolution is not None and not resolution.resolution_action:
+            rejection_reasons.append("missing_resolution_action")
+        if not has_resulting_state:
+            rejection_reasons.append("missing_resulting_transition_or_terminal_state")
+        if rejection_reasons:
             return self.create_phase5_record(
                 family="recovery_action_record",
                 workflow_instance_id=workflow_instance_id,
@@ -604,7 +660,8 @@ class CoordinationRuntime:
                     "action_status": "failed",
                     "actor_id": actor_id,
                     "reason": "manual_resolution_requires_accepted_resolution_record_and_evidence",
-                    "evidence_refs": list(evidence_refs or []),
+                    "rejection_reasons": rejection_reasons,
+                    "evidence_refs": requested_evidence_refs,
                     "direct_human_write_allowed": False,
                 },
             )
@@ -618,7 +675,12 @@ class CoordinationRuntime:
             payload={
                 "canonical_outcome": "manual_governed_resolution",
                 "actor_id": actor_id,
-                "evidence_refs": list(evidence_refs),
+                "resolved_by": resolution.resolved_by,
+                "resolution_action": resolution.resolution_action,
+                "state_transition_id": resolution_payload.get("state_transition_id"),
+                "terminal_state": resolution_payload.get("terminal_state") or resolution_payload.get("explicit_terminal_state"),
+                "evidence_refs": requested_evidence_refs,
+                "stored_evidence_refs": list(stored_evidence_refs),
                 "direct_human_write_allowed": False,
             },
         )

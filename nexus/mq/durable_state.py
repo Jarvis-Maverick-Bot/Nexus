@@ -928,6 +928,24 @@ class DurableStateStore:
             raise KeyError(f"side_effect_outbox not found: {outbox_id}")
         return record
 
+    def mark_outbox_publish_in_flight(self, outbox_id: str, attempt_id: str) -> SideEffectOutboxRecord:
+        with self._conn:
+            self._conn.execute(
+                """
+                UPDATE side_effect_outbox
+                SET state = 'PUBLISHED',
+                    published_at = ?,
+                    error_summary = ?,
+                    retry_count = retry_count + 1
+                WHERE outbox_id = ? AND state = 'PLANNED'
+                """,
+                (now_iso(), f"publish_in_flight:{attempt_id}", outbox_id),
+            )
+        record = self.get_outbox_record(outbox_id)
+        if record is None:
+            raise KeyError(f"side_effect_outbox not found: {outbox_id}")
+        return record
+
     def mark_outbox_confirmed(self, outbox_id: str, confirmed_by: str) -> SideEffectOutboxRecord:
         with self._conn:
             self._conn.execute(
@@ -2133,6 +2151,57 @@ class DurableStateStore:
                 ),
             )
         return record
+
+    def get_resolution_record(self, resolution_id: str) -> Optional[ResolutionStoreRecord]:
+        row = self._conn.execute(
+            """
+            SELECT resolution_id, abnormal_state_id, error_event_id, workflow_instance_id,
+                   resolved_by, resolution_action, created_at, payload
+            FROM resolution_record
+            WHERE resolution_id = ?
+            """,
+            (resolution_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return ResolutionStoreRecord(
+            resolution_id=row["resolution_id"],
+            abnormal_state_id=row["abnormal_state_id"],
+            error_event_id=row["error_event_id"],
+            workflow_instance_id=row["workflow_instance_id"],
+            resolved_by=row["resolved_by"],
+            resolution_action=row["resolution_action"],
+            created_at=row["created_at"],
+            payload=_json_loads(row["payload"], {}),
+        )
+
+    def get_abnormal_state_record(self, abnormal_state_id: str) -> Optional[AbnormalStateStoreRecord]:
+        row = self._conn.execute(
+            """
+            SELECT abnormal_state_id, error_event_id, workflow_instance_id, error_class, abnormal_class,
+                   resolved, notification_sent, resolution_record_id, escalation_timer_id,
+                   detected_at, resolved_at, payload
+            FROM abnormal_state_record
+            WHERE abnormal_state_id = ?
+            """,
+            (abnormal_state_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return AbnormalStateStoreRecord(
+            abnormal_state_id=row["abnormal_state_id"],
+            error_event_id=row["error_event_id"],
+            workflow_instance_id=row["workflow_instance_id"],
+            error_class=row["error_class"],
+            abnormal_class=row["abnormal_class"],
+            resolved=bool(row["resolved"]),
+            notification_sent=bool(row["notification_sent"]),
+            resolution_record_id=row["resolution_record_id"],
+            escalation_timer_id=row["escalation_timer_id"],
+            detected_at=row["detected_at"],
+            resolved_at=row["resolved_at"],
+            payload=_json_loads(row["payload"], {}),
+        )
 
     def create_escalation_timer(
         self,
