@@ -208,26 +208,29 @@ def test_p4_04_retry_policy_separates_broker_local_and_application_paths(tmp_pat
 
 
 def test_p4_05_retry_attempt_limits_are_enforced(tmp_path):
-    runtime = _make_runtime(tmp_path)
-
-    decision = runtime.record_retry_decision(
-        original_message_id="msg-retry-limit-001",
-        original_idempotency_key="idem-retry-limit-001",
-        workflow_instance_id="wf-phase4-001",
-        message_family="Timeout_Message",
-        failure_class="IF-04",
-        attempt_count=3,
-        max_attempts=3,
-        retry_actor="application_retry_message",
-        failure_cause="timeout exhausted",
+    runtime, coordinator = _make_coordinator(tmp_path)
+    command = _make_command(idempotency_key="idem-retry-limit-001")
+    retry = coordinator.build_retry_message(
+        original_envelope=command,
+        target_subject="agent.maverick.inbox",
+        retry_count=3,
+        max_retries=3,
+        retry_reason="timeout exhausted",
+        last_error="timeout exhausted",
     )
+
+    result = coordinator.dispatch_runtime_message(retry)
+    decision = runtime.state_store.list_phase3_runtime_records("retry_decision_record")
     dlq = runtime.state_store.list_phase3_runtime_records("dead_letter_record")
     retry_outbox = runtime.state_store.list_phase3_runtime_records("retry_outbox_record")
+    retry_dispatch = runtime.state_store.list_phase3_runtime_records("retry_dispatch_evidence_record")
     runtime.close()
 
-    assert decision.status == "dlq_recorded"
+    assert result.status == "dlq_recorded"
+    assert decision[0].status == "dlq_recorded"
     assert len(dlq) == 1
     assert retry_outbox == []
+    assert retry_dispatch == []
 
 
 def test_p4_06_dlq_eligible_failure_creates_durable_dlq_evidence(tmp_path):

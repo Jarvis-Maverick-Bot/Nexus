@@ -207,7 +207,7 @@ class ExecutionLifecycleCoordinator:
         if family == "Retry_Message":
             retry_payload = envelope.payload if isinstance(envelope.payload, RetryMessagePayload) else None
             if retry_payload is not None:
-                self.runtime.record_retry_decision(
+                decision = self.runtime.record_retry_decision(
                     original_message_id=retry_payload.original_message_id,
                     original_idempotency_key=retry_payload.original_idempotency_key,
                     workflow_instance_id=envelope.workflow_instance_id,
@@ -218,6 +218,8 @@ class ExecutionLifecycleCoordinator:
                     retry_actor="application_retry_message",
                     failure_cause=retry_payload.last_error or retry_payload.retry_reason,
                 )
+                if decision.status == "dlq_recorded":
+                    return DispatchResult(family=family, status=decision.status, evidence_record=decision)
             evidence = self.runtime.record_retry_dispatch_evidence(envelope)
             return DispatchResult(family=family, status=evidence.status, evidence_record=evidence)
         if family == "Dead_Letter_Message":
