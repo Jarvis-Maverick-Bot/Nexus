@@ -3,6 +3,19 @@ __pycache__/
 *.pyc
 *.pyo
 *.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# Local machine-specific identity config — never commit
+# Local tool and vendored dependency caches
+.tools/
+.vendor/
+
+# Local runtime scratch data
+tmp/
+*.sqlite
+*.sqlite3
+*.db
+
+# Local machine-specific identity config - never commit
 governance/collab/collab_config.json
