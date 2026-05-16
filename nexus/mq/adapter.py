@@ -99,6 +99,7 @@ class MqAdapterStub:
             "message_id": envelope.get("message_id", ""),
             "workflow_instance_id": envelope.get("workflow_instance_id", ""),
             "timestamp": datetime.now(timezone.utc).isoformat(),
+            "not_business_completion": True,
         }
         self._ack_log.append(ack)
         return ack
@@ -147,6 +148,7 @@ class MqAdapterStub:
             "ack_level": level.value,
             "message_id": message_id,
             "timestamp": datetime.now(timezone.utc).isoformat(),
+            "not_business_completion": True,
         }
         self._ack_log.append(ack)
         return ack
@@ -158,6 +160,7 @@ class MqAdapterStub:
             "message_id": message_id,
             "reason": reason,
             "timestamp": datetime.now(timezone.utc).isoformat(),
+            "not_business_completion": True,
         }
         self._ack_log.append(ack)
         return ack
@@ -252,6 +255,35 @@ class MqAdapterStub:
 
     def get_ack_log(self) -> list[dict]:
         return list(self._ack_log)
+
+    def broker_policy_evidence(self) -> dict:
+        return {
+            "adapter": "stub",
+            "topology": "local_in_memory",
+            "stream_policy": {
+                "retention": "memory",
+                "replay": "cursor_reset",
+                "max_messages": "bounded_by_process_memory",
+            },
+            "consumer_policy": {
+                "ack_policy": "manual_log_only",
+                "ack_boundary": "consumer_intake_only",
+                "max_deliver": self._retry_config.max_attempts,
+            },
+            "dlq_distinct_from_handler_exhausted": True,
+            "not_production_topology": True,
+            "not_business_completion": True,
+        }
+
+    def health_probe(self) -> dict:
+        return {
+            "component": "broker_stub",
+            "status": "healthy",
+            "queued_messages": len(self._messages),
+            "dlq_events": len(self._dlq_events),
+            "ack_events": len(self._ack_log),
+            "not_business_completion": True,
+        }
 
     def clear(self):
         self._messages.clear()

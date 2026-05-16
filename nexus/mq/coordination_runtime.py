@@ -2202,6 +2202,21 @@ class CoordinationRuntime:
                 failure_class=terminal.failure_class,
             )
         envelope = validation.envelope
+        existing_intake = self.state_store.get_envelope_inbox(envelope.message_id)
+        if existing_intake is not None:
+            return RuntimeIntakeResult(
+                valid=True,
+                ack_allowed=True,
+                duplicate=True,
+                envelope=envelope,
+                intake_record=existing_intake,
+                broker_action="ACK",
+                existing_result={
+                    "duplicate_basis": "envelope_inbox",
+                    "intake_record_id": existing_intake.record_id,
+                    "not_business_completion": True,
+                },
+            )
         existing = self.state_store.get_idempotency(envelope.idempotency_key)
         if existing is not None:
             return RuntimeIntakeResult(

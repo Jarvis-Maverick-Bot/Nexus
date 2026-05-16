@@ -256,6 +256,7 @@ class MqAdapterNats:
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "nats_seq": ack.seq,
             "subject": subject,
+            "not_business_completion": True,
         }
         self._ack_log.append(ack_result)
         return ack_result
@@ -348,6 +349,7 @@ class MqAdapterNats:
             "ack_level": level,
             "message_id": message_id,
             "timestamp": datetime.now(timezone.utc).isoformat(),
+            "not_business_completion": True,
         }
         self._ack_log.append(ack)
         return ack
@@ -493,6 +495,43 @@ class MqAdapterNats:
 
     def get_ack_log(self) -> list[dict]:
         return list(self._ack_log)
+
+    def broker_policy_evidence(self) -> dict:
+        return {
+            "adapter": "nats_jetstream",
+            "nats_url": self._redacted_nats_url(),
+            "stream_name": self._stream_name,
+            "stream_subjects": list(self._stream_subjects),
+            "dlq_stream_name": self._dlq_stream_name,
+            "dlq_subject": self._dlq_subject,
+            "consumer_name": self._consumer_name,
+            "consumer_filter_subject": self._consumer_filter_subject,
+            "consumer_policy": {
+                "durable_name": self._consumer_name,
+                "ack_policy": "explicit_required_by_phase6",
+                "ack_boundary": "consumer_intake_only",
+            },
+            "dlq_distinct_from_handler_exhausted": True,
+            "live_mutation_required_for_evidence": False,
+            "not_business_completion": True,
+        }
+
+    def health_probe(self) -> dict:
+        return {
+            "component": "nats_jetstream",
+            "status": "healthy" if self._connected else "degraded",
+            "stream_name": self._stream_name,
+            "consumer_name": self._consumer_name,
+            "connected": self._connected,
+            "not_business_completion": True,
+        }
+
+    def _redacted_nats_url(self) -> str:
+        if "@" not in self._nats_url:
+            return self._nats_url
+        scheme, rest = self._nats_url.split("://", 1) if "://" in self._nats_url else ("", self._nats_url)
+        host = rest.split("@", 1)[1]
+        return f"{scheme}://***@{host}" if scheme else f"***@{host}"
 
     def _resolve_subject(self, envelope: dict) -> str:
         if envelope.get("protocol_version"):

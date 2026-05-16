@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 from nexus.mq.coordination_runtime import CoordinationRuntime
+from nexus.mq.operational_config import OperationalManifest, validate_operational_manifest
 from nexus.mq.phase3_uat_command_bridge import Phase3UatCommandBridge
 from nexus.mq.protocol import ProtocolEnvelope
 from nexus.mq.protocol_boundary import ProtocolMessageBoundary
@@ -19,6 +20,7 @@ class ListenerRuntimeConfig:
     emit_anomaly_on_invalid: bool = True
     reconcile_outbox_on_startup: bool = True
     phase5_restart_scan_on_startup: bool = True
+    operational_manifest: Optional[OperationalManifest] = None
 
 
 @dataclass
@@ -29,6 +31,9 @@ class ListenerStartupResult:
     reconciled_outbox_records: int
     phase5_recovery_scan_records: int = 0
     phase5_recovery_action_records: int = 0
+    config_valid: bool = True
+    config_hash: Optional[str] = None
+    diagnostic_read_only: bool = False
     quarantined: bool = False
     errors: list[str] | None = None
 
@@ -65,6 +70,7 @@ class ListenerRuntime:
         self.config = config or ListenerRuntimeConfig()
         self.boundary = ProtocolMessageBoundary(self.runtime.identity_store)
         self.phase3_uat_bridge = Phase3UatCommandBridge(self.runtime)
+        self._actionable_consume_enabled = True
 
     @classmethod
     def from_paths(
@@ -87,6 +93,41 @@ class ListenerRuntime:
         return cls(adapter=adapter, coordination_runtime=runtime, config=config)
 
     def startup(self) -> ListenerStartupResult:
+        config_result = None
+        if self.config.operational_manifest is not None:
+            config_result = validate_operational_manifest(self.config.operational_manifest)
+            self.runtime.create_phase5_record(
+                family="event_log",
+                status="validated" if config_result.valid else "blocked",
+                workflow_instance_id=None,
+                target_ref=self.config.operational_manifest.manifest_version,
+                dedupe_key=f"operational_config:{self.config.operational_manifest.config_hash}:{config_result.checked_at}",
+                payload={
+                    "event_name": "operational_config_validation",
+                    "manifest_version": config_result.manifest_version,
+                    "config_hash": config_result.config_hash,
+                    "valid": config_result.valid,
+                    "fail_closed": config_result.fail_closed,
+                    "diagnostic_read_only": config_result.diagnostic_read_only,
+                    "errors": list(config_result.errors),
+                    "warnings": list(config_result.warnings),
+                    "not_business_completion": True,
+                },
+            )
+            if not config_result.valid:
+                self._actionable_consume_enabled = False
+                return ListenerStartupResult(
+                    runtime_status="DIAGNOSTIC_READ_ONLY" if config_result.diagnostic_read_only else "CONFIG_BLOCKED",
+                    recovered_pending_tasks=0,
+                    recovered_callback_waits=0,
+                    reconciled_outbox_records=0,
+                    config_valid=False,
+                    config_hash=config_result.config_hash,
+                    diagnostic_read_only=config_result.diagnostic_read_only,
+                    quarantined=False,
+                    errors=list(config_result.errors),
+                )
+            self._actionable_consume_enabled = True
         runtime_status = self.runtime.startup()
         recovered_pending = len(self.runtime.state_store.list_pending_tasks(states=["PENDING", "PROCESSING"]))
         recovered_callbacks = len(self.runtime.state_store.list_waiting_callbacks())
@@ -101,6 +142,9 @@ class ListenerRuntime:
                 reconciled_outbox_records=0,
                 phase5_recovery_scan_records=0,
                 phase5_recovery_action_records=0,
+                config_valid=config_result.valid if config_result is not None else True,
+                config_hash=config_result.config_hash if config_result is not None else None,
+                diagnostic_read_only=False,
                 quarantined=True,
                 errors=[runtime_status.reason] if runtime_status.reason else [],
             )
@@ -117,9 +161,18 @@ class ListenerRuntime:
             reconciled_outbox_records=reconciled,
             phase5_recovery_scan_records=phase5_scans_after - phase5_scans_before,
             phase5_recovery_action_records=phase5_actions_after - phase5_actions_before,
+            config_valid=config_result.valid if config_result is not None else True,
+            config_hash=config_result.config_hash if config_result is not None else None,
+            diagnostic_read_only=False,
         )
 
     def poll_once(self) -> ListenerPollResult:
+        if not self._actionable_consume_enabled:
+            return ListenerPollResult(
+                status="diagnostic_read_only",
+                acked=False,
+                errors=["ACTIONABLE_CONSUME_DISABLED_BY_OPERATIONAL_CONFIG"],
+            )
         message = self.adapter.consume()
         if message is None:
             return ListenerPollResult(status="idle")

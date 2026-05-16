@@ -451,6 +451,9 @@ class DurableStateStore:
             first_response_deadline = deadline_at
         if completion_deadline is None:
             completion_deadline = deadline_at
+        existing = self.get_pending_task(task_id)
+        if existing is not None:
+            return existing
         record = PendingTaskRecord(
             task_id=task_id,
             task_type=task_type,
@@ -1080,6 +1083,9 @@ class DurableStateStore:
         state: str = "processing",
         error: Optional[str] = None,
     ) -> EnvelopeInboxRecord:
+        existing = self.get_envelope_inbox(envelope_id)
+        if existing is not None:
+            return existing
         record = EnvelopeInboxRecord(
             record_id=record_id or f"intake-{uuid.uuid4().hex[:12]}",
             envelope_id=envelope_id,
