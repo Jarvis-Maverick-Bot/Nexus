@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta, timezone
 import os
+import asyncio
 
 import pytest
 
 from nexus.mq.adapter import MqAdapterStub
+from nexus.mq.adapter_nats import MqAdapterNats
 from nexus.mq.coordination_runtime import AUTHORITY_ORDER, CANONICAL_RECOVERY_OUTCOMES, CoordinationRuntime
 from nexus.mq.listener_runtime import ListenerRuntime, ListenerRuntimeConfig
 from nexus.mq.operational_alerts import (
@@ -173,6 +175,44 @@ def test_p6_03_consumer_policy_has_ack_wait_max_delivery_and_filter():
     assert policy.ack_wait_seconds > 0
     assert policy.max_deliver == 3
     assert policy.filter_subject == "agent.maverick.>"
+
+
+def test_p6_03_nats_consume_defers_broker_ack_until_consumer_intake_ack():
+    class FakeMsg:
+        def __init__(self):
+            self.subject = "agent.maverick.inbox"
+            self.data = b'{"message_id":"msg-p6-nats-ack","payload":{}}'
+            self.acked = False
+
+        async def ack(self):
+            self.acked = True
+
+    class FakePullSub:
+        def __init__(self, msg):
+            self.msg = msg
+
+        async def fetch(self, batch, timeout):
+            return [self.msg]
+
+    adapter = object.__new__(MqAdapterNats)
+    adapter._pull_sub = FakePullSub(FakeMsg())
+    adapter._pending_acks = {}
+    adapter._ack_log = []
+
+    async def no_connection():
+        return None
+
+    adapter._ensure_connection = no_connection
+
+    delivered = asyncio.run(adapter._consume_impl())
+    fake_msg = adapter._pending_acks["msg-p6-nats-ack"]
+    assert delivered["broker_ack_pending"] is True
+    assert fake_msg.acked is False
+
+    ack = asyncio.run(adapter._ack_impl("msg-p6-nats-ack"))
+    assert fake_msg.acked is True
+    assert ack["broker_acknowledged"] is True
+    assert ack["broker_ack_boundary"] == "after_durable_intake"
 
 
 def test_p6_04_ack_after_validation_and_durable_intake_only(tmp_path):
@@ -391,6 +431,26 @@ def test_p6_17_invalid_required_config_blocks_actionable_consume(tmp_path):
     assert startup.diagnostic_read_only is True
     assert result.status == "diagnostic_read_only"
     assert adapter.consume() is not None
+
+
+def test_p6_17_credential_bearing_broker_url_fails_closed_and_redacts_evidence(tmp_path):
+    manifest = _manifest(broker_urls=["nats://alice:pass@127.0.0.1:4222"])
+    manifest.diagnostic_read_only = True
+    validation = validate_operational_manifest(manifest)
+    redacted = redact_manifest(manifest)
+    adapter = MqAdapterStub()
+    runtime = _make_runtime(tmp_path)
+    listener = ListenerRuntime(adapter, runtime, ListenerRuntimeConfig(operational_manifest=manifest))
+
+    startup = listener.startup()
+    events = runtime.state_store.list_phase5_durable_records("event_log")
+    listener.close()
+
+    assert validation.valid is False
+    assert "SECRET_LEAK: broker_url" in validation.errors
+    assert redacted["broker"]["broker_urls"] == ["nats://***@127.0.0.1:4222"]
+    assert startup.config_valid is False
+    assert all("alice:pass" not in str(event.payload) for event in events)
 
 
 def test_p6_18_invalid_reload_keeps_prior_approved_config():

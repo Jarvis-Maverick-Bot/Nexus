@@ -144,6 +144,7 @@ class MqAdapterNats:
         self._ack_log: list[dict] = []
         self._connected = False
         self._pull_sub = None  # shared pull subscription (reused on reconnect)
+        self._pending_acks: dict[str, object] = {}
         self._loop = None      # persistent event loop for sync methods
         self._loop_thread = None
         self._loop_ready = None
@@ -297,10 +298,10 @@ class MqAdapterNats:
             if msgs:
                 msg = msgs[0]
                 envelope = json.loads(msg.data.decode('utf-8'))
-                # Auto-ack so the message is removed from the server.
-                # This prevents pending-message leakage to subsequent consumers.
-                await msg.ack()
-                return {"envelope": envelope, "subject": msg.subject, "status": "delivered"}
+                msg_id = envelope.get("message_id", "")
+                if msg_id:
+                    self._pending_acks[msg_id] = msg
+                return {"envelope": envelope, "subject": msg.subject, "status": "delivered", "broker_ack_pending": bool(msg_id)}
         except Exception:
             pass
 
@@ -345,10 +346,17 @@ class MqAdapterNats:
 
     async def _ack_impl(self, message_id: str, level: str = "consumer_intake") -> dict:
         """Async ACK: log the ack event."""
+        broker_acknowledged = False
+        pending = self._pending_acks.pop(message_id, None)
+        if pending is not None:
+            await pending.ack()
+            broker_acknowledged = True
         ack = {
             "ack_level": level,
             "message_id": message_id,
             "timestamp": datetime.now(timezone.utc).isoformat(),
+            "broker_acknowledged": broker_acknowledged,
+            "broker_ack_boundary": "after_durable_intake",
             "not_business_completion": True,
         }
         self._ack_log.append(ack)
@@ -508,7 +516,7 @@ class MqAdapterNats:
             "consumer_filter_subject": self._consumer_filter_subject,
             "consumer_policy": {
                 "durable_name": self._consumer_name,
-                "ack_policy": "explicit_required_by_phase6",
+                "ack_policy": "explicit",
                 "ack_boundary": "consumer_intake_only",
             },
             "dlq_distinct_from_handler_exhausted": True,
@@ -563,6 +571,7 @@ class MqAdapterNats:
             except Exception:
                 pass
             self._pull_sub = None
+        self._pending_acks.clear()
         if self._nc:
             await self._nc.close()
 

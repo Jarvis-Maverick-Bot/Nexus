@@ -212,9 +212,9 @@ def _validate_broker(manifest: OperationalManifest, errors: list[str], warnings:
         if manifest.environment == "production":
             errors.append("PRODUCTION_BROKER_TOPOLOGY_DEFERRED")
         elif manifest.environment == "local" and not url.startswith(APPROVED_LOCAL_BROKER_PREFIXES):
-            warnings.append(f"LOCAL_BROKER_ENDPOINT_NOT_LOOPBACK: {url}")
+            warnings.append(f"LOCAL_BROKER_ENDPOINT_NOT_LOOPBACK: {_redact_url(url)}")
         elif manifest.environment == "staging" and not url.startswith(APPROVED_STAGING_BROKER_PREFIXES):
-            warnings.append(f"STAGING_BROKER_ENDPOINT_NOT_PRIVATE: {url}")
+            warnings.append(f"STAGING_BROKER_ENDPOINT_NOT_PRIVATE: {_redact_url(url)}")
     if not broker.stream_policies:
         errors.append("MISSING_REQUIRED_FIELD: broker.stream_policies")
     if not broker.consumer_policies:
@@ -297,4 +297,14 @@ def _redact_dsn(value: str) -> str:
 
 def _has_secret_material(value: str) -> bool:
     lowered = value.lower()
-    return any(marker in lowered for marker in ("password=", "token=", "secret=", "://user:", "://admin:"))
+    return _has_embedded_url_credentials(value) or any(
+        marker in lowered for marker in ("password=", "token=", "secret=", "bearer ")
+    )
+
+
+def _has_embedded_url_credentials(value: str) -> bool:
+    if "://" not in value or "@" not in value:
+        return False
+    rest = value.split("://", 1)[1]
+    userinfo = rest.split("@", 1)[0]
+    return ":" in userinfo or bool(userinfo)
