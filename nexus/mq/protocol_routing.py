@@ -114,10 +114,17 @@ def route_execution_envelope_dict(envelope_dict: dict) -> RoutingResult:
     message_type = envelope_dict.get("message_type")
     reply_to_subject = envelope_dict.get("reply_to_subject")
     target_agent_id = envelope_dict.get("target_agent_id")
+    workflow_type = envelope_dict.get("workflow_type")
     payload = envelope_dict.get("payload") or {}
 
     if message_type in {"Command_Message", "Review_Task"}:
         if target_agent_id:
+            if (
+                message_type == "Command_Message"
+                and workflow_type == "controlled_3_5_uat"
+                and target_agent_id in {"nova", "jarvis"}
+            ):
+                return RoutingResult(valid=True, subject=f"nexus.3_5.uat.{target_agent_id}.inbox")
             return RoutingResult(valid=True, subject=build_agent_inbox_subject(str(target_agent_id)))
         return RoutingResult(valid=False, errors=["MISSING_ROUTING_TARGET"])
 

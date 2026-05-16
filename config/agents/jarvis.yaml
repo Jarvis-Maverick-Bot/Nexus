@@ -1,0 +1,38 @@
+agent_id: jarvis
+role: jarvis
+runtime_instance_id: jarvis-uat-runtime-001
+environment: controlled_uat
+authority_scopes:
+  - workflow.command
+  - workflow.result
+broker:
+  nats_url: nats://192.168.31.64:4222
+  stream_name: nexus-mq
+  dlq_stream_name: nexus-mq-dlq
+  stream_subjects:
+    - nexus.3_5.uat.nova.inbox
+    - nexus.3_5.uat.nova.callback
+    - nexus.3_5.uat.jarvis.inbox
+    - nexus.3_5.uat.jarvis.callback
+consumer:
+  durable_name: nexus-3_5-uat-jarvis
+  filter_subjects:
+    - nexus.3_5.uat.jarvis.inbox
+    - nexus.3_5.uat.jarvis.callback
+subjects:
+  inbox: nexus.3_5.uat.jarvis.inbox
+  callback: nexus.3_5.uat.jarvis.callback
+trusted_subject_prefixes:
+  - nexus.3_5.uat.
+supported_message_types:
+  - Command_Message
+  - Business_Message
+capabilities:
+  - controlled_uat_handoff_receive
+  - controlled_uat_return_receive
+handler_mapping:
+  Command_Message: controlled_uat_handoff_receive
+  Business_Message: controlled_uat_return_receive
+evidence_root: D:/tmp/nexus-3.5-controlled-full-link-uat/evidence/jarvis
+ack_policy: consumer_intake_only_after_durable_intake
+return_path_policy: prefer_reply_to_then_callback
