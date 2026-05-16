@@ -48,6 +48,14 @@ class AgentRuntimeBootstrapResult:
     evidence_root: Path
 
 
+@dataclass
+class AgentRuntimeRunResult:
+    startup_status: str
+    cycles_requested: int
+    cycles_completed: int
+    processed_results: list[dict[str, Any]]
+
+
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -310,6 +318,33 @@ def process_controlled_uat_once(bootstrap: AgentRuntimeBootstrapResult) -> dict[
     return {"status": "business_return_received", "message_id": envelope["message_id"]}
 
 
+def run_controlled_uat(
+    bootstrap: AgentRuntimeBootstrapResult,
+    *,
+    cycles: int = 1,
+    startup_only: bool = False,
+) -> AgentRuntimeRunResult:
+    if cycles < 0:
+        raise ValueError("INVALID_CYCLES: cycles must be >= 0")
+    startup = bootstrap.supervisor.startup()
+    if startup_only:
+        return AgentRuntimeRunResult(
+            startup_status=startup.runtime_status,
+            cycles_requested=0,
+            cycles_completed=0,
+            processed_results=[],
+        )
+    processed: list[dict[str, Any]] = []
+    for _ in range(cycles):
+        processed.append(process_controlled_uat_once(bootstrap))
+    return AgentRuntimeRunResult(
+        startup_status=startup.runtime_status,
+        cycles_requested=cycles,
+        cycles_completed=len(processed),
+        processed_results=processed,
+    )
+
+
 def controlled_uat_handoff_receive(envelope: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
     return build_execution_envelope(
         message_type="Business_Message",
@@ -357,10 +392,17 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="WBS 15.6 minimal controlled-UAT agent runtime bootstrap")
     parser.add_argument("--config", required=True)
     parser.add_argument("--startup-only", action="store_true")
+    parser.add_argument(
+        "--cycles",
+        type=int,
+        default=1,
+        help="Finite controlled-UAT processing cycles. Use --startup-only for validation/startup without consume.",
+    )
     args = parser.parse_args(argv)
     bootstrap = bootstrap_from_config(args.config)
-    startup = bootstrap.supervisor.startup()
-    return 0 if startup.config_valid and not startup.quarantined else 2
+    result = run_controlled_uat(bootstrap, cycles=args.cycles, startup_only=args.startup_only)
+    bootstrap.listener.close()
+    return 0 if result.startup_status == "ACTIVE" else 2
 
 
 def _validate_inbound_message(config: dict[str, Any], subject: str, envelope: Any) -> list[str]:

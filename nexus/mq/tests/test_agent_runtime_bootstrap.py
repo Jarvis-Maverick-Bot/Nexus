@@ -16,6 +16,7 @@ from nexus.mq.agent_runtime import (
     load_agent_runtime_config,
     main,
     process_controlled_uat_once,
+    run_controlled_uat,
     select_return_subject,
     validate_agent_runtime_config,
 )
@@ -282,3 +283,53 @@ def test_controlled_uat_nova_receives_business_return(tmp_path):
     assert result["status"] == "business_return_received"
     assert adapter.replay()[0]["subject"] == "nexus.3_5.uat.nova.callback"
     assert dispatch.exists()
+
+
+def test_run_controlled_uat_startup_only_does_not_consume(tmp_path):
+    adapter = MqAdapterStub()
+    bootstrap = _bootstrap("jarvis", tmp_path, adapter)
+    command = _command_to_jarvis()
+    adapter.publish(command)
+
+    result = run_controlled_uat(bootstrap, startup_only=True)
+    bootstrap.listener.close()
+
+    assert result.startup_status == "ACTIVE"
+    assert result.cycles_completed == 0
+    assert adapter.consume()["envelope"]["message_id"] == command["message_id"]
+
+
+def test_run_controlled_uat_cli_operator_mode_processes_one_cycle(tmp_path):
+    adapter = MqAdapterStub()
+    bootstrap = _bootstrap("jarvis", tmp_path, adapter)
+    command = _command_to_jarvis()
+    adapter.publish(command)
+
+    result = run_controlled_uat(bootstrap, cycles=1)
+    intake = bootstrap.evidence_root / "intake" / "03_durable_intake_record.json"
+    ack = bootstrap.evidence_root / "intake" / "04_ack_evidence.json"
+    dispatch = bootstrap.evidence_root / "dispatch" / "05_handler_dispatch_record.json"
+    return_path = bootstrap.evidence_root / "returns" / "06_return_path_decision.json"
+    published = bootstrap.evidence_root / "returns" / "07_return_publish_record.json"
+    bootstrap.listener.close()
+
+    assert result.startup_status == "ACTIVE"
+    assert result.cycles_completed == 1
+    assert result.processed_results[0]["status"] == "command_dispatched"
+    assert intake.exists()
+    assert ack.exists()
+    assert dispatch.exists()
+    assert return_path.exists()
+    assert published.exists()
+
+
+def test_agent_runtime_main_startup_only_cli_returns_zero(tmp_path, monkeypatch):
+    config = _load_config("nova", tmp_path)
+    config_path = _write_config(tmp_path, config)
+
+    class NoBrokerAdapter(MqAdapterStub):
+        pass
+
+    monkeypatch.setattr("nexus.mq.agent_runtime.build_nats_adapter", lambda _: NoBrokerAdapter())
+
+    assert main(["--config", str(config_path), "--startup-only"]) == 0
