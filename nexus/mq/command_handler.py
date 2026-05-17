@@ -89,7 +89,7 @@ class CommandHandler:
         if execute_command:
             try:
                 result_candidate = execute_command(payload)
-                ambiguity_error = _goal_command_ambiguity_error(result_candidate)
+                ambiguity_error = _goal_command_ambiguity_error(payload, result_candidate)
                 if ambiguity_error:
                     response = HandlerResponse(
                         workflow_instance_id=workflow_instance_id,
@@ -100,6 +100,15 @@ class CommandHandler:
                     self._responses.append(response)
                     return response
             except GoalCommandAmbiguityError as e:
+                if not _is_goal_driven_command_payload(payload):
+                    response = HandlerResponse(
+                        workflow_instance_id=workflow_instance_id,
+                        message_id=message_id,
+                        status="rejected",
+                        error=f"COMMAND_EXECUTION_FAILED: {e}",
+                    )
+                    self._responses.append(response)
+                    return response
                 response = HandlerResponse(
                     workflow_instance_id=workflow_instance_id,
                     message_id=message_id,
@@ -159,7 +168,9 @@ class CommandHandler:
         self._responses.clear()
 
 
-def _goal_command_ambiguity_error(result_candidate: Any) -> Optional[str]:
+def _goal_command_ambiguity_error(payload: Any, result_candidate: Any) -> Optional[str]:
+    if not _is_goal_driven_command_payload(payload):
+        return None
     if not isinstance(result_candidate, dict):
         return None
     status = result_candidate.get("status")
@@ -174,3 +185,9 @@ def _goal_command_ambiguity_error(result_candidate: Any) -> Optional[str]:
     if route:
         return f"GOAL_COMMAND_AMBIGUITY: {reason}; escalation_route_ref={route}"
     return f"GOAL_COMMAND_AMBIGUITY: {reason}"
+
+
+def _is_goal_driven_command_payload(payload: Any) -> bool:
+    if isinstance(payload, dict):
+        return payload.get("command_name") == "Goal_Driven_Command"
+    return getattr(payload, "command_name", None) == "Goal_Driven_Command"

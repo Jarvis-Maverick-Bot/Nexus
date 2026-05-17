@@ -59,6 +59,29 @@ def _goal_envelope(payload: dict | None = None) -> dict:
     ).to_dict()
 
 
+def _ordinary_command_envelope() -> dict:
+    return build_execution_envelope(
+        message_type="Command_Message",
+        workflow_instance_id="wf-ordinary-command-001",
+        workflow_type="standard",
+        workflow_version="1.0",
+        producer="maverick",
+        payload={
+            "command_name": "dispatch",
+            "target_handler": "runtime.dispatch",
+            "completion_event_type": "command.dispatched",
+        },
+        source_agent_id="maverick",
+        source_runtime_instance_id="maverick-windows-main-20260507",
+        source_role="maverick",
+        authority_scope="workflow.command",
+        target_agent_id="maverick",
+        reply_to_subject="agent.maverick.callbacks",
+        idempotency_key="idem-ordinary-command-001",
+        correlation_id="corr-ordinary-command-001",
+    ).to_dict()
+
+
 def test_goal_command_requires_done_condition():
     envelope = _goal_envelope(_goal_payload(measurable_done_condition=""))
 
@@ -141,6 +164,27 @@ def test_goal_command_escalates_on_ambiguity():
     assert "GOAL_COMMAND_AMBIGUITY" in (result.error or "")
     assert commit_boundary.get_commit_log() == []
     assert idempotency_store.get_record(envelope["idempotency_key"]) is None
+
+
+def test_ordinary_command_ambiguous_status_is_not_goal_ambiguity():
+    idempotency_store = IdempotencyStore()
+    commit_boundary = CommitBoundary()
+    handler = CommandHandler(idempotency_store, commit_boundary, AckPolicy())
+    envelope = _ordinary_command_envelope()
+
+    result = handler.handle(
+        envelope,
+        execute_command=lambda _payload: {
+            "status": "ambiguous",
+            "evidence_refs": ["evidence://ordinary/ambiguous-status"],
+            "transition_request": {"new_state": "ordinary_candidate_progress"},
+        },
+    )
+
+    assert result.status == "committed"
+    assert "GOAL_COMMAND_AMBIGUITY" not in (result.error or "")
+    assert commit_boundary.get_current_state(envelope["workflow_instance_id"]) == "ordinary_candidate_progress"
+    assert idempotency_store.get_record(envelope["idempotency_key"]) is not None
 
 
 def test_goal_command_handler_success_not_business_completion():
