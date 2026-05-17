@@ -27,6 +27,39 @@ class PayloadContract:
         if not value:
             errors.append(f"MISSING_REQUIRED_PAYLOAD_FIELD: {field_name}")
 
+    @staticmethod
+    def _is_bounded_text(value: Optional[str]) -> bool:
+        if not isinstance(value, str):
+            return False
+        normalized = " ".join(value.strip().lower().split())
+        if len(normalized) < 8:
+            return False
+        unbounded_markers = {
+            "any",
+            "anything",
+            "as needed",
+            "best effort",
+            "do it",
+            "everything",
+            "figure it out",
+            "tbd",
+            "unknown",
+            "whatever",
+        }
+        return normalized not in unbounded_markers
+
+    @staticmethod
+    def _has_bounded_list(values: Optional[list[Any]]) -> bool:
+        if not isinstance(values, list) or not values:
+            return False
+        unbounded_markers = {"*", "all", "any", "anything", "everything", "unbounded", "unknown"}
+        for value in values:
+            if value is None:
+                return False
+            if isinstance(value, str) and " ".join(value.strip().lower().split()) in unbounded_markers:
+                return False
+        return True
+
 
 @dataclass
 class CommandMessagePayload(PayloadContract):
@@ -48,6 +81,60 @@ class CommandMessagePayload(PayloadContract):
         if self.commit_pattern not in {"local_transactional_default", "coordinator_distributed_with_outbox"}:
             errors.append(f"INVALID_COMMIT_PATTERN: {self.commit_pattern}")
         return PayloadValidationResult(valid=len(errors) == 0, errors=errors)
+
+
+@dataclass
+class GoalDrivenCommandPayload(PayloadContract):
+    command_name: str = "Goal_Driven_Command"
+    goal_statement: str = ""
+    measurable_done_condition: str = ""
+    constraints: Optional[list[Any]] = None
+    allowed_write_scope: Optional[list[Any]] = None
+    allowed_tool_scope: Optional[list[Any]] = None
+    forbidden_actions: list[Any] = field(default_factory=list)
+    source_authority_refs: Optional[list[Any]] = None
+    source_authority_gap: Optional[str] = None
+    validation_commands_or_checks: Optional[list[Any]] = None
+    required_evidence_refs: Optional[list[Any]] = None
+    stop_conditions: Optional[list[Any]] = None
+    escalation_route_ref: str = ""
+    progress_record_ref: Optional[str] = None
+
+    def validate(self) -> PayloadValidationResult:
+        errors: list[str] = []
+        if self.command_name != "Goal_Driven_Command":
+            errors.append(f"INVALID_GOAL_COMMAND_NAME: {self.command_name}")
+        if not self._is_bounded_text(self.goal_statement):
+            errors.append("GOAL_STATEMENT_UNBOUNDED")
+        if not self._is_bounded_text(self.measurable_done_condition):
+            errors.append("DONE_CONDITION_MISSING")
+        if not self._has_bounded_list(self.constraints):
+            errors.append("GOAL_SCOPE_UNBOUNDED")
+        if not self._has_bounded_scope():
+            errors.append("GOAL_SCOPE_UNBOUNDED")
+        if not self._has_source_authority_or_declared_gap():
+            errors.append("SOURCE_AUTHORITY_UNDECLARED")
+        if not self._has_bounded_list(self.validation_commands_or_checks) or not self._has_bounded_list(self.required_evidence_refs):
+            errors.append("VALIDATION_CONTRACT_MISSING")
+        if not self._has_bounded_list(self.stop_conditions) or not self._is_bounded_text(self.escalation_route_ref):
+            errors.append("ESCALATION_ROUTE_MISSING")
+        deduped_errors = list(dict.fromkeys(errors))
+        return PayloadValidationResult(valid=len(deduped_errors) == 0, errors=deduped_errors)
+
+    def _has_bounded_scope(self) -> bool:
+        if isinstance(self.allowed_write_scope, list):
+            return self._write_scope_is_bounded()
+        return self._has_bounded_list(self.allowed_tool_scope)
+
+    def _write_scope_is_bounded(self) -> bool:
+        if self.allowed_write_scope == []:
+            return True
+        return self._has_bounded_list(self.allowed_write_scope)
+
+    def _has_source_authority_or_declared_gap(self) -> bool:
+        if self._has_bounded_list(self.source_authority_refs):
+            return True
+        return self._is_bounded_text(self.source_authority_gap)
 
 
 @dataclass

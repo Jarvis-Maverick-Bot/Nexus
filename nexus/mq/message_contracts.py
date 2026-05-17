@@ -14,6 +14,7 @@ from nexus.mq.payloads import (
     DeadLetterMessagePayload,
     EvidenceWriteMessagePayload,
     FeedbackMessagePayload,
+    GoalDrivenCommandPayload,
     PayloadContract,
     ReviewTaskPayload,
     RetryMessagePayload,
@@ -208,6 +209,14 @@ def is_transport_active(message_type: str) -> bool:
 def _coerce_payload_contract(
     message_type: str, payload: Any
 ) -> tuple[Optional[PayloadContract], Optional[str]]:
+    if message_type == "Command_Message":
+        if isinstance(payload, GoalDrivenCommandPayload):
+            return payload, None
+        if isinstance(payload, dict) and payload.get("command_name") == "Goal_Driven_Command":
+            try:
+                return GoalDrivenCommandPayload.from_dict(payload), None
+            except TypeError:
+                return None, "PAYLOAD_SCHEMA_MISMATCH: Command_Message"
     payload_type = PAYLOAD_TYPE_BY_MESSAGE_TYPE.get(message_type)
     if payload_type is None:
         return None, None
