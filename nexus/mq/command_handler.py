@@ -32,6 +32,10 @@ class HandlerResponse:
     error: Optional[str] = None
 
 
+class GoalCommandAmbiguityError(RuntimeError):
+    """Explicit stop/escalation signal for bounded goal-driven command handlers."""
+
+
 class CommandHandler:
     """
     Command message handler.
@@ -85,6 +89,25 @@ class CommandHandler:
         if execute_command:
             try:
                 result_candidate = execute_command(payload)
+                ambiguity_error = _goal_command_ambiguity_error(result_candidate)
+                if ambiguity_error:
+                    response = HandlerResponse(
+                        workflow_instance_id=workflow_instance_id,
+                        message_id=message_id,
+                        status="rejected",
+                        error=ambiguity_error,
+                    )
+                    self._responses.append(response)
+                    return response
+            except GoalCommandAmbiguityError as e:
+                response = HandlerResponse(
+                    workflow_instance_id=workflow_instance_id,
+                    message_id=message_id,
+                    status="rejected",
+                    error=f"GOAL_COMMAND_AMBIGUITY: {e}",
+                )
+                self._responses.append(response)
+                return response
             except Exception as e:
                 response = HandlerResponse(
                     workflow_instance_id=workflow_instance_id,
@@ -134,3 +157,20 @@ class CommandHandler:
 
     def clear(self):
         self._responses.clear()
+
+
+def _goal_command_ambiguity_error(result_candidate: Any) -> Optional[str]:
+    if not isinstance(result_candidate, dict):
+        return None
+    status = result_candidate.get("status")
+    if status not in {"stopped_for_escalation", "ambiguous"} and not result_candidate.get("ambiguity_detected"):
+        return None
+    reason = (
+        result_candidate.get("ambiguity_reason")
+        or result_candidate.get("stop_reason")
+        or "unspecified_goal_command_ambiguity"
+    )
+    route = result_candidate.get("escalation_route_ref")
+    if route:
+        return f"GOAL_COMMAND_AMBIGUITY: {reason}; escalation_route_ref={route}"
+    return f"GOAL_COMMAND_AMBIGUITY: {reason}"
