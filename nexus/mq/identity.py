@@ -16,6 +16,8 @@ import yaml
 class IdentityValidationResult:
     valid: bool
     errors: list[str]
+    resolved_principal_id: Optional[str] = None
+    evidence_refs: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -160,3 +162,40 @@ class AgentIdentityStore:
         if capability and not consumer.supports_capability(capability):
             errors.append(f"UNSUPPORTED_CAPABILITY: {capability}")
         return IdentityValidationResult(valid=len(errors) == 0, errors=errors)
+
+
+@dataclass
+class PrincipalIdentityMappingRecord:
+    mapping_id: str
+    channel_type: str
+    actor_channel_identity_ref: str
+    resolved_principal_id: Optional[str]
+    permission_scope_ref: str
+    mapping_state: str
+    source_authority_ref: Optional[str]
+    last_verified_at: Optional[str]
+    evidence_refs: list[str] = field(default_factory=list)
+
+
+def validate_principal_identity_mapping(
+    record: PrincipalIdentityMappingRecord,
+    *,
+    required_permission_scope_ref: Optional[str] = None,
+) -> IdentityValidationResult:
+    errors: list[str] = []
+    if record.mapping_state == "unknown" or not record.resolved_principal_id:
+        errors.append("UNKNOWN_IDENTITY")
+    if record.mapping_state == "suspended":
+        errors.append("SUSPENDED_PRINCIPAL")
+    if record.mapping_state == "revoked":
+        errors.append("REVOKED_PRINCIPAL")
+    if not record.source_authority_ref:
+        errors.append("MISSING_SOURCE_AUTHORITY")
+    if required_permission_scope_ref and record.permission_scope_ref != required_permission_scope_ref:
+        errors.append("WRONG_SCOPE")
+    return IdentityValidationResult(
+        valid=not errors,
+        errors=errors,
+        resolved_principal_id=record.resolved_principal_id if not errors else None,
+        evidence_refs=list(record.evidence_refs),
+    )

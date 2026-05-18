@@ -36,3 +36,15 @@ handler_mapping:
 evidence_root: D:/tmp/nexus-3.5-controlled-full-link-uat/evidence/jarvis
 ack_policy: consumer_intake_only_after_durable_intake
 return_path_policy: prefer_reply_to_then_callback
+agent_access:
+  runtime_type: local_skeleton
+  registry_status: active
+  initialization_status: ready
+  presence_state: idle
+  heartbeat_ttl_seconds: 60
+  startup_packet_ref: startup-packet://local/jarvis
+  readiness_evidence_ref: evidence://local/jarvis/readiness
+  privacy_scopes:
+    - project
+  allowed_task_boundaries:
+    - implementation

@@ -14,6 +14,7 @@ from nexus.mq.abnormal_state import (
     classify_abnormal_state,
     resolve_abnormal_state,
 )
+from nexus.mq.agent_registry import DispatchAssignmentRecord
 from nexus.mq.durable_state import (
     CallbackWaitRecord,
     DurableStateStore,
@@ -161,6 +162,7 @@ PHASE5_DURABLE_FAMILIES = {
     "recovery_action_record",
     "event_log",
     "current_projection",
+    "agent_access_event",
 }
 
 AUTHORITY_ORDER = [
@@ -523,6 +525,42 @@ class CoordinationRuntime:
                 "family": family,
                 "authority_order": list(AUTHORITY_ORDER),
                 **payload,
+            },
+        )
+
+    def record_layer3_dispatch_assignment(self, assignment: DispatchAssignmentRecord) -> Any:
+        """Persist 4.19 dispatch evidence without changing business truth."""
+        return self.create_phase5_record(
+            family="agent_access_event",
+            workflow_instance_id=None,
+            target_ref=assignment.assignment_id,
+            related_record_id=assignment.message_envelope_ref,
+            dedupe_key=f"4.19.dispatch:{assignment.assignment_id}",
+            status=assignment.dispatch_state,
+            payload={
+                "event_name": "layer3_dispatch_assignment",
+                "assignment": assignment.to_dict(),
+                "ack_is_not_business_completion": True,
+                "assignment_is_not_business_completion": True,
+                "not_business_completion": True,
+            },
+        )
+
+    def record_layer3_reallocation_or_dlq(self, assignment: DispatchAssignmentRecord) -> Any:
+        family = "dead_letter_record" if assignment.dispatch_state == "dlq" else "agent_access_event"
+        return self.create_phase5_record(
+            family=family,
+            workflow_instance_id=None,
+            target_ref=assignment.assignment_id,
+            related_record_id=assignment.message_envelope_ref,
+            dedupe_key=f"4.19.{assignment.dispatch_state}:{assignment.assignment_id}",
+            status=assignment.dispatch_state,
+            payload={
+                "event_name": "layer3_reallocation_or_dlq",
+                "assignment": assignment.to_dict(),
+                "delivery_not_completion": True,
+                "business_commit_created": False,
+                "not_business_completion": True,
             },
         )
 

@@ -42,6 +42,18 @@ agents:
       - "SA"
       - "DEV"
       - "QA"
+    agent_access:
+      runtime_type: "local_skeleton"
+      registry_status: "active"
+      initialization_status: "ready"
+      presence_state: "idle"
+      heartbeat_ttl_seconds: 60
+      startup_packet_ref: "startup-packet://local/viper"
+      readiness_evidence_ref: "evidence://local/viper/readiness"
+      privacy_scopes:
+        - "project"
+      allowed_task_boundaries:
+        - "delivery"
 
   maverick:
     agent_id: "maverick"
@@ -74,6 +86,18 @@ agents:
       signature_key_ref:
       expires_at: "2026-12-31T00:00:00Z"
     last_rotated_at: "2026-05-07T00:00:00Z"
+    agent_access:
+      runtime_type: "local_skeleton"
+      registry_status: "active"
+      initialization_status: "ready"
+      presence_state: "idle"
+      heartbeat_ttl_seconds: 60
+      startup_packet_ref: "startup-packet://local/maverick"
+      readiness_evidence_ref: "evidence://local/maverick/readiness"
+      privacy_scopes:
+        - "project"
+      allowed_task_boundaries:
+        - "coordination"
 
 workflows:
   standard_delivery:
