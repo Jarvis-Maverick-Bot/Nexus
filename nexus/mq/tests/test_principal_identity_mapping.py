@@ -54,3 +54,29 @@ def test_principal_identity_blocks_unknown_suspended_and_wrong_scope():
     assert "MISSING_SOURCE_AUTHORITY" in unknown.errors
     assert "SUSPENDED_PRINCIPAL" in suspended.errors
     assert "WRONG_SCOPE" in suspended.errors
+
+
+def test_principal_identity_fails_closed_for_non_authoritative_or_typo_states():
+    for state in ("display_name_match", "pending", "expired", "resovled_typo"):
+        result = validate_principal_identity_mapping(
+            PrincipalIdentityMappingRecord(
+                mapping_id=f"map-{state}",
+                channel_type="telegram",
+                actor_channel_identity_ref=f"telegram:user:{state}",
+                resolved_principal_id="principal:alex",
+                permission_scope_ref="project:nexus",
+                mapping_state=state,
+                source_authority_ref="authority://local/identity",
+                last_verified_at="2026-05-18T00:00:00+00:00",
+                evidence_refs=[f"evidence://identity/{state}"],
+            ),
+            required_permission_scope_ref="project:nexus",
+        )
+
+        assert result.valid is False
+        assert result.resolved_principal_id is None
+        assert any(
+            error.startswith("NON_AUTHORITATIVE_MAPPING_STATE")
+            or error.startswith("UNRECOGNIZED_MAPPING_STATE")
+            for error in result.errors
+        )

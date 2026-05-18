@@ -7,6 +7,33 @@ from typing import Any
 
 from nexus.mq.agent_registry import AgentRegistryRecord, DispatchAssignmentRecord
 from nexus.mq.channel_outbox import ChannelOutboxItem
+from nexus.mq.operational_observability import redact_payload
+
+
+ADAPTER_HEALTH_FIELDS = {
+    "adapter_id",
+    "adapter_type",
+    "status",
+    "last_event_at",
+    "error_ref",
+    "supported_protocol_versions",
+    "evidence_refs",
+}
+EXCEPTION_FIELDS = {
+    "event_type",
+    "severity",
+    "owner",
+    "related_record_ref",
+    "next_action",
+    "evidence_refs",
+}
+EVIDENCE_FIELDS = {
+    "evidence_ref",
+    "source_doc",
+    "source_record",
+    "timestamp",
+    "checksum_ref",
+}
 
 
 @dataclass
@@ -103,16 +130,26 @@ def build_agent_access_read_model(
             }
             for item in outbox_items
         ],
-        adapter_health=list(adapter_health),
-        exceptions=list(exceptions),
-        evidence=list(evidence),
+        adapter_health=_sanitize_records(adapter_health, ADAPTER_HEALTH_FIELDS),
+        exceptions=_sanitize_records(exceptions, EXCEPTION_FIELDS),
+        evidence=_sanitize_records(evidence, EVIDENCE_FIELDS),
     )
 
 
 def export_agent_access_evidence(read_model: AgentAccessReadModel) -> dict[str, Any]:
     return {
-        "evidence": list(read_model.evidence),
+        "evidence": _sanitize_records(read_model.evidence, EVIDENCE_FIELDS),
         "read_only": True,
         "not_business_completion": True,
         "status_families": dict(read_model.status_families),
     }
+
+
+def _sanitize_records(records: list[dict[str, Any]], allowed_fields: set[str]) -> list[dict[str, Any]]:
+    sanitized: list[dict[str, Any]] = []
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        filtered = {key: value for key, value in record.items() if key in allowed_fields}
+        sanitized.append(redact_payload(filtered))
+    return sanitized

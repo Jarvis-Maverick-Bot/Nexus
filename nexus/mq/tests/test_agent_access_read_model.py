@@ -37,3 +37,52 @@ def test_agent_access_read_model_separates_status_families_and_labels():
     assert payload["outbox"][0]["status"] == "queued"
     with pytest.raises(PermissionError):
         model.apply_operator_action("assign_work")
+
+
+def test_agent_access_read_model_sanitizes_adapter_exceptions_and_evidence():
+    model = build_agent_access_read_model(
+        agents=[],
+        assignments=[],
+        outbox_items=[],
+        adapter_health=[
+            {
+                "adapter_id": "feishu-main",
+                "adapter_type": "feishu",
+                "status": "degraded",
+                "error_ref": "token=abc",
+                "raw_private_payload": {"password": "abc"},
+                "secret": "abc",
+            }
+        ],
+        exceptions=[
+            {
+                "event_type": "adapter_error",
+                "severity": "warning",
+                "owner": "operator",
+                "next_action": "rotate bearer abc",
+                "raw_payload": {"authorization": "bearer abc"},
+                "password": "abc",
+            }
+        ],
+        evidence=[
+            {
+                "evidence_ref": "evidence://agent-access/token=abc",
+                "source_doc": "4.19",
+                "source_record": "adapter_health",
+                "raw_event": {"private_text": "secret"},
+                "credential": "abc",
+            }
+        ],
+    )
+
+    payload = model.to_dict()
+    rendered = str(payload).lower()
+
+    assert payload["adapter_health"][0]["error_ref"] == "[REDACTED]"
+    assert payload["exceptions"][0]["next_action"] == "[REDACTED]"
+    assert payload["evidence"][0]["evidence_ref"] == "[REDACTED]"
+    assert "raw_private_payload" not in rendered
+    assert "raw_payload" not in rendered
+    assert "raw_event" not in rendered
+    assert "password" not in rendered
+    assert "credential" not in rendered

@@ -12,6 +12,20 @@ from typing import Optional
 import yaml
 
 
+AUTHORITY_VALID_MAPPING_STATES = {"resolved", "verified"}
+NON_AUTHORITATIVE_MAPPING_STATES = {
+    "unknown",
+    "suspended",
+    "revoked",
+    "wrong_scope",
+    "pending",
+    "stale",
+    "expired",
+    "display_name_match",
+    "display_name_similarity",
+}
+
+
 @dataclass
 class IdentityValidationResult:
     valid: bool
@@ -183,12 +197,21 @@ def validate_principal_identity_mapping(
     required_permission_scope_ref: Optional[str] = None,
 ) -> IdentityValidationResult:
     errors: list[str] = []
-    if record.mapping_state == "unknown" or not record.resolved_principal_id:
+    mapping_state = record.mapping_state.strip().lower() if record.mapping_state else ""
+    if not mapping_state:
+        errors.append("MISSING_MAPPING_STATE")
+    elif mapping_state not in AUTHORITY_VALID_MAPPING_STATES and mapping_state not in NON_AUTHORITATIVE_MAPPING_STATES:
+        errors.append(f"UNRECOGNIZED_MAPPING_STATE: {record.mapping_state}")
+    elif mapping_state not in AUTHORITY_VALID_MAPPING_STATES:
+        errors.append(f"NON_AUTHORITATIVE_MAPPING_STATE: {mapping_state}")
+    if mapping_state == "unknown" or not record.resolved_principal_id:
         errors.append("UNKNOWN_IDENTITY")
-    if record.mapping_state == "suspended":
+    if mapping_state == "suspended":
         errors.append("SUSPENDED_PRINCIPAL")
-    if record.mapping_state == "revoked":
+    if mapping_state == "revoked":
         errors.append("REVOKED_PRINCIPAL")
+    if mapping_state == "wrong_scope":
+        errors.append("WRONG_SCOPE")
     if not record.source_authority_ref:
         errors.append("MISSING_SOURCE_AUTHORITY")
     if required_permission_scope_ref and record.permission_scope_ref != required_permission_scope_ref:
