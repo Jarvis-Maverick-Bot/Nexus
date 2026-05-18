@@ -257,8 +257,13 @@ def dispatch_ineligibility_reasons(
         reasons.append("READINESS_EVIDENCE_MISSING")
     if not record.startup_packet_expires_at:
         reasons.append("STARTUP_PACKET_FRESHNESS_UNDECLARED")
-    elif now_at and _parse_iso(record.startup_packet_expires_at) <= _parse_iso(now_at):
-        reasons.append("STARTUP_PACKET_EXPIRED")
+    elif now_at:
+        expires_dt = _parse_iso(record.startup_packet_expires_at)
+        now_dt = _parse_iso(now_at)
+        if expires_dt is None or now_dt is None:
+            reasons.append("STARTUP_PACKET_FRESHNESS_INVALID")
+        elif expires_dt <= now_dt:
+            reasons.append("STARTUP_PACKET_EXPIRED")
     if record.readiness_blocker:
         reasons.append(f"READINESS_BLOCKED: {record.readiness_blocker}")
     if record.presence_state != "idle":
@@ -314,10 +319,13 @@ def reallocate_or_dlq_assignment(
     return decision.assignment
 
 
-def _parse_iso(value: Optional[str]) -> datetime:
+def _parse_iso(value: Optional[str]) -> Optional[datetime]:
     if not value:
-        return datetime.min.replace(tzinfo=timezone.utc)
-    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=timezone.utc)
     return parsed

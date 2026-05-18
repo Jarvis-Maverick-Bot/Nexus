@@ -49,6 +49,7 @@ agents:
       presence_state: "idle"
       heartbeat_ttl_seconds: 60
       startup_packet_ref: "startup-packet://local/viper"
+      startup_packet_expires_at: "2026-12-31T00:00:00Z"
       readiness_evidence_ref: "evidence://local/viper/readiness"
       privacy_scopes:
         - "project"
@@ -93,6 +94,7 @@ agents:
       presence_state: "idle"
       heartbeat_ttl_seconds: 60
       startup_packet_ref: "startup-packet://local/maverick"
+      startup_packet_expires_at: "2026-12-31T00:00:00Z"
       readiness_evidence_ref: "evidence://local/maverick/readiness"
       privacy_scopes:
         - "project"

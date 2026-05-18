@@ -43,6 +43,7 @@ agent_access:
   presence_state: idle
   heartbeat_ttl_seconds: 60
   startup_packet_ref: startup-packet://local/jarvis
+  startup_packet_expires_at: "2026-12-31T00:00:00Z"
   readiness_evidence_ref: evidence://local/jarvis/readiness
   privacy_scopes:
     - project

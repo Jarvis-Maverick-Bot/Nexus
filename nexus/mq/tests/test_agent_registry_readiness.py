@@ -96,3 +96,29 @@ def test_expired_startup_packet_blocks_normal_dispatch():
     assert decision.accepted is False
     assert "NO_ELIGIBLE_AGENT" in decision.errors
     assert "STARTUP_PACKET_EXPIRED" in decision.rejected["expired"]
+
+
+def test_invalid_startup_packet_freshness_blocks_dispatch_without_exception():
+    registry = AgentRegistry(
+        [
+            _record(
+                agent_id="invalid-freshness",
+                runtime_instance_id="invalid-freshness-runtime",
+                startup_packet_expires_at="not-a-timestamp",
+            )
+        ]
+    )
+
+    decision = registry.assign_work(
+        work_ref="implementation",
+        message_envelope_ref="envelope://cmd-invalid-startup",
+        required_capability="implementation",
+        required_authority_scope="workflow.command",
+        required_privacy_scope="project",
+        allowed_task_boundary="implementation",
+        now_at="2026-05-18T00:10:00+00:00",
+    )
+
+    assert decision.accepted is False
+    assert "NO_ELIGIBLE_AGENT" in decision.errors
+    assert "STARTUP_PACKET_FRESHNESS_INVALID" in decision.rejected["invalid-freshness"]
