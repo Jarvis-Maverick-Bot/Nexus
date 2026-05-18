@@ -12,10 +12,26 @@ from typing import Optional
 import yaml
 
 
+AUTHORITY_VALID_MAPPING_STATES = {"resolved", "verified"}
+NON_AUTHORITATIVE_MAPPING_STATES = {
+    "unknown",
+    "suspended",
+    "revoked",
+    "wrong_scope",
+    "pending",
+    "stale",
+    "expired",
+    "display_name_match",
+    "display_name_similarity",
+}
+
+
 @dataclass
 class IdentityValidationResult:
     valid: bool
     errors: list[str]
+    resolved_principal_id: Optional[str] = None
+    evidence_refs: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -160,3 +176,49 @@ class AgentIdentityStore:
         if capability and not consumer.supports_capability(capability):
             errors.append(f"UNSUPPORTED_CAPABILITY: {capability}")
         return IdentityValidationResult(valid=len(errors) == 0, errors=errors)
+
+
+@dataclass
+class PrincipalIdentityMappingRecord:
+    mapping_id: str
+    channel_type: str
+    actor_channel_identity_ref: str
+    resolved_principal_id: Optional[str]
+    permission_scope_ref: str
+    mapping_state: str
+    source_authority_ref: Optional[str]
+    last_verified_at: Optional[str]
+    evidence_refs: list[str] = field(default_factory=list)
+
+
+def validate_principal_identity_mapping(
+    record: PrincipalIdentityMappingRecord,
+    *,
+    required_permission_scope_ref: Optional[str] = None,
+) -> IdentityValidationResult:
+    errors: list[str] = []
+    mapping_state = record.mapping_state.strip().lower() if record.mapping_state else ""
+    if not mapping_state:
+        errors.append("MISSING_MAPPING_STATE")
+    elif mapping_state not in AUTHORITY_VALID_MAPPING_STATES and mapping_state not in NON_AUTHORITATIVE_MAPPING_STATES:
+        errors.append(f"UNRECOGNIZED_MAPPING_STATE: {record.mapping_state}")
+    elif mapping_state not in AUTHORITY_VALID_MAPPING_STATES:
+        errors.append(f"NON_AUTHORITATIVE_MAPPING_STATE: {mapping_state}")
+    if mapping_state == "unknown" or not record.resolved_principal_id:
+        errors.append("UNKNOWN_IDENTITY")
+    if mapping_state == "suspended":
+        errors.append("SUSPENDED_PRINCIPAL")
+    if mapping_state == "revoked":
+        errors.append("REVOKED_PRINCIPAL")
+    if mapping_state == "wrong_scope":
+        errors.append("WRONG_SCOPE")
+    if not record.source_authority_ref:
+        errors.append("MISSING_SOURCE_AUTHORITY")
+    if required_permission_scope_ref and record.permission_scope_ref != required_permission_scope_ref:
+        errors.append("WRONG_SCOPE")
+    return IdentityValidationResult(
+        valid=not errors,
+        errors=errors,
+        resolved_principal_id=record.resolved_principal_id if not errors else None,
+        evidence_refs=list(record.evidence_refs),
+    )

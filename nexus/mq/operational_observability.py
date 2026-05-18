@@ -176,6 +176,23 @@ def build_health_probe(
     )
 
 
+def build_agent_access_evidence_ref(
+    *,
+    source_doc: str,
+    source_record: str,
+    evidence_ref: str,
+    checksum_ref: Optional[str] = None,
+) -> dict[str, Any]:
+    return {
+        "evidence_ref": evidence_ref,
+        "source_doc": source_doc,
+        "source_record": source_record,
+        "timestamp": datetime.now(UTC).isoformat(),
+        "checksum_ref": checksum_ref,
+        "not_business_completion": True,
+    }
+
+
 def redact_payload(payload: dict[str, Any]) -> dict[str, Any]:
     redacted: dict[str, Any] = {}
     for key, value in payload.items():
