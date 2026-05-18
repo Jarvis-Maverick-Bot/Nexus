@@ -22,6 +22,7 @@ def _record(**overrides):
         "trust_material_ref": "local:nats-agent-protocol",
         "startup_packet_ref": "startup-packet://jarvis",
         "readiness_evidence_ref": "evidence://readiness/jarvis",
+        "startup_packet_expires_at": "2026-05-18T01:00:00+00:00",
         "created_at": "2026-05-18T00:00:00+00:00",
         "updated_at": "2026-05-18T00:00:00+00:00",
         "privacy_scopes": ["project"],
@@ -39,6 +40,7 @@ def test_registry_ready_requires_packet_and_evidence():
         required_authority_scope="workflow.command",
         required_privacy_scope="project",
         allowed_task_boundary="implementation",
+        now_at="2026-05-18T00:30:00+00:00",
     )
 
     assert "READINESS_EVIDENCE_MISSING" in reasons
@@ -68,3 +70,29 @@ def test_registry_excludes_quarantined_stale_or_online_only_agents():
     assert decision.assignment.assigned_agent_id == "ready"
     assert "PRESENCE_NOT_IDLE: online" in decision.rejected["online-only"]
     assert "INITIALIZATION_NOT_READY: quarantined" in decision.rejected["quarantined"]
+
+
+def test_expired_startup_packet_blocks_normal_dispatch():
+    registry = AgentRegistry(
+        [
+            _record(
+                agent_id="expired",
+                runtime_instance_id="expired-runtime",
+                startup_packet_expires_at="2026-05-18T00:05:00+00:00",
+            )
+        ]
+    )
+
+    decision = registry.assign_work(
+        work_ref="implementation",
+        message_envelope_ref="envelope://cmd-expired-startup",
+        required_capability="implementation",
+        required_authority_scope="workflow.command",
+        required_privacy_scope="project",
+        allowed_task_boundary="implementation",
+        now_at="2026-05-18T00:10:00+00:00",
+    )
+
+    assert decision.accepted is False
+    assert "NO_ELIGIBLE_AGENT" in decision.errors
+    assert "STARTUP_PACKET_EXPIRED" in decision.rejected["expired"]

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 
@@ -26,6 +27,8 @@ class StartupPacketRecord:
     reply_format_ref: str
     stop_conditions: list[str]
     issued_at: str
+    expires_at: Optional[str] = None
+    valid_for_seconds: Optional[int] = None
     supersedes_packet_id: Optional[str] = None
     not_business_completion: bool = True
 
@@ -40,7 +43,11 @@ class StartupPacketValidationResult:
     evidence_refs: list[str] = field(default_factory=list)
 
 
-def validate_startup_packet(packet: StartupPacketRecord) -> StartupPacketValidationResult:
+def validate_startup_packet(
+    packet: StartupPacketRecord,
+    *,
+    now_at: Optional[str] = None,
+) -> StartupPacketValidationResult:
     errors: list[str] = []
     if not packet.active_objective:
         errors.append("MISSING_ACTIVE_OBJECTIVE")
@@ -56,6 +63,7 @@ def validate_startup_packet(packet: StartupPacketRecord) -> StartupPacketValidat
         errors.append("MISSING_SOURCE_AUTHORITY")
     if not packet.stop_conditions:
         errors.append("MISSING_STOP_CONDITIONS")
+    errors.extend(_freshness_errors(packet, now_at=now_at))
     return StartupPacketValidationResult(valid=not errors, errors=errors)
 
 
@@ -63,9 +71,10 @@ def verify_startup_packet_readiness(
     packet: StartupPacketRecord,
     *,
     readiness_evidence_refs: list[str],
+    now_at: Optional[str] = None,
 ) -> StartupPacketValidationResult:
     """Return readiness only when packet validation and external evidence pass."""
-    result = validate_startup_packet(packet)
+    result = validate_startup_packet(packet, now_at=now_at)
     errors = list(result.errors)
     if not readiness_evidence_refs:
         errors.append("MISSING_READINESS_EVIDENCE")
@@ -84,3 +93,37 @@ def _dedupe(errors: list[str]) -> list[str]:
         if error not in deduped:
             deduped.append(error)
     return deduped
+
+
+def _freshness_errors(packet: StartupPacketRecord, *, now_at: Optional[str]) -> list[str]:
+    errors: list[str] = []
+    if not packet.expires_at and packet.valid_for_seconds is None:
+        return ["STARTUP_PACKET_FRESHNESS_UNDECLARED"]
+    now_dt = _parse_iso(now_at) if now_at else datetime.now(timezone.utc)
+    if packet.expires_at:
+        expires_dt = _parse_iso(packet.expires_at)
+        if expires_dt is None:
+            errors.append("STARTUP_PACKET_EXPIRES_AT_INVALID")
+        elif expires_dt <= now_dt:
+            errors.append("STARTUP_PACKET_EXPIRED")
+    if packet.valid_for_seconds is not None:
+        if packet.valid_for_seconds <= 0:
+            errors.append("STARTUP_PACKET_VALID_FOR_INVALID")
+        issued_dt = _parse_iso(packet.issued_at)
+        if issued_dt is None:
+            errors.append("STARTUP_PACKET_ISSUED_AT_INVALID")
+        elif packet.valid_for_seconds > 0 and issued_dt + timedelta(seconds=packet.valid_for_seconds) <= now_dt:
+            errors.append("STARTUP_PACKET_EXPIRED")
+    return _dedupe(errors)
+
+
+def _parse_iso(value: Optional[str]) -> Optional[datetime]:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed

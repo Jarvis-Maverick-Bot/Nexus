@@ -46,6 +46,7 @@ class AgentRegistryRecord:
     trust_material_ref: str
     startup_packet_ref: Optional[str]
     readiness_evidence_ref: Optional[str]
+    startup_packet_expires_at: Optional[str]
     created_at: str
     updated_at: str
     privacy_scopes: list[str] = field(default_factory=lambda: ["project"])
@@ -171,6 +172,7 @@ class AgentRegistry:
                 required_authority_scope=required_authority_scope,
                 required_privacy_scope=required_privacy_scope,
                 allowed_task_boundary=allowed_task_boundary,
+                now_at=now_at,
             )
             if reasons:
                 rejected[record.agent_id] = reasons
@@ -230,6 +232,8 @@ def validate_agent_registry_record(record: AgentRegistryRecord) -> list[str]:
         errors.append("MISSING_STARTUP_PACKET_REF")
     if record.initialization_status == "ready" and not record.readiness_evidence_ref:
         errors.append("MISSING_READINESS_EVIDENCE_REF")
+    if record.initialization_status == "ready" and not record.startup_packet_expires_at:
+        errors.append("MISSING_STARTUP_PACKET_FRESHNESS")
     if record.heartbeat_ttl_seconds <= 0:
         errors.append("INVALID_HEARTBEAT_TTL")
     return errors
@@ -242,6 +246,7 @@ def dispatch_ineligibility_reasons(
     required_authority_scope: str,
     required_privacy_scope: str,
     allowed_task_boundary: str,
+    now_at: Optional[str] = None,
 ) -> list[str]:
     reasons: list[str] = []
     if record.registry_status != "active":
@@ -250,6 +255,12 @@ def dispatch_ineligibility_reasons(
         reasons.append(f"INITIALIZATION_NOT_READY: {record.initialization_status}")
     if not record.startup_packet_ref or not record.readiness_evidence_ref:
         reasons.append("READINESS_EVIDENCE_MISSING")
+    if not record.startup_packet_expires_at:
+        reasons.append("STARTUP_PACKET_FRESHNESS_UNDECLARED")
+    elif now_at and _parse_iso(record.startup_packet_expires_at) <= _parse_iso(now_at):
+        reasons.append("STARTUP_PACKET_EXPIRED")
+    if record.readiness_blocker:
+        reasons.append(f"READINESS_BLOCKED: {record.readiness_blocker}")
     if record.presence_state != "idle":
         reasons.append(f"PRESENCE_NOT_IDLE: {record.presence_state}")
     if not record.accepting_new_work:

@@ -21,13 +21,17 @@ def _packet(**overrides):
         "reply_format_ref": "report://thunder",
         "stop_conditions": ["ambiguous authority", "scope breach"],
         "issued_at": "2026-05-18T00:00:00+00:00",
+        "valid_for_seconds": 3600,
     }
     data.update(overrides)
     return StartupPacketRecord(**data)
 
 
 def test_startup_packet_requires_current_source_and_stop_conditions():
-    result = validate_startup_packet(_packet(active_objective="", source_authority_refs=[], stop_conditions=[]))
+    result = validate_startup_packet(
+        _packet(active_objective="", source_authority_refs=[], stop_conditions=[]),
+        now_at="2026-05-18T00:10:00+00:00",
+    )
 
     assert result.valid is False
     assert "MISSING_ACTIVE_OBJECTIVE" in result.errors
@@ -38,10 +42,56 @@ def test_startup_packet_requires_current_source_and_stop_conditions():
 def test_startup_packet_ack_alone_is_not_readiness():
     packet = _packet()
 
-    no_evidence = verify_startup_packet_readiness(packet, readiness_evidence_refs=[])
-    ready = verify_startup_packet_readiness(packet, readiness_evidence_refs=["evidence://readiness/jarvis"])
+    no_evidence = verify_startup_packet_readiness(
+        packet,
+        readiness_evidence_refs=[],
+        now_at="2026-05-18T00:10:00+00:00",
+    )
+    ready = verify_startup_packet_readiness(
+        packet,
+        readiness_evidence_refs=["evidence://readiness/jarvis"],
+        now_at="2026-05-18T00:10:00+00:00",
+    )
 
     assert no_evidence.valid is False
     assert "MISSING_READINESS_EVIDENCE" in no_evidence.errors
     assert ready.valid is True
     assert ready.evidence_refs == ["evidence://readiness/jarvis"]
+
+
+def test_fresh_startup_packet_with_readiness_evidence_is_valid():
+    packet = _packet(expires_at="2026-05-18T01:00:00+00:00", valid_for_seconds=None)
+
+    result = verify_startup_packet_readiness(
+        packet,
+        readiness_evidence_refs=["evidence://readiness/jarvis"],
+        now_at="2026-05-18T00:30:00+00:00",
+    )
+
+    assert result.valid is True
+    assert result.errors == []
+
+
+def test_expired_startup_packet_is_invalid():
+    expired_by_expires_at = verify_startup_packet_readiness(
+        _packet(expires_at="2026-05-18T00:30:00+00:00", valid_for_seconds=None),
+        readiness_evidence_refs=["evidence://readiness/jarvis"],
+        now_at="2026-05-18T00:30:01+00:00",
+    )
+    expired_by_ttl = verify_startup_packet_readiness(
+        _packet(valid_for_seconds=60),
+        readiness_evidence_refs=["evidence://readiness/jarvis"],
+        now_at="2026-05-18T00:02:00+00:00",
+    )
+    no_freshness = verify_startup_packet_readiness(
+        _packet(valid_for_seconds=None, expires_at=None),
+        readiness_evidence_refs=["evidence://readiness/jarvis"],
+        now_at="2026-05-18T00:02:00+00:00",
+    )
+
+    assert expired_by_expires_at.valid is False
+    assert expired_by_ttl.valid is False
+    assert no_freshness.valid is False
+    assert "STARTUP_PACKET_EXPIRED" in expired_by_expires_at.errors
+    assert "STARTUP_PACKET_EXPIRED" in expired_by_ttl.errors
+    assert "STARTUP_PACKET_FRESHNESS_UNDECLARED" in no_freshness.errors
