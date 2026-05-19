@@ -92,6 +92,28 @@ class AgentRegistryStore(Protocol):
     ) -> AgentRegistryWriteResult:
         ...
 
+    def update_presence(
+        self,
+        agent_id: str,
+        *,
+        runtime_instance_id: str,
+        presence_state: str,
+        heartbeat_at: str,
+        heartbeat_sequence: Optional[int],
+        expected_revision: int,
+        load_score: float = 0.0,
+        accepting_new_work: bool = True,
+        evidence_refs: Optional[list[str]] = None,
+        health_summary_ref: Optional[str] = None,
+        event_type: str = "heartbeat_accepted",
+        now_at: Optional[str] = None,
+        allow_lifecycle_downgrade: bool = False,
+    ) -> AgentRegistryWriteResult:
+        ...
+
+    def get_heartbeat_sequence(self, agent_id: str) -> Optional[int]:
+        ...
+
     def list_events(self) -> list[AgentRegistryEvent]:
         ...
 
@@ -294,6 +316,140 @@ class FakeAgentRegistryStore:
             event=event,
         )
 
+    def update_presence(
+        self,
+        agent_id: str,
+        *,
+        runtime_instance_id: str,
+        presence_state: str,
+        heartbeat_at: str,
+        heartbeat_sequence: Optional[int],
+        expected_revision: int,
+        load_score: float = 0.0,
+        accepting_new_work: bool = True,
+        evidence_refs: Optional[list[str]] = None,
+        health_summary_ref: Optional[str] = None,
+        event_type: str = "heartbeat_accepted",
+        now_at: Optional[str] = None,
+        allow_lifecycle_downgrade: bool = False,
+    ) -> AgentRegistryWriteResult:
+        store_errors = self._store_preflight_errors()
+        if store_errors:
+            return self._rejected_write(
+                event_type="heartbeat_rejected",
+                agent_id=agent_id,
+                runtime_instance_id=runtime_instance_id,
+                revision=None,
+                errors=store_errors,
+            )
+        row = self._rows.get(agent_id)
+        if row is None:
+            return self._rejected_write(
+                event_type="heartbeat_rejected",
+                agent_id=agent_id,
+                runtime_instance_id=runtime_instance_id,
+                revision=None,
+                errors=["REGISTRY_RECORD_NOT_FOUND"],
+            )
+        if row.get("revision") != expected_revision:
+            return self._rejected_write(
+                event_type="heartbeat_rejected",
+                agent_id=agent_id,
+                runtime_instance_id=runtime_instance_id,
+                revision=row.get("revision"),
+                errors=["STALE_REVISION"],
+            )
+        existing_read = self._row_to_record(row, now_at=now_at)
+        if not existing_read.accepted or existing_read.record is None:
+            return self._rejected_write(
+                event_type="heartbeat_rejected",
+                agent_id=agent_id,
+                runtime_instance_id=runtime_instance_id,
+                revision=row.get("revision"),
+                errors=existing_read.errors,
+            )
+        record = existing_read.record
+        if record.runtime_instance_id != runtime_instance_id:
+            return self._rejected_write(
+                event_type="heartbeat_rejected",
+                agent_id=agent_id,
+                runtime_instance_id=runtime_instance_id,
+                revision=row.get("revision"),
+                errors=["RUNTIME_INSTANCE_MISMATCH"],
+            )
+        if record.registry_status in {"suspended", "revoked"}:
+            return self._rejected_write(
+                event_type="heartbeat_rejected",
+                agent_id=agent_id,
+                runtime_instance_id=runtime_instance_id,
+                revision=row.get("revision"),
+                errors=[f"REGISTRY_NOT_ACTIVE: {record.registry_status}"],
+            )
+        previous_sequence = row.get("heartbeat_sequence")
+        if heartbeat_sequence is not None and previous_sequence is not None and heartbeat_sequence <= previous_sequence:
+            return self._rejected_write(
+                event_type="heartbeat_rejected",
+                agent_id=agent_id,
+                runtime_instance_id=runtime_instance_id,
+                revision=row.get("revision"),
+                errors=["STALE_HEARTBEAT_SEQUENCE"],
+            )
+        if not 0 <= load_score <= 1:
+            return self._rejected_write(
+                event_type="heartbeat_rejected",
+                agent_id=agent_id,
+                runtime_instance_id=runtime_instance_id,
+                revision=row.get("revision"),
+                errors=["INVALID_HEARTBEAT_LOAD_SCORE"],
+            )
+        if presence_state not in {"online", "idle", "busy", "degraded", "draining", "offline", "stale"}:
+            return self._rejected_write(
+                event_type="heartbeat_rejected",
+                agent_id=agent_id,
+                runtime_instance_id=runtime_instance_id,
+                revision=row.get("revision"),
+                errors=[f"INVALID_PRESENCE_STATE: {presence_state}"],
+            )
+
+        updated = deepcopy(record)
+        updated.presence_state = presence_state
+        updated.last_heartbeat_at = heartbeat_at
+        updated.load_score = load_score
+        updated.accepting_new_work = accepting_new_work and presence_state == "idle"
+        updated.updated_at = heartbeat_at
+        revision = expected_revision + 1
+        updated_row = record_to_normalized_row(updated, revision=revision, quarantined=bool(row.get("quarantined", False)))
+        updated_row["heartbeat_sequence"] = heartbeat_sequence if heartbeat_sequence is not None else previous_sequence
+        updated_row["heartbeat_evidence_refs"] = list(evidence_refs or [])
+        updated_row["health_summary_ref"] = health_summary_ref
+        self._rows[agent_id] = updated_row
+        event = self._append_event(
+            event_type=event_type,
+            agent_id=agent_id,
+            runtime_instance_id=runtime_instance_id,
+            revision=revision,
+            payload={
+                "presence_state": presence_state,
+                "heartbeat_sequence": updated_row["heartbeat_sequence"],
+                "heartbeat_at": heartbeat_at,
+                "accepting_new_work": updated.accepting_new_work,
+                "health_summary_ref": health_summary_ref,
+            },
+        )
+        return AgentRegistryWriteResult(
+            accepted=True,
+            record=updated,
+            revision=revision,
+            event=event,
+        )
+
+    def get_heartbeat_sequence(self, agent_id: str) -> Optional[int]:
+        row = self._rows.get(agent_id)
+        if row is None:
+            return None
+        sequence = row.get("heartbeat_sequence")
+        return sequence if isinstance(sequence, int) else None
+
     def list_events(self) -> list[AgentRegistryEvent]:
         return list(self._events)
 
@@ -431,6 +587,9 @@ def record_to_normalized_row(
         "payload_schema_version": REGISTRY_RECORD_SCHEMA_VERSION,
         "payload": payload,
         "quarantined": quarantined,
+        "heartbeat_sequence": None,
+        "heartbeat_evidence_refs": [],
+        "health_summary_ref": None,
     }
 
 
@@ -455,6 +614,9 @@ def normalized_columns(row: dict[str, Any]) -> dict[str, Any]:
         "revision",
         "payload_schema_version",
         "quarantined",
+        "heartbeat_sequence",
+        "heartbeat_evidence_refs",
+        "health_summary_ref",
     }
     return {key: deepcopy(row.get(key)) for key in sorted(keys)}
 

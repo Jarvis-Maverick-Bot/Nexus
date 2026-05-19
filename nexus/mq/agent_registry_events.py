@@ -10,6 +10,10 @@ import uuid
 
 REGISTRY_EVENT_SCHEMA_VERSION = "4.19.registry.event.v1"
 REGISTRY_EVENT_TYPES = {
+    "heartbeat_accepted",
+    "heartbeat_offline",
+    "heartbeat_rejected",
+    "heartbeat_stale",
     "registry_record_upserted",
     "registry_record_unchanged",
     "registry_record_rejected",

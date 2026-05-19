@@ -34,6 +34,19 @@ EVIDENCE_FIELDS = {
     "timestamp",
     "checksum_ref",
 }
+HEARTBEAT_FIELDS = {
+    "agent_id",
+    "supervisor_state",
+    "presence_state",
+    "last_heartbeat_at",
+    "heartbeat_ttl_seconds",
+    "heartbeat_sequence",
+    "stale_at",
+    "offline_at",
+    "health_summary_ref",
+    "heartbeat_evidence_ref",
+    "projection_status",
+}
 
 
 @dataclass
@@ -71,7 +84,9 @@ def build_agent_access_read_model(
     adapter_health: list[dict[str, Any]],
     exceptions: list[dict[str, Any]],
     evidence: list[dict[str, Any]],
+    heartbeat_projection: dict[str, dict[str, Any]] | None = None,
 ) -> AgentAccessReadModel:
+    heartbeat_projection = heartbeat_projection or {}
     return AgentAccessReadModel(
         agent_roster=[
             {
@@ -104,6 +119,7 @@ def build_agent_access_read_model(
                 "ttl_seconds": agent.heartbeat_ttl_seconds,
                 "load_score": agent.load_score,
                 "accepting_new_work": agent.accepting_new_work,
+                **_heartbeat_projection_for(agent.agent_id, heartbeat_projection),
             }
             for agent in agents
         ],
@@ -153,3 +169,14 @@ def _sanitize_records(records: list[dict[str, Any]], allowed_fields: set[str]) -
         filtered = {key: value for key, value in record.items() if key in allowed_fields}
         sanitized.append(redact_payload(filtered))
     return sanitized
+
+
+def _heartbeat_projection_for(agent_id: str, heartbeat_projection: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    raw = heartbeat_projection.get(agent_id)
+    if not isinstance(raw, dict):
+        return {}
+    sanitized = _sanitize_records([raw], HEARTBEAT_FIELDS)
+    if not sanitized:
+        return {}
+    sanitized[0].pop("agent_id", None)
+    return sanitized[0]
