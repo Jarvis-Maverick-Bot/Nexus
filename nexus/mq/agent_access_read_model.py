@@ -47,6 +47,32 @@ HEARTBEAT_FIELDS = {
     "heartbeat_evidence_ref",
     "projection_status",
 }
+DISPATCH_PROJECTION_FIELDS = {
+    "projection_type",
+    "decision_status",
+    "request_id",
+    "correlation_id",
+    "assignment_id",
+    "target_agent_id",
+    "target_runtime_instance_id",
+    "registry_revision_seen",
+    "heartbeat_timestamp_observed",
+    "startup_packet_ref",
+    "startup_packet_expires_at",
+    "readiness_evidence_ref",
+    "required_capability",
+    "required_authority_scope",
+    "required_privacy_scope",
+    "allowed_task_boundary",
+    "assignment_kind",
+    "business_execution_allowed",
+    "rejection_codes",
+    "eligible_agent_ids",
+    "expires_at",
+    "evidence_refs",
+    "read_only",
+    "not_business_completion",
+}
 
 
 @dataclass
@@ -85,8 +111,10 @@ def build_agent_access_read_model(
     exceptions: list[dict[str, Any]],
     evidence: list[dict[str, Any]],
     heartbeat_projection: dict[str, dict[str, Any]] | None = None,
+    dispatch_projection: list[dict[str, Any]] | None = None,
 ) -> AgentAccessReadModel:
     heartbeat_projection = heartbeat_projection or {}
+    dispatch_projection = dispatch_projection or []
     return AgentAccessReadModel(
         agent_roster=[
             {
@@ -124,16 +152,19 @@ def build_agent_access_read_model(
             for agent in agents
         ],
         dispatch=[
-            {
-                "assignment_id": assignment.assignment_id,
-                "work_ref": assignment.work_ref,
-                "required_capability": assignment.required_capability,
-                "assigned_agent": assignment.assigned_agent_id,
-                "state": assignment.dispatch_state,
-                "timeout_at": assignment.timeout_at,
-                "reallocation_count": assignment.reallocation_count,
-            }
-            for assignment in assignments
+            *[
+                {
+                    "assignment_id": assignment.assignment_id,
+                    "work_ref": assignment.work_ref,
+                    "required_capability": assignment.required_capability,
+                    "assigned_agent": assignment.assigned_agent_id,
+                    "state": assignment.dispatch_state,
+                    "timeout_at": assignment.timeout_at,
+                    "reallocation_count": assignment.reallocation_count,
+                }
+                for assignment in assignments
+            ],
+            *_sanitize_records(dispatch_projection, DISPATCH_PROJECTION_FIELDS),
         ],
         outbox=[
             {
@@ -167,7 +198,7 @@ def _sanitize_records(records: list[dict[str, Any]], allowed_fields: set[str]) -
         if not isinstance(record, dict):
             continue
         filtered = {key: value for key, value in record.items() if key in allowed_fields}
-        sanitized.append(redact_payload(filtered))
+        sanitized.append(_redact_value(redact_payload(filtered)))
     return sanitized
 
 
@@ -180,3 +211,33 @@ def _heartbeat_projection_for(agent_id: str, heartbeat_projection: dict[str, dic
         return {}
     sanitized[0].pop("agent_id", None)
     return sanitized[0]
+
+
+def _redact_value(value: Any) -> Any:
+    if isinstance(value, dict):
+        redacted: dict[str, Any] = {}
+        for key, item in value.items():
+            if _is_secret_key(str(key)):
+                redacted[key] = "[REDACTED]"
+            else:
+                redacted[key] = _redact_value(item)
+        return redacted
+    if isinstance(value, list):
+        return [_redact_value(item) for item in value]
+    if isinstance(value, str) and _looks_secret(value):
+        return "[REDACTED]"
+    return value
+
+
+def _is_secret_key(key: str) -> bool:
+    lowered = key.lower()
+    if lowered.endswith("_ref") or lowered.endswith("_refs"):
+        return False
+    return any(marker in lowered for marker in ("authorization", "credential", "password", "private_key", "secret", "token"))
+
+
+def _looks_secret(value: str) -> bool:
+    lowered = value.lower()
+    return lowered.startswith("sk-") or any(
+        marker in lowered for marker in ("authorization:", "bearer ", "password=", "secret=", "token=")
+    )
