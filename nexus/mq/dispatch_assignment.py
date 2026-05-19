@@ -9,7 +9,7 @@ from typing import Any, Optional
 
 from nexus.mq.agent_registry import AgentRegistryRecord
 from nexus.mq.agent_registry_events import secret_material_errors
-from nexus.mq.dispatch_request import DispatchRequest
+from nexus.mq.dispatch_request import BUSINESS_ASSIGNMENT_KIND, DispatchRequest
 
 
 DISPATCH_ASSIGNMENT_SCHEMA_VERSION = "4.19.assignment.v1"
@@ -20,6 +20,11 @@ INERT_ASSIGNMENT_STATES = {
     ASSIGNMENT_CANDIDATE_STATE,
     ASSIGNMENT_REJECTED_STATE,
     ASSIGNMENT_EXPIRED_STATE,
+}
+INERT_ASSIGNMENT_KINDS = {
+    "diagnostic",
+    "non_business_probe",
+    "readiness_probe",
 }
 
 
@@ -119,15 +124,28 @@ def validate_assignment_candidate(candidate: DispatchAssignmentCandidate) -> Ass
         "idempotency_key",
         "request_id",
         "correlation_id",
+        "work_ref",
         "target_agent_id",
         "target_runtime_instance_id",
+        "heartbeat_timestamp_observed",
         "startup_packet_ref",
         "startup_packet_expires_at",
         "readiness_evidence_ref",
+        "required_capability",
+        "required_authority_scope",
+        "required_privacy_scope",
+        "allowed_task_boundary",
+        "assignment_kind",
         "expires_at",
     ]:
         if not getattr(candidate, field_name):
             errors.append(f"MISSING_{field_name.upper()}")
+    if not candidate.no_go_scope:
+        errors.append("MISSING_NO_GO_SCOPE")
+    if candidate.assignment_kind == BUSINESS_ASSIGNMENT_KIND:
+        errors.append("BUSINESS_DISPATCH_NOT_AUTHORIZED")
+    elif candidate.assignment_kind and candidate.assignment_kind not in INERT_ASSIGNMENT_KINDS:
+        errors.append(f"UNSUPPORTED_INERT_ASSIGNMENT_KIND: {candidate.assignment_kind}")
     if candidate.registry_revision_seen <= 0:
         errors.append("INVALID_REGISTRY_REVISION_SEEN")
     errors.extend(secret_material_errors(candidate.to_dict(), path="assignment_candidate"))

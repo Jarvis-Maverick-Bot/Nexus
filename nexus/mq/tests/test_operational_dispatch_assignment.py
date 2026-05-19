@@ -1,5 +1,7 @@
 from dataclasses import replace
 
+import pytest
+
 from nexus.mq.agent_registry_service import AgentRegistryService
 from nexus.mq.agent_registry_store import FakeAgentRegistryStore
 from nexus.mq.dispatch_assignment import validate_assignment_candidate
@@ -71,6 +73,44 @@ def test_assignment_candidate_cannot_mark_business_completion_or_allow_business_
     assert "ASSIGNMENT_CANDIDATE_CANNOT_BE_BUSINESS_COMPLETION" in invalid_completion.errors
     assert "ASSIGNMENT_CANDIDATE_CANNOT_ALLOW_BUSINESS_EXECUTION" in invalid_business_execution.errors
     assert "UNSUPPORTED_INERT_ASSIGNMENT_STATE: completed" in invalid_live_state.errors
+
+
+@pytest.mark.parametrize(
+    ("field_name", "expected_error"),
+    [
+        ("work_ref", "MISSING_WORK_REF"),
+        ("heartbeat_timestamp_observed", "MISSING_HEARTBEAT_TIMESTAMP_OBSERVED"),
+        ("required_capability", "MISSING_REQUIRED_CAPABILITY"),
+        ("required_authority_scope", "MISSING_REQUIRED_AUTHORITY_SCOPE"),
+        ("required_privacy_scope", "MISSING_REQUIRED_PRIVACY_SCOPE"),
+        ("allowed_task_boundary", "MISSING_ALLOWED_TASK_BOUNDARY"),
+        ("assignment_kind", "MISSING_ASSIGNMENT_KIND"),
+    ],
+)
+def test_assignment_candidate_validator_requires_wbs_envelope_string_fields(field_name, expected_error):
+    candidate = _candidate()
+
+    result = validate_assignment_candidate(replace(candidate, **{field_name: ""}))
+
+    assert result.valid is False
+    assert expected_error in result.errors
+
+
+def test_assignment_candidate_validator_requires_no_go_scope():
+    result = validate_assignment_candidate(replace(_candidate(), no_go_scope=[]))
+
+    assert result.valid is False
+    assert "MISSING_NO_GO_SCOPE" in result.errors
+
+
+def test_assignment_candidate_validator_rejects_business_or_unknown_assignment_kind():
+    business = validate_assignment_candidate(replace(_candidate(), assignment_kind="business_task"))
+    unknown = validate_assignment_candidate(replace(_candidate(), assignment_kind="live_dispatch"))
+
+    assert business.valid is False
+    assert "BUSINESS_DISPATCH_NOT_AUTHORIZED" in business.errors
+    assert unknown.valid is False
+    assert "UNSUPPORTED_INERT_ASSIGNMENT_KIND: live_dispatch" in unknown.errors
 
 
 def test_assignment_candidate_generation_is_deterministic_for_same_registry_snapshot():

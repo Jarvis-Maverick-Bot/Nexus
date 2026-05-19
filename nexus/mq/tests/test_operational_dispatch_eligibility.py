@@ -84,6 +84,40 @@ def test_dispatch_policy_default_fails_closed_before_candidate_creation():
     assert decision.candidate is None
 
 
+def test_disabled_dispatch_does_not_load_or_emit_registry_failure_event():
+    store = FakeAgentRegistryStore()
+    store.corrupt_store_for_test()
+    service = AgentRegistryService(store)
+
+    decision = evaluate_dispatch_from_registry_service(
+        _request(),
+        service,
+        policy=DispatchPolicy(dispatch_enabled=False),
+        now_at=EVAL_NOW,
+    )
+
+    assert decision.accepted is False
+    assert decision.errors == [DispatchRejectionCode.DISPATCH_DISABLED]
+    assert store.list_events() == []
+
+
+def test_business_request_failure_does_not_load_or_emit_registry_failure_event():
+    store = FakeAgentRegistryStore()
+    store.corrupt_store_for_test()
+    service = AgentRegistryService(store)
+
+    decision = evaluate_dispatch_from_registry_service(
+        _request(assignment_kind="business_task"),
+        service,
+        policy=_enabled_policy(),
+        now_at=EVAL_NOW,
+    )
+
+    assert decision.accepted is False
+    assert decision.errors == [DispatchRejectionCode.BUSINESS_DISPATCH_NOT_AUTHORIZED]
+    assert store.list_events() == []
+
+
 def test_cache_only_registry_truth_fails_closed():
     authoritative = FakeAgentRegistryStore()
     authoritative.upsert_record(_record(), now_at=NOW)

@@ -86,6 +86,9 @@ def evaluate_dispatch_from_registry_service(
     now_at: str,
     blocking_anomalies: Optional[dict[str, list[str]]] = None,
 ) -> DispatchEligibilityDecision:
+    preflight_errors = _pre_registry_errors(request, policy=policy, now_at=now_at)
+    if preflight_errors:
+        return _blocked(preflight_errors)
     registry = registry_service.load_registry_records(now_at=now_at)
     return evaluate_dispatch_eligibility(
         request,
@@ -104,12 +107,9 @@ def evaluate_dispatch_eligibility(
     now_at: str,
     blocking_anomalies: Optional[dict[str, list[str]]] = None,
 ) -> DispatchEligibilityDecision:
-    if not policy.dispatch_enabled:
-        return _blocked([DispatchRejectionCode.DISPATCH_DISABLED])
-
-    request_errors = _request_errors(request, policy=policy, now_at=now_at)
-    if request_errors:
-        return _blocked(request_errors)
+    preflight_errors = _pre_registry_errors(request, policy=policy, now_at=now_at)
+    if preflight_errors:
+        return _blocked(preflight_errors)
 
     registry_errors = _registry_load_errors(registry)
     if registry_errors:
@@ -234,6 +234,12 @@ def _request_errors(request: DispatchRequest, *, policy: DispatchPolicy, now_at:
     ):
         errors.append(DispatchRejectionCode.BUSINESS_DISPATCH_NOT_AUTHORIZED)
     return _dedupe(errors)
+
+
+def _pre_registry_errors(request: DispatchRequest, *, policy: DispatchPolicy, now_at: str) -> list[str]:
+    if not policy.dispatch_enabled:
+        return [DispatchRejectionCode.DISPATCH_DISABLED]
+    return _request_errors(request, policy=policy, now_at=now_at)
 
 
 def _registry_load_errors(registry: AgentRegistryLoadResult) -> list[str]:
