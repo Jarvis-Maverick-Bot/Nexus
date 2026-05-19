@@ -74,6 +74,8 @@ def run_private_diagnostic_invocation(
     errors.extend(package_errors)
     allowlist = validate_private_invocation_allowlist(contract, invocation_request)
     errors.extend(allowlist.errors)
+    if invocation_request.task_package_hash != package.package_hash:
+        errors.append("PRIVATE_INVOCATION_TASK_PACKAGE_HASH_MISMATCH")
     if errors or allowlist.invocation is None:
         return PrivateDiagnosticRunResult(accepted=False, errors=_dedupe(errors))
 

@@ -80,6 +80,22 @@ def test_private_diagnostic_runner_rejects_unallowlisted_invocation_before_resul
     assert result.result_candidate is None
 
 
+def test_private_diagnostic_runner_rejects_mismatched_task_package_hash():
+    package = _package()
+    result = run_private_diagnostic_invocation(
+        _contract(),
+        package,
+        _invocation(task_package_hash="sha256:wrong-package-hash"),
+        _prepared_result(),
+        now_at=NOW,
+    )
+
+    assert result.accepted is False
+    assert "PRIVATE_INVOCATION_TASK_PACKAGE_HASH_MISMATCH" in result.errors
+    assert result.invocation_record is None
+    assert result.result_candidate is None
+
+
 def test_private_diagnostic_runner_does_not_treat_cli_success_as_completion():
     package = _package()
     result = run_private_diagnostic_invocation(
