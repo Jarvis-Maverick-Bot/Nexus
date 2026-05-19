@@ -413,7 +413,8 @@ class FakeAgentRegistryStore:
 
         updated = deepcopy(record)
         updated.presence_state = presence_state
-        updated.last_heartbeat_at = heartbeat_at
+        if not allow_lifecycle_downgrade:
+            updated.last_heartbeat_at = heartbeat_at
         updated.load_score = load_score
         updated.accepting_new_work = accepting_new_work and presence_state == "idle"
         updated.updated_at = heartbeat_at
@@ -431,7 +432,8 @@ class FakeAgentRegistryStore:
             payload={
                 "presence_state": presence_state,
                 "heartbeat_sequence": updated_row["heartbeat_sequence"],
-                "heartbeat_at": heartbeat_at,
+                "heartbeat_at": updated.last_heartbeat_at,
+                "transitioned_at": heartbeat_at if allow_lifecycle_downgrade else None,
                 "accepting_new_work": updated.accepting_new_work,
                 "health_summary_ref": health_summary_ref,
             },

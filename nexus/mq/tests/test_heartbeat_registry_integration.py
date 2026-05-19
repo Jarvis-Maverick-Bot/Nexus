@@ -57,20 +57,26 @@ def test_runtime_mismatch_rejects_presence_update():
 
 
 def test_ttl_expiry_marks_stale_then_offline_and_blocks_new_work():
+    original_heartbeat_at = "2026-05-19T00:00:00+00:00"
     service, _store = _service_with_record(
-        _record(last_heartbeat_at="2026-05-19T00:00:00+00:00", heartbeat_ttl_seconds=10)
+        _record(last_heartbeat_at=original_heartbeat_at, heartbeat_ttl_seconds=10)
     )
     evaluator = HeartbeatTtlEvaluator(service, HeartbeatPolicy(stale_to_offline_grace_seconds=180))
 
     stale = evaluator.evaluate_agent("jarvis", now_at="2026-05-19T00:00:15+00:00")
-    offline = evaluator.evaluate_agent("jarvis", now_at="2026-05-19T00:03:30+00:00")
+    after_stale = service.read_registry_record("jarvis", now_at="2026-05-19T00:00:15+00:00")
+    offline = evaluator.evaluate_agent("jarvis", now_at="2026-05-19T00:03:12+00:00")
 
     assert stale.transitioned is True
     assert stale.record.presence_state == "stale"
     assert stale.record.accepting_new_work is False
+    assert stale.record.last_heartbeat_at == original_heartbeat_at
+    assert stale.record.updated_at == "2026-05-19T00:00:15+00:00"
+    assert after_stale.record.last_heartbeat_at == original_heartbeat_at
     assert offline.transitioned is True
     assert offline.record.presence_state == "offline"
     assert offline.record.accepting_new_work is False
+    assert offline.record.last_heartbeat_at == original_heartbeat_at
 
 
 def test_drain_sets_accepting_new_work_false():
