@@ -55,4 +55,3 @@ class AgentRegistryService:
             expected_revision=expected_revision,
             now_at=now_at,
         )
-
