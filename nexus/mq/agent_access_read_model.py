@@ -73,6 +73,30 @@ DISPATCH_PROJECTION_FIELDS = {
     "read_only",
     "not_business_completion",
 }
+PRIVATE_AGENT_PROJECTION_FIELDS = {
+    "projection_type",
+    "contract_id",
+    "contract_revision",
+    "contract_status",
+    "trust_class",
+    "adapter_agent_id",
+    "adapter_runtime_instance_id",
+    "diagnostic_only",
+    "eligibility_status",
+    "invocation_status",
+    "task_package_id",
+    "task_package_hash",
+    "result_id",
+    "result_state",
+    "evidence_status",
+    "safety_status",
+    "governed_status",
+    "business_state_committed",
+    "rejection_codes",
+    "evidence_refs",
+    "read_only",
+    "not_business_completion",
+}
 
 
 @dataclass
@@ -85,6 +109,7 @@ class AgentAccessReadModel:
     adapter_health: list[dict[str, Any]]
     exceptions: list[dict[str, Any]]
     evidence: list[dict[str, Any]]
+    private_agents: list[dict[str, Any]] = field(default_factory=list)
     status_families: dict[str, str] = field(default_factory=lambda: {
         "ack": "durable_intake_only",
         "progress": "governed_evidence_state_commit_required",
@@ -112,9 +137,11 @@ def build_agent_access_read_model(
     evidence: list[dict[str, Any]],
     heartbeat_projection: dict[str, dict[str, Any]] | None = None,
     dispatch_projection: list[dict[str, Any]] | None = None,
+    private_agent_projection: list[dict[str, Any]] | None = None,
 ) -> AgentAccessReadModel:
     heartbeat_projection = heartbeat_projection or {}
     dispatch_projection = dispatch_projection or []
+    private_agent_projection = private_agent_projection or []
     return AgentAccessReadModel(
         agent_roster=[
             {
@@ -180,6 +207,7 @@ def build_agent_access_read_model(
         adapter_health=_sanitize_records(adapter_health, ADAPTER_HEALTH_FIELDS),
         exceptions=_sanitize_records(exceptions, EXCEPTION_FIELDS),
         evidence=_sanitize_records(evidence, EVIDENCE_FIELDS),
+        private_agents=_sanitize_records(private_agent_projection, PRIVATE_AGENT_PROJECTION_FIELDS),
     )
 
 
