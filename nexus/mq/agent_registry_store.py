@@ -386,7 +386,12 @@ class FakeAgentRegistryStore:
                 errors=[f"REGISTRY_NOT_ACTIVE: {record.registry_status}"],
             )
         previous_sequence = row.get("heartbeat_sequence")
-        if heartbeat_sequence is not None and previous_sequence is not None and heartbeat_sequence <= previous_sequence:
+        if (
+            not allow_lifecycle_downgrade
+            and heartbeat_sequence is not None
+            and previous_sequence is not None
+            and heartbeat_sequence <= previous_sequence
+        ):
             return self._rejected_write(
                 event_type="heartbeat_rejected",
                 agent_id=agent_id,
