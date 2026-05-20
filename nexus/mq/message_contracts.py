@@ -2,21 +2,25 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field, is_dataclass
+from dataclasses import asdict, dataclass, field, fields as dataclass_fields, is_dataclass
 from datetime import datetime, timezone
 from typing import Any, Optional
 import uuid
 
 from nexus.mq.message_families import MessageFamilyDefinition, get_message_family
 from nexus.mq.payloads import (
+    AnomalyMessagePayload,
     BusinessMessagePayload,
+    CallbackMessagePayload,
     CommandMessagePayload,
     DeadLetterMessagePayload,
     EvidenceWriteMessagePayload,
     FeedbackMessagePayload,
     GoalDrivenCommandPayload,
+    HandoffMessagePayload,
     PayloadContract,
     ReviewTaskPayload,
+    ResultMessagePayload,
     RetryMessagePayload,
     StateTransitionMessagePayload,
     TimeoutMessagePayload,
@@ -32,6 +36,10 @@ PAYLOAD_TYPE_BY_MESSAGE_TYPE = {
     "Review_Task": ReviewTaskPayload,
     "Feedback_Message": FeedbackMessagePayload,
     "Business_Message": BusinessMessagePayload,
+    "Result_Message": ResultMessagePayload,
+    "Callback_Message": CallbackMessagePayload,
+    "Handoff_Message": HandoffMessagePayload,
+    "Anomaly_Message": AnomalyMessagePayload,
     "Timeout_Message": TimeoutMessagePayload,
     "Retry_Message": RetryMessagePayload,
     "Dead_Letter_Message": DeadLetterMessagePayload,
@@ -42,6 +50,9 @@ PAYLOAD_TYPE_BY_MESSAGE_TYPE = {
 _CALLBACK_OR_RESPONSE_TYPES = {
     "Feedback_Message",
     "Business_Message",
+    "Result_Message",
+    "Callback_Message",
+    "Handoff_Message",
     "Timeout_Message",
     "Retry_Message",
     "Dead_Letter_Message",
@@ -92,6 +103,13 @@ class ExecutionMessageEnvelope:
     authority_scope: Optional[str] = None
     reply_to_subject: Optional[str] = None
     target_agent_id: Optional[str] = None
+    target_runtime_instance_id: Optional[str] = None
+    target_role: Optional[str] = None
+    capability: Optional[str] = None
+    binding_policy_ref: Optional[str] = None
+    payload_schema: Optional[str] = None
+    payload_hash: Optional[str] = None
+    no_go_scope: list[Any] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         data = asdict(self)
@@ -103,7 +121,8 @@ class ExecutionMessageEnvelope:
 
     @classmethod
     def from_dict(cls, payload: dict) -> "ExecutionMessageEnvelope":
-        return cls(**payload)
+        allowed = {field_info.name for field_info in dataclass_fields(cls)}
+        return cls(**{key: value for key, value in payload.items() if key in allowed})
 
 
 def build_execution_envelope(
@@ -206,6 +225,61 @@ def is_transport_active(message_type: str) -> bool:
     return bool(family and family.transport_active)
 
 
+def validate_wbs717_diagnostic_envelope(
+    envelope: ExecutionMessageEnvelope | dict,
+) -> ContractValidationResult:
+    if isinstance(envelope, dict):
+        envelope = ExecutionMessageEnvelope.from_dict(envelope)
+
+    result = validate_execution_message(envelope, require_runtime_overlay=True)
+    errors = list(result.errors)
+
+    if envelope.workflow_type != "wbs_7_17_live_mq_diagnostic":
+        errors.append(f"INVALID_WBS717_WORKFLOW_TYPE: {envelope.workflow_type}")
+    if envelope.message_type not in {
+        "Command_Message",
+        "Result_Message",
+        "Callback_Message",
+        "Handoff_Message",
+        "Anomaly_Message",
+        "Timeout_Message",
+        "Retry_Message",
+        "Dead_Letter_Message",
+    }:
+        errors.append(f"WBS717_MESSAGE_TYPE_NOT_LIVE: {envelope.message_type}")
+    for field_name in (
+        "source_agent_id",
+        "source_runtime_instance_id",
+        "source_role",
+        "target_agent_id",
+        "target_runtime_instance_id",
+        "authority_scope",
+        "capability",
+        "binding_policy_ref",
+        "reply_to_subject",
+        "payload_schema",
+        "payload_hash",
+        "expires_at",
+        "correlation_id",
+        "idempotency_key",
+    ):
+        if not getattr(envelope, field_name):
+            errors.append(f"MISSING_WBS717_FIELD: {field_name}")
+    if envelope.ack_policy != "explicit":
+        errors.append(f"WBS717_ACK_POLICY_MUST_BE_EXPLICIT: {envelope.ack_policy}")
+    if not isinstance(envelope.no_go_scope, list) or not envelope.no_go_scope:
+        errors.append("MISSING_WBS717_FIELD: no_go_scope")
+    elif not _contains_required_wbs717_blocks(envelope.no_go_scope):
+        errors.append("WBS717_NO_GO_SCOPE_MUST_BLOCK_PASS_AND_BUSINESS_COMPLETION")
+
+    return ContractValidationResult(
+        valid=len(errors) == 0,
+        errors=list(dict.fromkeys(errors)),
+        family=result.family,
+        payload_contract=result.payload_contract,
+    )
+
+
 def _coerce_payload_contract(
     message_type: str, payload: Any
 ) -> tuple[Optional[PayloadContract], Optional[str]]:
@@ -235,7 +309,7 @@ def _validate_runtime_overlay(envelope: ExecutionMessageEnvelope, errors: list[s
         if not getattr(envelope, field_name):
             errors.append(f"MISSING_RUNTIME_OVERLAY_FIELD: {field_name}")
 
-    if envelope.message_type in {"Review_Task", "Feedback_Message"} and not envelope.authority_scope:
+    if envelope.message_type in {"Review_Task", "Feedback_Message", "Result_Message", "Callback_Message", "Handoff_Message"} and not envelope.authority_scope:
         errors.append("MISSING_RUNTIME_OVERLAY_FIELD: authority_scope")
 
     if envelope.message_type in _CALLBACK_OR_RESPONSE_TYPES and not envelope.reply_to_subject:
@@ -243,3 +317,19 @@ def _validate_runtime_overlay(envelope: ExecutionMessageEnvelope, errors: list[s
 
     if envelope.message_type in {"Command_Message", "Review_Task"} and not envelope.target_agent_id:
         errors.append("MISSING_RUNTIME_OVERLAY_FIELD: target_agent_id")
+
+
+def _contains_required_wbs717_blocks(no_go_scope: list[Any]) -> bool:
+    normalized = {
+        str(item).strip().lower().replace(" ", "_").replace("-", "_")
+        for item in no_go_scope
+        if item is not None
+    }
+    required = {
+        "wbs_7_17_pass",
+        "business_execution",
+        "assignment_publish",
+        "private_agent_invocation",
+        "runtime_listener_daemon_start",
+    }
+    return required.issubset(normalized)

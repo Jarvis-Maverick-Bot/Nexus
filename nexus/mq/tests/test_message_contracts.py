@@ -4,6 +4,7 @@ from nexus.mq.message_contracts import (
     build_execution_envelope,
     is_transport_active,
     validate_execution_message,
+    validate_wbs717_diagnostic_envelope,
 )
 from nexus.mq.message_families import (
     MESSAGE_FAMILY_DEFINITIONS,
@@ -11,7 +12,7 @@ from nexus.mq.message_families import (
     get_message_family,
     primary_message_families,
 )
-from nexus.mq.payloads import AbnormalStateRecord
+from nexus.mq.payloads import AbnormalStateRecord, ResultMessagePayload
 from nexus.mq.taxonomy import (
     ABNORMAL_CLASSES,
     DEFERRED_MESSAGE_TYPES,
@@ -24,11 +25,11 @@ def test_v03_message_family_taxonomy_is_exact():
     primary = primary_message_families()
     deferred = deferred_message_families()
 
-    assert len(primary) == 7
+    assert len(primary) == 11
     assert len(deferred) == 2
     assert [family.message_type for family in primary] == list(PRIMARY_MESSAGE_TYPES)
     assert [family.message_type for family in deferred] == list(DEFERRED_MESSAGE_TYPES)
-    assert len(MESSAGE_FAMILY_DEFINITIONS) == 9
+    assert len(MESSAGE_FAMILY_DEFINITIONS) == 13
 
 
 def test_retry_message_is_independent_primary_family():
@@ -38,6 +39,25 @@ def test_retry_message_is_independent_primary_family():
     assert retry_family.skeleton_status == "primary"
     assert retry_family.message_class == "retry"
     assert retry_family.transport_active is True
+
+
+def test_wbs717_result_message_payload_is_primary_transport_family():
+    result_family = get_message_family("Result_Message")
+
+    assert result_family is not None
+    assert result_family.skeleton_status == "primary"
+    assert result_family.message_class == "result"
+    assert result_family.transport_active is True
+
+    payload = ResultMessagePayload(
+        result_id="res-001",
+        original_message_id="msg-001",
+        original_idempotency_key="idem-001",
+        result_status="accepted_candidate",
+        completed_at="2026-05-21T02:00:00Z",
+        evidence_refs=["evidence://wbs717/receive"],
+    )
+    assert payload.validate().valid is True
 
 
 def test_deferred_message_families_validate_but_transport_is_inactive():
@@ -160,6 +180,51 @@ def test_runtime_overlay_validation_can_be_required_separately():
     assert "MISSING_RUNTIME_OVERLAY_FIELD: source_agent_id" in result.errors
     assert "MISSING_RUNTIME_OVERLAY_FIELD: authority_scope" in result.errors
     assert "MISSING_RUNTIME_OVERLAY_FIELD: target_agent_id" in result.errors
+
+
+def test_wbs717_diagnostic_envelope_requires_strict_binding_overlay():
+    envelope = build_execution_envelope(
+        message_type="Command_Message",
+        workflow_instance_id="wbs717-run-001",
+        workflow_type="wbs_7_17_live_mq_diagnostic",
+        workflow_version="7.17",
+        producer="thunder",
+        payload={
+            "command_name": "wbs717_diagnostic_send_receive",
+            "target_handler": "jarvis.diagnostic.intake",
+            "input_refs": ["authority://wbs717/kickoff"],
+            "expected_outputs": ["transport_evidence"],
+            "allowed_side_effects": [],
+            "commit_pattern": "local_transactional_default",
+            "completion_event_type": "diagnostic_candidate_returned",
+        },
+        source_agent_id="thunder",
+        source_runtime_instance_id="rt-thunder-001",
+        source_role="implementer",
+        target_agent_id="jarvis",
+        target_runtime_instance_id="rt-jarvis-001",
+        target_role="diagnostic_target",
+        authority_scope="wbs_7_17_nova_cleared",
+        capability="live_mq_diagnostic",
+        binding_policy_ref="policy://wbs717/live-send-receive",
+        reply_to_subject="nexus.wbs7_17.wbs717-run-001.thunder.callbacks",
+        payload_schema="nexus.mq.payloads.CommandMessagePayload",
+        payload_hash="sha256:abc",
+        expires_at="2026-05-21T03:00:00Z",
+        no_go_scope=[
+            "runtime_listener_daemon_start",
+            "assignment_publish",
+            "private_agent_invocation",
+            "business_execution",
+            "broker_config_mutation",
+            "wbs_7_17_pass",
+            "wbs_7_18",
+        ],
+    )
+
+    result = validate_wbs717_diagnostic_envelope(envelope)
+
+    assert result.valid is True
 
 
 def test_abnormal_class_taxonomy_is_exact():

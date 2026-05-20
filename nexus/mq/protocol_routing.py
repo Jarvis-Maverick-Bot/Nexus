@@ -16,6 +16,8 @@ from nexus.mq.protocol import ProtocolEnvelope
 SUBJECT_OPS_ANOMALY = "ops.anomaly"
 SUBJECT_OPS_TIMEOUT = "ops.timeout"
 SUBJECT_OPS_DLQ = "ops.dlq"
+WBS717_SUBJECT_PREFIX = "nexus.wbs7_17"
+WBS717_LEGACY_BROAD_SUBJECT_PREFIXES = ("agent.", "workflow.")
 
 
 @dataclass
@@ -51,6 +53,35 @@ def build_ops_anomaly_subject() -> str:
 
 def build_ops_timeout_subject() -> str:
     return SUBJECT_OPS_TIMEOUT
+
+
+def build_wbs717_agent_subject(run_id: str, agent_id: str, lane: str = "inbox") -> str:
+    return f"{WBS717_SUBJECT_PREFIX}.{run_id}.{agent_id}.{lane}"
+
+
+def build_wbs717_return_subject(run_id: str, agent_id: str) -> str:
+    return build_wbs717_agent_subject(run_id, agent_id, "callbacks")
+
+
+def validate_wbs717_subject(subject: str, run_id: str | None = None) -> RoutingResult:
+    errors: list[str] = []
+    if not subject:
+        return RoutingResult(valid=False, errors=["MISSING_WBS717_SUBJECT"])
+    if "*" in subject or ">" in subject:
+        errors.append("WBS717_SUBJECT_MUST_NOT_USE_WILDCARDS")
+    if subject.startswith(WBS717_LEGACY_BROAD_SUBJECT_PREFIXES):
+        errors.append(f"WBS717_SUBJECT_MUST_NOT_USE_LEGACY_BROAD_ROUTE: {subject}")
+    prefix = f"{WBS717_SUBJECT_PREFIX}."
+    if not subject.startswith(prefix):
+        errors.append(f"WBS717_SUBJECT_OUT_OF_SCOPE: {subject}")
+    parts = subject.split(".")
+    if len(parts) != 5:
+        errors.append(f"WBS717_SUBJECT_SHAPE_INVALID: {subject}")
+    elif run_id and parts[2] != run_id:
+        errors.append(f"WBS717_SUBJECT_RUN_MISMATCH: expected {run_id}, got {parts[2]}")
+    if len(parts) == 5 and parts[4] not in {"inbox", "callbacks", "anomaly", "timeout", "dlq"}:
+        errors.append(f"WBS717_SUBJECT_LANE_INVALID: {parts[4]}")
+    return RoutingResult(valid=len(errors) == 0, subject=subject if not errors else None, errors=errors)
 
 
 def subject_matches_trusted_prefixes(subject: str, trusted_prefixes: list[str]) -> bool:
@@ -115,7 +146,11 @@ def route_execution_envelope_dict(envelope_dict: dict) -> RoutingResult:
     reply_to_subject = envelope_dict.get("reply_to_subject")
     target_agent_id = envelope_dict.get("target_agent_id")
     workflow_type = envelope_dict.get("workflow_type")
+    explicit_subject = envelope_dict.get("subject")
     payload = envelope_dict.get("payload") or {}
+
+    if workflow_type == "wbs_7_17_live_mq_diagnostic" and explicit_subject:
+        return validate_wbs717_subject(str(explicit_subject), envelope_dict.get("workflow_instance_id"))
 
     if message_type in {"Command_Message", "Review_Task"}:
         if target_agent_id:
@@ -128,7 +163,13 @@ def route_execution_envelope_dict(envelope_dict: dict) -> RoutingResult:
             return RoutingResult(valid=True, subject=build_agent_inbox_subject(str(target_agent_id)))
         return RoutingResult(valid=False, errors=["MISSING_ROUTING_TARGET"])
 
-    if message_type in {"Feedback_Message", "Business_Message"}:
+    if message_type in {
+        "Feedback_Message",
+        "Business_Message",
+        "Result_Message",
+        "Callback_Message",
+        "Handoff_Message",
+    }:
         if reply_to_subject:
             return RoutingResult(valid=True, subject=str(reply_to_subject))
         if target_agent_id:
@@ -139,7 +180,22 @@ def route_execution_envelope_dict(envelope_dict: dict) -> RoutingResult:
         return RoutingResult(valid=False, errors=["MISSING_REPLY_ROUTE"])
 
     if message_type == "Timeout_Message":
+        if workflow_type == "wbs_7_17_live_mq_diagnostic" and envelope_dict.get("workflow_instance_id"):
+            return RoutingResult(
+                valid=True,
+                subject=build_wbs717_agent_subject(str(envelope_dict["workflow_instance_id"]), "ops", "timeout"),
+            )
         return RoutingResult(valid=True, subject=SUBJECT_OPS_TIMEOUT)
+
+    if message_type == "Anomaly_Message":
+        if reply_to_subject:
+            return RoutingResult(valid=True, subject=str(reply_to_subject))
+        if workflow_type == "wbs_7_17_live_mq_diagnostic" and envelope_dict.get("workflow_instance_id"):
+            return RoutingResult(
+                valid=True,
+                subject=build_wbs717_agent_subject(str(envelope_dict["workflow_instance_id"]), "ops", "anomaly"),
+            )
+        return RoutingResult(valid=True, subject=SUBJECT_OPS_ANOMALY)
 
     if message_type == "Retry_Message":
         target_subject = None
@@ -150,6 +206,11 @@ def route_execution_envelope_dict(envelope_dict: dict) -> RoutingResult:
         return RoutingResult(valid=False, errors=["MISSING_RETRY_TARGET_SUBJECT"])
 
     if message_type == "Dead_Letter_Message":
+        if workflow_type == "wbs_7_17_live_mq_diagnostic" and envelope_dict.get("workflow_instance_id"):
+            return RoutingResult(
+                valid=True,
+                subject=build_wbs717_agent_subject(str(envelope_dict["workflow_instance_id"]), "ops", "dlq"),
+            )
         return RoutingResult(valid=True, subject=SUBJECT_OPS_DLQ)
 
     if message_type in {"Evidence_Write_Message", "State_Transition_Message"}:

@@ -215,6 +215,120 @@ class BusinessMessagePayload(PayloadContract):
 
 
 @dataclass
+class ResultMessagePayload(PayloadContract):
+    result_id: str = ""
+    original_message_id: str = ""
+    original_idempotency_key: str = ""
+    result_status: str = ""
+    completed_at: str = ""
+    evidence_refs: list[Any] = field(default_factory=list)
+    artifact_refs: list[Any] = field(default_factory=list)
+    diagnostic_output_ref: Optional[str] = None
+    rejection_reason: Optional[str] = None
+    not_business_completion: bool = True
+
+    def validate(self) -> PayloadValidationResult:
+        errors: list[str] = []
+        for field_name in (
+            "result_id",
+            "original_message_id",
+            "original_idempotency_key",
+            "result_status",
+            "completed_at",
+        ):
+            self._require_non_empty(getattr(self, field_name), field_name, errors)
+        if self.result_status not in {"accepted_candidate", "rejected_candidate", "blocked", "failed"}:
+            errors.append(f"INVALID_RESULT_STATUS: {self.result_status}")
+        if self.not_business_completion is not True:
+            errors.append("RESULT_MUST_NOT_CLAIM_BUSINESS_COMPLETION")
+        return PayloadValidationResult(valid=len(errors) == 0, errors=errors)
+
+
+@dataclass
+class CallbackMessagePayload(PayloadContract):
+    callback_id: str = ""
+    original_message_id: str = ""
+    original_idempotency_key: str = ""
+    callback_type: str = ""
+    status: str = ""
+    created_at: str = ""
+    evidence_refs: list[Any] = field(default_factory=list)
+    not_business_completion: bool = True
+
+    def validate(self) -> PayloadValidationResult:
+        errors: list[str] = []
+        for field_name in (
+            "callback_id",
+            "original_message_id",
+            "original_idempotency_key",
+            "callback_type",
+            "status",
+            "created_at",
+        ):
+            self._require_non_empty(getattr(self, field_name), field_name, errors)
+        if self.status not in {"progress", "accepted", "rejected", "blocked", "failed"}:
+            errors.append(f"INVALID_CALLBACK_STATUS: {self.status}")
+        if self.not_business_completion is not True:
+            errors.append("CALLBACK_MUST_NOT_CLAIM_BUSINESS_COMPLETION")
+        return PayloadValidationResult(valid=len(errors) == 0, errors=errors)
+
+
+@dataclass
+class HandoffMessagePayload(PayloadContract):
+    handoff_id: str = ""
+    original_message_id: str = ""
+    original_idempotency_key: str = ""
+    from_agent_id: str = ""
+    to_agent_id: str = ""
+    handoff_reason: str = ""
+    created_at: str = ""
+    evidence_refs: list[Any] = field(default_factory=list)
+    not_business_completion: bool = True
+
+    def validate(self) -> PayloadValidationResult:
+        errors: list[str] = []
+        for field_name in (
+            "handoff_id",
+            "original_message_id",
+            "original_idempotency_key",
+            "from_agent_id",
+            "to_agent_id",
+            "handoff_reason",
+            "created_at",
+        ):
+            self._require_non_empty(getattr(self, field_name), field_name, errors)
+        if self.not_business_completion is not True:
+            errors.append("HANDOFF_MUST_NOT_CLAIM_BUSINESS_COMPLETION")
+        return PayloadValidationResult(valid=len(errors) == 0, errors=errors)
+
+
+@dataclass
+class AnomalyMessagePayload(PayloadContract):
+    anomaly_id: str = ""
+    related_message_id: str = ""
+    anomaly_scope: str = ""
+    reason: str = ""
+    detected_at: str = ""
+    evidence_refs: list[Any] = field(default_factory=list)
+    context: dict[str, Any] = field(default_factory=dict)
+    not_business_completion: bool = True
+
+    def validate(self) -> PayloadValidationResult:
+        errors: list[str] = []
+        for field_name in (
+            "anomaly_id",
+            "related_message_id",
+            "anomaly_scope",
+            "reason",
+            "detected_at",
+        ):
+            self._require_non_empty(getattr(self, field_name), field_name, errors)
+        if self.not_business_completion is not True:
+            errors.append("ANOMALY_MUST_NOT_CLAIM_BUSINESS_COMPLETION")
+        return PayloadValidationResult(valid=len(errors) == 0, errors=errors)
+
+
+@dataclass
 class TimeoutMessagePayload(PayloadContract):
     timeout_id: str = ""
     related_message_id: str = ""
