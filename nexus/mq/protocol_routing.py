@@ -180,7 +180,7 @@ def route_execution_envelope_dict(envelope_dict: dict) -> RoutingResult:
         return RoutingResult(valid=False, errors=["MISSING_REPLY_ROUTE"])
 
     if message_type == "Timeout_Message":
-        if workflow_type == "agent_transport_diagnostic" and envelope_dict.get("workflow_instance_id"):
+        if workflow_type == "agent_transport" and envelope_dict.get("workflow_instance_id"):
             return RoutingResult(
                 valid=True,
                 subject=build_agent_transport_subject(str(envelope_dict["workflow_instance_id"]), "ops", "timeout"),
@@ -190,7 +190,7 @@ def route_execution_envelope_dict(envelope_dict: dict) -> RoutingResult:
     if message_type == "Anomaly_Message":
         if reply_to_subject:
             return RoutingResult(valid=True, subject=str(reply_to_subject))
-        if workflow_type == "agent_transport_diagnostic" and envelope_dict.get("workflow_instance_id"):
+        if workflow_type == "agent_transport" and envelope_dict.get("workflow_instance_id"):
             return RoutingResult(
                 valid=True,
                 subject=build_agent_transport_subject(str(envelope_dict["workflow_instance_id"]), "ops", "anomaly"),
@@ -206,7 +206,7 @@ def route_execution_envelope_dict(envelope_dict: dict) -> RoutingResult:
         return RoutingResult(valid=False, errors=["MISSING_RETRY_TARGET_SUBJECT"])
 
     if message_type == "Dead_Letter_Message":
-        if workflow_type == "agent_transport_diagnostic" and envelope_dict.get("workflow_instance_id"):
+        if workflow_type == "agent_transport" and envelope_dict.get("workflow_instance_id"):
             return RoutingResult(
                 valid=True,
                 subject=build_agent_transport_subject(str(envelope_dict["workflow_instance_id"]), "ops", "dlq"),

@@ -11,14 +11,7 @@ from nexus.mq.protocol_routing import validate_agent_transport_subject
 from nexus.mq.taxonomy import MESSAGE_CLASSES_BY_TYPE
 
 
-AGENT_TRANSPORT_WORKFLOW_TYPE = "agent_transport_diagnostic"
-AGENT_TRANSPORT_DEFAULT_NO_GO_SCOPE = (
-    "runtime_listener_daemon_start",
-    "assignment_publish",
-    "private_agent_invocation",
-    "business_execution",
-    "broker_config_mutation",
-)
+AGENT_TRANSPORT_WORKFLOW_TYPE = "agent_transport"
 
 
 @dataclass
@@ -37,7 +30,9 @@ class AgentTransportBinding:
     reply_to_subject: str
     payload_schema: str
     credential_ref: str
-    no_go_scope: list[str] = field(default_factory=lambda: list(AGENT_TRANSPORT_DEFAULT_NO_GO_SCOPE))
+    workflow_type: str = AGENT_TRANSPORT_WORKFLOW_TYPE
+    workflow_version: str = "1.0"
+    no_go_scope: list[str] = field(default_factory=list)
     evidence_refs: list[Any] = field(default_factory=list)
 
 
@@ -58,6 +53,8 @@ def validate_agent_transport_binding(binding: AgentTransportBinding) -> list[str
         "reply_to_subject",
         "payload_schema",
         "credential_ref",
+        "workflow_type",
+        "workflow_version",
     ):
         if not getattr(binding, field_name):
             errors.append(f"MISSING_BINDING_FIELD: {field_name}")
@@ -65,9 +62,8 @@ def validate_agent_transport_binding(binding: AgentTransportBinding) -> list[str
         routed = validate_agent_transport_subject(str(getattr(binding, subject_field)), binding.run_id)
         if not routed.valid:
             errors.extend(f"{subject_field}: {error}" for error in (routed.errors or []))
-    missing_no_go = set(AGENT_TRANSPORT_DEFAULT_NO_GO_SCOPE) - set(binding.no_go_scope)
-    if missing_no_go:
-        errors.append(f"AGENT_TRANSPORT_NO_GO_SCOPE_INCOMPLETE: {sorted(missing_no_go)}")
+    if not binding.no_go_scope:
+        errors.append("MISSING_BINDING_FIELD: no_go_scope")
     if binding.credential_ref.lower().startswith(("env:", "secret:", "vault:")):
         errors.append("AGENT_TRANSPORT_BINDING_MUST_REFERENCE_RESOLVER_OUTPUT_NOT_SECRET")
     return list(dict.fromkeys(errors))
@@ -88,8 +84,8 @@ def build_agent_transport_envelope(
         message_type=message_type,
         message_class=MESSAGE_CLASSES_BY_TYPE[message_type],
         workflow_instance_id=binding.run_id,
-        workflow_type=AGENT_TRANSPORT_WORKFLOW_TYPE,
-        workflow_version="1.0",
+        workflow_type=binding.workflow_type,
+        workflow_version=binding.workflow_version,
         producer=binding.source_agent_id,
         payload=payload,
         idempotency_key=idempotency_key,

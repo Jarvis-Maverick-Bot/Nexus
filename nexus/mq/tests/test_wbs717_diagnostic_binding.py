@@ -6,11 +6,21 @@ from nexus.mq.protocol_routing import (
     validate_agent_transport_subject,
 )
 from nexus.mq.agent_transport_binding import (
-    AGENT_TRANSPORT_DEFAULT_NO_GO_SCOPE,
     AgentTransportBinding,
     build_agent_transport_envelope,
     validate_agent_transport_binding,
 )
+
+
+WBS717_NO_GO_SCOPE = [
+    "runtime_listener_daemon_start",
+    "assignment_publish",
+    "private_agent_invocation",
+    "business_execution",
+    "broker_config_mutation",
+    "wbs_7_17_pass",
+    "wbs_7_18",
+]
 
 
 def _binding() -> AgentTransportBinding:
@@ -29,7 +39,7 @@ def _binding() -> AgentTransportBinding:
         reply_to_subject=build_agent_transport_return_subject("wbs717-run-001", "thunder"),
         payload_schema="nexus.mq.payloads.CommandMessagePayload",
         credential_ref="credential-resolution://wbs717/stub",
-        no_go_scope=list(AGENT_TRANSPORT_DEFAULT_NO_GO_SCOPE),
+        no_go_scope=list(WBS717_NO_GO_SCOPE),
     )
 
 
@@ -64,7 +74,7 @@ def test_wbs717_binding_builds_strict_command_envelope():
 
     assert result.valid is True
     assert envelope.target_runtime_instance_id == "rt-jarvis-001"
-    assert envelope.no_go_scope == list(AGENT_TRANSPORT_DEFAULT_NO_GO_SCOPE)
+    assert envelope.no_go_scope == list(WBS717_NO_GO_SCOPE)
 
 
 def test_wbs717_binding_rejects_secret_material_references():

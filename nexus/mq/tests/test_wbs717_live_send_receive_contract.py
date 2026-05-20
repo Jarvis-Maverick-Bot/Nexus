@@ -15,7 +15,6 @@ from nexus.mq.live_transport_evidence import evaluate_live_mq_evidence_gate, evi
 from nexus.mq.payloads import CommandMessagePayload, ResultMessagePayload
 from nexus.mq.protocol_routing import build_agent_transport_subject, build_agent_transport_return_subject
 from nexus.mq.agent_transport_binding import (
-    AGENT_TRANSPORT_DEFAULT_NO_GO_SCOPE,
     AgentTransportBinding,
     build_agent_transport_envelope,
 )
@@ -24,6 +23,15 @@ from nexus.mq.agent_transport_binding import (
 RUN_ID = "wbs717-run-001"
 NOW = "2026-05-21T02:00:00Z"
 EXPIRES = "2026-05-21T03:00:00Z"
+WBS717_NO_GO_SCOPE = [
+    "runtime_listener_daemon_start",
+    "assignment_publish",
+    "private_agent_invocation",
+    "business_execution",
+    "broker_config_mutation",
+    "wbs_7_17_pass",
+    "wbs_7_18",
+]
 
 
 def _target_record() -> AgentRegistryRecord:
@@ -69,7 +77,7 @@ def _binding(source: str = "thunder", target: str = "jarvis") -> AgentTransportB
         reply_to_subject=build_agent_transport_return_subject(RUN_ID, source),
         payload_schema="nexus.mq.payloads.CommandMessagePayload",
         credential_ref="credential-resolution://wbs717/stub",
-        no_go_scope=list(AGENT_TRANSPORT_DEFAULT_NO_GO_SCOPE),
+        no_go_scope=list(WBS717_NO_GO_SCOPE),
     )
 
 
@@ -84,6 +92,7 @@ def _policy(subject: str):
         binding_policy_ref="policy://wbs717/live-send-receive",
         subject=subject,
         payload_schema="nexus.mq.payloads.CommandMessagePayload",
+        allowed_task_boundary="agent_transport_diagnostic_only",
     )
     return evaluate_agent_message_capability(request, target_record=_target_record(), now_at=NOW)
 

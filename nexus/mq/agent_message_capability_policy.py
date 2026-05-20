@@ -1,4 +1,4 @@
-"""4.19 read-only capability gate for WBS 7.17 message send/receive tests."""
+"""Read-only agent message capability gate for live MQ transport."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ class AgentMessageCapabilityRequest:
     binding_policy_ref: str
     subject: str
     payload_schema: str
-    allowed_task_boundary: str = "agent_transport_diagnostic_only"
+    allowed_task_boundary: str = "agent_transport"
     required_privacy_scope: str = "project"
 
 
