@@ -225,8 +225,12 @@ def is_transport_active(message_type: str) -> bool:
     return bool(family and family.transport_active)
 
 
-def validate_wbs717_diagnostic_envelope(
+def validate_agent_transport_envelope(
     envelope: ExecutionMessageEnvelope | dict,
+    *,
+    allowed_workflow_types: Optional[set[str]] = None,
+    allowed_message_types: Optional[set[str]] = None,
+    required_no_go_scope: Optional[set[str]] = None,
 ) -> ContractValidationResult:
     if isinstance(envelope, dict):
         envelope = ExecutionMessageEnvelope.from_dict(envelope)
@@ -234,9 +238,9 @@ def validate_wbs717_diagnostic_envelope(
     result = validate_execution_message(envelope, require_runtime_overlay=True)
     errors = list(result.errors)
 
-    if envelope.workflow_type != "wbs_7_17_live_mq_diagnostic":
-        errors.append(f"INVALID_WBS717_WORKFLOW_TYPE: {envelope.workflow_type}")
-    if envelope.message_type not in {
+    if allowed_workflow_types and envelope.workflow_type not in allowed_workflow_types:
+        errors.append(f"INVALID_AGENT_TRANSPORT_WORKFLOW_TYPE: {envelope.workflow_type}")
+    live_message_types = allowed_message_types or {
         "Command_Message",
         "Result_Message",
         "Callback_Message",
@@ -245,8 +249,9 @@ def validate_wbs717_diagnostic_envelope(
         "Timeout_Message",
         "Retry_Message",
         "Dead_Letter_Message",
-    }:
-        errors.append(f"WBS717_MESSAGE_TYPE_NOT_LIVE: {envelope.message_type}")
+    }
+    if envelope.message_type not in live_message_types:
+        errors.append(f"AGENT_TRANSPORT_MESSAGE_TYPE_NOT_LIVE: {envelope.message_type}")
     for field_name in (
         "source_agent_id",
         "source_runtime_instance_id",
@@ -264,13 +269,16 @@ def validate_wbs717_diagnostic_envelope(
         "idempotency_key",
     ):
         if not getattr(envelope, field_name):
-            errors.append(f"MISSING_WBS717_FIELD: {field_name}")
+            errors.append(f"MISSING_AGENT_TRANSPORT_FIELD: {field_name}")
     if envelope.ack_policy != "explicit":
-        errors.append(f"WBS717_ACK_POLICY_MUST_BE_EXPLICIT: {envelope.ack_policy}")
+        errors.append(f"AGENT_TRANSPORT_ACK_POLICY_MUST_BE_EXPLICIT: {envelope.ack_policy}")
     if not isinstance(envelope.no_go_scope, list) or not envelope.no_go_scope:
-        errors.append("MISSING_WBS717_FIELD: no_go_scope")
-    elif not _contains_required_wbs717_blocks(envelope.no_go_scope):
-        errors.append("WBS717_NO_GO_SCOPE_MUST_BLOCK_PASS_AND_BUSINESS_COMPLETION")
+        errors.append("MISSING_AGENT_TRANSPORT_FIELD: no_go_scope")
+    elif required_no_go_scope and not _contains_required_no_go_scope(
+        envelope.no_go_scope,
+        required_no_go_scope,
+    ):
+        errors.append("AGENT_TRANSPORT_NO_GO_SCOPE_INCOMPLETE")
 
     return ContractValidationResult(
         valid=len(errors) == 0,
@@ -319,17 +327,14 @@ def _validate_runtime_overlay(envelope: ExecutionMessageEnvelope, errors: list[s
         errors.append("MISSING_RUNTIME_OVERLAY_FIELD: target_agent_id")
 
 
-def _contains_required_wbs717_blocks(no_go_scope: list[Any]) -> bool:
+def _contains_required_no_go_scope(no_go_scope: list[Any], required_no_go_scope: set[str]) -> bool:
     normalized = {
         str(item).strip().lower().replace(" ", "_").replace("-", "_")
         for item in no_go_scope
         if item is not None
     }
     required = {
-        "wbs_7_17_pass",
-        "business_execution",
-        "assignment_publish",
-        "private_agent_invocation",
-        "runtime_listener_daemon_start",
+        str(item).strip().lower().replace(" ", "_").replace("-", "_")
+        for item in required_no_go_scope
     }
     return required.issubset(normalized)

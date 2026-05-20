@@ -4,7 +4,7 @@ from nexus.mq.message_contracts import (
     build_execution_envelope,
     is_transport_active,
     validate_execution_message,
-    validate_wbs717_diagnostic_envelope,
+    validate_agent_transport_envelope,
 )
 from nexus.mq.message_families import (
     MESSAGE_FAMILY_DEFINITIONS,
@@ -186,7 +186,7 @@ def test_wbs717_diagnostic_envelope_requires_strict_binding_overlay():
     envelope = build_execution_envelope(
         message_type="Command_Message",
         workflow_instance_id="wbs717-run-001",
-        workflow_type="wbs_7_17_live_mq_diagnostic",
+        workflow_type="agent_transport_diagnostic",
         workflow_version="7.17",
         producer="thunder",
         payload={
@@ -207,7 +207,7 @@ def test_wbs717_diagnostic_envelope_requires_strict_binding_overlay():
         authority_scope="wbs_7_17_nova_cleared",
         capability="live_mq_diagnostic",
         binding_policy_ref="policy://wbs717/live-send-receive",
-        reply_to_subject="nexus.wbs7_17.wbs717-run-001.thunder.callbacks",
+        reply_to_subject="nexus.agent_transport.wbs717-run-001.thunder.callbacks",
         payload_schema="nexus.mq.payloads.CommandMessagePayload",
         payload_hash="sha256:abc",
         expires_at="2026-05-21T03:00:00Z",
@@ -222,7 +222,7 @@ def test_wbs717_diagnostic_envelope_requires_strict_binding_overlay():
         ],
     )
 
-    result = validate_wbs717_diagnostic_envelope(envelope)
+    result = validate_agent_transport_envelope(envelope)
 
     assert result.valid is True
 

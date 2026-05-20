@@ -11,13 +11,13 @@ from nexus.mq.live_send_receive import (
     publish_return_message,
     receive_live_message_once,
 )
-from nexus.mq.live_transport_evidence import evaluate_wbs717_evidence_gate, evidence_record
+from nexus.mq.live_transport_evidence import evaluate_live_mq_evidence_gate, evidence_record
 from nexus.mq.payloads import CommandMessagePayload, ResultMessagePayload
-from nexus.mq.protocol_routing import build_wbs717_agent_subject, build_wbs717_return_subject
-from nexus.mq.wbs717_diagnostic_binding import (
-    WBS717_REQUIRED_NO_GO_SCOPE,
-    Wbs717DiagnosticBinding,
-    build_wbs717_diagnostic_envelope,
+from nexus.mq.protocol_routing import build_agent_transport_subject, build_agent_transport_return_subject
+from nexus.mq.agent_transport_binding import (
+    AGENT_TRANSPORT_DEFAULT_NO_GO_SCOPE,
+    AgentTransportBinding,
+    build_agent_transport_envelope,
 )
 
 
@@ -33,10 +33,10 @@ def _target_record() -> AgentRegistryRecord:
         role="diagnostic_target",
         owner_principal_id="jarvis-owner",
         runtime_type="test_stub",
-        channel_bindings=[build_wbs717_agent_subject(RUN_ID, "jarvis")],
+        channel_bindings=[build_agent_transport_subject(RUN_ID, "jarvis")],
         capabilities=["live_mq_diagnostic"],
         authority_scopes=["wbs_7_17_nova_cleared"],
-        allowed_task_boundaries=["wbs_7_17_diagnostic_only"],
+        allowed_task_boundaries=["agent_transport_diagnostic_only"],
         initialization_status="ready",
         registry_status="active",
         presence_state="idle",
@@ -53,8 +53,8 @@ def _target_record() -> AgentRegistryRecord:
     )
 
 
-def _binding(source: str = "thunder", target: str = "jarvis") -> Wbs717DiagnosticBinding:
-    return Wbs717DiagnosticBinding(
+def _binding(source: str = "thunder", target: str = "jarvis") -> AgentTransportBinding:
+    return AgentTransportBinding(
         run_id=RUN_ID,
         source_agent_id=source,
         source_runtime_instance_id=f"rt-{source}-001",
@@ -65,11 +65,11 @@ def _binding(source: str = "thunder", target: str = "jarvis") -> Wbs717Diagnosti
         capability="live_mq_diagnostic",
         authority_scope="wbs_7_17_nova_cleared",
         binding_policy_ref="policy://wbs717/live-send-receive",
-        subject=build_wbs717_agent_subject(RUN_ID, target),
-        reply_to_subject=build_wbs717_return_subject(RUN_ID, source),
+        subject=build_agent_transport_subject(RUN_ID, target),
+        reply_to_subject=build_agent_transport_return_subject(RUN_ID, source),
         payload_schema="nexus.mq.payloads.CommandMessagePayload",
         credential_ref="credential-resolution://wbs717/stub",
-        no_go_scope=list(WBS717_REQUIRED_NO_GO_SCOPE),
+        no_go_scope=list(AGENT_TRANSPORT_DEFAULT_NO_GO_SCOPE),
     )
 
 
@@ -97,7 +97,7 @@ def test_live_send_receive_ack_and_duplicate_are_transport_only():
         credential_ref="credential-resolution://wbs717/stub",
         resolver_ref="resolver://wbs717/no-secret",
     )
-    envelope = build_wbs717_diagnostic_envelope(
+    envelope = build_agent_transport_envelope(
         binding=binding,
         message_type="Command_Message",
         payload=CommandMessagePayload(
@@ -159,7 +159,7 @@ def test_live_send_fails_closed_without_policy_or_credential():
     denied_policy = _policy(binding.subject)
     denied_policy.allowed = False
     denied_policy.errors = ["AGENT_MESSAGE_POLICY_DENIED"]
-    envelope = build_wbs717_diagnostic_envelope(
+    envelope = build_agent_transport_envelope(
         binding=binding,
         message_type="Command_Message",
         payload=CommandMessagePayload(
@@ -200,7 +200,7 @@ def test_result_return_routes_to_reply_subject_and_gate_shape_is_not_pass():
         accepted=True,
         credential_ref="credential-resolution://wbs717/stub",
     )
-    result_envelope = build_wbs717_diagnostic_envelope(
+    result_envelope = build_agent_transport_envelope(
         binding=binding,
         message_type="Result_Message",
         payload=ResultMessagePayload(
@@ -224,14 +224,14 @@ def test_result_return_routes_to_reply_subject_and_gate_shape_is_not_pass():
         policy_decision=policy,
         credential_result=credential,
     )
-    gate = evaluate_wbs717_evidence_gate(
+    gate = evaluate_live_mq_evidence_gate(
         [
             evidence_record("publish", message_id="msg-001", subject=binding.subject, status="broker_received"),
             evidence_record("receive", message_id="msg-001", subject=binding.subject, status="accepted"),
             evidence_record("ack", message_id="msg-001", subject=binding.subject, status="consumer_intake"),
             *returned.evidence,
             evidence_record("duplicate", message_id="msg-001", subject=binding.subject, status="suppressed"),
-            evidence_record("timeout_or_anomaly", message_id="msg-001", subject=build_wbs717_agent_subject(RUN_ID, "ops", "timeout"), status="not_observed"),
+            evidence_record("timeout_or_anomaly", message_id="msg-001", subject=build_agent_transport_subject(RUN_ID, "ops", "timeout"), status="not_observed"),
             evidence_record("cleanup", message_id="msg-001", subject=binding.subject, status="not_started_runtime"),
             evidence_record("secret_scan", message_id="msg-001", subject=binding.subject, status="clean"),
         ]

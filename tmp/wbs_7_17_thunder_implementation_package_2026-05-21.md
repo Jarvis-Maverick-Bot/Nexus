@@ -29,7 +29,7 @@ Status: `THUNDER_WBS_7_17_IMPLEMENTATION_PACKAGE_RETURNED / CODE EDITS COMPLETED
 - `nexus/mq/live_transport_evidence.py`
 - `nexus/mq/agent_message_capability_policy.py`
 - `nexus/mq/live_send_receive.py`
-- `nexus/mq/wbs717_diagnostic_binding.py`
+- `nexus/mq/agent_transport_binding.py`
 - `nexus/mq/tests/test_message_contracts.py`
 - `nexus/mq/tests/test_wbs717_diagnostic_binding.py`
 - `nexus/mq/tests/test_wbs717_live_transport_evidence.py`
@@ -54,7 +54,7 @@ Status: `THUNDER_WBS_7_17_IMPLEMENTATION_PACKAGE_RETURNED / CODE EDITS COMPLETED
 - Added live transport message families: `Result_Message`, `Callback_Message`, `Handoff_Message`, `Anomaly_Message`.
 - Added payload contracts for result/callback/handoff/anomaly with `not_business_completion=True` enforcement.
 - Extended execution envelopes with runtime target binding, capability, binding policy, payload schema/hash, and no-go metadata.
-- Added strict `validate_wbs717_diagnostic_envelope` for WBS 7.17 live diagnostic overlays.
+- Added strict `validate_agent_transport_envelope` for live agent transport overlays.
 - Added run-scoped subject builders and validators under `nexus.wbs7_17.<run>.<agent>.<lane>`.
 - Rejected legacy broad subjects and wildcard subjects in WBS 7.17 paths.
 - Added read-only 4.19 capability policy gate over registry/readiness/heartbeat metadata.
@@ -75,7 +75,7 @@ Status: `THUNDER_WBS_7_17_IMPLEMENTATION_PACKAGE_RETURNED / CODE EDITS COMPLETED
 
 ## Tests / Evidence Shape
 
-- `python -m py_compile nexus/mq/taxonomy.py nexus/mq/payloads.py nexus/mq/message_contracts.py nexus/mq/protocol_routing.py nexus/mq/live_transport_evidence.py nexus/mq/agent_message_capability_policy.py nexus/mq/wbs717_diagnostic_binding.py nexus/mq/live_send_receive.py`
+- `python -m py_compile nexus/mq/taxonomy.py nexus/mq/payloads.py nexus/mq/message_contracts.py nexus/mq/protocol_routing.py nexus/mq/live_transport_evidence.py nexus/mq/agent_message_capability_policy.py nexus/mq/agent_transport_binding.py nexus/mq/live_send_receive.py`
   Result: pass.
 - `python -m pytest nexus/mq/tests/test_message_contracts.py nexus/mq/tests/test_wbs717_diagnostic_binding.py nexus/mq/tests/test_wbs717_live_transport_evidence.py nexus/mq/tests/test_wbs717_live_send_receive_contract.py`
   Result: `19 passed`.

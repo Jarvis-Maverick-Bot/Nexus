@@ -1,4 +1,4 @@
-"""WBS 7.17 live send/receive correction helpers.
+"""Live agent MQ send/receive helpers.
 
 This module is transport-mechanics scope only. It provides preflight checks,
 in-memory adapter send/receive evidence, intake ACKs, duplicate suppression,
@@ -13,8 +13,8 @@ from typing import Any, Callable, Optional
 from nexus.mq.adapter import MqAdapterStub
 from nexus.mq.agent_message_capability_policy import AgentMessagePolicyDecision
 from nexus.mq.live_transport_evidence import TransportEvidenceRecord, evidence_record
-from nexus.mq.message_contracts import ExecutionMessageEnvelope, validate_wbs717_diagnostic_envelope
-from nexus.mq.protocol_routing import validate_wbs717_subject
+from nexus.mq.message_contracts import ExecutionMessageEnvelope, validate_agent_transport_envelope
+from nexus.mq.protocol_routing import validate_agent_transport_subject
 
 
 @dataclass
@@ -278,9 +278,9 @@ def _send_preflight_errors(
     credential_result: CredentialResolutionResult,
 ) -> list[str]:
     errors: list[str] = []
-    validation = validate_wbs717_diagnostic_envelope(envelope)
+    validation = validate_agent_transport_envelope(envelope)
     errors.extend(validation.errors)
-    subject_validation = validate_wbs717_subject(subject, envelope.workflow_instance_id)
+    subject_validation = validate_agent_transport_subject(subject, envelope.workflow_instance_id)
     if not subject_validation.valid:
         errors.extend(subject_validation.errors or [])
     errors.extend(_policy_errors(policy_decision))
@@ -301,17 +301,17 @@ def _receive_preflight_errors(
     policy_decision: AgentMessagePolicyDecision,
 ) -> list[str]:
     errors: list[str] = []
-    validation = validate_wbs717_diagnostic_envelope(envelope)
+    validation = validate_agent_transport_envelope(envelope)
     errors.extend(validation.errors)
     if subject != expected_subject:
-        errors.append(f"WBS717_SUBJECT_MISMATCH: expected {expected_subject}, got {subject}")
-    subject_validation = validate_wbs717_subject(subject, str(envelope.get("workflow_instance_id", "")))
+        errors.append(f"AGENT_TRANSPORT_SUBJECT_MISMATCH: expected {expected_subject}, got {subject}")
+    subject_validation = validate_agent_transport_subject(subject, str(envelope.get("workflow_instance_id", "")))
     if not subject_validation.valid:
         errors.extend(subject_validation.errors or [])
     if envelope.get("target_agent_id") != expected_target_agent_id:
-        errors.append("WBS717_TARGET_AGENT_MISMATCH")
+        errors.append("AGENT_TRANSPORT_TARGET_AGENT_MISMATCH")
     if envelope.get("target_runtime_instance_id") != expected_target_runtime_instance_id:
-        errors.append("WBS717_TARGET_RUNTIME_MISMATCH")
+        errors.append("AGENT_TRANSPORT_TARGET_RUNTIME_MISMATCH")
     errors.extend(_policy_errors(policy_decision))
     return list(dict.fromkeys(errors))
 

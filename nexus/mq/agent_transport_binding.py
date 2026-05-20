@@ -1,4 +1,4 @@
-"""WBS 7.17 diagnostic binding metadata and envelope construction."""
+"""Agent transport binding metadata and envelope construction."""
 
 from __future__ import annotations
 
@@ -7,24 +7,22 @@ from typing import Any
 
 from nexus.mq.message_contracts import ExecutionMessageEnvelope, build_execution_envelope
 from nexus.mq.payloads import PayloadContract
-from nexus.mq.protocol_routing import validate_wbs717_subject
+from nexus.mq.protocol_routing import validate_agent_transport_subject
 from nexus.mq.taxonomy import MESSAGE_CLASSES_BY_TYPE
 
 
-WBS717_WORKFLOW_TYPE = "wbs_7_17_live_mq_diagnostic"
-WBS717_REQUIRED_NO_GO_SCOPE = (
+AGENT_TRANSPORT_WORKFLOW_TYPE = "agent_transport_diagnostic"
+AGENT_TRANSPORT_DEFAULT_NO_GO_SCOPE = (
     "runtime_listener_daemon_start",
     "assignment_publish",
     "private_agent_invocation",
     "business_execution",
     "broker_config_mutation",
-    "wbs_7_17_pass",
-    "wbs_7_18",
 )
 
 
 @dataclass
-class Wbs717DiagnosticBinding:
+class AgentTransportBinding:
     run_id: str
     source_agent_id: str
     source_runtime_instance_id: str
@@ -39,11 +37,11 @@ class Wbs717DiagnosticBinding:
     reply_to_subject: str
     payload_schema: str
     credential_ref: str
-    no_go_scope: list[str] = field(default_factory=lambda: list(WBS717_REQUIRED_NO_GO_SCOPE))
+    no_go_scope: list[str] = field(default_factory=lambda: list(AGENT_TRANSPORT_DEFAULT_NO_GO_SCOPE))
     evidence_refs: list[Any] = field(default_factory=list)
 
 
-def validate_wbs717_binding(binding: Wbs717DiagnosticBinding) -> list[str]:
+def validate_agent_transport_binding(binding: AgentTransportBinding) -> list[str]:
     errors: list[str] = []
     for field_name in (
         "run_id",
@@ -64,20 +62,20 @@ def validate_wbs717_binding(binding: Wbs717DiagnosticBinding) -> list[str]:
         if not getattr(binding, field_name):
             errors.append(f"MISSING_BINDING_FIELD: {field_name}")
     for subject_field in ("subject", "reply_to_subject"):
-        routed = validate_wbs717_subject(str(getattr(binding, subject_field)), binding.run_id)
+        routed = validate_agent_transport_subject(str(getattr(binding, subject_field)), binding.run_id)
         if not routed.valid:
             errors.extend(f"{subject_field}: {error}" for error in (routed.errors or []))
-    missing_no_go = set(WBS717_REQUIRED_NO_GO_SCOPE) - set(binding.no_go_scope)
+    missing_no_go = set(AGENT_TRANSPORT_DEFAULT_NO_GO_SCOPE) - set(binding.no_go_scope)
     if missing_no_go:
-        errors.append(f"WBS717_NO_GO_SCOPE_INCOMPLETE: {sorted(missing_no_go)}")
+        errors.append(f"AGENT_TRANSPORT_NO_GO_SCOPE_INCOMPLETE: {sorted(missing_no_go)}")
     if binding.credential_ref.lower().startswith(("env:", "secret:", "vault:")):
-        errors.append("WBS717_BINDING_MUST_REFERENCE_RESOLVER_OUTPUT_NOT_SECRET")
+        errors.append("AGENT_TRANSPORT_BINDING_MUST_REFERENCE_RESOLVER_OUTPUT_NOT_SECRET")
     return list(dict.fromkeys(errors))
 
 
-def build_wbs717_diagnostic_envelope(
+def build_agent_transport_envelope(
     *,
-    binding: Wbs717DiagnosticBinding,
+    binding: AgentTransportBinding,
     message_type: str,
     payload: dict | PayloadContract,
     payload_hash: str,
@@ -90,8 +88,8 @@ def build_wbs717_diagnostic_envelope(
         message_type=message_type,
         message_class=MESSAGE_CLASSES_BY_TYPE[message_type],
         workflow_instance_id=binding.run_id,
-        workflow_type=WBS717_WORKFLOW_TYPE,
-        workflow_version="7.17",
+        workflow_type=AGENT_TRANSPORT_WORKFLOW_TYPE,
+        workflow_version="1.0",
         producer=binding.source_agent_id,
         payload=payload,
         idempotency_key=idempotency_key,

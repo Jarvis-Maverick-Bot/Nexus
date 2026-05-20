@@ -20,7 +20,7 @@ class AgentMessageCapabilityRequest:
     binding_policy_ref: str
     subject: str
     payload_schema: str
-    allowed_task_boundary: str = "wbs_7_17_diagnostic_only"
+    allowed_task_boundary: str = "agent_transport_diagnostic_only"
     required_privacy_scope: str = "project"
 
 

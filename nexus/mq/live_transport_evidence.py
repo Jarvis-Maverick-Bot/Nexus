@@ -1,4 +1,4 @@
-"""WBS 7.17 live MQ transport evidence gates.
+"""Live MQ transport evidence gates.
 
 The records here describe transport observations only. They never mark a
 workflow complete and do not carry credential material.
@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 
-REQUIRED_WBS717_EVIDENCE_EVENTS = (
+REQUIRED_LIVE_MQ_EVIDENCE_EVENTS = (
     "publish",
     "receive",
     "ack",
@@ -59,7 +59,7 @@ class TransportEvidenceRecord:
 
 
 @dataclass
-class Wbs717EvidenceGateResult:
+class LiveMqEvidenceGateResult:
     accepted: bool
     missing_events: list[str]
     errors: list[str]
@@ -86,21 +86,21 @@ def evidence_record(
     )
 
 
-def evaluate_wbs717_evidence_gate(
+def evaluate_live_mq_evidence_gate(
     records: list[TransportEvidenceRecord],
-) -> Wbs717EvidenceGateResult:
+) -> LiveMqEvidenceGateResult:
     present = {record.event_type for record in records}
-    missing = [event for event in REQUIRED_WBS717_EVIDENCE_EVENTS if event not in present]
+    missing = [event for event in REQUIRED_LIVE_MQ_EVIDENCE_EVENTS if event not in present]
     errors: list[str] = []
     if not records:
-        errors.append("WBS717_EVIDENCE_EMPTY")
+        errors.append("LIVE_MQ_EVIDENCE_EMPTY")
     if any(record.not_business_completion is not True for record in records):
-        errors.append("WBS717_EVIDENCE_MUST_NOT_CLAIM_BUSINESS_COMPLETION")
+        errors.append("LIVE_MQ_EVIDENCE_MUST_NOT_CLAIM_BUSINESS_COMPLETION")
     for record in records:
         errors.extend(secret_material_errors(record.to_dict(), path=f"record[{record.event_type}]"))
     if present == {"publish"}:
-        errors.append("WBS717_SENDER_ONLY_EVIDENCE_CANNOT_PASS")
-    return Wbs717EvidenceGateResult(
+        errors.append("LIVE_MQ_SENDER_ONLY_EVIDENCE_CANNOT_PASS")
+    return LiveMqEvidenceGateResult(
         accepted=not missing and not errors,
         missing_events=missing,
         errors=list(dict.fromkeys(errors)),
