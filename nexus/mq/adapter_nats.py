@@ -237,9 +237,9 @@ class MqAdapterNats:
         return self._run_sync(self._publish_impl(envelope))
 
     async def _publish_impl(self, envelope: dict) -> dict:
+        subject = self._resolve_subject(envelope)
         await self._ensure_connection()
 
-        subject = self._resolve_subject(envelope)
         payload_bytes = json.dumps(envelope, ensure_ascii=False).encode('utf-8')
         msg_id = envelope.get("message_id", "")
 
@@ -272,6 +272,8 @@ class MqAdapterNats:
             routed = route_execution_envelope_dict(envelope)
             if routed.valid and routed.subject:
                 return routed.subject
+            if _is_agent_transport_envelope(envelope):
+                raise ValueError(f"AGENT_TRANSPORT_ROUTING_INVALID: {routed.errors or []}")
         return f"{self._subject_prefix}.{envelope.get('message_type', 'unknown').lower()}"
 
     # ── consume ───────────────────────────────────────────────────────────────
@@ -556,6 +558,10 @@ class MqAdapterNats:
                 routed = route_execution_envelope_dict(envelope)
                 if routed.valid and routed.subject:
                     return routed.subject
+                if _is_agent_transport_envelope(envelope):
+                    raise ValueError(f"AGENT_TRANSPORT_ROUTING_INVALID: {routed.errors or []}")
+            except ValueError:
+                raise
             except Exception:
                 pass
 
@@ -596,3 +602,7 @@ class MqAdapterNats:
             self._loop = None
             self._loop_thread = None
             self._loop_ready = None
+
+
+def _is_agent_transport_envelope(envelope: dict) -> bool:
+    return envelope.get("workflow_type") == "agent_transport"

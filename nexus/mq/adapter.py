@@ -114,6 +114,8 @@ class MqAdapterStub:
             routed = route_execution_envelope_dict(envelope)
             if routed.valid and routed.subject:
                 return routed.subject
+            if _is_agent_transport_envelope(envelope):
+                raise ValueError(f"AGENT_TRANSPORT_ROUTING_INVALID: {routed.errors or []}")
         return envelope.get("subject", "stub.local")
 
     # --- consume ---
@@ -324,6 +326,10 @@ def test_dlq_on_retry_exhaustion() -> bool:
     assert dlq_event.dlq_at is not None, "DLQ timestamp must be set"
 
     return True
+
+
+def _is_agent_transport_envelope(envelope: dict) -> bool:
+    return envelope.get("workflow_type") == "agent_transport"
 
 
 def test_adapter_stub_publish_consume() -> bool:

@@ -1,3 +1,7 @@
+import pytest
+
+from nexus.mq.adapter import MqAdapterStub
+from nexus.mq.adapter_nats import MqAdapterNats
 from nexus.mq.message_contracts import validate_agent_transport_envelope
 from nexus.mq.payloads import CommandMessagePayload
 from nexus.mq.protocol_routing import (
@@ -112,3 +116,51 @@ def test_agent_transport_routing_does_not_fall_back_to_legacy_agent_subjects():
     assert routed_without_explicit_subject.subject == "nexus.agent_transport.wbs717-run-001.jarvis.inbox"
     assert routed_with_legacy_subject.valid is False
     assert "AGENT_TRANSPORT_SUBJECT_OUT_OF_SCOPE: agent.jarvis.inbox" in routed_with_legacy_subject.errors
+
+
+def test_agent_transport_command_rejects_broad_reply_to_subject_in_routing():
+    binding = _binding()
+    binding.reply_to_subject = "agent.thunder.callbacks"
+    envelope = build_agent_transport_envelope(
+        binding=binding,
+        message_type="Command_Message",
+        payload=CommandMessagePayload(
+            command_name="wbs717_diagnostic_send_receive",
+            target_handler="jarvis.diagnostic.intake",
+            completion_event_type="diagnostic_candidate_returned",
+        ),
+        payload_hash="sha256:payload",
+        expires_at="2026-05-21T03:00:00Z",
+        idempotency_key="idem-wbs717-routing-002",
+        correlation_id="corr-wbs717-routing-002",
+    ).to_dict()
+
+    routed = route_execution_envelope_dict(envelope)
+
+    assert routed.valid is False
+    assert "AGENT_TRANSPORT_SUBJECT_OUT_OF_SCOPE: agent.thunder.callbacks" in routed.errors
+
+
+def test_adapters_fail_closed_on_invalid_agent_transport_route():
+    binding = _binding()
+    envelope = build_agent_transport_envelope(
+        binding=binding,
+        message_type="Command_Message",
+        payload=CommandMessagePayload(
+            command_name="wbs717_diagnostic_send_receive",
+            target_handler="jarvis.diagnostic.intake",
+            completion_event_type="diagnostic_candidate_returned",
+        ),
+        payload_hash="sha256:payload",
+        expires_at="2026-05-21T03:00:00Z",
+        idempotency_key="idem-wbs717-routing-003",
+        correlation_id="corr-wbs717-routing-003",
+    ).to_dict()
+    envelope["subject"] = "agent.jarvis.inbox"
+
+    with pytest.raises(ValueError, match="AGENT_TRANSPORT_ROUTING_INVALID"):
+        MqAdapterStub().publish(envelope)
+
+    nats_adapter = object.__new__(MqAdapterNats)
+    with pytest.raises(ValueError, match="AGENT_TRANSPORT_ROUTING_INVALID"):
+        MqAdapterNats._resolve_subject(nats_adapter, envelope)

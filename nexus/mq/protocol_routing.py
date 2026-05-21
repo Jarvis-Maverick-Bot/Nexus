@@ -237,6 +237,10 @@ def _route_agent_transport_envelope_dict(envelope_dict: dict) -> RoutingResult:
         return RoutingResult(valid=False, errors=["MISSING_AGENT_TRANSPORT_RUN_ID"])
 
     if message_type in {"Command_Message", "Review_Task"}:
+        if reply_to_subject:
+            reply_route = validate_agent_transport_subject(str(reply_to_subject), str(workflow_instance_id))
+            if not reply_route.valid:
+                return reply_route
         if target_agent_id:
             return RoutingResult(
                 valid=True,
