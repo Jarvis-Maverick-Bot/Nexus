@@ -283,6 +283,15 @@ def _send_preflight_errors(
     subject_validation = validate_agent_transport_subject(subject, envelope.workflow_instance_id)
     if not subject_validation.valid:
         errors.extend(subject_validation.errors or [])
+    reply_subject_validation = validate_agent_transport_subject(
+        str(envelope.reply_to_subject or ""),
+        envelope.workflow_instance_id,
+    )
+    if not reply_subject_validation.valid:
+        errors.extend(
+            f"reply_to_subject: {error}"
+            for error in (reply_subject_validation.errors or [])
+        )
     errors.extend(_policy_errors(policy_decision))
     if not credential_result.accepted:
         errors.extend(credential_result.errors or ["CREDENTIAL_RESOLUTION_REJECTED"])

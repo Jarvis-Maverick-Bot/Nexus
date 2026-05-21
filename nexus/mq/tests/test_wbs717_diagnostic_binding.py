@@ -3,6 +3,7 @@ from nexus.mq.payloads import CommandMessagePayload
 from nexus.mq.protocol_routing import (
     build_agent_transport_subject,
     build_agent_transport_return_subject,
+    route_execution_envelope_dict,
     validate_agent_transport_subject,
 )
 from nexus.mq.agent_transport_binding import (
@@ -84,3 +85,30 @@ def test_wbs717_binding_rejects_secret_material_references():
     errors = validate_agent_transport_binding(binding)
 
     assert "AGENT_TRANSPORT_BINDING_MUST_REFERENCE_RESOLVER_OUTPUT_NOT_SECRET" in errors
+
+
+def test_agent_transport_routing_does_not_fall_back_to_legacy_agent_subjects():
+    binding = _binding()
+    envelope = build_agent_transport_envelope(
+        binding=binding,
+        message_type="Command_Message",
+        payload=CommandMessagePayload(
+            command_name="wbs717_diagnostic_send_receive",
+            target_handler="jarvis.diagnostic.intake",
+            completion_event_type="diagnostic_candidate_returned",
+        ),
+        payload_hash="sha256:payload",
+        expires_at="2026-05-21T03:00:00Z",
+        idempotency_key="idem-wbs717-routing-001",
+        correlation_id="corr-wbs717-routing-001",
+    ).to_dict()
+
+    routed_without_explicit_subject = route_execution_envelope_dict(envelope)
+    routed_with_legacy_subject = route_execution_envelope_dict(
+        {**envelope, "subject": "agent.jarvis.inbox"}
+    )
+
+    assert routed_without_explicit_subject.valid is True
+    assert routed_without_explicit_subject.subject == "nexus.agent_transport.wbs717-run-001.jarvis.inbox"
+    assert routed_with_legacy_subject.valid is False
+    assert "AGENT_TRANSPORT_SUBJECT_OUT_OF_SCOPE: agent.jarvis.inbox" in routed_with_legacy_subject.errors

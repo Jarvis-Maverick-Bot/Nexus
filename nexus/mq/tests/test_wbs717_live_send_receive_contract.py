@@ -201,6 +201,42 @@ def test_live_send_fails_closed_without_policy_or_credential():
     assert adapter.consume() is None
 
 
+def test_live_send_rejects_broad_reply_to_subject_before_publish():
+    adapter = MqAdapterStub()
+    binding = _binding()
+    binding.reply_to_subject = "agent.thunder.callbacks"
+    policy = _policy(binding.subject)
+    envelope = build_agent_transport_envelope(
+        binding=binding,
+        message_type="Command_Message",
+        payload=CommandMessagePayload(
+            command_name="wbs717_diagnostic_send_receive",
+            target_handler="jarvis.diagnostic.intake",
+            completion_event_type="diagnostic_candidate_returned",
+        ),
+        payload_hash="sha256:payload",
+        expires_at=EXPIRES,
+        idempotency_key="idem-wbs717-reply-001",
+        correlation_id="corr-wbs717-reply-001",
+    )
+
+    result = publish_live_message(
+        adapter,
+        envelope,
+        subject=binding.subject,
+        policy_decision=policy,
+        credential_result=CredentialResolutionResult(
+            accepted=True,
+            credential_ref="credential-resolution://wbs717/stub",
+        ),
+    )
+
+    assert result.accepted is False
+    assert result.published is False
+    assert "reply_to_subject: AGENT_TRANSPORT_SUBJECT_OUT_OF_SCOPE: agent.thunder.callbacks" in result.errors
+    assert adapter.consume() is None
+
+
 def test_result_return_routes_to_reply_subject_and_gate_shape_is_not_pass():
     adapter = MqAdapterStub()
     binding = _binding()

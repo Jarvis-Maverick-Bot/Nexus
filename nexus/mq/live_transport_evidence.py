@@ -41,6 +41,7 @@ SECRET_VALUE_MARKERS = (
     "private_key",
     "token=",
 )
+REJECTED_EVIDENCE_STATUSES = {"blocked", "error", "failed", "invalid", "rejected"}
 
 
 @dataclass
@@ -98,6 +99,18 @@ def evaluate_live_mq_evidence_gate(
         errors.append("LIVE_MQ_EVIDENCE_MUST_NOT_CLAIM_BUSINESS_COMPLETION")
     for record in records:
         errors.extend(secret_material_errors(record.to_dict(), path=f"record[{record.event_type}]"))
+        if record.errors:
+            errors.extend(
+                f"LIVE_MQ_EVIDENCE_RECORD_ERROR: {record.event_type}: {error}"
+                for error in record.errors
+            )
+        if (
+            record.event_type in REQUIRED_LIVE_MQ_EVIDENCE_EVENTS
+            and record.status.strip().lower() in REJECTED_EVIDENCE_STATUSES
+        ):
+            errors.append(
+                f"LIVE_MQ_EVIDENCE_RECORD_REJECTED: {record.event_type}: {record.status}"
+            )
     if present == {"publish"}:
         errors.append("LIVE_MQ_SENDER_ONLY_EVIDENCE_CANNOT_PASS")
     return LiveMqEvidenceGateResult(

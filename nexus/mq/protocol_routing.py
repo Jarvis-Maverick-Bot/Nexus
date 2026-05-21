@@ -149,6 +149,9 @@ def route_execution_envelope_dict(envelope_dict: dict) -> RoutingResult:
     explicit_subject = envelope_dict.get("subject")
     payload = envelope_dict.get("payload") or {}
 
+    if workflow_type == "agent_transport":
+        return _route_agent_transport_envelope_dict(envelope_dict)
+
     if explicit_subject and str(explicit_subject).startswith(f"{AGENT_TRANSPORT_SUBJECT_PREFIX}."):
         return validate_agent_transport_subject(str(explicit_subject), envelope_dict.get("workflow_instance_id"))
 
@@ -212,6 +215,76 @@ def route_execution_envelope_dict(envelope_dict: dict) -> RoutingResult:
                 subject=build_agent_transport_subject(str(envelope_dict["workflow_instance_id"]), "ops", "dlq"),
             )
         return RoutingResult(valid=True, subject=SUBJECT_OPS_DLQ)
+
+    if message_type in {"Evidence_Write_Message", "State_Transition_Message"}:
+        return RoutingResult(valid=False, errors=[f"DEFERRED_TRANSPORT_INACTIVE: {message_type}"])
+
+    return RoutingResult(valid=False, errors=[f"UNROUTABLE_MESSAGE_TYPE: {message_type}"])
+
+
+def _route_agent_transport_envelope_dict(envelope_dict: dict) -> RoutingResult:
+    message_type = envelope_dict.get("message_type")
+    reply_to_subject = envelope_dict.get("reply_to_subject")
+    target_agent_id = envelope_dict.get("target_agent_id")
+    workflow_instance_id = envelope_dict.get("workflow_instance_id")
+    explicit_subject = envelope_dict.get("subject")
+    payload = envelope_dict.get("payload") or {}
+
+    if explicit_subject:
+        return validate_agent_transport_subject(str(explicit_subject), workflow_instance_id)
+
+    if not workflow_instance_id:
+        return RoutingResult(valid=False, errors=["MISSING_AGENT_TRANSPORT_RUN_ID"])
+
+    if message_type in {"Command_Message", "Review_Task"}:
+        if target_agent_id:
+            return RoutingResult(
+                valid=True,
+                subject=build_agent_transport_subject(str(workflow_instance_id), str(target_agent_id), "inbox"),
+            )
+        return RoutingResult(valid=False, errors=["MISSING_ROUTING_TARGET"])
+
+    if message_type in {
+        "Feedback_Message",
+        "Business_Message",
+        "Result_Message",
+        "Callback_Message",
+        "Handoff_Message",
+    }:
+        if reply_to_subject:
+            return validate_agent_transport_subject(str(reply_to_subject), str(workflow_instance_id))
+        if target_agent_id:
+            return RoutingResult(
+                valid=True,
+                subject=build_agent_transport_return_subject(str(workflow_instance_id), str(target_agent_id)),
+            )
+        return RoutingResult(valid=False, errors=["MISSING_REPLY_ROUTE"])
+
+    if message_type == "Timeout_Message":
+        return RoutingResult(
+            valid=True,
+            subject=build_agent_transport_subject(str(workflow_instance_id), "ops", "timeout"),
+        )
+
+    if message_type == "Anomaly_Message":
+        if reply_to_subject:
+            return validate_agent_transport_subject(str(reply_to_subject), str(workflow_instance_id))
+        return RoutingResult(
+            valid=True,
+            subject=build_agent_transport_subject(str(workflow_instance_id), "ops", "anomaly"),
+        )
+
+    if message_type == "Retry_Message":
+        target_subject = payload.get("target_subject") if isinstance(payload, dict) else None
+        if target_subject:
+            return validate_agent_transport_subject(str(target_subject), str(workflow_instance_id))
+        return RoutingResult(valid=False, errors=["MISSING_RETRY_TARGET_SUBJECT"])
+
+    if message_type == "Dead_Letter_Message":
+        return RoutingResult(
+            valid=True,
+            subject=build_agent_transport_subject(str(workflow_instance_id), "ops", "dlq"),
+        )
 
     if message_type in {"Evidence_Write_Message", "State_Transition_Message"}:
         return RoutingResult(valid=False, errors=[f"DEFERRED_TRANSPORT_INACTIVE: {message_type}"])
