@@ -97,6 +97,34 @@ PRIVATE_AGENT_PROJECTION_FIELDS = {
     "read_only",
     "not_business_completion",
 }
+CANDIDATE_RUNTIME_PROJECTION_FIELDS = {
+    "projection_type",
+    "agent_id",
+    "candidate_profile_ref",
+    "runtime_instance_id",
+    "runtime_type",
+    "runtime_provider",
+    "runtime_version",
+    "host_ref",
+    "owner_principal_id",
+    "registry_status",
+    "initialization_status",
+    "presence_state",
+    "last_heartbeat_at",
+    "heartbeat_ttl_seconds",
+    "accepting_new_work",
+    "capacity_revision",
+    "capacity_observed_at",
+    "active_assignment_count",
+    "max_concurrent_assignments",
+    "load_state",
+    "claim_id",
+    "claim_state",
+    "stale_or_offline_reason",
+    "evidence_refs",
+    "read_only",
+    "not_business_completion",
+}
 
 
 @dataclass
@@ -110,6 +138,7 @@ class AgentAccessReadModel:
     exceptions: list[dict[str, Any]]
     evidence: list[dict[str, Any]]
     private_agents: list[dict[str, Any]] = field(default_factory=list)
+    candidate_runtimes: list[dict[str, Any]] = field(default_factory=list)
     status_families: dict[str, str] = field(default_factory=lambda: {
         "ack": "durable_intake_only",
         "progress": "governed_evidence_state_commit_required",
@@ -138,10 +167,12 @@ def build_agent_access_read_model(
     heartbeat_projection: dict[str, dict[str, Any]] | None = None,
     dispatch_projection: list[dict[str, Any]] | None = None,
     private_agent_projection: list[dict[str, Any]] | None = None,
+    candidate_runtime_projection: list[dict[str, Any]] | None = None,
 ) -> AgentAccessReadModel:
     heartbeat_projection = heartbeat_projection or {}
     dispatch_projection = dispatch_projection or []
     private_agent_projection = private_agent_projection or []
+    candidate_runtime_projection = candidate_runtime_projection or []
     return AgentAccessReadModel(
         agent_roster=[
             {
@@ -208,6 +239,7 @@ def build_agent_access_read_model(
         exceptions=_sanitize_records(exceptions, EXCEPTION_FIELDS),
         evidence=_sanitize_records(evidence, EVIDENCE_FIELDS),
         private_agents=_sanitize_records(private_agent_projection, PRIVATE_AGENT_PROJECTION_FIELDS),
+        candidate_runtimes=_sanitize_records(candidate_runtime_projection, CANDIDATE_RUNTIME_PROJECTION_FIELDS),
     )
 
 

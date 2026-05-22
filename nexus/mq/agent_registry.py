@@ -8,7 +8,7 @@ from typing import Any, Optional
 import uuid
 
 
-REGISTRY_STATUSES = {"proposed", "active", "suspended", "revoked"}
+REGISTRY_STATUSES = {"proposed", "active", "suspended", "revoked", "quarantined"}
 INITIALIZATION_STATUSES = {"not_started", "initializing", "ready", "failed", "quarantined", "superseded"}
 PRESENCE_STATES = {"online", "idle", "busy", "degraded", "draining", "offline", "stale"}
 DISPATCH_STATES = {
@@ -54,6 +54,13 @@ class AgentRegistryRecord:
     accepting_new_work: bool = True
     readiness_blocker: Optional[str] = None
     not_business_completion: bool = True
+    candidate_profile_ref: Optional[str] = None
+    runtime_provider: Optional[str] = None
+    runtime_version: Optional[str] = None
+    host_ref: Optional[str] = None
+    source_repo_refs: list[str] = field(default_factory=list)
+    credential_ref: Optional[str] = None
+    legacy_runtime_refs: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
