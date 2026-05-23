@@ -1,2 +1,6 @@
 ﻿Command: git diff --check
 ExitCode: 0
+
+warning: in the working copy of 'handoff/evidence/STRUCTURED_TASK_HANDOFF_CONTROLLER_IMPLEMENTATION_REPORT_2026-05-23.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'nexus/mq/structured_task_llm_advisory.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'nexus/mq/tests/test_structured_task_llm_advisory.py', LF will be replaced by CRLF the next time Git touches it

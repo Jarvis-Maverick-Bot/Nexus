@@ -2,6 +2,7 @@ from nexus.mq.structured_task_llm_advisory import (
     build_llm_advisory_context,
     validate_llm_advisory_output,
 )
+from nexus.mq.agent_registry_events import secret_material_errors
 
 
 def test_llm_receives_only_bounded_source_context():
@@ -15,6 +16,51 @@ def test_llm_receives_only_bounded_source_context():
     assert context.source_refs == ["wbs://7.19.1"]
     assert context.eligible_candidate_ids == ["thunder"]
     assert "secret" not in context.deterministic_fields
+
+
+def test_llm_context_removes_top_level_secret_marker_keys():
+    context = build_llm_advisory_context(
+        source_refs=["wbs://7.19.1"],
+        deterministic_fields={"objective": "Implement controller", "api_key": "opaque-ref"},
+        eligible_candidate_ids=["thunder"],
+        no_go_scope=["no runtime start"],
+    )
+
+    assert context.deterministic_fields == {"objective": "Implement controller"}
+    assert secret_material_errors(context.deterministic_fields, path="deterministic_fields") == []
+
+
+def test_llm_context_removes_nested_secret_marker_keys():
+    context = build_llm_advisory_context(
+        source_refs=["wbs://7.19.1"],
+        deterministic_fields={
+            "objective": "Implement controller",
+            "nested": {"token": "opaque-ref", "route": "thunder"},
+        },
+        eligible_candidate_ids=["thunder"],
+        no_go_scope=["no runtime start"],
+    )
+
+    assert context.deterministic_fields == {
+        "objective": "Implement controller",
+        "nested": {"route": "thunder"},
+    }
+    assert secret_material_errors(context.deterministic_fields, path="deterministic_fields") == []
+
+
+def test_llm_context_removes_secret_like_values():
+    context = build_llm_advisory_context(
+        source_refs=["wbs://7.19.1"],
+        deterministic_fields={
+            "objective": "Implement controller",
+            "source_hint": "sk-" + "reviewer-owned-secret",
+        },
+        eligible_candidate_ids=["thunder"],
+        no_go_scope=["no runtime start"],
+    )
+
+    assert context.deterministic_fields == {"objective": "Implement controller"}
+    assert secret_material_errors(context.deterministic_fields, path="deterministic_fields") == []
 
 
 def test_llm_owner_not_eligible_rejected():
