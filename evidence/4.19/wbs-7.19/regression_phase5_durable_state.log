@@ -1,0 +1,5 @@
+﻿Command: python -m pytest nexus/mq/tests/test_phase5_durable_state_listener_supervisor.py -q
+ExitCode: 0
+
+..........................                                               [100%]
+26 passed in 1.11s

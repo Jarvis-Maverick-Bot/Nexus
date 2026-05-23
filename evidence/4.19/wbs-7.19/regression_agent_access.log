@@ -1,0 +1,5 @@
+﻿Command: python -m pytest nexus/mq/tests/test_agent_access_read_model.py nexus/mq/tests/test_agent_access_evidence_export.py -q
+ExitCode: 0
+
+...                                                                      [100%]
+3 passed in 0.03s
