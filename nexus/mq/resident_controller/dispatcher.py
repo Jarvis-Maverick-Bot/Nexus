@@ -192,10 +192,13 @@ def _request_errors(
 
 def _matches_publish_allowlist(subject: str, policy: ResidentControllerSubjectPolicy) -> bool:
     for pattern in policy.publish_allowlist:
-        if "*" in pattern:
+        if pattern.count("*") == 1:
             prefix, suffix = pattern.split("*", 1)
-            if subject.startswith(prefix.rstrip(".")) and subject.endswith(suffix.lstrip(".")):
-                return True
+            if subject.startswith(prefix) and subject.endswith(suffix):
+                middle = subject[len(prefix) : len(subject) - len(suffix)]
+                if len([part for part in middle.split(".") if part]) == 2:
+                    return True
+            continue
         pattern_parts = pattern.split(".")
         subject_parts = subject.split(".")
         if len(pattern_parts) != len(subject_parts):

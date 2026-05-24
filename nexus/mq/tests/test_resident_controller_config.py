@@ -118,3 +118,11 @@ def test_resident_controller_config_rejects_unsafe_policy_flags():
     assert "PRIVATE_AGENT_INVOCATION_NOT_AUTHORIZED" in result.errors
     assert "BROKER_MUTATION_NOT_AUTHORIZED" in result.errors
     assert "AUTONOMOUS_ACCEPTANCE_NOT_AUTHORIZED" in result.errors
+
+
+def test_resident_controller_config_hash_is_deterministic():
+    first = validate_resident_controller_config(_config())
+    second = validate_resident_controller_config(_config())
+
+    assert first.config_hash == second.config_hash
+    assert "redacted_at" not in first.redacted_snapshot

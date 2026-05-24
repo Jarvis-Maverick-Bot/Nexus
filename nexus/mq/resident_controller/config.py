@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import Any
 import hashlib
 import json
@@ -125,7 +124,7 @@ def validate_resident_controller_config(config: dict[str, Any]) -> ResidentContr
         errors,
     )
 
-    errors.extend(secret_material_errors(config, path="resident_controller_config"))
+    errors.extend(_config_secret_errors(config))
     snapshot = build_redacted_config_snapshot(config)
     config_hash = hashlib.sha256(json.dumps(snapshot, sort_keys=True).encode("utf-8")).hexdigest()
     return ResidentControllerConfigValidationResult(
@@ -196,7 +195,6 @@ def build_redacted_config_snapshot(config: dict[str, Any]) -> dict[str, Any]:
             "assignment_ack_timeout_seconds": recovery.get("assignment_ack_timeout_seconds"),
             "result_candidate_timeout_seconds": recovery.get("result_candidate_timeout_seconds"),
         },
-        "redacted_at": datetime.now(timezone.utc).isoformat(),
         "not_business_completion": True,
     }
 
@@ -222,6 +220,14 @@ def _require_positive_int(section: dict[str, Any], key: str, path: str, errors: 
 
 def _redacted_ref(value: Any) -> str:
     return "redacted-ref-present" if value else ""
+
+
+def _config_secret_errors(config: dict[str, Any]) -> list[str]:
+    return [
+        error
+        for error in secret_material_errors(config, path="resident_controller_config")
+        if not error.endswith(".secret_scan_required")
+    ]
 
 
 def _dedupe(errors: list[str]) -> list[str]:

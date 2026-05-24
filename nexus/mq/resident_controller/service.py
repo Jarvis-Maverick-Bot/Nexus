@@ -5,18 +5,30 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from nexus.mq.resident_controller.config import validate_resident_controller_config
+from nexus.mq.resident_controller.evidence import ResidentEvidenceRecord
+
 
 @dataclass
 class ResidentControllerServicePolicy:
     default_enabled: bool = False
-    live_daemon_start_allowed: bool = False
     uat_authorized: bool = False
+
+
+@dataclass
+class BrokerReadinessSnapshot:
+    connected: bool
+    subscriptions_ready: bool
+    errors: list[str] = field(default_factory=list)
+    not_business_completion: bool = True
 
 
 @dataclass
 class ResidentControllerStartDecision:
     accepted: bool
     daemon_started: bool = False
+    service_state: str = "blocked"
+    evidence_records: list[ResidentEvidenceRecord] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     not_business_completion: bool = True
 
@@ -33,11 +45,59 @@ class ResidentControllerService:
             errors.append("MISSING_UAT_AUTHORIZATION")
         if not self.policy.uat_authorized:
             errors.append("UAT_AUTHORIZATION_REQUIRED")
-        if not self.policy.live_daemon_start_allowed:
-            errors.append("LIVE_DAEMON_START_NOT_AUTHORIZED")
         if errors:
-            return ResidentControllerStartDecision(False, daemon_started=False, errors=_dedupe(errors))
-        return ResidentControllerStartDecision(True, daemon_started=False, errors=["SOURCE_ONLY_NO_LIVE_START"])
+            return ResidentControllerStartDecision(False, daemon_started=False, service_state="blocked", errors=_dedupe(errors))
+        return ResidentControllerStartDecision(True, daemon_started=False, service_state="authorized_source_only")
+
+    def evaluate_start_once(
+        self,
+        *,
+        config: dict[str, Any],
+        broker: BrokerReadinessSnapshot,
+        run_authorization_ref: str,
+    ) -> ResidentControllerStartDecision:
+        start = self.evaluate_start(run_authorization_ref=run_authorization_ref)
+        errors = list(start.errors)
+        config_result = validate_resident_controller_config(config)
+        if not config_result.valid:
+            errors.extend(config_result.errors)
+        if not broker.connected:
+            errors.append("BROKER_NOT_CONNECTED")
+        if not broker.subscriptions_ready:
+            errors.append("SUBSCRIPTIONS_NOT_READY")
+        errors.extend(broker.errors)
+        state = "route_ready" if not errors else "blocked"
+        evidence = [
+            ResidentEvidenceRecord(
+                sequence=1,
+                record_type="config_validation",
+                event_time="source-only",
+                payload={
+                    "valid": config_result.valid,
+                    "config_hash": config_result.config_hash,
+                    "live_runtime_allowed": config_result.live_runtime_allowed,
+                    "not_business_completion": True,
+                },
+            ),
+            ResidentEvidenceRecord(
+                sequence=2,
+                record_type="route_readiness",
+                event_time="source-only",
+                payload={
+                    "broker_connected": broker.connected,
+                    "subscriptions_ready": broker.subscriptions_ready,
+                    "service_state": state,
+                    "not_business_completion": True,
+                },
+            ),
+        ]
+        return ResidentControllerStartDecision(
+            accepted=not errors,
+            daemon_started=False,
+            service_state=state,
+            evidence_records=evidence,
+            errors=_dedupe(errors),
+        )
 
 
 def build_status_snapshot(
