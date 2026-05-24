@@ -1,0 +1,36 @@
+﻿{
+    "schema_version":  "4.19.resident_controller.implementation_evidence_manifest.v1",
+    "wbs_id":  "7.19.14.3",
+    "run_id":  "wbs-7-19-14-3-implementation",
+    "repo":  "D:\\Projects\\Nexus",
+    "branch":  "codex/wbs-7-19-14-3-resident-controller",
+    "base_commit":  "bb241891a97057891d498b12f912a37d46c0657b",
+    "source_commit":  "e8b61174efb1ce56479aa5179c236b1b9c519097",
+    "candidate_verdict":  "READY_FOR_NOVA_REVIEW",
+    "no_go_confirmed":  true,
+    "files":  [
+                  "compile_resident_controller.log",
+                  "focused_resident_controller.log",
+                  "git_status.log",
+                  "IMPLEMENTATION_REPORT_2026-05-25.md",
+                  "regression_candidate_runtime.log",
+                  "regression_dispatch_message.log",
+                  "regression_structured_task.log",
+                  "runtime_posture_scan.log",
+                  "secret_scan_changed_files.log",
+                  "source_diff_check.log"
+              ],
+    "checksums":  {
+                      "regression_dispatch_message.log":  "sha256:f6367f1712f96e3906abd19179cada9236a4320e500bea1cf6b36b98a8a0a570",
+                      "source_diff_check.log":  "sha256:3ebff83b3f863aebc53d0301f877182f5109642b7c2749d8748eac761bc5a7a4",
+                      "focused_resident_controller.log":  "sha256:d6ce20571ee147b5a019b16b4e5dbf8dbccb7d947098a887b77602bbc0b2bbb4",
+                      "secret_scan_changed_files.log":  "sha256:440de97a3a5ff2f624d719b2b67c38f4a3db1184c0fca9ef9122bb616818a439",
+                      "compile_resident_controller.log":  "sha256:42f3204bcdc77658494988a399580b668a2daa20c7803259d4da11edf18bc4dd",
+                      "runtime_posture_scan.log":  "sha256:c95288e21a6a7529e9f83028f9d9850a7546f79336889e885af80ada66ecae1f",
+                      "regression_candidate_runtime.log":  "sha256:96c67090672398539ebc2b66b95ce1280bd0fb600eb38adad1c604105b08d388",
+                      "IMPLEMENTATION_REPORT_2026-05-25.md":  "sha256:323f08dabcabb9f0567ea85e57f45b95ac4afedbbf4bb0a9d9e1371f7f8f61ca",
+                      "regression_structured_task.log":  "sha256:77383a4b7aa01de518b2d6ddd956fc729209a9e47abd58ed4475793e73c3e183",
+                      "git_status.log":  "sha256:f4831be5c9f339ef8388601cefbd35cff1c3c99d05308efd6dba44763386f838"
+                  },
+    "not_business_completion":  true
+}

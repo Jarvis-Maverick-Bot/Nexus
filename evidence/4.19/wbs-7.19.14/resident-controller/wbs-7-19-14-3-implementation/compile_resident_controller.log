@@ -1,0 +1,4 @@
+﻿# Command: python -m compileall -q nexus/mq/resident_controller
+# Started: 2026-05-25T01:22:15.4715511+08:00
+# ExitCode: 0
+# Finished: 2026-05-25T01:22:15.4720945+08:00
