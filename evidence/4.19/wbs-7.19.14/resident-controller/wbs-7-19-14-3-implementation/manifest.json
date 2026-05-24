@@ -3,16 +3,16 @@
   "branch": "codex/wbs-7-19-14-3-resident-controller",
   "candidate_verdict": "READY_FOR_NOVA_REVIEW",
   "checksums": {
-    "IMPLEMENTATION_REPORT_2026-05-25.md": "sha256:12eb21755d42232a547078bbe11bdf82f6b4e07828ab90ca3ac109ed8d186134",
-    "compile_resident_controller.log": "sha256:d576a92650cea6c66fa361d6fac24b2c50f61aa7fcde370f9e3d1e4c9fbb1e44",
-    "focused_resident_controller.log": "sha256:665f5fdb698dd0e1aba33384866963fa3383ba6283b19fdf18baeeef4f24b553",
-    "git_status.log": "sha256:27a5f375ca9b94747eb3024e045e36bcb8e476215167985b32ed293506c7d54b",
-    "regression_candidate_runtime.log": "sha256:783c00b4150f7b0494a121a56b1cf749294748806294d933290b2d13fe032a5d",
-    "regression_dispatch_message.log": "sha256:fc5975afdc30f3d8fd7408ac94ff661204886c00ec78694e63547a49bfd68720",
-    "regression_structured_task.log": "sha256:4f8c3b42254a29856487e4131dd2cc78cb7afd592a3b18c3b4c52f2f745261ad",
-    "runtime_posture_scan.log": "sha256:16784a11c61cd8ade1ae7d02656f742ddb10c1728748caa8fd38dfd63fc2d9a5",
-    "secret_scan_changed_files.log": "sha256:40b613e450aed4ce39c44c512ea9b4d0ce3073d1f614e087c247d9476b3ef6d1",
-    "source_diff_check.log": "sha256:f6111ae93003d5b72c6d18350b95c4b6ad031d4fb5c0c8667cc143c831f8ff47"
+    "IMPLEMENTATION_REPORT_2026-05-25.md": "sha256:cadb2d35b16ccbf002b1c67e557443279cabc270f1fd454fc30d6bc3608d59cc",
+    "compile_resident_controller.log": "sha256:afe878c07edb25857398f9a8685351408d54b461c959f7dbe9fdc40278d68b18",
+    "focused_resident_controller.log": "sha256:0c2ea0ef545757b3e49e6c6531c2504d8a0bb6d33d7f997855d196c749a2b174",
+    "git_status.log": "sha256:7b0aecfe582947084f236f132fc39c7421a46b5e97cfd2a87f80832be344dbda",
+    "regression_candidate_runtime.log": "sha256:f468166c00cc87e5b8e786a42aa67d91b83cb5aa20600a58bf82faa9be77b14d",
+    "regression_dispatch_message.log": "sha256:cb9d95c4fe796329af04e80287e3fffe1abf846061ce9ddbba8cfa74630793a1",
+    "regression_structured_task.log": "sha256:4ad40b404233f1745b5a2190d2c42c54b839f1a5d44f97e4b4519658b664677f",
+    "runtime_posture_scan.log": "sha256:0e93c303d2a0d46ce15375611435a1fe68db565f6124ee463d4ad18b0213f989",
+    "secret_scan_changed_files.log": "sha256:2e2c8afb9ea34669fd7d29306e5436d838ba6ab249df955230581fe118254177",
+    "source_diff_check.log": "sha256:6816d96911666162cafd256e997bff488acf68fc410e55bc77d66a4e2fdbd683"
   },
   "files": [
     "compile_resident_controller.log",
@@ -32,6 +32,7 @@
   "review_cleanup_commit": "785814b11db347f83af0071649c145ea4c0d8229",
   "run_id": "wbs-7-19-14-3-implementation",
   "schema_version": "4.19.resident_controller.implementation_evidence_manifest.v1",
+  "second_review_cleanup_commit": "f1a2066eec4fae210d25dad9bc419291d996cbf0",
   "source_commit": "e8b61174efb1ce56479aa5179c236b1b9c519097",
   "wbs_id": "7.19.14.3"
 }

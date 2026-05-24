@@ -1,6 +1,6 @@
 ﻿# Command: python -m pytest nexus/mq/tests/test_structured_task_models.py nexus/mq/tests/test_structured_task_validation.py nexus/mq/tests/test_structured_task_runledger.py nexus/mq/tests/test_structured_task_policy.py nexus/mq/tests/test_structured_task_llm_advisory.py nexus/mq/tests/test_structured_task_persistence.py nexus/mq/tests/test_structured_task_controller.py -q
-# Started: 2026-05-25T01:45:42.4877626+08:00
+# Started: 2026-05-25T01:56:54.5645877+08:00
 ....................................                                     [100%]
-36 passed in 0.26s
+36 passed in 0.25s
 # ExitCode: 0
-# Finished: 2026-05-25T01:45:42.4877626+08:00
+# Finished: 2026-05-25T01:56:54.5645877+08:00

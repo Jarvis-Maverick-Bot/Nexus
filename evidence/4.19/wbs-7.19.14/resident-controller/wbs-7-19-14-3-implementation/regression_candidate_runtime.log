@@ -1,6 +1,6 @@
 ﻿# Command: python -m pytest nexus/mq/tests/test_candidate_runtime_identity.py nexus/mq/tests/test_candidate_runtime_lifecycle.py nexus/mq/tests/test_candidate_runtime_capacity.py nexus/mq/tests/test_candidate_runtime_scheduler.py nexus/mq/tests/test_candidate_runtime_controller.py nexus/mq/tests/test_candidate_runtime_evidence.py nexus/mq/tests/test_candidate_runtime_projection.py nexus/mq/tests/test_candidate_runtime_registry.py nexus/mq/tests/test_candidate_runtime_no_go.py -q
-# Started: 2026-05-25T01:45:41.8441699+08:00
+# Started: 2026-05-25T01:56:53.9257320+08:00
 ...........................                                              [100%]
 27 passed in 0.10s
 # ExitCode: 0
-# Finished: 2026-05-25T01:45:41.8441699+08:00
+# Finished: 2026-05-25T01:56:53.9257320+08:00

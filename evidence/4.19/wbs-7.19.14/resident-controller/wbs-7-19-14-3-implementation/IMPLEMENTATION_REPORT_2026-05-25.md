@@ -10,6 +10,7 @@ Base commit: bb241891a97057891d498b12f912a37d46c0657b
 Merge-base with origin/master: bb241891a97057891d498b12f912a37d46c0657b
 Source implementation commit: e8b61174efb1ce56479aa5179c236b1b9c519097
 Review cleanup commit: 785814b11db347f83af0071649c145ea4c0d8229
+Second review cleanup commit: f1a2066eec4fae210d25dad9bc419291d996cbf0
 Candidate verdict: READY_FOR_NOVA_REVIEW
 
 ## Authority Inputs
@@ -61,6 +62,11 @@ Nova review `REQUEST_CHANGES` at Shared Docs commit `f43f263` listed four blocke
 - Config hash nondeterministic: closed by removing `redacted_at` from the redacted snapshot used for hashing and adding a deterministic hash test.
 - Publish subject allowlist overmatch: closed by exact-segment wildcard matching and a negative test for extra subject segments.
 
+Nova rereview at Shared Docs commit `a0ab996` listed two remaining blockers. Second cleanup status:
+
+- CLI `start-once` unwired: closed by adding `start-once --config <json|yaml> --broker-readiness <json> --output <json>` source-only route-readiness evaluation. It returns route readiness JSON with `daemon_started=false`; it does not connect to broker or start a daemon.
+- Committed YAML example not accepted by `validate-config`: closed by loading `.yaml` / `.yml` through `yaml.safe_load`; `config/resident_controller.example.yaml` is covered by a focused CLI test.
+
 ## Verification Evidence
 
 Evidence directory:
@@ -69,7 +75,7 @@ Evidence directory:
 
 | Log | Scope | Result |
 | --- | --- | --- |
-| focused_resident_controller.log | Resident controller focused tests | 27 passed |
+| focused_resident_controller.log | Resident controller focused tests | 29 passed |
 | regression_dispatch_message.log | Dispatch eligibility, operational assignment, message contracts | 24 passed |
 | regression_candidate_runtime.log | Candidate runtime regression set | 27 passed |
 | regression_structured_task.log | Structured task controller regression set | 36 passed |
@@ -81,7 +87,7 @@ Evidence directory:
 
 ## Changed File Summary
 
-Source commits e8b61174efb1ce56479aa5179c236b1b9c519097 and 785814b11db347f83af0071649c145ea4c0d8229 add/update:
+Source commits e8b61174efb1ce56479aa5179c236b1b9c519097, 785814b11db347f83af0071649c145ea4c0d8229, and f1a2066eec4fae210d25dad9bc419291d996cbf0 add/update:
 
 - config/resident_controller.example.yaml
 - nexus/mq/resident_controller/__init__.py

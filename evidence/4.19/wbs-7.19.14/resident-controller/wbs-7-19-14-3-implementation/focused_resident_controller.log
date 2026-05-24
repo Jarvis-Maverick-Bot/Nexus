@@ -1,6 +1,6 @@
 ﻿# Command: python -m pytest nexus/mq/tests/test_resident_controller_config.py nexus/mq/tests/test_resident_controller_subject_policy.py nexus/mq/tests/test_resident_controller_observer_dispatcher.py nexus/mq/tests/test_resident_controller_evidence_recovery.py nexus/mq/tests/test_resident_controller_cli_service.py nexus/mq/tests/test_resident_controller_launchd.py -q
-# Started: 2026-05-25T01:45:40.9458148+08:00
-...........................                                              [100%]
-27 passed in 0.11s
+# Started: 2026-05-25T01:56:53.0377293+08:00
+.............................                                            [100%]
+29 passed in 0.14s
 # ExitCode: 0
-# Finished: 2026-05-25T01:45:40.9478171+08:00
+# Finished: 2026-05-25T01:56:53.0400442+08:00
