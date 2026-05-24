@@ -29,6 +29,25 @@ def test_resident_controller_cli_validate_config_reads_file(tmp_path):
     assert payload["live_runtime_allowed"] is False
 
 
+def test_resident_controller_cli_validate_config_reads_committed_yaml_example(tmp_path):
+    output_path = tmp_path / "validation.json"
+
+    exit_code = main(
+        [
+            "validate-config",
+            "--config",
+            "config/resident_controller.example.yaml",
+            "--output",
+            str(output_path),
+        ]
+    )
+
+    assert exit_code == 0
+    payload = json.loads(output_path.read_text(encoding="utf-8"))
+    assert payload["valid"] is True
+    assert payload["redacted_snapshot"]["controller"]["launch_mode"] == "disabled"
+
+
 def test_resident_controller_cli_validate_config_rejects_unsafe_file(tmp_path):
     config = _config()
     config["policy"]["broker_mutation_allowed"] = True
@@ -106,6 +125,37 @@ def test_resident_controller_cli_build_evidence_package_creates_manifest(tmp_pat
     assert exit_code == 0
     assert (output_root / "manifest.json").exists()
     assert (output_root / "SHA256SUMS").exists()
+
+
+def test_resident_controller_cli_start_once_outputs_route_readiness(tmp_path):
+    config = _config()
+    config["controller"]["launch_mode"] = "bounded_uat"
+    config_path = tmp_path / "resident.json"
+    config_path.write_text(json.dumps(config), encoding="utf-8")
+    broker_path = tmp_path / "broker.json"
+    broker_path.write_text(
+        json.dumps({"connected": True, "subscriptions_ready": True}),
+        encoding="utf-8",
+    )
+    output_path = tmp_path / "start_once.json"
+
+    exit_code = main(
+        [
+            "start-once",
+            "--config",
+            str(config_path),
+            "--broker-readiness",
+            str(broker_path),
+            "--output",
+            str(output_path),
+        ]
+    )
+
+    assert exit_code == 0
+    payload = json.loads(output_path.read_text(encoding="utf-8"))
+    assert payload["accepted"] is True
+    assert payload["daemon_started"] is False
+    assert payload["service_state"] == "route_ready"
 
 
 def test_resident_controller_status_never_claims_acceptance():

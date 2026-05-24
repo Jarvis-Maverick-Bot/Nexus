@@ -10,11 +10,18 @@ import argparse
 import json
 from pathlib import Path
 from typing import Optional
+import yaml
 
 from nexus.mq.resident_controller.config import validate_resident_controller_config
 from nexus.mq.resident_controller.evidence import ResidentEvidenceRecord, build_evidence_package
 from nexus.mq.resident_controller.recovery import ResidentControllerCheckpoint, classify_restart_recovery
-from nexus.mq.resident_controller.service import build_drain_offline_record, build_status_snapshot
+from nexus.mq.resident_controller.service import (
+    BrokerReadinessSnapshot,
+    ResidentControllerService,
+    ResidentControllerServicePolicy,
+    build_drain_offline_record,
+    build_status_snapshot,
+)
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -25,7 +32,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     validate_parser.add_argument("--output")
     status_parser = subparsers.add_parser("status")
     status_parser.add_argument("--output")
-    subparsers.add_parser("start-once")
+    start_parser = subparsers.add_parser("start-once")
+    start_parser.add_argument("--config", required=True)
+    start_parser.add_argument("--broker-readiness", required=True)
+    start_parser.add_argument("--output")
     drain_parser = subparsers.add_parser("drain")
     drain_parser.add_argument("--run-id", required=True)
     drain_parser.add_argument("--reason-ref", required=True)
@@ -36,7 +46,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     evidence_parser = subparsers.add_parser("build-evidence-package")
     evidence_parser.add_argument("--run-id", required=True)
     evidence_parser.add_argument("--evidence-root", required=True)
-    args = parser.parse_args(argv)
+    try:
+        args = parser.parse_args(argv)
+    except SystemExit as exc:
+        return int(exc.code or 0)
 
     if not args.command:
         parser.print_usage()
@@ -69,6 +82,37 @@ def main(argv: Optional[list[str]] = None) -> int:
             output=getattr(args, "output", None),
         )
         return 0
+    if args.command == "start-once":
+        config = _load_config(Path(args.config))
+        broker_payload = json.loads(Path(args.broker_readiness).read_text(encoding="utf-8"))
+        controller = dict(config.get("controller") or {})
+        service = ResidentControllerService(
+            policy=ResidentControllerServicePolicy(
+                default_enabled=controller.get("launch_mode") == "bounded_uat",
+                uat_authorized=bool(controller.get("run_authorization_ref")),
+            )
+        )
+        decision = service.evaluate_start_once(
+            config=config,
+            broker=BrokerReadinessSnapshot(
+                connected=bool(broker_payload.get("connected")),
+                subscriptions_ready=bool(broker_payload.get("subscriptions_ready")),
+                errors=list(broker_payload.get("errors") or []),
+            ),
+            run_authorization_ref=str(controller.get("run_authorization_ref") or ""),
+        )
+        _emit_json(
+            {
+                "accepted": decision.accepted,
+                "daemon_started": decision.daemon_started,
+                "service_state": decision.service_state,
+                "errors": decision.errors,
+                "evidence_records": [record.to_dict() for record in decision.evidence_records],
+                "not_business_completion": decision.not_business_completion,
+            },
+            output=getattr(args, "output", None),
+        )
+        return 0 if decision.accepted else 1
     if args.command == "drain":
         _emit_json(
             build_drain_offline_record(
@@ -126,6 +170,11 @@ def _load_config(path: Path) -> dict:
     text = path.read_text(encoding="utf-8")
     if path.suffix.lower() == ".json":
         return json.loads(text)
+    if path.suffix.lower() in {".yaml", ".yml"}:
+        loaded = yaml.safe_load(text)
+        if not isinstance(loaded, dict):
+            raise ValueError("CONFIG_FILE_MUST_BE_MAPPING")
+        return loaded
     raise ValueError("ONLY_JSON_CONFIG_SUPPORTED_BY_SOURCE_CLI")
 
 
