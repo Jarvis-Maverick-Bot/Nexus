@@ -1,6 +1,13 @@
 ﻿# Command: git status --short --branch
-# Started: 2026-05-25T01:22:15.6298118+08:00
-## codex/wbs-7-19-14-3-resident-controller...origin/master [ahead 1]
-?? evidence/4.19/wbs-7.19.14/
+# Started: 2026-05-25T01:45:42.7328007+08:00
+## codex/wbs-7-19-14-3-resident-controller...origin/codex/wbs-7-19-14-3-resident-controller [ahead 1]
+ M evidence/4.19/wbs-7.19.14/resident-controller/wbs-7-19-14-3-implementation/compile_resident_controller.log
+ M evidence/4.19/wbs-7.19.14/resident-controller/wbs-7-19-14-3-implementation/focused_resident_controller.log
+ M evidence/4.19/wbs-7.19.14/resident-controller/wbs-7-19-14-3-implementation/regression_candidate_runtime.log
+ M evidence/4.19/wbs-7.19.14/resident-controller/wbs-7-19-14-3-implementation/regression_dispatch_message.log
+ M evidence/4.19/wbs-7.19.14/resident-controller/wbs-7-19-14-3-implementation/regression_structured_task.log
+ M evidence/4.19/wbs-7.19.14/resident-controller/wbs-7-19-14-3-implementation/runtime_posture_scan.log
+ M evidence/4.19/wbs-7.19.14/resident-controller/wbs-7-19-14-3-implementation/secret_scan_changed_files.log
+ M evidence/4.19/wbs-7.19.14/resident-controller/wbs-7-19-14-3-implementation/source_diff_check.log
 # ExitCode: 0
-# Finished: 2026-05-25T01:22:15.6298118+08:00
+# Finished: 2026-05-25T01:45:42.7328007+08:00

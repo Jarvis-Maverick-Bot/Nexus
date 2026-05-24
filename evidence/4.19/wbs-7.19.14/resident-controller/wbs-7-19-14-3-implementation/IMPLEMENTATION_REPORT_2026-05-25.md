@@ -9,6 +9,7 @@ Branch: codex/wbs-7-19-14-3-resident-controller
 Base commit: bb241891a97057891d498b12f912a37d46c0657b
 Merge-base with origin/master: bb241891a97057891d498b12f912a37d46c0657b
 Source implementation commit: e8b61174efb1ce56479aa5179c236b1b9c519097
+Review cleanup commit: 785814b11db347f83af0071649c145ea4c0d8229
 Candidate verdict: READY_FOR_NOVA_REVIEW
 
 ## Authority Inputs
@@ -22,7 +23,7 @@ Candidate verdict: READY_FOR_NOVA_REVIEW
 ## Implemented Source Surfaces
 
 - nexus/mq/resident_controller/config.py
-  - Config validation, fail-closed unsafe policy rejection, refs-only redaction, config hash.
+  - Config validation, fail-closed unsafe policy rejection, refs-only redaction, deterministic config hash.
 - nexus/mq/resident_controller/dispatcher.py
   - WBS 7.19.14 run-scoped subject policy, bounded non-business dispatch decision, duplicate suppression.
 - nexus/mq/resident_controller/observer.py
@@ -32,7 +33,7 @@ Candidate verdict: READY_FOR_NOVA_REVIEW
 - nexus/mq/resident_controller/recovery.py
   - Restart recovery classification before replay.
 - nexus/mq/resident_controller/service.py
-  - Default-off service start decision, operational status snapshot, local drain/offline evidence record.
+  - Default-off service start decision, source-only route readiness evaluation, operational status snapshot, local drain/offline evidence record.
 - nexus/mq/resident_controller/cli.py
   - Source-only CLI command surface: validate-config, status, start-once, drain, recover, build-evidence-package.
 - config/resident_controller.example.yaml
@@ -49,7 +50,16 @@ Candidate verdict: READY_FOR_NOVA_REVIEW
 - nexus/mq/tests/test_resident_controller_cli_service.py
 - nexus/mq/tests/test_resident_controller_launchd.py
 
-Coverage includes default-off behavior, unsafe config rejection, subject policy, stale runtime ineligibility, non-business dispatch guard, duplicate suppression, evidence manifest/checksums, secret-scan blocking, restart replay classification, drain/offline local evidence, launchd default-off template, and UAT authorization gate.
+Coverage includes default-off behavior, unsafe config rejection, deterministic config hash, exact subject policy matching, stale runtime ineligibility, non-business dispatch guard, duplicate suppression, evidence manifest/checksums, secret-scan blocking, restart replay classification, drain/offline local evidence, launchd default-off template, and UAT authorization gate.
+
+## Request Changes Closure
+
+Nova review `REQUEST_CHANGES` at Shared Docs commit `f43f263` listed four blockers. Cleanup status:
+
+- CLI/service placeholder: closed by adding file-backed `validate-config`, machine-readable `status`, local `drain`, checkpoint `recover`, local evidence-package build, and source-only route readiness evaluation with evidence records.
+- Evidence SHA256SUMS mismatch: closed by regenerating evidence after cleanup and calculating final checksums from staged Git index/blob content before committing the evidence package.
+- Config hash nondeterministic: closed by removing `redacted_at` from the redacted snapshot used for hashing and adding a deterministic hash test.
+- Publish subject allowlist overmatch: closed by exact-segment wildcard matching and a negative test for extra subject segments.
 
 ## Verification Evidence
 
@@ -59,7 +69,7 @@ Evidence directory:
 
 | Log | Scope | Result |
 | --- | --- | --- |
-| focused_resident_controller.log | Resident controller focused tests | 18 passed |
+| focused_resident_controller.log | Resident controller focused tests | 27 passed |
 | regression_dispatch_message.log | Dispatch eligibility, operational assignment, message contracts | 24 passed |
 | regression_candidate_runtime.log | Candidate runtime regression set | 27 passed |
 | regression_structured_task.log | Structured task controller regression set | 36 passed |
@@ -71,7 +81,7 @@ Evidence directory:
 
 ## Changed File Summary
 
-Source commit e8b61174efb1ce56479aa5179c236b1b9c519097 adds:
+Source commits e8b61174efb1ce56479aa5179c236b1b9c519097 and 785814b11db347f83af0071649c145ea4c0d8229 add/update:
 
 - config/resident_controller.example.yaml
 - nexus/mq/resident_controller/__init__.py
