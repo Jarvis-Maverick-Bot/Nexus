@@ -1,0 +1,63 @@
+schema_version: resident_controller.v0.2
+controller:
+  controller_id: resident-controller-nova-mac
+  runtime_instance_id: resident-controller-RUN_ID
+  environment: bounded_uat
+  launch_mode: disabled
+  run_authorization_ref: review-evidence/nova/2026-XX-XX_4_19_WBS_7_19_14_5_ALEX_UAT_AUTHORIZATION.md
+  allowed_wbs_ids:
+    - "7.19.14.5"
+broker:
+  nats_url_ref: env:NEXUS_RESIDENT_CONTROLLER_NATS_URL
+  auth_ref: env:NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF
+  connect_timeout_seconds: 10
+  subscription_ready_timeout_seconds: 10
+subjects:
+  namespace: nexus.4_19.wbs7_19_14
+  subscribe_allowlist:
+    - nexus.4_19.wbs7_19_14.*.registration.>
+    - nexus.4_19.wbs7_19_14.*.readiness.>
+    - nexus.4_19.wbs7_19_14.*.heartbeat.>
+    - nexus.4_19.wbs7_19_14.*.ack.>
+    - nexus.4_19.wbs7_19_14.*.progress.>
+    - nexus.4_19.wbs7_19_14.*.evidence.>
+    - nexus.4_19.wbs7_19_14.*.result_candidate.>
+    - nexus.4_19.wbs7_19_14.*.offline.>
+  publish_allowlist:
+    - nexus.4_19.wbs7_19_14.*.controller.init
+    - nexus.4_19.wbs7_19_14.*.assignment
+    - nexus.4_19.wbs7_19_14.*.assignment.duplicate_replay
+    - nexus.4_19.wbs7_19_14.*.drain
+runtimes:
+  allowed_agents:
+    - jarvis
+  required_capabilities:
+    - controlled_uat_handoff_receive
+  heartbeat_ttl_seconds: 30
+  stale_after_missed_heartbeats: 2
+policy:
+  production_business_execution_allowed: false
+  private_agent_invocation_allowed: false
+  broker_mutation_allowed: false
+  autonomous_acceptance_allowed: false
+  require_non_loopback_for_distributed_uat: true
+  command_allowlist:
+    - controller_init
+    - bounded_assignment
+    - duplicate_replay
+    - drain
+evidence:
+  root: evidence/4.19/wbs-7.19.14/resident-controller/RUN_ID
+  raw_log: events.jsonl
+  manifest: manifest.json
+  summary: verdict_report.md
+  secret_scan_required: true
+recovery:
+  checkpoint_file: controller_state.json
+  reconnect_max_attempts: 3
+  reconnect_backoff_seconds:
+    - 1
+    - 2
+    - 5
+  assignment_ack_timeout_seconds: 30
+  result_candidate_timeout_seconds: 120
