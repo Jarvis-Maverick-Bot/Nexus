@@ -1,0 +1,6 @@
+﻿# Command: python -m pytest nexus/mq/tests/test_codex_worker.py -q
+# Started: 2026-05-24T21:45:33.7456422+08:00
+....                                                                     [100%]
+4 passed in 0.03s
+# ExitCode: 0
+# Finished: 2026-05-24T21:45:33.7456422+08:00
