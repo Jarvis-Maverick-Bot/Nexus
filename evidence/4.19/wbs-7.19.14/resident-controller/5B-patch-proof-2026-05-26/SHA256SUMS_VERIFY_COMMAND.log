@@ -1,0 +1,4 @@
+Regenerated from staged Git blob bytes, excluding SHA256SUMS.txt itself and tools/.
+Generation command: enumerate git ls-files evidence/4.19/wbs-7.19.14/resident-controller/5B-patch-proof-2026-05-26, hash each staged blob with git cat-file -p :<path>, write relative paths to SHA256SUMS.txt.
+Nova verification command: cd evidence/4.19/wbs-7.19.14/resident-controller/5B-patch-proof-2026-05-26 && shasum -a 256 -c SHA256SUMS.txt
+Thunder blob-equivalent verification command: git checkout-index --prefix=<temp>/ -- <package files>; cd <temp>/evidence/4.19/wbs-7.19.14/resident-controller/5B-patch-proof-2026-05-26 && sha256sum -c SHA256SUMS.txt
