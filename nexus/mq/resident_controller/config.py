@@ -134,7 +134,9 @@ def validate_resident_controller_config(config: dict[str, Any]) -> ResidentContr
         warnings=warnings,
         config_hash=f"sha256:{config_hash}",
         redacted_snapshot=snapshot,
-        live_runtime_allowed=False,
+        live_runtime_allowed=not errors
+        and controller.get("launch_mode") == "bounded_uat"
+        and bool(controller.get("run_authorization_ref")),
     )
 
 

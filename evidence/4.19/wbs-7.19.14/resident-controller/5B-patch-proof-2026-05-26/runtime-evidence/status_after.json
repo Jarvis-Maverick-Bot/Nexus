@@ -1,0 +1,14 @@
+{
+  "broker_connected": true,
+  "evidence_root": "evidence/4.19/wbs-7.19.14/resident-controller/5B-patch-proof-2026-05-26/runtime-evidence",
+  "final_acceptance": false,
+  "last_heartbeat_at": "2026-05-25T16:33:01.767821+00:00",
+  "not_business_completion": true,
+  "operational_status_only": true,
+  "pending_assignments": [],
+  "result_candidate_only": true,
+  "schema_version": "4.19.resident_controller.status.v1",
+  "service_state": "offline",
+  "subscriptions_ready": true,
+  "wbs_pass": false
+}

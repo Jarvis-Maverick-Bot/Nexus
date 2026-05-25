@@ -1,0 +1,1 @@
+D:\Projects\Nexus\evidence\4.19\wbs-7.19.14\resident-controller\5B-patch-proof-2026-05-26\tools\nats-server-v2.14.1-windows-amd64\nats-server.exe
