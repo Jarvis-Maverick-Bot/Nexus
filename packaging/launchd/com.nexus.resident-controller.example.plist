@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "https://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.nexus.resident-controller.example</string>
+  <key>Disabled</key>
+  <true/>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>-m</string>
+    <string>nexus.mq.resident_controller.cli</string>
+    <string>status</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>NEXUS_RESIDENT_CONTROLLER_NATS_URL</key>
+    <string>ref-only-config-required</string>
+    <key>NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF</key>
+    <string>ref-only-config-required</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>KeepAlive</key>
+  <false/>
+</dict>
+</plist>

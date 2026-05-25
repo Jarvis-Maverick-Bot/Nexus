@@ -1,0 +1,38 @@
+{
+  "base_commit": "bb241891a97057891d498b12f912a37d46c0657b",
+  "branch": "codex/wbs-7-19-14-3-resident-controller",
+  "candidate_verdict": "READY_FOR_NOVA_REVIEW",
+  "checksums": {
+    "IMPLEMENTATION_REPORT_2026-05-25.md": "sha256:cadb2d35b16ccbf002b1c67e557443279cabc270f1fd454fc30d6bc3608d59cc",
+    "compile_resident_controller.log": "sha256:afe878c07edb25857398f9a8685351408d54b461c959f7dbe9fdc40278d68b18",
+    "focused_resident_controller.log": "sha256:0c2ea0ef545757b3e49e6c6531c2504d8a0bb6d33d7f997855d196c749a2b174",
+    "git_status.log": "sha256:7b0aecfe582947084f236f132fc39c7421a46b5e97cfd2a87f80832be344dbda",
+    "regression_candidate_runtime.log": "sha256:f468166c00cc87e5b8e786a42aa67d91b83cb5aa20600a58bf82faa9be77b14d",
+    "regression_dispatch_message.log": "sha256:cb9d95c4fe796329af04e80287e3fffe1abf846061ce9ddbba8cfa74630793a1",
+    "regression_structured_task.log": "sha256:4ad40b404233f1745b5a2190d2c42c54b839f1a5d44f97e4b4519658b664677f",
+    "runtime_posture_scan.log": "sha256:0e93c303d2a0d46ce15375611435a1fe68db565f6124ee463d4ad18b0213f989",
+    "secret_scan_changed_files.log": "sha256:2e2c8afb9ea34669fd7d29306e5436d838ba6ab249df955230581fe118254177",
+    "source_diff_check.log": "sha256:6816d96911666162cafd256e997bff488acf68fc410e55bc77d66a4e2fdbd683"
+  },
+  "files": [
+    "compile_resident_controller.log",
+    "focused_resident_controller.log",
+    "git_status.log",
+    "IMPLEMENTATION_REPORT_2026-05-25.md",
+    "regression_candidate_runtime.log",
+    "regression_dispatch_message.log",
+    "regression_structured_task.log",
+    "runtime_posture_scan.log",
+    "secret_scan_changed_files.log",
+    "source_diff_check.log"
+  ],
+  "no_go_confirmed": true,
+  "not_business_completion": true,
+  "repo": "D:/Projects/Nexus",
+  "review_cleanup_commit": "785814b11db347f83af0071649c145ea4c0d8229",
+  "run_id": "wbs-7-19-14-3-implementation",
+  "schema_version": "4.19.resident_controller.implementation_evidence_manifest.v1",
+  "second_review_cleanup_commit": "f1a2066eec4fae210d25dad9bc419291d996cbf0",
+  "source_commit": "e8b61174efb1ce56479aa5179c236b1b9c519097",
+  "wbs_id": "7.19.14.3"
+}
