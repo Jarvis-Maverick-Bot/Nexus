@@ -1,8 +1,4 @@
-"""Resident controller CLI.
-
-The WBS 7.19.14.3 CLI is intentionally source-only and default-off. It exposes
-validation/status command names without installing or starting a daemon.
-"""
+"""Resident controller CLI."""
 
 from __future__ import annotations
 
@@ -14,6 +10,7 @@ import yaml
 
 from nexus.mq.resident_controller.config import validate_resident_controller_config
 from nexus.mq.resident_controller.evidence import ResidentEvidenceRecord, build_evidence_package
+from nexus.mq.resident_controller.live_loop import run_start_once
 from nexus.mq.resident_controller.recovery import ResidentControllerCheckpoint, classify_restart_recovery
 from nexus.mq.resident_controller.service import (
     BrokerReadinessSnapshot,
@@ -34,7 +31,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     status_parser.add_argument("--output")
     start_parser = subparsers.add_parser("start-once")
     start_parser.add_argument("--config", required=True)
-    start_parser.add_argument("--broker-readiness", required=True)
+    start_parser.add_argument("--broker-readiness")
     start_parser.add_argument("--output")
     drain_parser = subparsers.add_parser("drain")
     drain_parser.add_argument("--run-id", required=True)
@@ -84,6 +81,27 @@ def main(argv: Optional[list[str]] = None) -> int:
         return 0
     if args.command == "start-once":
         config = _load_config(Path(args.config))
+        if not args.broker_readiness:
+            decision = run_start_once(config=config)
+            _emit_json(
+                {
+                    "accepted": decision.accepted,
+                    "daemon_started": decision.daemon_started,
+                    "service_state": decision.service_state,
+                    "errors": decision.errors,
+                    "evidence_records": [record.to_dict() for record in decision.evidence_records],
+                    "status_snapshot": decision.status_snapshot,
+                    "evidence_package": {
+                        "review_ready": decision.evidence_package.review_ready if decision.evidence_package else False,
+                        "manifest_path": str(decision.evidence_package.manifest_path) if decision.evidence_package else "",
+                        "checksum_path": str(decision.evidence_package.checksum_path) if decision.evidence_package else "",
+                        "secret_scan_path": str(decision.evidence_package.secret_scan_path) if decision.evidence_package else "",
+                    },
+                    "not_business_completion": decision.not_business_completion,
+                },
+                output=getattr(args, "output", None),
+            )
+            return 0 if decision.accepted else 1
         broker_payload = json.loads(Path(args.broker_readiness).read_text(encoding="utf-8"))
         controller = dict(config.get("controller") or {})
         service = ResidentControllerService(

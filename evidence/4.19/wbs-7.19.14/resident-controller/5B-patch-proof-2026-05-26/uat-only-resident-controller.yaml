@@ -1,0 +1,72 @@
+schema_version: resident_controller.v0.2
+controller:
+  controller_id: resident-controller-thunder-local
+  runtime_instance_id: wbs-7-19-14-5b-thunder-local
+  run_id: wbs-7-19-14-5b-thunder-local
+  environment: bounded_uat
+  launch_mode: bounded_uat
+  run_authorization_ref: review-evidence/nova/2026-05-26_4_19_WBS_7_19_14_5B_SOURCE_AUTHORITY_TRIAGE.md
+  allowed_wbs_ids:
+    - "7.19.14.5"
+broker:
+  nats_url_ref: env:NEXUS_RESIDENT_CONTROLLER_NATS_URL
+  auth_ref: env:NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF
+  connect_timeout_seconds: 5
+  subscription_ready_timeout_seconds: 5
+subjects:
+  namespace: nexus.4_19.wbs7_19_14
+  subscribe_allowlist:
+    - nexus.4_19.wbs7_19_14.*.registration.>
+    - nexus.4_19.wbs7_19_14.*.readiness.>
+    - nexus.4_19.wbs7_19_14.*.heartbeat.>
+    - nexus.4_19.wbs7_19_14.*.ack.>
+    - nexus.4_19.wbs7_19_14.*.progress.>
+    - nexus.4_19.wbs7_19_14.*.evidence.>
+    - nexus.4_19.wbs7_19_14.*.result_candidate.>
+    - nexus.4_19.wbs7_19_14.*.offline.>
+  publish_allowlist:
+    - nexus.4_19.wbs7_19_14.*.controller.init
+    - nexus.4_19.wbs7_19_14.*.assignment
+    - nexus.4_19.wbs7_19_14.*.assignment.duplicate_replay
+    - nexus.4_19.wbs7_19_14.*.drain
+runtimes:
+  allowed_agents:
+    - synthetic-local
+  required_capabilities:
+    - controlled_uat_handoff_receive
+  heartbeat_ttl_seconds: 30
+  stale_after_missed_heartbeats: 2
+policy:
+  production_business_execution_allowed: false
+  private_agent_invocation_allowed: false
+  broker_mutation_allowed: false
+  autonomous_acceptance_allowed: false
+  require_non_loopback_for_distributed_uat: false
+  command_allowlist:
+    - controller_init
+    - bounded_assignment
+    - duplicate_replay
+    - drain
+evidence:
+  root: evidence/4.19/wbs-7.19.14/resident-controller/5B-patch-proof-2026-05-26/runtime-evidence
+  raw_log: events.jsonl
+  manifest: manifest.json
+  summary: verdict_report.md
+  secret_scan_required: true
+recovery:
+  checkpoint_file: controller_state.json
+  reconnect_max_attempts: 3
+  reconnect_backoff_seconds:
+    - 1
+    - 2
+    - 5
+  assignment_ack_timeout_seconds: 5
+  result_candidate_timeout_seconds: 5
+uat:
+  max_runtime_seconds: 2
+  post_assignment_seconds: 1
+  assignment_enabled: true
+  assignment_id: assign-5b-thunder-local
+  idempotency_key: idem-5b-thunder-local
+  target_runtime_instance_id: synthetic-runtime-5b
+  assignment_kind: non_business_probe

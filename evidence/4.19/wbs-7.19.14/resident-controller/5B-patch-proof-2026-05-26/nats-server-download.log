@@ -1,0 +1,2 @@
+NATS_SERVER_RELEASE=v2.14.1
+NATS_SERVER_ASSET=nats-server-v2.14.1-windows-amd64.zip

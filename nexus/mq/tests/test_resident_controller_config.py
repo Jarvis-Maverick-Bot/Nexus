@@ -126,3 +126,14 @@ def test_resident_controller_config_hash_is_deterministic():
 
     assert first.config_hash == second.config_hash
     assert "redacted_at" not in first.redacted_snapshot
+
+
+def test_resident_controller_config_marks_bounded_uat_live_runtime_allowed():
+    config = _config()
+    config["controller"]["launch_mode"] = "bounded_uat"
+    config["policy"]["require_non_loopback_for_distributed_uat"] = False
+
+    result = validate_resident_controller_config(config)
+
+    assert result.valid is True
+    assert result.live_runtime_allowed is True
