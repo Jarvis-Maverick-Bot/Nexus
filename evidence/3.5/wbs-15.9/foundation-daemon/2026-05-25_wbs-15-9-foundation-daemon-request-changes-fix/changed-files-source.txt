@@ -1,0 +1,14 @@
+config/mq/foundation_daemon.example.yaml
+nexus/mq/foundation_daemon.py
+nexus/mq/foundation_daemon_config.py
+nexus/mq/foundation_daemon_evidence.py
+nexus/mq/foundation_daemon_lifecycle.py
+nexus/mq/foundation_daemon_runtime.py
+nexus/mq/foundation_daemon_status.py
+nexus/mq/tests/test_foundation_daemon_config.py
+nexus/mq/tests/test_foundation_daemon_packaging.py
+nexus/mq/tests/test_foundation_daemon_runtime.py
+nexus/mq/tests/test_thin_endpoint_contract.py
+nexus/mq/thin_endpoint_contract.py
+packaging/launchd/com.nexus.mq-foundation-daemon.plist
+packaging/systemd/nexus-mq-foundation-daemon.service
