@@ -109,7 +109,6 @@ class FoundationDaemonRuntime:
         dedupe_key = str(envelope.get("idempotency_key"))
         existing = self.state_store.find_phase5_durable_record("foundation_intake", dedupe_key)
         if existing is not None:
-            ack = self.adapter.ack(str(envelope.get("message_id", "")))
             action = "duplicate_inflight_reconciled" if existing.status == "inflight" else "duplicate_suppressed"
             self.evidence.write_record(
                 "ack",
@@ -118,13 +117,16 @@ class FoundationDaemonRuntime:
                     "subject": subject,
                     "message_id": envelope.get("message_id"),
                     "workflow_instance_id": envelope.get("workflow_instance_id"),
-                    "ack": ack,
+                    "ack_level": "consumer_intake",
+                    "ack_pending": True,
                     "duplicate_of_record_ref": existing.record_id,
                     "duplicate_action": action,
                     "ack_is_not_progress": True,
+                    "ack_after_duplicate_evidence": True,
                     "not_business_completion": True,
                 },
             )
+            ack = self.adapter.ack(str(envelope.get("message_id", "")))
             return IntakeResult(
                 accepted=True,
                 duplicate=True,

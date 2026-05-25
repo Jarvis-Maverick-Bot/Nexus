@@ -2,6 +2,8 @@ import json
 import subprocess
 import sys
 
+import pytest
+
 from nexus.mq.adapter import MqAdapterStub, RetryConfig
 from nexus.mq.durable_state import DurableStateStore
 from nexus.mq.foundation_daemon_config import load_foundation_daemon_config
@@ -173,6 +175,25 @@ def test_foundation_daemon_duplicate_completed_key_is_suppressed(tmp_path):
     assert second.action == "duplicate_suppressed"
     assert len(records) == 1
     assert duplicate_ack_evidence.exists()
+
+
+def test_foundation_daemon_duplicate_ack_not_emitted_when_ack_evidence_write_fails(tmp_path):
+    runtime = _runtime(tmp_path)
+    runtime.intake_message("nexus.3_5.mq.inbox", _command(message_id="msg-1"))
+    first_ack_count = len(runtime.adapter.get_ack_log())
+
+    def fail_write(*args, **kwargs):
+        raise RuntimeError("SIMULATED_DUPLICATE_ACK_EVIDENCE_FAILURE")
+
+    runtime.evidence.write_record = fail_write
+
+    with pytest.raises(RuntimeError, match="SIMULATED_DUPLICATE_ACK_EVIDENCE_FAILURE"):
+        runtime.intake_message("nexus.3_5.mq.inbox", _command(message_id="msg-2"))
+
+    ack_log = runtime.adapter.get_ack_log()
+    runtime.close()
+
+    assert len(ack_log) == first_ack_count
 
 
 def test_foundation_daemon_duplicate_inflight_key_is_reconciled(tmp_path):
