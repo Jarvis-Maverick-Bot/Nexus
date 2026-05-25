@@ -34,6 +34,29 @@ def _command(message_id="msg-foundation-001", idempotency_key="idem-foundation-0
     return data
 
 
+def _business_message():
+    envelope = build_execution_envelope(
+        message_type="Business_Message",
+        workflow_instance_id="wf-foundation-001",
+        workflow_type="layer3_mq_foundation",
+        workflow_version="15.9",
+        producer="thunder",
+        payload={
+            "business_event_type": "state_accepted",
+            "transition_id": "transition-001",
+            "previous_state": "pending",
+            "new_state": "accepted",
+            "validation_result": "accepted",
+            "evidence_refs": ["evidence://business"],
+        },
+        idempotency_key="idem-business-001",
+    )
+    data = envelope.to_dict()
+    data["message_id"] = "msg-business-001"
+    data["subject"] = "nexus.3_5.mq.inbox"
+    return data
+
+
 def _runtime(tmp_path, *, adapter=None):
     config = load_foundation_daemon_config("config/mq/foundation_daemon.example.yaml")
     state_store = DurableStateStore(tmp_path / "foundation.sqlite3")
@@ -57,6 +80,53 @@ def test_foundation_daemon_ack_is_not_progress(tmp_path):
     assert result.not_business_completion is True
     assert records[0].status == "intake_recorded"
     assert records[0].payload["ack_is_not_progress"] is True
+
+
+def test_foundation_daemon_rejects_business_message_intake_without_ack(tmp_path):
+    runtime = _runtime(tmp_path)
+
+    result = runtime.intake_message("nexus.3_5.mq.inbox", _business_message())
+    records = runtime.state_store.list_phase5_durable_records(family="foundation_intake")
+    ack_log = runtime.adapter.get_ack_log()
+    runtime.close()
+
+    assert result.accepted is False
+    assert "BUSINESS_MESSAGE_INTAKE_OUT_OF_SCOPE" in result.errors
+    assert result.ack is None
+    assert records == []
+    assert ack_log == []
+
+
+def test_foundation_daemon_rejects_private_agent_like_dispatch_without_ack(tmp_path):
+    runtime = _runtime(tmp_path)
+    envelope = _command()
+    envelope["payload"]["target_handler"] = "private_agent.invoke"
+    envelope["payload"]["allowed_side_effects"] = ["private_agent_invocation"]
+
+    result = runtime.intake_message("nexus.3_5.mq.inbox", envelope)
+    ack_log = runtime.adapter.get_ack_log()
+    runtime.close()
+
+    assert result.accepted is False
+    assert "PRIVATE_AGENT_INVOCATION_OUT_OF_SCOPE" in result.errors
+    assert result.ack is None
+    assert ack_log == []
+
+
+def test_foundation_daemon_evidence_failure_blocks_intake_ack_and_durable_record(tmp_path):
+    runtime = _runtime(tmp_path)
+    runtime.evidence_available = False
+
+    result = runtime.intake_message("nexus.3_5.mq.inbox", _command())
+    records = runtime.state_store.list_phase5_durable_records(family="foundation_intake")
+    ack_log = runtime.adapter.get_ack_log()
+    runtime.close()
+
+    assert result.accepted is False
+    assert "EVIDENCE_STORE_UNAVAILABLE" in result.errors
+    assert result.ack is None
+    assert records == []
+    assert ack_log == []
 
 
 def test_foundation_daemon_invalid_subject_rejected_before_publish(tmp_path):
@@ -187,3 +257,45 @@ def test_foundation_daemon_cli_start_once_is_source_only_route_readiness():
     assert payload["daemon_started"] is False
     assert payload["route_ready_source_only"] is True
     assert payload["not_live_uat"] is True
+
+
+def test_foundation_daemon_cli_readiness_exits_nonzero_when_overall_not_ready():
+    command = [
+        sys.executable,
+        "-m",
+        "nexus.mq.foundation_daemon",
+        "readiness",
+        "--config",
+        "config/mq/foundation_daemon.example.yaml",
+    ]
+
+    completed = subprocess.run(command, check=False, capture_output=True, text=True)
+    payload = json.loads(completed.stdout)
+
+    assert completed.returncode == 2
+    assert payload["overall_ready"] is False
+    assert payload["route_ready_source_only"] is True
+
+
+def test_foundation_daemon_cli_lifecycle_surfaces_are_present_and_non_live():
+    for command_name in ("run", "drain", "stop"):
+        command = [
+            sys.executable,
+            "-m",
+            "nexus.mq.foundation_daemon",
+            command_name,
+            "--config",
+            "config/mq/foundation_daemon.example.yaml",
+        ]
+
+        completed = subprocess.run(command, check=False, capture_output=True, text=True)
+        payload = json.loads(completed.stdout)
+
+        assert payload["command"] == command_name
+        assert payload["daemon_started"] is False
+        assert payload["not_live_uat"] is True
+        if command_name == "run":
+            assert completed.returncode == 2
+            assert payload["blocked"] is True
+        else:
+            assert completed.returncode == 0

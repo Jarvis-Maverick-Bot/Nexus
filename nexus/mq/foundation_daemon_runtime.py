@@ -91,8 +91,11 @@ class FoundationDaemonRuntime:
         allowlist = (self.config.get("subjects", {}) or {}).get("allowlist", [])
         if not subject_allowed(subject, allowlist):
             errors.append(f"SUBJECT_NOT_ALLOWED: {subject}")
+        if not self.evidence_available:
+            errors.append("EVIDENCE_STORE_UNAVAILABLE")
         validation = validate_execution_message(envelope)
         errors.extend(validation.errors)
+        errors.extend(_source_intake_scope_errors(envelope))
         if errors:
             return IntakeResult(
                 accepted=False,
@@ -116,16 +119,15 @@ class FoundationDaemonRuntime:
                 evidence_ref=existing.record_id,
             )
 
-        ack = self.adapter.ack(str(envelope.get("message_id", "")))
         evidence_ref = self.evidence.write_record(
             "intake",
-            str(envelope.get("message_id", "unknown")),
+            f"{envelope.get('message_id', 'unknown')}-pre-ack",
             {
                 "subject": subject,
                 "message_id": envelope.get("message_id"),
                 "workflow_instance_id": envelope.get("workflow_instance_id"),
-                "ack": ack,
-                "ack_is_not_progress": True,
+                "ack_emitted": False,
+                "ack_after_evidence_and_durable_state": True,
             },
         )
         record = self.state_store.create_phase5_durable_record(
@@ -137,10 +139,26 @@ class FoundationDaemonRuntime:
             payload={
                 "message_id": envelope.get("message_id"),
                 "subject": subject,
-                "ack": ack,
+                "ack_level": "consumer_intake",
                 "ack_is_not_progress": True,
+                "ack_after_evidence_and_durable_state": True,
                 "evidence_ref": evidence_ref,
                 "not_business_completion": True,
+            },
+        )
+        ack = self.adapter.ack(str(envelope.get("message_id", "")))
+        self.evidence.write_record(
+            "ack",
+            str(envelope.get("message_id", "unknown")),
+            {
+                "subject": subject,
+                "message_id": envelope.get("message_id"),
+                "workflow_instance_id": envelope.get("workflow_instance_id"),
+                "ack": ack,
+                "durable_record_ref": record.record_id,
+                "pre_ack_evidence_ref": evidence_ref,
+                "ack_is_not_progress": True,
+                "ack_after_evidence_and_durable_state": True,
             },
         )
         return IntakeResult(
@@ -192,3 +210,21 @@ class FoundationDaemonRuntime:
             "record_refs": [record.record_id for record in intake_records],
             "not_business_completion": True,
         }
+
+
+def _source_intake_scope_errors(envelope: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    message_type = str(envelope.get("message_type", ""))
+    workflow_type = str(envelope.get("workflow_type", "")).lower()
+    payload = envelope.get("payload") or {}
+    payload_values = []
+    if isinstance(payload, dict):
+        payload_values.extend(str(value).lower() for value in payload.values() if isinstance(value, str))
+        for value in payload.get("allowed_side_effects", []) or []:
+            payload_values.append(str(value).lower())
+
+    if message_type == "Business_Message" or "business" in workflow_type:
+        errors.append("BUSINESS_MESSAGE_INTAKE_OUT_OF_SCOPE")
+    if any("private_agent" in value or "private-agent" in value for value in payload_values):
+        errors.append("PRIVATE_AGENT_INVOCATION_OUT_OF_SCOPE")
+    return errors
