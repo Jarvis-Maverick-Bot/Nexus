@@ -35,11 +35,18 @@ def main(argv: list[str] | None = None) -> int:
         command.add_argument("--config", required=True)
         if name == "start-once":
             command.add_argument("--cycles", type=int, default=1)
+        if name in {"drain", "stop"}:
+            command.add_argument("--timeout", type=int, default=None)
     args = parser.parse_args(argv)
 
     try:
         config = load_foundation_daemon_config(args.config)
-        payload = _handle(args.command, config, cycles=getattr(args, "cycles", None))
+        payload = _handle(
+            args.command,
+            config,
+            cycles=getattr(args, "cycles", None),
+            timeout_seconds=getattr(args, "timeout", None),
+        )
         print(json.dumps(payload, ensure_ascii=True, sort_keys=True))
         if args.command == "validate-config" and not payload.get("valid", False):
             return 2
@@ -63,7 +70,13 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
 
-def _handle(command: str, config: dict[str, Any], *, cycles: int | None = None) -> dict[str, Any]:
+def _handle(
+    command: str,
+    config: dict[str, Any],
+    *,
+    cycles: int | None = None,
+    timeout_seconds: int | None = None,
+) -> dict[str, Any]:
     if command == "validate-config":
         result = validate_foundation_daemon_config(config).to_dict()
         result["redacted_config"] = redact_config(config)
@@ -101,11 +114,12 @@ def _handle(command: str, config: dict[str, Any], *, cycles: int | None = None) 
         return status
     if command == "drain":
         result = build_drain_result(inflight_count=0)
-        result.update({"command": "drain", "not_live_uat": True})
+        result.update({"command": "drain", "timeout_seconds": timeout_seconds, "not_live_uat": True})
         return result
     if command == "stop":
         return {
             "command": "stop",
+            "timeout_seconds": timeout_seconds,
             "daemon_started": False,
             "offline": True,
             "source_only_no_process_signal_sent": True,

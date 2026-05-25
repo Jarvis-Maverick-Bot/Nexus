@@ -111,6 +111,20 @@ class FoundationDaemonRuntime:
         if existing is not None:
             ack = self.adapter.ack(str(envelope.get("message_id", "")))
             action = "duplicate_inflight_reconciled" if existing.status == "inflight" else "duplicate_suppressed"
+            self.evidence.write_record(
+                "ack",
+                str(envelope.get("message_id", "unknown")),
+                {
+                    "subject": subject,
+                    "message_id": envelope.get("message_id"),
+                    "workflow_instance_id": envelope.get("workflow_instance_id"),
+                    "ack": ack,
+                    "duplicate_of_record_ref": existing.record_id,
+                    "duplicate_action": action,
+                    "ack_is_not_progress": True,
+                    "not_business_completion": True,
+                },
+            )
             return IntakeResult(
                 accepted=True,
                 duplicate=True,
@@ -225,6 +239,11 @@ def _source_intake_scope_errors(envelope: dict[str, Any]) -> list[str]:
 
     if message_type == "Business_Message" or "business" in workflow_type:
         errors.append("BUSINESS_MESSAGE_INTAKE_OUT_OF_SCOPE")
-    if any("private_agent" in value or "private-agent" in value for value in payload_values):
+    if any("business_dispatch" in value or "business-dispatch" in value for value in payload_values):
+        errors.append("BUSINESS_DISPATCH_OUT_OF_SCOPE")
+    if any(
+        "private_agent" in value or "private-agent" in value or "private.agent" in value
+        for value in payload_values
+    ):
         errors.append("PRIVATE_AGENT_INVOCATION_OUT_OF_SCOPE")
     return errors

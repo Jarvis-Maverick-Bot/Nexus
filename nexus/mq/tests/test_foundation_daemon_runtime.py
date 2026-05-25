@@ -113,6 +113,25 @@ def test_foundation_daemon_rejects_private_agent_like_dispatch_without_ack(tmp_p
     assert ack_log == []
 
 
+def test_foundation_daemon_rejects_private_dot_agent_and_business_dispatch_variants_without_ack(tmp_path):
+    runtime = _runtime(tmp_path)
+    envelope = _command()
+    envelope["payload"]["target_handler"] = "private.agent.invoke"
+    envelope["payload"]["allowed_side_effects"] = ["business_dispatch"]
+
+    result = runtime.intake_message("nexus.3_5.mq.inbox", envelope)
+    records = runtime.state_store.list_phase5_durable_records(family="foundation_intake")
+    ack_log = runtime.adapter.get_ack_log()
+    runtime.close()
+
+    assert result.accepted is False
+    assert "PRIVATE_AGENT_INVOCATION_OUT_OF_SCOPE" in result.errors
+    assert "BUSINESS_DISPATCH_OUT_OF_SCOPE" in result.errors
+    assert result.ack is None
+    assert records == []
+    assert ack_log == []
+
+
 def test_foundation_daemon_evidence_failure_blocks_intake_ack_and_durable_record(tmp_path):
     runtime = _runtime(tmp_path)
     runtime.evidence_available = False
@@ -146,12 +165,14 @@ def test_foundation_daemon_duplicate_completed_key_is_suppressed(tmp_path):
     first = runtime.intake_message("nexus.3_5.mq.inbox", _command(message_id="msg-1"))
     second = runtime.intake_message("nexus.3_5.mq.inbox", _command(message_id="msg-2"))
     records = runtime.state_store.list_phase5_durable_records(family="foundation_intake")
+    duplicate_ack_evidence = tmp_path / "evidence" / "ack" / "msg-2.json"
     runtime.close()
 
     assert first.duplicate is False
     assert second.duplicate is True
     assert second.action == "duplicate_suppressed"
     assert len(records) == 1
+    assert duplicate_ack_evidence.exists()
 
 
 def test_foundation_daemon_duplicate_inflight_key_is_reconciled(tmp_path):
@@ -299,3 +320,25 @@ def test_foundation_daemon_cli_lifecycle_surfaces_are_present_and_non_live():
             assert payload["blocked"] is True
         else:
             assert completed.returncode == 0
+
+
+def test_foundation_daemon_cli_drain_and_stop_accept_timeout_contract():
+    for command_name in ("drain", "stop"):
+        command = [
+            sys.executable,
+            "-m",
+            "nexus.mq.foundation_daemon",
+            command_name,
+            "--config",
+            "config/mq/foundation_daemon.example.yaml",
+            "--timeout",
+            "5",
+        ]
+
+        completed = subprocess.run(command, check=False, capture_output=True, text=True)
+        payload = json.loads(completed.stdout)
+
+        assert completed.returncode == 0
+        assert payload["command"] == command_name
+        assert payload["timeout_seconds"] == 5
+        assert payload["daemon_started"] is False
