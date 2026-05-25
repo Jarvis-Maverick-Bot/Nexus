@@ -1,0 +1,31 @@
+{
+  "package_id": "2026-05-25_wbs-15-9-foundation-daemon-rereview-2-fix",
+  "wbs": "15.9",
+  "candidate_verdict": "PASS",
+  "repo": "D:\\Projects\\Nexus",
+  "branch": "codex/wbs-15-9-layer3-foundation-daemon",
+  "base_branch": "origin/master",
+  "base_commit": "bb241891a97057891d498b12f912a37d46c0657b",
+  "merge_base": "bb241891a97057891d498b12f912a37d46c0657b",
+  "prior_rereview_2_head": "f37389715e29da136878a123fbe3fdb733824807",
+  "correction_source_commit": "29cd9e9228ccd98e1fb1554092ce70bdb85c7c25",
+  "evidence_commit": "branch-head-after-evidence-commit",
+  "logs": [
+    "focused-tests.log",
+    "regression-tests.log",
+    "compileall.log",
+    "git-diff-check.log",
+    "cli-drain-timeout.json",
+    "cli-stop-timeout.json",
+    "secret-scan.log",
+    "secret-scan-non-test.log",
+    "git-status-before-evidence.txt"
+  ],
+  "checksums": [
+    "SOURCE_SHA256SUMS.txt",
+    "EVIDENCE_SHA256SUMS.txt"
+  ],
+  "checksum_method": "sha256 over Git blob/index bytes",
+  "no_go_confirmed": true,
+  "not_business_completion": true
+}
