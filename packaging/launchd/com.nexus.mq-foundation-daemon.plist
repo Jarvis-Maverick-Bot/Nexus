@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DO NOT LOAD OR START WITHOUT LATER ALEX AUTHORIZATION. -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.nexus.mq-foundation-daemon</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>-m</string>
+    <string>nexus.mq.foundation_daemon</string>
+    <string>start-once</string>
+    <string>--config</string>
+    <string>/etc/nexus/mq/foundation_daemon.yaml</string>
+    <string>--cycles</string>
+    <string>1</string>
+  </array>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>KeepAlive</key>
+  <false/>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>NEXUS_MQ_FOUNDATION_DAEMON_DEFAULT_OFF</key>
+    <string>1</string>
+  </dict>
+</dict>
+</plist>

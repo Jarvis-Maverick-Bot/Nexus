@@ -1,0 +1,17 @@
+# DO NOT INSTALL OR ENABLE WITHOUT LATER ALEX AUTHORIZATION.
+# Source package template only for WBS 15.9 review; default-off by omission.
+[Unit]
+Description=Nexus Layer 3 MQ Foundation Daemon
+Documentation=internal:wbs-15.9-layer3-mq-foundation-daemon
+After=network-online.target
+
+[Service]
+Type=simple
+User=nexus
+WorkingDirectory=/opt/nexus
+ExecStart=/usr/bin/python -m nexus.mq.foundation_daemon start-once --config /etc/nexus/mq/foundation_daemon.yaml --cycles 1
+Restart=no
+Environment=NEXUS_MQ_FOUNDATION_DAEMON_DEFAULT_OFF=1
+
+[Install]
+# Intentionally no WantedBy target. Enabling is blocked until later authorization.
