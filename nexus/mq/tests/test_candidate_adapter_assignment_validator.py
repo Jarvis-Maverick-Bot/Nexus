@@ -1,5 +1,3 @@
-from dataclasses import replace
-
 import pytest
 
 from nexus.mq.candidate_adapter_assignment_validator import (
@@ -31,7 +29,11 @@ def _session(**overrides):
         "allowed_subject_patterns": ["nexus.candidate.jarvis.assignment.*"],
         "evidence_output_ref": "evidence://candidate-adapter/jarvis",
         "profile_digest": "digest-001",
-        "lifecycle_state": "ready",
+        "registration_ref": "registry://candidate/jarvis/jarvis-runtime-001",
+        "startup_packet_ref": "startup-packet://jarvis",
+        "readiness_evidence_ref": "evidence://readiness/jarvis",
+        "last_heartbeat_sequence": 1,
+        "lifecycle_state": "idle",
     }
     data.update(overrides)
     return CandidateAdapterSession(**data)
@@ -135,6 +137,26 @@ def test_candidate_ack_rejects_protocol_mismatch():
 
     assert result.accepted is False
     assert "ADAPTER_PROTOCOL_VERSION_MISMATCH" in result.errors
+
+
+def test_candidate_ack_rejects_ready_without_heartbeat():
+    result = validate_candidate_assignment(
+        _assignment(),
+        session=_session(last_heartbeat_sequence=0, lifecycle_state="ready"),
+        lease=_lease(),
+        now_at=NOW,
+    )
+
+    assert result.accepted is False
+    assert "MISSING_HEARTBEAT_FRESHNESS" in result.errors
+    assert "SESSION_NOT_READY_FOR_ASSIGNMENT_ACK: ready" in result.errors
+
+
+def test_candidate_ack_rejects_stale_session():
+    result = validate_candidate_assignment(_assignment(), session=_session(lifecycle_state="stale"), lease=_lease(), now_at=NOW)
+
+    assert result.accepted is False
+    assert "SESSION_NOT_ACCEPTING_ASSIGNMENTS: stale" in result.errors
 
 
 def test_candidate_drain_blocks_new_assignment_intake():

@@ -13,7 +13,7 @@ from nexus.mq.candidate_adapter_api import (
     InMemoryAssignmentBroker,
     InMemoryLifecycleProvider,
 )
-from nexus.mq.candidate_adapter_assignment_validator import CandidateAssignmentEvent
+from nexus.mq.candidate_adapter_assignment_validator import CandidateAssignmentEvent, CandidateReservationLease
 from nexus.mq.candidate_adapter_session_store import CandidateAdapterSessionStore
 
 
@@ -37,6 +37,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             command.add_argument("--runtime-instance-id")
         elif name == "ack":
             command.add_argument("--assignment-json", required=True)
+            command.add_argument("--lease-json", required=True)
         elif name in {"progress", "evidence", "result"}:
             command.add_argument("--assignment-id", required=True)
             if name == "progress":
@@ -99,6 +100,8 @@ def _dispatch(api: CandidateAdapterApi, args: argparse.Namespace):
         return api.await_assignment(Path(args.session))
     if args.command == "ack":
         assignment = CandidateAssignmentEvent.from_dict(json.loads(Path(args.assignment_json).read_text(encoding="utf-8")))
+        lease = CandidateReservationLease.from_dict(json.loads(Path(args.lease_json).read_text(encoding="utf-8")))
+        api.providers.lifecycle.leases[lease.lease_id] = lease
         return api.ack_assignment(Path(args.session), assignment)
     if args.command == "progress":
         return api.report_progress(Path(args.session), assignment_id=args.assignment_id, progress_ref=args.progress_ref)

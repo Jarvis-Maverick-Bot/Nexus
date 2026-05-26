@@ -58,6 +58,19 @@ class CandidateReservationLease:
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
+    @classmethod
+    def from_dict(cls, payload: dict[str, Any]) -> "CandidateReservationLease":
+        return cls(
+            lease_id=str(payload.get("lease_id") or ""),
+            lifecycle_decision_id=str(payload.get("lifecycle_decision_id") or ""),
+            assignment_id=str(payload.get("assignment_id") or ""),
+            runtime_instance_id=str(payload.get("runtime_instance_id") or ""),
+            active=bool(payload.get("active")),
+            expires_at=str(payload.get("expires_at") or ""),
+            revoked=bool(payload.get("revoked")),
+            not_business_completion=bool(payload.get("not_business_completion", True)),
+        )
+
 
 @dataclass
 class CandidateAssignmentValidationResult:
@@ -74,9 +87,7 @@ def validate_candidate_assignment(
     lease: CandidateReservationLease | None,
     now_at: str | None = None,
 ) -> CandidateAssignmentValidationResult:
-    errors: list[str] = []
-    if session.lifecycle_state in {"draining", "offline", "failed", "quarantined"}:
-        errors.append(f"SESSION_NOT_ACCEPTING_ASSIGNMENTS: {session.lifecycle_state}")
+    errors: list[str] = assignment_intake_prerequisite_errors(session, operation="ACK")
     if not assignment.assignment_id:
         errors.append("MISSING_ASSIGNMENT_ID")
     if not assignment.idempotency_key:
@@ -108,6 +119,34 @@ def validate_candidate_assignment(
     if assignment.not_business_completion is not True:
         errors.append("ASSIGNMENT_CANNOT_BE_BUSINESS_COMPLETION")
     return CandidateAssignmentValidationResult(not errors, _dedupe(errors), assignment=assignment)
+
+
+def assignment_intake_prerequisite_errors(
+    session: CandidateAdapterSession,
+    *,
+    operation: str,
+) -> list[str]:
+    errors: list[str] = []
+    normalized_operation = operation.upper().replace("-", "_")
+    if not session.registration_ref:
+        errors.append("MISSING_REGISTRATION_REF")
+    if not session.startup_packet_ref:
+        errors.append("MISSING_STARTUP_PACKET_REF")
+    if not session.readiness_evidence_ref:
+        errors.append("MISSING_READINESS_EVIDENCE_REF")
+    if session.last_heartbeat_sequence <= 0:
+        errors.append("MISSING_HEARTBEAT_FRESHNESS")
+    if session.lifecycle_state in {"draining", "offline", "failed", "quarantined", "stale"}:
+        errors.append(f"SESSION_NOT_ACCEPTING_ASSIGNMENTS: {session.lifecycle_state}")
+    elif session.lifecycle_state not in _allowed_assignment_states(normalized_operation):
+        errors.append(f"SESSION_NOT_READY_FOR_ASSIGNMENT_{normalized_operation}: {session.lifecycle_state}")
+    return _dedupe(errors)
+
+
+def _allowed_assignment_states(operation: str) -> set[str]:
+    if operation == "ACK":
+        return {"idle", "assigned"}
+    return {"idle"}
 
 
 def _lease_errors(

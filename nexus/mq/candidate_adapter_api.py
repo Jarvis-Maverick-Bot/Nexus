@@ -9,6 +9,7 @@ from typing import Any
 from nexus.mq.candidate_adapter_assignment_validator import (
     CandidateAssignmentEvent,
     CandidateReservationLease,
+    assignment_intake_prerequisite_errors,
     validate_candidate_assignment,
 )
 from nexus.mq.candidate_adapter_event_mapper import build_candidate_action_event, map_assignment_to_candidate_event
@@ -166,11 +167,12 @@ class CandidateAdapterApi:
 
     def await_assignment(self, session_path: str | Path, *, timeout_s: float | None = None) -> CandidateAdapterOperationResult:
         session = self._load(session_path)
-        if session.lifecycle_state in {"draining", "offline", "failed", "quarantined"}:
+        prerequisite_errors = assignment_intake_prerequisite_errors(session, operation="INTAKE")
+        if prerequisite_errors:
             return CandidateAdapterOperationResult(
                 False,
                 "await_assignment",
-                errors=[f"SESSION_NOT_ACCEPTING_ASSIGNMENTS: {session.lifecycle_state}"],
+                errors=prerequisite_errors,
                 session=session,
             )
         assignment = self.providers.broker.await_assignment(session, timeout_s=timeout_s)

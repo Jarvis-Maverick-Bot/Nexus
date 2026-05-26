@@ -1,4 +1,5 @@
 import json
+import hashlib
 
 from nexus.mq.candidate_adapter_api import (
     CandidateAdapterApi,
@@ -68,6 +69,8 @@ def _connect_ready_api(tmp_path, *, broker=None, lifecycle=None):
         self_check_evidence_ref="evidence://readiness/jarvis",
     )
     assert ready.accepted is True
+    heartbeat = api.heartbeat(tmp_path / "session.json", sequence=1, observed_state={"runtime_instance_id": "jarvis-runtime-001"})
+    assert heartbeat.accepted is True
     return api
 
 
@@ -155,6 +158,58 @@ def test_candidate_await_assignment_only_accepts_allowlisted_subjects(tmp_path):
     assert "ASSIGNMENT_SUBJECT_NOT_ALLOWED: nexus.other.assignment.001" in result.errors
 
 
+def test_candidate_await_assignment_requires_register_readiness_and_heartbeat(tmp_path):
+    broker = InMemoryAssignmentBroker(assignments=[_assignment()])
+    api = _api(tmp_path, broker=broker)
+    assert api.connect(_write_profile(tmp_path), session_path=tmp_path / "session.json").accepted is True
+
+    connected = api.await_assignment(tmp_path / "session.json")
+    assert connected.accepted is False
+    assert "MISSING_REGISTRATION_REF" in connected.errors
+    assert "SESSION_NOT_READY_FOR_ASSIGNMENT_INTAKE: connected" in connected.errors
+
+    assert api.register(tmp_path / "session.json").accepted is True
+    registered = api.await_assignment(tmp_path / "session.json")
+    assert registered.accepted is False
+    assert "MISSING_STARTUP_PACKET_REF" in registered.errors
+    assert "SESSION_NOT_READY_FOR_ASSIGNMENT_INTAKE: registered" in registered.errors
+
+    assert api.submit_readiness(
+        tmp_path / "session.json",
+        startup_packet_ref="startup-packet://jarvis",
+        self_check_evidence_ref="evidence://readiness/jarvis",
+    ).accepted is True
+    ready_without_heartbeat = api.await_assignment(tmp_path / "session.json")
+    assert ready_without_heartbeat.accepted is False
+    assert "MISSING_HEARTBEAT_FRESHNESS" in ready_without_heartbeat.errors
+    assert "SESSION_NOT_READY_FOR_ASSIGNMENT_INTAKE: ready" in ready_without_heartbeat.errors
+
+
+def test_candidate_await_assignment_rejects_stale_draining_and_offline_sessions(tmp_path):
+    broker = InMemoryAssignmentBroker(assignments=[_assignment()])
+    api = _connect_ready_api(tmp_path, broker=broker)
+    store = CandidateAdapterSessionStore(tmp_path / "session.json")
+
+    session = store.load()
+    session.lifecycle_state = "stale"
+    store.save(session)
+    stale = api.await_assignment(tmp_path / "session.json")
+    assert stale.accepted is False
+    assert "SESSION_NOT_ACCEPTING_ASSIGNMENTS: stale" in stale.errors
+
+    session.lifecycle_state = "draining"
+    store.save(session)
+    draining = api.await_assignment(tmp_path / "session.json")
+    assert draining.accepted is False
+    assert "SESSION_NOT_ACCEPTING_ASSIGNMENTS: draining" in draining.errors
+
+    session.lifecycle_state = "offline"
+    store.save(session)
+    offline = api.await_assignment(tmp_path / "session.json")
+    assert offline.accepted is False
+    assert "SESSION_NOT_ACCEPTING_ASSIGNMENTS: offline" in offline.errors
+
+
 def test_candidate_ack_requires_validated_assignment(tmp_path):
     lifecycle = InMemoryLifecycleProvider(leases={"lease-001": _lease()})
     api = _connect_ready_api(tmp_path, lifecycle=lifecycle)
@@ -163,6 +218,33 @@ def test_candidate_ack_requires_validated_assignment(tmp_path):
 
     assert result.accepted is True
     assert result.payload["event"]["event_type"] == "assignment_ack"
+
+
+def test_candidate_ack_requires_register_readiness_and_heartbeat(tmp_path):
+    lifecycle = InMemoryLifecycleProvider(leases={"lease-001": _lease()})
+    api = _api(tmp_path, lifecycle=lifecycle)
+    assert api.connect(_write_profile(tmp_path), session_path=tmp_path / "session.json").accepted is True
+
+    connected = api.ack_assignment(tmp_path / "session.json", _assignment(), now_at=NOW)
+    assert connected.accepted is False
+    assert "MISSING_REGISTRATION_REF" in connected.errors
+    assert "SESSION_NOT_READY_FOR_ASSIGNMENT_ACK: connected" in connected.errors
+
+    assert api.register(tmp_path / "session.json").accepted is True
+    registered = api.ack_assignment(tmp_path / "session.json", _assignment(), now_at=NOW)
+    assert registered.accepted is False
+    assert "MISSING_STARTUP_PACKET_REF" in registered.errors
+    assert "SESSION_NOT_READY_FOR_ASSIGNMENT_ACK: registered" in registered.errors
+
+    assert api.submit_readiness(
+        tmp_path / "session.json",
+        startup_packet_ref="startup-packet://jarvis",
+        self_check_evidence_ref="evidence://readiness/jarvis",
+    ).accepted is True
+    ready_without_heartbeat = api.ack_assignment(tmp_path / "session.json", _assignment(), now_at=NOW)
+    assert ready_without_heartbeat.accepted is False
+    assert "MISSING_HEARTBEAT_FRESHNESS" in ready_without_heartbeat.errors
+    assert "SESSION_NOT_READY_FOR_ASSIGNMENT_ACK: ready" in ready_without_heartbeat.errors
 
 
 def test_candidate_progress_and_evidence_require_active_assignment(tmp_path):
@@ -211,3 +293,87 @@ def test_candidate_cli_commands_emit_non_secret_json_status(tmp_path, capsys):
     assert output["operation"] == "connect"
     assert "token" not in json.dumps(output).lower()
     assert "password" not in json.dumps(output).lower()
+
+
+def test_candidate_cli_ack_accepts_deterministic_lease_json_and_unblocks_post_assignment_path(tmp_path, capsys):
+    profile = _write_profile(tmp_path)
+    session = tmp_path / "session.json"
+    assignment_path = tmp_path / "assignment.json"
+    lease_path = tmp_path / "lease.json"
+    assignment_path.write_text(json.dumps(_assignment().to_dict()), encoding="utf-8")
+    lease_path.write_text(json.dumps(_lease().to_dict()), encoding="utf-8")
+
+    assert main(["connect", "--profile", str(profile), "--session", str(session)]) == 0
+    capsys.readouterr()
+    assert main(["register", "--session", str(session)]) == 0
+    capsys.readouterr()
+    assert main(
+        [
+            "ready",
+            "--session",
+            str(session),
+            "--startup-packet-ref",
+            "startup-packet://jarvis",
+            "--self-check-evidence-ref",
+            "evidence://readiness/jarvis",
+        ]
+    ) == 0
+    capsys.readouterr()
+    assert main(["heartbeat", "--session", str(session), "--sequence", "1", "--runtime-instance-id", "jarvis-runtime-001"]) == 0
+    capsys.readouterr()
+
+    ack_code = main(["ack", "--session", str(session), "--assignment-json", str(assignment_path), "--lease-json", str(lease_path)])
+    ack_output = json.loads(capsys.readouterr().out)
+    assert ack_code == 0
+    assert ack_output["accepted"] is True
+    assert ack_output["payload"]["event"]["event_type"] == "assignment_ack"
+
+    progress_code = main(["progress", "--session", str(session), "--assignment-id", "assignment-001", "--progress-ref", "progress://001"])
+    progress_output = json.loads(capsys.readouterr().out)
+    assert progress_code == 0
+    assert progress_output["accepted"] is True
+
+    evidence_code = main(["evidence", "--session", str(session), "--assignment-id", "assignment-001", "--evidence-ref", "evidence://001"])
+    evidence_output = json.loads(capsys.readouterr().out)
+    assert evidence_code == 0
+    assert evidence_output["accepted"] is True
+
+    result_code = main(
+        [
+            "result",
+            "--session",
+            str(session),
+            "--assignment-id",
+            "assignment-001",
+            "--result-ref",
+            "result://candidate",
+            "--evidence-ref",
+            "evidence://result",
+        ]
+    )
+    result_output = json.loads(capsys.readouterr().out)
+    assert result_code == 0
+    assert result_output["accepted"] is True
+    assert result_output["payload"]["event"]["status"] == "candidate"
+
+
+def test_candidate_adapter_evidence_manifest_uses_relative_existing_paths_and_current_hashes():
+    evidence_dir = (
+        __import__("pathlib").Path(__file__).resolve().parents[3]
+        / "evidence"
+        / "4.19"
+        / "candidate-adapter"
+        / "implementation-2026-05-26-thunder"
+    )
+    manifest = evidence_dir / "SHA256SUMS.txt"
+
+    assert manifest.exists()
+    lines = [line for line in manifest.read_text(encoding="utf-8").splitlines() if line.strip()]
+    assert lines
+    for line in lines:
+        expected, relative_path = line.split("  ", 1)
+        assert not __import__("pathlib").Path(relative_path).is_absolute()
+        target = evidence_dir / relative_path
+        assert target.exists()
+        content = target.read_bytes().replace(b"\r\n", b"\n")
+        assert hashlib.sha256(content).hexdigest() == expected
