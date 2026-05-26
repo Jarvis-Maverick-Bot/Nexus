@@ -62,7 +62,7 @@ def map_assignment_to_candidate_event(
             runtime_instance_id=session.runtime_instance_id,
             session_id=session.session_id,
             assignment_id=assignment.assignment_id,
-            payload=_candidate_safe_payload(assignment.payload),
+            payload=candidate_safe_payload(assignment.payload),
         )
     )
 
@@ -78,7 +78,7 @@ def build_candidate_action_event(
     refs = list(evidence_refs or [])
     if event_type == "offline" and not refs:
         raise ValueError("OFFLINE_REQUIRES_FINAL_EVIDENCE_REF")
-    safe_payload = _candidate_safe_payload(payload or {})
+    safe_payload = candidate_safe_payload(payload or {})
     if event_type == "result_candidate":
         safe_payload["business_acceptance"] = False
     event = CandidateAdapterEvent(
@@ -94,7 +94,13 @@ def build_candidate_action_event(
     return _validated_event(event)
 
 
-def _candidate_safe_payload(payload: dict[str, Any]) -> dict[str, Any]:
+def candidate_safe_assignment_view(assignment: CandidateAssignmentEvent) -> dict[str, Any]:
+    assignment_view = assignment.to_dict()
+    assignment_view["payload"] = candidate_safe_payload(assignment.payload)
+    return assignment_view
+
+
+def candidate_safe_payload(payload: dict[str, Any]) -> dict[str, Any]:
     safe_payload = _candidate_safe_value(payload)
     if not isinstance(safe_payload, dict):
         return {}

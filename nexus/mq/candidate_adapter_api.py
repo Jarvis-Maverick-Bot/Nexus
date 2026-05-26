@@ -12,7 +12,11 @@ from nexus.mq.candidate_adapter_assignment_validator import (
     assignment_intake_prerequisite_errors,
     validate_candidate_assignment,
 )
-from nexus.mq.candidate_adapter_event_mapper import build_candidate_action_event, map_assignment_to_candidate_event
+from nexus.mq.candidate_adapter_event_mapper import (
+    build_candidate_action_event,
+    candidate_safe_assignment_view,
+    map_assignment_to_candidate_event,
+)
 from nexus.mq.candidate_adapter_profile_loader import load_candidate_adapter_profile
 from nexus.mq.candidate_adapter_session_store import (
     CandidateAdapterSession,
@@ -186,7 +190,7 @@ class CandidateAdapterApi:
             True,
             "await_assignment",
             session=session,
-            payload={"assignment": assignment.to_dict(), "event": event.to_dict()},
+            payload={"assignment": candidate_safe_assignment_view(assignment), "event": event.to_dict()},
         )
 
     def ack_assignment(

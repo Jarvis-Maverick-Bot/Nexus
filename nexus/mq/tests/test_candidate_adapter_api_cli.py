@@ -10,6 +10,7 @@ from nexus.mq.candidate_adapter_api import (
 )
 from nexus.mq.candidate_adapter_assignment_validator import CandidateAssignmentEvent, CandidateReservationLease
 from nexus.mq.candidate_adapter_cli import main
+from nexus.mq.candidate_adapter_event_mapper import RAW_INTERNAL_PAYLOAD_KEYS
 from nexus.mq.candidate_adapter_profile_loader import (
     CANDIDATE_ADAPTER_PROFILE_SCHEMA_VERSION,
     CANDIDATE_ADAPTER_PROTOCOL_VERSION,
@@ -157,6 +158,28 @@ def test_candidate_await_assignment_only_accepts_allowlisted_subjects(tmp_path):
 
     assert result.accepted is False
     assert "ASSIGNMENT_SUBJECT_NOT_ALLOWED: nexus.other.assignment.001" in result.errors
+
+
+def test_candidate_await_assignment_serialized_result_hides_raw_assignment_payload_internals(tmp_path):
+    broker = InMemoryAssignmentBroker(assignments=[_assignment(payload=_nested_raw_payload())])
+    api = _connect_ready_api(tmp_path, broker=broker)
+
+    result = api.await_assignment(tmp_path / "session.json")
+    output = result.to_dict()
+
+    assert result.accepted is True
+    assignment = output["payload"]["assignment"]
+    assert assignment["assignment_id"] == "assignment-001"
+    assert assignment["idempotency_key"] == "idem-001"
+    assert assignment["lifecycle_decision_id"] == "decision-001"
+    assert assignment["reservation_lease_id"] == "lease-001"
+    assert assignment["runtime_instance_id"] == "jarvis-runtime-001"
+    assert assignment["adapter_protocol_version"] == CANDIDATE_ADAPTER_PROTOCOL_VERSION
+    assert assignment["no_go_scope"] == ["no business execution"]
+    assert assignment["payload"]["safe_input"]["title"] == "safe title"
+    assert assignment["payload"]["safe_input"]["items"][0] == {"value": "keep"}
+    assert assignment["payload"]["safe_input"]["items"][1] == {"nested": {"keep": "yes"}}
+    _assert_no_raw_internal_keys(output)
 
 
 def test_candidate_await_assignment_requires_register_readiness_and_heartbeat(tmp_path):
@@ -358,6 +381,45 @@ def test_candidate_cli_ack_accepts_deterministic_lease_json_and_unblocks_post_as
     assert result_output["payload"]["event"]["status"] == "candidate"
 
 
+def test_candidate_cli_await_assignment_output_hides_raw_assignment_payload_internals(tmp_path, capsys, monkeypatch):
+    import nexus.mq.candidate_adapter_cli as cli
+
+    profile = _write_profile(tmp_path)
+    session = tmp_path / "session.json"
+    assignment = _assignment(payload=_nested_raw_payload())
+
+    assert main(["connect", "--profile", str(profile), "--session", str(session)]) == 0
+    capsys.readouterr()
+    assert main(["register", "--session", str(session)]) == 0
+    capsys.readouterr()
+    assert main(
+        [
+            "ready",
+            "--session",
+            str(session),
+            "--startup-packet-ref",
+            "startup-packet://jarvis",
+            "--self-check-evidence-ref",
+            "evidence://readiness/jarvis",
+        ]
+    ) == 0
+    capsys.readouterr()
+    assert main(["heartbeat", "--session", str(session), "--sequence", "1", "--runtime-instance-id", "jarvis-runtime-001"]) == 0
+    capsys.readouterr()
+
+    monkeypatch.setattr(cli, "InMemoryAssignmentBroker", lambda: InMemoryAssignmentBroker(assignments=[assignment]))
+    await_code = main(["await-assignment", "--session", str(session)])
+    output = json.loads(capsys.readouterr().out)
+
+    assert await_code == 0
+    assert output["accepted"] is True
+    assert output["payload"]["assignment"]["assignment_id"] == "assignment-001"
+    assert output["payload"]["assignment"]["lifecycle_decision_id"] == "decision-001"
+    assert output["payload"]["assignment"]["reservation_lease_id"] == "lease-001"
+    assert output["payload"]["assignment"]["payload"]["safe_input"]["title"] == "safe title"
+    _assert_no_raw_internal_keys(output)
+
+
 def test_candidate_adapter_evidence_manifest_uses_relative_existing_paths_and_current_hashes():
     evidence_dir = (
         Path(__file__).resolve().parents[3]
@@ -378,3 +440,30 @@ def test_candidate_adapter_evidence_manifest_uses_relative_existing_paths_and_cu
         assert target.exists()
         content = target.read_bytes().replace(b"\r\n", b"\n")
         assert hashlib.sha256(content).hexdigest() == expected
+
+
+def _nested_raw_payload():
+    return {
+        "safe_input": {
+            "title": "safe title",
+            "raw_envelope": {"transport": "hidden"},
+            "headers": {"x-nexus": "hidden"},
+            "items": [
+                {"value": "keep", "nats_subject": "internal.subject"},
+                {"nested": {"keep": "yes", "reply_to": "internal.reply"}},
+            ],
+            "message_package": {"payload": "hidden"},
+        },
+        "raw_message": {"hidden": True},
+        "safe_ref": "candidate-safe://ref",
+    }
+
+
+def _assert_no_raw_internal_keys(value):
+    if isinstance(value, dict):
+        for key, item in value.items():
+            assert key not in RAW_INTERNAL_PAYLOAD_KEYS
+            _assert_no_raw_internal_keys(item)
+    elif isinstance(value, list):
+        for item in value:
+            _assert_no_raw_internal_keys(item)
