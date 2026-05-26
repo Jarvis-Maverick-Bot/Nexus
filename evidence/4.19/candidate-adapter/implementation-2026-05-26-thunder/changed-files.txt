@@ -1,0 +1,40 @@
+# Branch changed files
+
+Implementation source:
+nexus/mq/candidate_adapter_api.py
+nexus/mq/candidate_adapter_assignment_validator.py
+nexus/mq/candidate_adapter_cli.py
+nexus/mq/candidate_adapter_event_mapper.py
+nexus/mq/candidate_adapter_evidence_writer.py
+nexus/mq/candidate_adapter_profile_loader.py
+nexus/mq/candidate_adapter_run_loop.py
+nexus/mq/candidate_adapter_session_store.py
+nexus/mq/candidate_adapter_subject_broker_policy.py
+
+Focused tests:
+nexus/mq/tests/test_candidate_adapter_api_cli.py
+nexus/mq/tests/test_candidate_adapter_assignment_validator.py
+nexus/mq/tests/test_candidate_adapter_event_mapper.py
+nexus/mq/tests/test_candidate_adapter_profile_loader.py
+nexus/mq/tests/test_candidate_adapter_run_loop.py
+
+Implementation evidence:
+evidence/4.19/candidate-adapter/implementation-2026-05-26-thunder/IMPLEMENTATION_EVIDENCE.md
+evidence/4.19/candidate-adapter/implementation-2026-05-26-thunder/CODE_TO_DESIGN_TRACEABILITY.md
+evidence/4.19/candidate-adapter/implementation-2026-05-26-thunder/RISK_NOTES.md
+evidence/4.19/candidate-adapter/implementation-2026-05-26-thunder/changed-files.txt
+evidence/4.19/candidate-adapter/implementation-2026-05-26-thunder/git-diff-check.txt
+evidence/4.19/candidate-adapter/implementation-2026-05-26-thunder/compileall-nexus-mq.txt
+evidence/4.19/candidate-adapter/implementation-2026-05-26-thunder/focused-pytest.txt
+evidence/4.19/candidate-adapter/implementation-2026-05-26-thunder/full-mq-pytest.txt
+evidence/4.19/candidate-adapter/implementation-2026-05-26-thunder/secret-scan.txt
+evidence/4.19/candidate-adapter/implementation-2026-05-26-thunder/sha256-verify.txt
+evidence/4.19/candidate-adapter/implementation-2026-05-26-thunder/SHA256SUMS.txt
+
+Excluded by design:
+nexus/mq/resident_controller/**
+Existing NATS adapter modules
+Broker, transport, credential, or production config files
+Private-agent runner modules
+D:\Nova-Jarvis-Shared-Docs\**
+Runtime, UAT, MiniTest, deploy, or merge activation scripts

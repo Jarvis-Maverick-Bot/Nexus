@@ -1,0 +1,17 @@
+# Candidate Adapter Code-To-Design Traceability
+
+| Design requirement | Implementation surface | Test evidence |
+| --- | --- | --- |
+| Load bounded onboarding profile with broker/profile refs, protocol version, no-go scope, subject allowlist, and evidence output refs | `candidate_adapter_profile_loader.py`, `candidate_adapter_subject_broker_policy.py` | `test_candidate_adapter_profile_loader.py` |
+| Reject OpenClaw `4222` and Jarvis-side loopback for distributed UAT unless explicitly local-only | `candidate_adapter_subject_broker_policy.py`, `candidate_adapter_profile_loader.py` | `test_candidate_profile_rejects_openclaw_4222_for_distributed_uat`, `test_candidate_profile_rejects_jarvis_loopback_for_distributed_uat`, `test_candidate_profile_allows_loopback_only_with_explicit_local_authorization` |
+| Persist adapter session state without credentials | `candidate_adapter_session_store.py` | Covered by API/CLI and run-loop tests using file-backed session state |
+| Expose stable API/CLI operations for connect/register/ready/heartbeat/await-assignment/ack/progress/evidence/result/drain/offline | `candidate_adapter_api.py`, `candidate_adapter_cli.py` | `test_candidate_adapter_api_cli.py`, `test_candidate_adapter_run_loop.py` |
+| Use injected/fake providers instead of live broker/runtime activation | `candidate_adapter_api.py`, `candidate_adapter_run_loop.py` | `test_run_loop_uses_injected_fake_broker_and_lifecycle_provider` |
+| Await assignments only on allowlisted subjects | `candidate_adapter_api.py`, `candidate_adapter_subject_broker_policy.py` | `test_candidate_await_assignment_only_accepts_allowlisted_subjects` |
+| Validate lifecycle decision id and reservation lease id before ACK | `candidate_adapter_assignment_validator.py`, `candidate_adapter_api.py` | `test_candidate_ack_requires_active_lease_and_matching_decision`, missing/mismatched decision/lease negative tests |
+| Fail closed on expired, revoked, inactive, or mismatched lease | `candidate_adapter_assignment_validator.py` | `test_candidate_ack_rejects_expired_revoked_or_inactive_lease` |
+| Fail closed on duplicate non-idempotent assignment | `candidate_adapter_assignment_validator.py` | `test_candidate_ack_rejects_duplicate_non_idempotent_assignment` |
+| Hide raw Nexus message package internals from candidate agent | `candidate_adapter_event_mapper.py` | `test_assignment_event_hides_raw_nexus_message_internals` |
+| Emit ack/progress/evidence/result_candidate/rejected/draining/offline as canonical non-business events | `candidate_adapter_event_mapper.py`, `candidate_adapter_api.py`, `candidate_adapter_evidence_writer.py` | `test_ack_progress_evidence_and_result_candidate_map_to_candidate_safe_events`, `test_result_candidate_is_not_business_acceptance`, run-loop tests |
+| Drain/offline stop new assignment intake and require final evidence | `candidate_adapter_api.py`, `candidate_adapter_run_loop.py` | `test_candidate_offline_requires_final_evidence_ref`, `test_run_loop_drain_stops_new_assignment_intake`, `test_run_loop_offline_emits_final_evidence_ref` |
+| Do not claim MiniTest/PASS/business acceptance | `candidate_adapter_event_mapper.py`, `candidate_adapter_run_loop.py` | `test_run_loop_never_claims_business_acceptance_or_pass`, `test_result_candidate_is_not_business_acceptance` |
