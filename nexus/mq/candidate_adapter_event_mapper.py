@@ -14,11 +14,21 @@ CANDIDATE_ADAPTER_EVENT_SCHEMA_VERSION = "4.19.candidate_adapter.event.v1"
 RAW_INTERNAL_PAYLOAD_KEYS = {
     "ack_subject",
     "broker_credentials",
+    "broker_subject",
     "headers",
+    "internal_headers",
+    "internal_message",
+    "message_package",
+    "mq_envelope",
+    "nats_headers",
     "nats_subject",
+    "nexus_envelope",
     "raw_envelope",
+    "raw_message",
     "reply_to",
     "transport_ack",
+    "transport_headers",
+    "transport_metadata",
 }
 
 
@@ -85,7 +95,22 @@ def build_candidate_action_event(
 
 
 def _candidate_safe_payload(payload: dict[str, Any]) -> dict[str, Any]:
-    return {key: value for key, value in payload.items() if key not in RAW_INTERNAL_PAYLOAD_KEYS}
+    safe_payload = _candidate_safe_value(payload)
+    if not isinstance(safe_payload, dict):
+        return {}
+    return safe_payload
+
+
+def _candidate_safe_value(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: _candidate_safe_value(item)
+            for key, item in value.items()
+            if str(key).lower() not in RAW_INTERNAL_PAYLOAD_KEYS
+        }
+    if isinstance(value, list):
+        return [_candidate_safe_value(item) for item in value]
+    return value
 
 
 def _status_for_event(event_type: str) -> str:
