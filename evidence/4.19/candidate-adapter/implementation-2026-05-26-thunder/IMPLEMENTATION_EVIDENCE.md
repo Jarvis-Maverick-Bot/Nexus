@@ -6,10 +6,11 @@ Date: 2026-05-26
 Branch: `codex/4.19-candidate-agent-adapter-api-cli`
 Initial implementation code commit: `2a2afd9f46f896ac0d2200fb69dd9d86377e320f`
 Nova REQUEST_CHANGES correction code commit: `63047b1667cf65e0f240ab7dca7a2b70c50ea591`
+Nova redaction correction code commit: `76dcdbf22bb7165f596797e8677711a81d7a2f2f`
 Source base: `origin/master@f27a7bcd3ecc720ee28c676fb9f0ecb0ddbe2a24`
 Merge base: `f27a7bcd3ecc720ee28c676fb9f0ecb0ddbe2a24`
 Final evidence package head: provided by the Thunder handoff because a commit cannot self-reference its own SHA without changing that SHA.
-Verdict: READY_FOR_NOVA_CODE_REVIEW
+Verdict: READY_FOR_NOVA_REVIEW
 
 ## Authority Inputs
 
@@ -56,6 +57,14 @@ Nova blocking findings corrected:
 - CLI ACK stores active assignment state so later CLI `progress`, `evidence`, and `result` commands can complete against the same session file.
 - `SHA256SUMS.txt` is regenerated with relative paths and LF-normalized clean-checkout hashes.
 
+Nova redaction blocker corrected:
+
+- Candidate-facing payload sanitization now recursively strips raw internal transport/message-package keys at every dict/list depth before assignment events or candidate action events are returned.
+- The raw-key denylist now includes top-level and nested transport/message-package variants such as `raw_envelope`, `nats_subject`, `reply_to`, `headers`, `message_package`, `raw_message`, `transport_headers`, `transport_metadata`, `nats_headers`, and broker/internal envelope aliases.
+- Focused negative tests cover nested raw-key removal for `assignment_available`, `progress`, `evidence`, `result_candidate`, `assignment_rejected`, `draining`, and `offline` payloads.
+- Evidence-writer coverage verifies nested raw internal keys do not appear in written candidate event JSON.
+- Manifest coverage convention: `SHA256SUMS.txt` and `sha256-verify.txt` are intentionally excluded from `SHA256SUMS.txt` because one is self-referential and the other is generated verification output for that manifest. All other files in the implementation evidence package are covered.
+
 ## Changed File Summary
 
 See `changed-files.txt` for the complete branch-level file list.
@@ -85,8 +94,8 @@ Command output files:
 
 Observed verification:
 
-- Focused Candidate Adapter pytest slice: `51 passed`.
-- Full MQ test suite: `544 passed, 19 warnings`.
+- Focused Candidate Adapter pytest slice: `59 passed`.
+- Full MQ test suite: `552 passed, 19 warnings`.
 - `python -m compileall -q nexus/mq`: exit code 0.
 - `git diff --check`: clean.
 - High-confidence secret scan: no matches.
@@ -102,4 +111,4 @@ Observed verification:
 
 ## Final Candidate Verdict
 
-READY_FOR_NOVA_CODE_REVIEW
+READY_FOR_NOVA_REVIEW

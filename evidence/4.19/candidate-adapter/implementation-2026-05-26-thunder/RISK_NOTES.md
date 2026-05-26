@@ -15,7 +15,7 @@
 - Assignment ACK requires assignment id, idempotency key, lifecycle decision id, reservation lease id, matching runtime identity, matching protocol, matching no-go scope, and an active non-expired non-revoked lease.
 - CLI ACK requires deterministic `--lease-json` input and does not invent lifecycle truth from config.
 - Duplicate assignment id with a conflicting idempotency key is rejected.
-- Event mapper strips raw transport/internal keys before exposing assignment payloads to candidate callers.
+- Event mapper recursively strips raw transport/internal/message-package keys at every payload depth before exposing assignment or action payloads to candidate callers or evidence output.
 - Session state is file-backed, schema-versioned, and does not persist credential material.
 - Tests use injected in-memory broker and lifecycle providers only.
 
@@ -26,3 +26,4 @@
 - YAML profile loading remains deferred; JSON profile loading is implemented for the first typed contract without adding dependencies.
 - The evidence writer is available for candidate event file refs, but API tests rely on deterministic event payloads and do not create live runtime evidence.
 - Evidence checksums are generated with relative filenames and LF-normalized content so Nova can verify them from a clean checkout.
+- `SHA256SUMS.txt` and `sha256-verify.txt` are excluded from manifest coverage by convention because the manifest is self-referential and the verification file is generated from that manifest; all other implementation evidence files are covered.
