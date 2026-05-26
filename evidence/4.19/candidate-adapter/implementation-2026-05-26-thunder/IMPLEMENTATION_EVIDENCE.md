@@ -7,6 +7,7 @@ Branch: `codex/4.19-candidate-agent-adapter-api-cli`
 Initial implementation code commit: `2a2afd9f46f896ac0d2200fb69dd9d86377e320f`
 Nova REQUEST_CHANGES correction code commit: `63047b1667cf65e0f240ab7dca7a2b70c50ea591`
 Nova redaction correction code commit: `76dcdbf22bb7165f596797e8677711a81d7a2f2f`
+Nova API-output redaction correction code commit: `d839676696d36e601b080f36d4e67022095f34c3`
 Source base: `origin/master@f27a7bcd3ecc720ee28c676fb9f0ecb0ddbe2a24`
 Merge base: `f27a7bcd3ecc720ee28c676fb9f0ecb0ddbe2a24`
 Final evidence package head: provided by the Thunder handoff because a commit cannot self-reference its own SHA without changing that SHA.
@@ -65,6 +66,13 @@ Nova redaction blocker corrected:
 - Evidence-writer coverage verifies nested raw internal keys do not appear in written candidate event JSON.
 - Manifest coverage convention: `SHA256SUMS.txt` and `sha256-verify.txt` are intentionally excluded from `SHA256SUMS.txt` because one is self-referential and the other is generated verification output for that manifest. All other files in the implementation evidence package are covered.
 
+Nova API-output redaction blocker corrected:
+
+- `await_assignment()` now returns a candidate-safe normalized assignment view in `CandidateAdapterOperationResult.payload["assignment"]`.
+- The normalized assignment view preserves ACK-required assignment/control metadata: assignment id, idempotency key, lifecycle decision id, reservation lease id, runtime identity, protocol version, and no-go scope.
+- Raw transport/message-package payload internals are recursively stripped from the assignment branch before API return or CLI JSON emission.
+- Focused API and CLI negative tests prove no raw internal keys appear anywhere in the full serialized `await_assignment` result, including the `assignment` branch and companion `event` branch.
+
 ## Changed File Summary
 
 See `changed-files.txt` for the complete branch-level file list.
@@ -94,8 +102,8 @@ Command output files:
 
 Observed verification:
 
-- Focused Candidate Adapter pytest slice: `59 passed`.
-- Full MQ test suite: `552 passed, 19 warnings`.
+- Focused Candidate Adapter pytest slice: `61 passed`.
+- Full MQ test suite: `554 passed, 19 warnings`.
 - `python -m compileall -q nexus/mq`: exit code 0.
 - `git diff --check`: clean.
 - High-confidence secret scan: no matches.

@@ -12,10 +12,11 @@
 - Broker endpoint validation rejects distributed-UAT OpenClaw `4222` and Jarvis-side loopback unless explicitly local-only.
 - Subject policy rejects broad or unauthorized assignment subjects.
 - Assignment intake is blocked unless registration, startup packet, readiness evidence, heartbeat freshness, and an active lifecycle state are present.
+- Await-assignment API/CLI output uses a normalized assignment/control view that preserves ACK-required decision, lease, idempotency, runtime, protocol, and no-go metadata while removing raw payload internals.
 - Assignment ACK requires assignment id, idempotency key, lifecycle decision id, reservation lease id, matching runtime identity, matching protocol, matching no-go scope, and an active non-expired non-revoked lease.
 - CLI ACK requires deterministic `--lease-json` input and does not invent lifecycle truth from config.
 - Duplicate assignment id with a conflicting idempotency key is rejected.
-- Event mapper recursively strips raw transport/internal/message-package keys at every payload depth before exposing assignment or action payloads to candidate callers or evidence output.
+- Event mapper recursively strips raw transport/internal/message-package keys at every payload depth before exposing assignment, action, API/CLI, or evidence output payloads to candidate callers.
 - Session state is file-backed, schema-versioned, and does not persist credential material.
 - Tests use injected in-memory broker and lifecycle providers only.
 
