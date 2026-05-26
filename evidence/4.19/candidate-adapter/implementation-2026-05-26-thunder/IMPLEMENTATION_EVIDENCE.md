@@ -4,7 +4,8 @@ Owner: Thunder
 Requester: Alex, via Nova review gate
 Date: 2026-05-26
 Branch: `codex/4.19-candidate-agent-adapter-api-cli`
-Implementation code commit: `2a2afd9f46f896ac0d2200fb69dd9d86377e320f`
+Initial implementation code commit: `2a2afd9f46f896ac0d2200fb69dd9d86377e320f`
+Nova REQUEST_CHANGES correction code commit: `63047b1667cf65e0f240ab7dca7a2b70c50ea591`
 Source base: `origin/master@f27a7bcd3ecc720ee28c676fb9f0ecb0ddbe2a24`
 Merge base: `f27a7bcd3ecc720ee28c676fb9f0ecb0ddbe2a24`
 Final evidence package head: provided by the Thunder handoff because a commit cannot self-reference its own SHA without changing that SHA.
@@ -44,6 +45,17 @@ No global `nexus candidate` executable or packaging entrypoint was added.
 
 The implementation uses deterministic injected providers for assignment intake and lifecycle lease lookup in tests. It does not start a runtime, connect to NATS, mutate broker/firewall/config/credentials, invoke private agents, deploy, merge, execute business work, or claim PASS.
 
+## Request Changes Corrections
+
+Nova blocking findings corrected:
+
+- Assignment intake and ACK now fail closed unless the session has registration, startup packet, readiness evidence, heartbeat freshness, and an allowed active lifecycle state.
+- `await_assignment` rejects connected-only, registered-only, ready-without-heartbeat, stale, draining, and offline sessions before returning a normal assignment.
+- `ack_assignment` rejects connected-only, registered-only, ready-without-heartbeat, stale, draining, and offline sessions before emitting intake ACK.
+- CLI ACK now has a deterministic source-only contract: `python -m nexus.mq.candidate_adapter_cli ack --assignment-json <path> --lease-json <path> --session <path>`.
+- CLI ACK stores active assignment state so later CLI `progress`, `evidence`, and `result` commands can complete against the same session file.
+- `SHA256SUMS.txt` is regenerated with relative paths and LF-normalized clean-checkout hashes.
+
 ## Changed File Summary
 
 See `changed-files.txt` for the complete branch-level file list.
@@ -73,8 +85,8 @@ Command output files:
 
 Observed verification:
 
-- Focused Candidate Adapter pytest slice: `44 passed`.
-- Full MQ test suite: `537 passed, 19 warnings`.
+- Focused Candidate Adapter pytest slice: `51 passed`.
+- Full MQ test suite: `544 passed, 19 warnings`.
 - `python -m compileall -q nexus/mq`: exit code 0.
 - `git diff --check`: clean.
 - High-confidence secret scan: no matches.

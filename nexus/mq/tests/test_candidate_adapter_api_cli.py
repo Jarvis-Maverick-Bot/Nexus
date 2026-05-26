@@ -1,5 +1,6 @@
 import json
 import hashlib
+from pathlib import Path
 
 from nexus.mq.candidate_adapter_api import (
     CandidateAdapterApi,
@@ -359,7 +360,7 @@ def test_candidate_cli_ack_accepts_deterministic_lease_json_and_unblocks_post_as
 
 def test_candidate_adapter_evidence_manifest_uses_relative_existing_paths_and_current_hashes():
     evidence_dir = (
-        __import__("pathlib").Path(__file__).resolve().parents[3]
+        Path(__file__).resolve().parents[3]
         / "evidence"
         / "4.19"
         / "candidate-adapter"
@@ -372,7 +373,7 @@ def test_candidate_adapter_evidence_manifest_uses_relative_existing_paths_and_cu
     assert lines
     for line in lines:
         expected, relative_path = line.split("  ", 1)
-        assert not __import__("pathlib").Path(relative_path).is_absolute()
+        assert not Path(relative_path).is_absolute()
         target = evidence_dir / relative_path
         assert target.exists()
         content = target.read_bytes().replace(b"\r\n", b"\n")
