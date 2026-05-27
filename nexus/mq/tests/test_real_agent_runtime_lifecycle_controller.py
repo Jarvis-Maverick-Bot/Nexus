@@ -198,6 +198,25 @@ def test_runtime_reserve_capacity_replay_returns_same_active_lease():
     assert record.active_reservation_lease_ids == [first.lease_id]
 
 
+def test_runtime_reserve_capacity_replay_after_decision_expiry_returns_same_active_lease():
+    controller = _ready_controller()
+    decision = controller.query_eligibility(_eligibility_request(), now_at=NOW)
+
+    first = controller.reserve_capacity(decision, assignment_id="assignment-001", now_at=NOW)
+    second = controller.reserve_capacity(
+        decision,
+        assignment_id="assignment-001",
+        now_at="2026-05-27T07:00:31+00:00",
+    )
+    record = controller.get_runtime("jarvis-runtime-001")
+
+    assert second.lease_id == first.lease_id
+    assert second.expires_at == "2026-05-27T07:01:00+00:00"
+    assert second.active is True
+    assert second.status == "active"
+    assert record.active_reservation_lease_ids == [first.lease_id]
+
+
 def test_runtime_reserve_capacity_rejects_stale_accepted_decision_after_reservation():
     controller = _ready_controller()
     first_decision = controller.query_eligibility(_eligibility_request(), now_at=NOW)

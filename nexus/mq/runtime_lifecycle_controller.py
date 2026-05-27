@@ -341,10 +341,6 @@ class RuntimeLifecycleController:
     ) -> RuntimeReservationLease:
         if not decision.accepted:
             raise ValueError("ELIGIBILITY_DECISION_NOT_ALLOWED")
-        valid_until = _parse_iso(decision.valid_until)
-        now = _parse_iso(now_at)
-        if valid_until is not None and now is not None and valid_until <= now:
-            raise ValueError("ELIGIBILITY_DECISION_EXPIRED")
         if decision.assignment_id != assignment_id:
             raise ValueError("DECISION_ASSIGNMENT_ID_MISMATCH")
         record = self.get_runtime(decision.target_runtime_instance_id)
@@ -357,6 +353,10 @@ class RuntimeLifecycleController:
                 record.updated_at = now_at
                 return existing_lease
             raise ValueError("RESERVATION_REQUIRES_LIFECYCLE_REQUERY")
+        valid_until = _parse_iso(decision.valid_until)
+        now = _parse_iso(now_at)
+        if valid_until is not None and now is not None and valid_until <= now:
+            raise ValueError("ELIGIBILITY_DECISION_EXPIRED")
         requery_errors = self._reservation_requery_errors(record, decision=decision, now_at=now_at)
         if requery_errors:
             raise ValueError("; ".join(requery_errors))

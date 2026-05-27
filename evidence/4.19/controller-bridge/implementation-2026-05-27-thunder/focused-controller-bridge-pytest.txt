@@ -1,5 +1,5 @@
 command: python -m pytest nexus/mq/tests/test_controller_bridge_dispatch.py nexus/mq/tests/test_controller_bridge_state_store.py nexus/mq/tests/test_controller_bridge_evidence.py nexus/mq/tests/test_controller_bridge_cli.py nexus/mq/tests/test_eligibility_reservation_policy.py nexus/mq/tests/test_real_agent_runtime_lifecycle_controller.py nexus/mq/tests/test_real_agent_operating_runbook.py -q
 exit_code=0
 
-...............................................                          [100%]
-47 passed in 0.79s
+................................................                         [100%]
+48 passed in 0.75s

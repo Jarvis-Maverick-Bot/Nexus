@@ -13,6 +13,7 @@
 - Added focused tests for post-consume capacity blocking, post-release eligibility, and expired reservation cleanup.
 - Added Runtime Lifecycle reservation replay idempotency for the same lifecycle decision/idempotency identity while an active lease is valid.
 - Added fail-closed Runtime Lifecycle reservation behavior for stale accepted decisions after capacity/state changes, forcing lifecycle re-query instead of minting a second lease.
+- Moved same-identity active lease replay ahead of lifecycle decision TTL rejection, while keeping expired decisions blocked for new reservations.
 
 ## No Design Deviations Requiring Approval
 
