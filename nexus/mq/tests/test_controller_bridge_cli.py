@@ -1,6 +1,10 @@
 import json
+from hashlib import sha256
 
 from nexus.mq.controller_bridge_cli import main
+from nexus.mq.controller_bridge_models import ControllerBridgePolicy, policy_hash
+from nexus.mq.controller_bridge_state_store import ControllerBridgeStateStore
+from nexus.mq.durable_state import DurableStateStore
 
 
 NOW = "2026-05-27T12:00:00+00:00"
@@ -38,15 +42,17 @@ def _decision_payload():
 def _runtime_decision_payload():
     return {
         "decision_id": "runtime-decision-001",
-        "request_id": "eligibility-001",
+        "request_id": f"eligibility-{sha256('run-001|assignment-001|idem-001'.encode('utf-8')).hexdigest()[:12]}",
         "dispatch_run_id": "run-001",
         "assignment_id": "assignment-001",
         "target_agent_id": "jarvis",
         "target_runtime_instance_id": "jarvis-runtime-001",
         "accepted": True,
-        "policy_hash": "policy-hash-001",
+        "policy_hash": policy_hash(ControllerBridgePolicy()),
         "idempotency_key": "idem-001",
         "valid_until": "2026-05-27T12:00:30+00:00",
+        "runtime_role": "implementation_agent",
+        "runtime_owner": "principal://jarvis",
     }
 
 
@@ -135,6 +141,62 @@ def test_controller_bridge_cli_dispatch_validate_create_publish(tmp_path, capsys
     publish_output = json.loads(capsys.readouterr().out)
     assert publish_output["accepted"] is True
     assert publish_output["payload"]["assignment_publish_request"]["reservation_lease_id"] == "lease-001"
+
+
+def test_controller_bridge_cli_dispatch_request_eligibility_persists_lifecycle_decision_without_runtime_mutation(
+    tmp_path, capsys
+):
+    state_db = tmp_path / "bridge.sqlite3"
+    decision_json = _write_json(tmp_path / "decision.json", _decision_payload())
+    runtime_decision_json = _write_json(tmp_path / "runtime-decision.json", _runtime_decision_payload())
+
+    assert (
+        main(
+            [
+                "dispatch",
+                "create",
+                "--state-db",
+                str(state_db),
+                "--decision-json",
+                str(decision_json),
+                "--run-id",
+                "run-001",
+                "--assignment-id",
+                "assignment-001",
+                "--now-at",
+                NOW,
+            ]
+        )
+        == 0
+    )
+    capsys.readouterr()
+
+    assert (
+        main(
+            [
+                "dispatch",
+                "request-eligibility",
+                "--state-db",
+                str(state_db),
+                "--run-id",
+                "run-001",
+                "--lifecycle-decision-json",
+                str(runtime_decision_json),
+                "--now-at",
+                NOW,
+            ]
+        )
+        == 0
+    )
+    output = json.loads(capsys.readouterr().out)
+    store = ControllerBridgeStateStore(DurableStateStore(str(state_db)))
+
+    assert output["accepted"] is True
+    assert output["operation"] == "request_eligibility"
+    assert output["payload"]["lifecycle_decision"]["decision_id"] == "runtime-decision-001"
+    assert output["payload"]["runtime_lifecycle_provider"]["mutating_calls"] == []
+    assert store.get_lifecycle_decision("runtime-decision-001").accepted is True
+    store.close()
 
 
 def test_controller_bridge_cli_runtime_lease_status_and_release(tmp_path, capsys):

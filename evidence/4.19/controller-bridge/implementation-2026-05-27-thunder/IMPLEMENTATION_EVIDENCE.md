@@ -4,7 +4,7 @@ Status: source/evidence implementation candidate. This package does not authoriz
 
 ## Verdict
 
-READY_FOR_NOVA_CODE_REVIEW
+READY_FOR_NOVA_RE_REVIEW
 
 ## Branch / Base
 
@@ -16,17 +16,20 @@ READY_FOR_NOVA_CODE_REVIEW
 | Merge target | `master` |
 | Approved pre-edit package | `codex/4.19-controller-bridge-pre-edit` at `a6b6943d14cea942ef71d8f964a1183f3ae04d54` |
 | Shared Docs authority | `c3ef7b3bdd1ceb3cc1117c2b95bd78a28282ce5f` |
+| Nova reviewed commit | `1ba683ab5510b559f8a28f47a768a9a0ffd76dae` |
 
 The final pushed commit hash is reported in the handoff/final response because a committed file cannot contain its own final SHA without changing that SHA.
 
 ## Completed Items
 
 - Added dedicated controller bridge models, state store, dispatch controller, evidence builder, and module CLI.
+- Corrected Nova review blocker 1 by adding `dispatch request-eligibility` to `python -m nexus.mq.controller_bridge_cli`, wired through `ControllerBridgeDispatchController.request_eligibility` with a deterministic query-only lifecycle provider.
+- Corrected Nova review blocker 2 by reconciling runtime active reservation lease IDs, active assignment IDs, lifecycle state, and capacity after lease consume/release/revoke/expiry.
 - Extended Runtime Lifecycle Controller with decision validity, lease status, consume/release/revoke/expiry, and optional durable bridge state recording.
 - Extended eligibility/reservation validation to fail closed on expired lifecycle decisions and invalid leases.
 - Extended integrated evidence package validation for controller bridge evidence refs when required.
 - Added Track 2 Controller Bridge runbook section with TTLs, source-bound dispatch and active lease requirements, and no-runtime boundary.
-- Added focused tests for missing decision/source, missing/expired/mismatched lease, duplicate replay, wrong subject/runtime, valid lease-backed publish, incomplete evidence, CLI paths, runtime lease status/consume/release/revoke, and runbook coverage.
+- Added focused tests for missing decision/source, missing/expired/mismatched lease, duplicate replay, wrong subject/runtime, valid lease-backed publish, incomplete evidence, CLI paths including `dispatch request-eligibility`, runtime lease status/consume/release/revoke/expiry, post-consume capacity blocking, post-release eligibility, and runbook coverage.
 
 ## Verification Summary
 
@@ -34,9 +37,9 @@ The final pushed commit hash is reported in the handoff/final response because a
 | --- | --- | --- |
 | `git diff --check` | `git-diff-check.txt` | exit_code=0 |
 | `python -m compileall -q nexus/mq` | `compileall-nexus-mq.txt` | exit_code=0 |
-| Focused controller bridge pytest | `focused-controller-bridge-pytest.txt` | 41 passed |
+| Focused controller bridge pytest | `focused-controller-bridge-pytest.txt` | 44 passed |
 | Regression slice pytest | `regression-slice-pytest.txt` | 101 passed |
-| Full MQ pytest | `full-mq-pytest.txt` | 612 passed, 19 warnings |
+| Full MQ pytest | `full-mq-pytest.txt` | 615 passed, 19 warnings |
 | High-confidence secret scan | `secret-scan.txt` | no matches |
 | SHA256 manifest verification | `sha256-verify.txt` | all listed entries OK |
 

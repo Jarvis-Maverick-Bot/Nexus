@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict, is_dataclass
+from dataclasses import asdict, is_dataclass, replace
 from datetime import timedelta
 import json
 from pathlib import Path
@@ -47,6 +47,11 @@ def _add_dispatch_parser(subparsers: argparse._SubParsersAction) -> None:
     create.add_argument("--run-id", required=True)
     create.add_argument("--assignment-id", required=True)
     create.add_argument("--now-at", required=True)
+    request_eligibility = commands.add_parser("request-eligibility")
+    request_eligibility.add_argument("--state-db", required=True)
+    request_eligibility.add_argument("--run-id", required=True)
+    request_eligibility.add_argument("--lifecycle-decision-json", required=True)
+    request_eligibility.add_argument("--now-at", required=True)
     publish = commands.add_parser("publish-assignment")
     publish.add_argument("--state-db", required=True)
     publish.add_argument("--run-id", required=True)
@@ -107,6 +112,17 @@ def _dispatch(args: argparse.Namespace) -> dict[str, Any]:
                 assignment_id=args.assignment_id,
                 now_at=args.now_at,
             ).to_dict()
+        if args.command == "request-eligibility":
+            provider = _StaticRuntimeLifecycleProvider(
+                RuntimeEligibilityDecision(**_read_json(args.lifecycle_decision_json))
+            )
+            result = controller.request_eligibility(
+                args.run_id,
+                runtime_lifecycle=provider,
+                now_at=args.now_at,
+            ).to_dict()
+            result["payload"]["runtime_lifecycle_provider"] = provider.to_dict()
+            return result
         if args.command == "publish-assignment":
             return controller.publish_assignment(
                 dispatch_run_id=args.run_id,
@@ -187,6 +203,43 @@ def _lease_from_decision(decision: RuntimeEligibilityDecision, *, lease_id: str,
         runtime_role=decision.runtime_role,
         runtime_owner=decision.runtime_owner,
     )
+
+
+class _StaticRuntimeLifecycleProvider:
+    def __init__(self, decision: RuntimeEligibilityDecision) -> None:
+        self.decision = decision
+        self.query_calls = 0
+        self.mutating_calls: list[str] = []
+
+    def query_eligibility(self, request: Any, *, now_at: str) -> RuntimeEligibilityDecision:
+        self.query_calls += 1
+        mismatches: list[str] = []
+        expected = {
+            "request_id": request.request_id,
+            "dispatch_run_id": request.dispatch_run_id,
+            "assignment_id": request.assignment_id,
+            "idempotency_key": request.idempotency_key,
+            "target_agent_id": request.target_agent_id,
+            "target_runtime_instance_id": request.target_runtime_instance_id,
+            "policy_hash": request.policy_hash,
+        }
+        for field_name, expected_value in expected.items():
+            if getattr(self.decision, field_name) != expected_value:
+                mismatches.append(f"LIFECYCLE_DECISION_{field_name.upper()}_MISMATCH")
+        if mismatches:
+            return replace(
+                self.decision,
+                accepted=False,
+                errors=list(self.decision.errors) + mismatches,
+            )
+        return self.decision
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "source": "static_lifecycle_decision_json",
+            "query_calls": self.query_calls,
+            "mutating_calls": list(self.mutating_calls),
+        }
 
 
 def _json_safe(value: Any) -> Any:

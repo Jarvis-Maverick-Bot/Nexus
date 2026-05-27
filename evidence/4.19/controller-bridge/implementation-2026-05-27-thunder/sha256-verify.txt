@@ -1,3 +1,7 @@
+command: clean-export SHA256 verification from git index bytes
+exit_code=0
+entries=16
+
 .gitattributes: OK
 branch-base.txt: OK
 changed-files-all.txt: OK

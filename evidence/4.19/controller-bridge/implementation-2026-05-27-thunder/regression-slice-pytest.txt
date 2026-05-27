@@ -1,4 +1,6 @@
+command: python -m pytest nexus/mq/tests/test_resident_controller_real_agent_dispatch.py nexus/mq/tests/test_resident_controller_observer_dispatcher.py nexus/mq/tests/test_candidate_adapter_api_cli.py nexus/mq/tests/test_candidate_adapter_assignment_validator.py nexus/mq/tests/test_candidate_adapter_event_mapper.py nexus/mq/tests/test_candidate_adapter_run_loop.py nexus/mq/tests/test_agent_access_real_agent_projection.py nexus/mq/tests/test_agent_access_read_model.py nexus/mq/tests/test_integrated_evidence_package_generator.py nexus/mq/tests/test_operational_dispatch_assignment.py nexus/mq/tests/test_operational_dispatch_eligibility.py nexus/mq/tests/test_operational_dispatch_scope.py -q
+exit_code=0
+
 ........................................................................ [ 71%]
 .............................                                            [100%]
-101 passed in 1.05s
-exit_code=0
+101 passed in 1.25s

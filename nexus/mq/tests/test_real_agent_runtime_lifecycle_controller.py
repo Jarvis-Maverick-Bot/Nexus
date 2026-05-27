@@ -52,8 +52,8 @@ def _eligibility_request(**overrides):
     return RuntimeEligibilityRequest(**data)
 
 
-def _ready_controller():
-    controller = RuntimeLifecycleController(policy=RuntimeLifecyclePolicy())
+def _ready_controller(policy=None):
+    controller = RuntimeLifecycleController(policy=policy or RuntimeLifecyclePolicy())
     controller.register_runtime(_registration(), now_at=NOW)
     controller.submit_readiness(
         runtime_instance_id="jarvis-runtime-001",
@@ -158,12 +158,25 @@ def test_runtime_ack_consumes_lease():
     controller = _ready_controller()
     decision = controller.query_eligibility(_eligibility_request(), now_at=NOW)
     lease = controller.reserve_capacity(decision, assignment_id="assignment-001", now_at=NOW)
+    record = controller.get_runtime("jarvis-runtime-001")
+
+    assert lease.lease_id in record.active_reservation_lease_ids
+    assert record.active_assignment_ids == []
 
     consumed = controller.consume_reservation(lease.lease_id, consumed_at=NOW)
+    record = controller.get_runtime("jarvis-runtime-001")
+    blocked = controller.evaluate_eligibility(
+        _eligibility_request(request_id="eligibility-002", assignment_id="assignment-002", idempotency_key="idem-002"),
+        now_at=NOW,
+    )
 
     assert consumed.status == "consumed"
     assert consumed.active is False
     assert controller.lease_status(lease.lease_id, now_at=NOW).status == "consumed"
+    assert lease.lease_id not in record.active_reservation_lease_ids
+    assert "assignment-001" in record.active_assignment_ids
+    assert blocked.accepted is False
+    assert "RUNTIME_CAPACITY_EXHAUSTED" in blocked.errors
 
 
 def test_runtime_release_and_revoke_reservation():
@@ -172,15 +185,66 @@ def test_runtime_release_and_revoke_reservation():
     released_lease = controller.reserve_capacity(decision, assignment_id="assignment-001", now_at=NOW)
 
     released = controller.release_reservation(released_lease.lease_id, released_at=NOW, reason_ref="drain://run-001")
+    released_record = controller.get_runtime("jarvis-runtime-001")
+    post_release = controller.evaluate_eligibility(
+        _eligibility_request(request_id="eligibility-002", assignment_id="assignment-002", idempotency_key="idem-002"),
+        now_at=NOW,
+    )
 
     assert released.status == "released"
     assert released.release_reason_ref == "drain://run-001"
+    assert released_lease.lease_id not in released_record.active_reservation_lease_ids
+    assert released_record.active_assignment_ids == []
+    assert released_record.lifecycle_state == "idle"
+    assert post_release.accepted is True
 
     controller = _ready_controller()
     decision = controller.query_eligibility(_eligibility_request(), now_at=NOW)
     revoked_lease = controller.reserve_capacity(decision, assignment_id="assignment-001", now_at=NOW)
 
     revoked = controller.revoke_reservation(revoked_lease.lease_id, revoked_at=NOW, reason_ref="control://revoke")
+    revoked_record = controller.get_runtime("jarvis-runtime-001")
 
     assert revoked.status == "revoked"
     assert revoked.revoked is True
+    assert revoked_lease.lease_id not in revoked_record.active_reservation_lease_ids
+    assert revoked_record.lifecycle_state == "idle"
+
+
+def test_runtime_release_after_consumed_assignment_restores_eligibility():
+    controller = _ready_controller()
+    decision = controller.query_eligibility(_eligibility_request(), now_at=NOW)
+    lease = controller.reserve_capacity(decision, assignment_id="assignment-001", now_at=NOW)
+    controller.consume_reservation(lease.lease_id, consumed_at=NOW)
+
+    released = controller.release_reservation(lease.lease_id, released_at=NOW, reason_ref="result://assignment-001")
+    record = controller.get_runtime("jarvis-runtime-001")
+    post_release = controller.evaluate_eligibility(
+        _eligibility_request(request_id="eligibility-002", assignment_id="assignment-002", idempotency_key="idem-002"),
+        now_at=NOW,
+    )
+
+    assert released.status == "released"
+    assert record.active_assignment_ids == []
+    assert record.active_reservation_lease_ids == []
+    assert record.lifecycle_state == "idle"
+    assert post_release.accepted is True
+
+
+def test_runtime_expired_reservation_reconciles_capacity_and_allows_new_eligibility():
+    controller = _ready_controller(policy=RuntimeLifecyclePolicy(lease_ttl_seconds=10))
+    decision = controller.query_eligibility(_eligibility_request(), now_at=NOW)
+    lease = controller.reserve_capacity(decision, assignment_id="assignment-001", now_at=NOW)
+
+    expired = controller.lease_status(lease.lease_id, now_at="2026-05-27T07:00:11+00:00")
+    record = controller.get_runtime("jarvis-runtime-001")
+    post_expiry = controller.evaluate_eligibility(
+        _eligibility_request(request_id="eligibility-002", assignment_id="assignment-002", idempotency_key="idem-002"),
+        now_at="2026-05-27T07:00:11+00:00",
+    )
+
+    assert expired.status == "expired"
+    assert lease.lease_id not in record.active_reservation_lease_ids
+    assert record.active_assignment_ids == []
+    assert record.lifecycle_state == "idle"
+    assert post_expiry.accepted is True

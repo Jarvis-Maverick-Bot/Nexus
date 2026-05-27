@@ -1,1 +1,3 @@
+command: python -m compileall -q nexus/mq
 exit_code=0
+NO_OUTPUT

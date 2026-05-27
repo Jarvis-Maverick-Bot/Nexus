@@ -292,6 +292,7 @@ class RuntimeLifecycleController:
             self._record_lifecycle_decision(decision)
             return decision
 
+        self._expire_active_reservations(record, now_at=now_at)
         if record.agent_id != request.target_agent_id:
             errors.append("TARGET_AGENT_ID_MISMATCH")
         errors.extend(_readiness_errors(record, now_at=now_at))
@@ -395,13 +396,28 @@ class RuntimeLifecycleController:
                 lease = replace(lease, active=False, status="expired")
                 self._leases[lease_id] = lease
                 self._record_reservation_lease(lease)
+                self._apply_lease_transition(
+                    lease,
+                    transitioned_at=now_at,
+                    remove_assignment=False,
+                    remove_decision=True,
+                )
         return lease
 
     def consume_reservation(self, lease_id: str, *, consumed_at: str) -> RuntimeReservationLease:
         lease = self.lease_status(lease_id, now_at=consumed_at)
+        if not lease.active or lease.status != "active":
+            raise ValueError(f"RESERVATION_LEASE_NOT_ACTIVE: {lease.status}")
         updated = replace(lease, active=False, status="consumed", consumed_at=consumed_at)
         self._leases[lease_id] = updated
         self._record_reservation_lease(updated)
+        self._apply_lease_transition(
+            updated,
+            transitioned_at=consumed_at,
+            add_assignment=True,
+            remove_assignment=False,
+            remove_decision=False,
+        )
         return updated
 
     def release_reservation(self, lease_id: str, *, released_at: str, reason_ref: str) -> RuntimeReservationLease:
@@ -409,6 +425,12 @@ class RuntimeLifecycleController:
         updated = replace(lease, active=False, status="released", released_at=released_at, release_reason_ref=reason_ref)
         self._leases[lease_id] = updated
         self._record_reservation_lease(updated)
+        self._apply_lease_transition(
+            updated,
+            transitioned_at=released_at,
+            remove_assignment=True,
+            remove_decision=True,
+        )
         return updated
 
     def revoke_reservation(self, lease_id: str, *, revoked_at: str, reason_ref: str) -> RuntimeReservationLease:
@@ -416,6 +438,12 @@ class RuntimeLifecycleController:
         updated = replace(lease, active=False, status="revoked", revoked=True, released_at=revoked_at, release_reason_ref=reason_ref)
         self._leases[lease_id] = updated
         self._record_reservation_lease(updated)
+        self._apply_lease_transition(
+            updated,
+            transitioned_at=revoked_at,
+            remove_assignment=True,
+            remove_decision=True,
+        )
         return updated
 
     def get_runtime(self, runtime_instance_id: str) -> RuntimeLifecycleRecord:
@@ -431,6 +459,46 @@ class RuntimeLifecycleController:
     def _record_reservation_lease(self, lease: RuntimeReservationLease) -> None:
         if self._state_store is not None:
             self._state_store.record_reservation_lease(lease)
+
+    def _expire_active_reservations(self, record: RuntimeLifecycleRecord, *, now_at: str) -> None:
+        for lease_id in list(record.active_reservation_lease_ids):
+            self.lease_status(lease_id, now_at=now_at)
+
+    def _apply_lease_transition(
+        self,
+        lease: RuntimeReservationLease,
+        *,
+        transitioned_at: str,
+        add_assignment: bool = False,
+        remove_assignment: bool = False,
+        remove_decision: bool = False,
+    ) -> None:
+        record = self._records.get(lease.target_runtime_instance_id)
+        if record is None:
+            return
+        _remove_value(record.active_reservation_lease_ids, lease.lease_id)
+        if add_assignment:
+            _append_unique(record.active_assignment_ids, lease.assignment_id)
+        if remove_assignment:
+            _remove_value(record.active_assignment_ids, lease.assignment_id)
+        if remove_decision:
+            _remove_value(record.active_decision_ids, lease.lifecycle_decision_id)
+        self._reconcile_runtime_capacity_state(record)
+        record.updated_at = transitioned_at
+
+    def _reconcile_runtime_capacity_state(self, record: RuntimeLifecycleRecord) -> None:
+        if record.lifecycle_state in {"offline", "revoked", "quarantined", "draining", "paused", "suspended"}:
+            return
+        if record.active_reservation_lease_ids:
+            record.lifecycle_state = "reserved"
+            return
+        if len(record.active_assignment_ids) >= self.policy.max_concurrent_assignments:
+            record.lifecycle_state = "assigned"
+            return
+        if record.last_heartbeat_at and record.startup_packet_ref and record.readiness_evidence_ref:
+            record.lifecycle_state = "idle"
+        elif record.startup_packet_ref and record.readiness_evidence_ref:
+            record.lifecycle_state = "ready"
 
 
 def _registration_errors(request: RuntimeRegistrationRequest) -> list[str]:
@@ -542,6 +610,11 @@ def _stable_id(prefix: str, *parts: str) -> str:
 def _append_unique(items: list[str], value: str) -> None:
     if value and value not in items:
         items.append(value)
+
+
+def _remove_value(items: list[str], value: str) -> None:
+    while value in items:
+        items.remove(value)
 
 
 def _parse_iso(value: str | None) -> datetime | None:

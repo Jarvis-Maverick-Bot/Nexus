@@ -14,6 +14,9 @@ evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/IMPLEMENTATION
 evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/no-runtime-uat-evidence.txt
 evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/regression-slice-pytest.txt
 evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/runbook-completeness.txt
+evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/secret-scan.txt
+evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/SHA256SUMS.txt
+evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/sha256-verify.txt
 nexus/mq/controller_bridge_cli.py
 nexus/mq/controller_bridge_dispatch.py
 nexus/mq/controller_bridge_evidence.py
