@@ -1,0 +1,56 @@
+﻿COMMAND: git status --short --branch; git rev-parse HEAD; git merge-base HEAD origin/master; git rev-parse 366377009940b0feef0fb808b582961d044ea777
+CWD: D:\Projects\Nexus
+STARTED_AT: 2026-05-27T15:24:17.6307477+08:00
+## codex/4.19-real-agent-operating-env
+A  docs/runbooks/4.19_REAL_AGENT_OPERATING_ENVIRONMENT_RUNBOOK.md
+A  evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/CODE_TO_DESIGN_TRACEABILITY.md
+A  evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/IMPLEMENTATION_EVIDENCE.md
+A  evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/PACKAGE_INDEX.md
+A  evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/SHA256SUMS.txt
+AM evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/branch-base.txt
+AM evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/candidate-resident-focused-pytest.txt
+A  evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/changed-files-source.txt
+AM evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/compileall-nexus-mq.txt
+A  evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/design-to-code-deviation-report.md
+A  evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/diagnostic-readiness-evidence.txt
+A  evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/diff-summary.txt
+AM evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/focused-real-agent-pytest.txt
+AM evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/full-mq-pytest.txt
+AM evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/git-diff-check.txt
+A  evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/no-a2a-evidence.txt
+AM evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/regression-slice-pytest.txt
+A  evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/runbook-completeness.txt
+A  evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/secret-scan.txt
+A  evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/sha256-verify.txt
+A  nexus/mq/a2a_placeholder_marker.py
+M  nexus/mq/agent_access_read_model.py
+M  nexus/mq/candidate_adapter_profile_loader.py
+A  nexus/mq/eligibility_reservation_policy.py
+A  nexus/mq/heartbeat_presence_controller.py
+A  nexus/mq/integrated_evidence_package_generator.py
+A  nexus/mq/readiness_taxonomy.py
+M  nexus/mq/resident_controller/dispatcher.py
+M  nexus/mq/resident_controller/live_loop.py
+A  nexus/mq/runtime_lifecycle_controller.py
+A  nexus/mq/runtime_metrics_projection.py
+A  nexus/mq/tests/test_a2a_placeholder_boundary.py
+A  nexus/mq/tests/test_agent_access_real_agent_projection.py
+M  nexus/mq/tests/test_candidate_adapter_profile_loader.py
+A  nexus/mq/tests/test_eligibility_reservation_policy.py
+A  nexus/mq/tests/test_heartbeat_presence_controller.py
+A  nexus/mq/tests/test_integrated_evidence_package_generator.py
+A  nexus/mq/tests/test_real_agent_operating_runbook.py
+A  nexus/mq/tests/test_real_agent_readiness_taxonomy.py
+A  nexus/mq/tests/test_real_agent_runtime_lifecycle_controller.py
+M  nexus/mq/tests/test_resident_controller_live_loop.py
+M  nexus/mq/tests/test_resident_controller_observer_dispatcher.py
+A  nexus/mq/tests/test_resident_controller_real_agent_dispatch.py
+?? evidence/4.19/wbs-7.19.14/resident-controller/5B-live-loop-proof-2026-05-25/
+?? evidence/4.19/wbs-7.19.14/resident-controller/5B-merge-evidence-2026-05-26/
+?? evidence/4.19/wbs-7.19.14/resident-controller/5B-patch-proof-2026-05-26/tools/
+?? evidence/4.19/wbs-7.19.14/resident-controller/pre-merge-check-2026-05-25/
+366377009940b0feef0fb808b582961d044ea777
+f27a7bcd3ecc720ee28c676fb9f0ecb0ddbe2a24
+366377009940b0feef0fb808b582961d044ea777
+EXIT_CODE: 0
+ENDED_AT: 2026-05-27T15:24:17.7414508+08:00

@@ -1,0 +1,4 @@
+﻿Diagnostic-only readiness evidence:
+nexus/mq/readiness_taxonomy.py blocks Phase 3/MiniTest diagnostic-only evidence from claiming real operating readiness.
+pytest nexus/mq/tests/test_real_agent_readiness_taxonomy.py is included in focused-real-agent-pytest.txt and passed.
+Forbidden final label remains THUNDER_REAL_AGENT_OPERATING_ENVIRONMENT_READY and is not claimed by implementation evidence.

@@ -1,0 +1,20 @@
+SHA256 verification excluding SHA256SUMS.txt and sha256-verify.txt
+OK  branch-base.txt
+OK  candidate-resident-focused-pytest.txt
+OK  changed-files-all.txt
+OK  changed-files-source.txt
+OK  CODE_TO_DESIGN_TRACEABILITY.md
+OK  compileall-nexus-mq.txt
+OK  design-to-code-deviation-report.md
+OK  diagnostic-readiness-evidence.txt
+OK  diff-summary.txt
+OK  focused-real-agent-pytest.txt
+OK  full-mq-pytest.txt
+OK  git-diff-check.txt
+OK  IMPLEMENTATION_EVIDENCE.md
+OK  no-a2a-evidence.txt
+OK  PACKAGE_INDEX.md
+OK  regression-slice-pytest.txt
+OK  runbook-completeness.txt
+OK  secret-scan.txt
+EXIT_CODE: 0

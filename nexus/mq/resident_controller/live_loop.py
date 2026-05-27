@@ -12,6 +12,7 @@ import json
 import threading
 import time
 
+from nexus.mq.eligibility_reservation_policy import RuntimeEligibilityDecision, RuntimeReservationLease
 from nexus.mq.resident_controller.config import validate_resident_controller_config
 from nexus.mq.resident_controller.dispatcher import (
     ResidentControllerDispatchPolicy,
@@ -50,6 +51,34 @@ class ResidentBrokerClient(Protocol):
 
     def close(self) -> None:
         ...
+
+
+class ResidentLifecycleProvider(Protocol):
+    def assignment_decision_and_lease(
+        self,
+        *,
+        run_id: str,
+        agent_id: str,
+        assignment_id: str,
+        idempotency_key: str,
+        target_runtime_instance_id: str,
+        now_at: str,
+    ) -> tuple[RuntimeEligibilityDecision | None, RuntimeReservationLease | None]:
+        ...
+
+
+class MissingResidentLifecycleProvider:
+    def assignment_decision_and_lease(
+        self,
+        *,
+        run_id: str,
+        agent_id: str,
+        assignment_id: str,
+        idempotency_key: str,
+        target_runtime_instance_id: str,
+        now_at: str,
+    ) -> tuple[RuntimeEligibilityDecision | None, RuntimeReservationLease | None]:
+        return None, None
 
 
 @dataclass
@@ -146,6 +175,7 @@ def run_start_once(
     *,
     config: dict[str, Any],
     broker: ResidentBrokerClient | None = None,
+    lifecycle_provider: ResidentLifecycleProvider | None = None,
 ) -> ResidentStartOnceRuntimeResult:
     records: list[ResidentEvidenceRecord] = []
     errors: list[str] = []
@@ -213,6 +243,7 @@ def run_start_once(
         )
 
     client = broker or NatsResidentBrokerClient()
+    lifecycle_provider = lifecycle_provider or MissingResidentLifecycleProvider()
     observed: dict[str, set[str]] = {
         "registration": set(),
         "readiness": set(),
@@ -291,6 +322,7 @@ def run_start_once(
                     agent_id=agent_id,
                     controller=controller,
                     uat_config=uat_config,
+                    lifecycle_provider=lifecycle_provider,
                     record=record,
                     errors=errors,
                 )
@@ -358,20 +390,35 @@ def _publish_assignment(
     agent_id: str,
     controller: dict[str, Any],
     uat_config: dict[str, Any],
+    lifecycle_provider: ResidentLifecycleProvider,
     record: Callable[[str, dict[str, Any]], None],
     errors: list[str],
 ) -> None:
+    now_at = _now()
+    assignment_id = str(uat_config.get("assignment_id") or f"{run_id}-assignment")
+    idempotency_key = str(uat_config.get("idempotency_key") or f"{run_id}-idempotency")
+    target_runtime_instance_id = str(uat_config.get("target_runtime_instance_id") or agent_id)
+    lifecycle_decision, reservation_lease = lifecycle_provider.assignment_decision_and_lease(
+        run_id=run_id,
+        agent_id=agent_id,
+        assignment_id=assignment_id,
+        idempotency_key=idempotency_key,
+        target_runtime_instance_id=target_runtime_instance_id,
+        now_at=now_at,
+    )
     request = ResidentControllerDispatchRequest(
-        assignment_id=str(uat_config.get("assignment_id") or f"{run_id}-assignment"),
-        idempotency_key=str(uat_config.get("idempotency_key") or f"{run_id}-idempotency"),
+        assignment_id=assignment_id,
+        idempotency_key=idempotency_key,
         run_id=run_id,
         wbs_id="7.19.14.5",
         target_agent_id=agent_id,
-        target_runtime_instance_id=str(uat_config.get("target_runtime_instance_id") or agent_id),
+        target_runtime_instance_id=target_runtime_instance_id,
         assignment_kind=str(uat_config.get("assignment_kind") or "non_business_probe"),
         command="bounded_assignment",
         source_authority_ref=str(controller.get("run_authorization_ref") or ""),
         no_go_scope_ref="no-go://wbs-7.19.14.5",
+        lifecycle_decision_id=lifecycle_decision.decision_id if lifecycle_decision is not None else "",
+        reservation_lease_id=reservation_lease.lease_id if reservation_lease is not None else "",
         not_business_completion=True,
     )
     subject = f"{subject_policy.namespace}.{run_id}.{agent_id}.assignment"
@@ -389,7 +436,9 @@ def _publish_assignment(
         runtime=_runtime_record_for_assignment(agent_id=agent_id, request=request),
         subject_policy=subject_policy,
         policy=dispatch_policy,
-        now_at=_now(),
+        now_at=now_at,
+        lifecycle_decision=lifecycle_decision,
+        reservation_lease=reservation_lease,
     )
     if not decision.accepted:
         errors.extend(decision.errors)

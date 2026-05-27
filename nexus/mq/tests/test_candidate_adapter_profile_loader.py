@@ -88,6 +88,23 @@ def test_candidate_profile_requires_evidence_output_policy(tmp_path):
     assert "MISSING_PROFILE_FIELD: evidence_output_ref" in result.errors
 
 
+def test_candidate_profile_pins_real_agent_heartbeat_policy(tmp_path):
+    result = load_candidate_adapter_profile(_write_profile(tmp_path))
+
+    assert result.accepted is True
+    assert result.profile.heartbeat_interval_seconds == 15
+    assert result.profile.heartbeat_ttl_seconds == 60
+
+
+def test_candidate_profile_rejects_heartbeat_ttl_shorter_than_interval(tmp_path):
+    result = load_candidate_adapter_profile(
+        _write_profile(tmp_path, heartbeat_interval_seconds=60, heartbeat_ttl_seconds=15)
+    )
+
+    assert result.accepted is False
+    assert "HEARTBEAT_TTL_SHORTER_THAN_INTERVAL" in result.errors
+
+
 def test_candidate_profile_digest_changes_on_authority_fields(tmp_path):
     first = load_candidate_adapter_profile(_write_profile(tmp_path))
     second = load_candidate_adapter_profile(_write_profile(tmp_path, authority_scopes=["workflow.readonly"]))

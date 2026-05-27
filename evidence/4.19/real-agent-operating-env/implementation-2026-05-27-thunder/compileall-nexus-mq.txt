@@ -1,0 +1,5 @@
+﻿COMMAND: python -m compileall -q nexus/mq
+CWD: D:\Projects\Nexus
+STARTED_AT: 2026-05-27T15:23:24.2856740+08:00
+EXIT_CODE: 0
+ENDED_AT: 2026-05-27T15:23:24.4019090+08:00

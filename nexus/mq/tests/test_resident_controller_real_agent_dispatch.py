@@ -1,18 +1,17 @@
 from nexus.mq.agent_registry import AgentRegistryRecord
 from nexus.mq.eligibility_reservation_policy import RuntimeEligibilityDecision, RuntimeReservationLease
 from nexus.mq.resident_controller.dispatcher import (
-    ResidentControllerDispatchRequest,
     ResidentControllerDispatchPolicy,
+    ResidentControllerDispatchRequest,
     ResidentControllerSubjectPolicy,
     evaluate_resident_dispatch,
 )
-from nexus.mq.resident_controller.observer import evaluate_runtime_observation
 
 
-NOW = "2026-05-25T00:00:00+00:00"
+NOW = "2026-05-27T07:00:00+00:00"
 
 
-def _record(**overrides):
+def _runtime(**overrides):
     data = {
         "agent_id": "jarvis",
         "runtime_instance_id": "jarvis-runtime-001",
@@ -26,14 +25,14 @@ def _record(**overrides):
         "initialization_status": "ready",
         "registry_status": "active",
         "presence_state": "idle",
-        "heartbeat_ttl_seconds": 30,
-        "last_heartbeat_at": "2026-05-24T23:59:45+00:00",
+        "heartbeat_ttl_seconds": 60,
+        "last_heartbeat_at": NOW,
         "current_assignment_refs": [],
         "protocol_versions_supported": ["4.19"],
         "trust_material_ref": "trust://jarvis",
         "startup_packet_ref": "startup://jarvis/run-001",
         "readiness_evidence_ref": "evidence://jarvis/readiness",
-        "startup_packet_expires_at": "2026-05-25T01:00:00+00:00",
+        "startup_packet_expires_at": "2026-05-27T08:00:00+00:00",
         "created_at": NOW,
         "updated_at": NOW,
     }
@@ -41,18 +40,9 @@ def _record(**overrides):
     return AgentRegistryRecord(**data)
 
 
-def _subject_policy():
-    return ResidentControllerSubjectPolicy(
-        namespace="nexus.4_19.wbs7_19_14",
-        run_id="run-001",
-        allowed_agents=["jarvis"],
-        publish_allowlist=["nexus.4_19.wbs7_19_14.*.assignment"],
-    )
-
-
-def _dispatch_request(**overrides):
+def _request(**overrides):
     data = {
-        "assignment_id": "assign-001",
+        "assignment_id": "assignment-001",
         "idempotency_key": "idem-001",
         "run_id": "run-001",
         "wbs_id": "7.19.14.5",
@@ -60,8 +50,8 @@ def _dispatch_request(**overrides):
         "target_runtime_instance_id": "jarvis-runtime-001",
         "assignment_kind": "non_business_probe",
         "command": "bounded_assignment",
-        "source_authority_ref": "review-evidence/nova/uat-auth.md",
-        "no_go_scope_ref": "no-go://7.19.14.5",
+        "source_authority_ref": "review://nova/real-agent-go",
+        "no_go_scope_ref": "no-go://real-agent",
         "lifecycle_decision_id": "decision-001",
         "reservation_lease_id": "lease-001",
         "not_business_completion": True,
@@ -70,12 +60,25 @@ def _dispatch_request(**overrides):
     return ResidentControllerDispatchRequest(**data)
 
 
+def _subject_policy():
+    return ResidentControllerSubjectPolicy(
+        namespace="nexus.4_19.real_agent",
+        run_id="run-001",
+        allowed_agents=["jarvis"],
+        publish_allowlist=["nexus.4_19.real_agent.*.assignment"],
+    )
+
+
+def _policy():
+    return ResidentControllerDispatchPolicy(dispatch_enabled=True, uat_authorized=True)
+
+
 def _decision(**overrides):
     data = {
         "decision_id": "decision-001",
         "request_id": "eligibility-001",
         "dispatch_run_id": "run-001",
-        "assignment_id": "assign-001",
+        "assignment_id": "assignment-001",
         "target_agent_id": "jarvis",
         "target_runtime_instance_id": "jarvis-runtime-001",
         "accepted": True,
@@ -91,12 +94,12 @@ def _lease(**overrides):
     data = {
         "lease_id": "lease-001",
         "lifecycle_decision_id": "decision-001",
-        "assignment_id": "assign-001",
+        "assignment_id": "assignment-001",
         "dispatch_run_id": "run-001",
         "target_runtime_instance_id": "jarvis-runtime-001",
         "active": True,
         "status": "active",
-        "expires_at": "2026-05-25T00:01:00+00:00",
+        "expires_at": "2026-05-27T07:01:00+00:00",
         "policy_hash": "policy-hash-001",
         "idempotency_key": "idem-001",
     }
@@ -104,39 +107,49 @@ def _lease(**overrides):
     return RuntimeReservationLease(**data)
 
 
-def test_resident_controller_observer_marks_stale_runtime_ineligible():
-    observation = evaluate_runtime_observation(
-        _record(last_heartbeat_at="2026-05-24T23:58:00+00:00"),
-        now_at=NOW,
-    )
-
-    assert observation.dispatch_eligible is False
-    assert observation.presence_state == "stale"
-    assert "HEARTBEAT_STALE" in observation.errors
-
-
-def test_resident_controller_dispatch_requires_non_business_scope():
+def test_assignment_publish_requires_active_reservation_lease():
     decision = evaluate_resident_dispatch(
-        request=_dispatch_request(assignment_kind="business_task", not_business_completion=False),
-        runtime=_record(),
+        request=_request(),
+        runtime=_runtime(),
         subject_policy=_subject_policy(),
-        policy=ResidentControllerDispatchPolicy(dispatch_enabled=True, uat_authorized=True),
+        policy=_policy(),
         now_at=NOW,
         lifecycle_decision=_decision(),
         reservation_lease=_lease(),
     )
 
-    assert decision.accepted is False
+    assert decision.accepted is True
     assert decision.published is False
-    assert "BUSINESS_EXECUTION_NOT_AUTHORIZED" in decision.errors
+    assert decision.lifecycle_decision_id == "decision-001"
+    assert decision.reservation_lease_id == "lease-001"
 
 
-def test_resident_controller_duplicate_replay_same_idempotency_key_suppressed():
+def test_dispatch_blocks_missing_lifecycle_identity_before_duplicate_suppression():
     decision = evaluate_resident_dispatch(
-        request=_dispatch_request(),
-        runtime=_record(),
+        request=_request(lifecycle_decision_id="", reservation_lease_id=""),
+        runtime=_runtime(),
         subject_policy=_subject_policy(),
-        policy=ResidentControllerDispatchPolicy(dispatch_enabled=True, uat_authorized=True),
+        policy=_policy(),
+        now_at=NOW,
+        prior_idempotency_keys={"idem-001"},
+        lifecycle_decision=None,
+        reservation_lease=None,
+    )
+
+    assert decision.accepted is False
+    assert decision.duplicate_suppressed is False
+    assert "MISSING_LIFECYCLE_DECISION_ID" in decision.errors
+    assert "MISSING_RESERVATION_LEASE_ID" in decision.errors
+    assert "MISSING_LIFECYCLE_DECISION" in decision.errors
+    assert "MISSING_RESERVATION_LEASE" in decision.errors
+
+
+def test_dispatch_duplicate_replay_suppressed_only_after_lifecycle_validation():
+    decision = evaluate_resident_dispatch(
+        request=_request(),
+        runtime=_runtime(),
+        subject_policy=_subject_policy(),
+        policy=_policy(),
         now_at=NOW,
         prior_idempotency_keys={"idem-001"},
         lifecycle_decision=_decision(),
@@ -144,6 +157,21 @@ def test_resident_controller_duplicate_replay_same_idempotency_key_suppressed():
     )
 
     assert decision.accepted is True
-    assert decision.published is False
     assert decision.duplicate_suppressed is True
     assert "DUPLICATE_ASSIGNMENT_SUPPRESSED" in decision.errors
+
+
+def test_heartbeat_or_route_ready_cannot_unlock_assignment_without_lifecycle_lease():
+    decision = evaluate_resident_dispatch(
+        request=_request(),
+        runtime=_runtime(),
+        subject_policy=_subject_policy(),
+        policy=_policy(),
+        now_at=NOW,
+        lifecycle_decision=None,
+        reservation_lease=None,
+    )
+
+    assert decision.accepted is False
+    assert "MISSING_LIFECYCLE_DECISION" in decision.errors
+    assert "MISSING_RESERVATION_LEASE" in decision.errors

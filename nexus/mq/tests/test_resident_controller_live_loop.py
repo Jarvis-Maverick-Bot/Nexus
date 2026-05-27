@@ -1,5 +1,6 @@
 import json
 
+from nexus.mq.eligibility_reservation_policy import RuntimeEligibilityDecision, RuntimeReservationLease
 from nexus.mq.resident_controller.cli import main
 from nexus.mq.resident_controller.live_loop import run_start_once
 from nexus.mq.tests.test_resident_controller_config import _config
@@ -31,6 +32,44 @@ class FakeResidentBroker:
 
     def close(self):
         self.closed = True
+
+
+class FakeResidentLifecycleProvider:
+    def assignment_decision_and_lease(
+        self,
+        *,
+        run_id,
+        agent_id,
+        assignment_id,
+        idempotency_key,
+        target_runtime_instance_id,
+        now_at,
+    ):
+        decision = RuntimeEligibilityDecision(
+            decision_id="decision-5b-local",
+            request_id=f"eligibility-{run_id}",
+            dispatch_run_id=run_id,
+            assignment_id=assignment_id,
+            target_agent_id=agent_id,
+            target_runtime_instance_id=target_runtime_instance_id,
+            accepted=True,
+            policy_hash="policy-hash-5b-local",
+            idempotency_key=idempotency_key,
+            evidence_refs=["evidence://runtime-lifecycle/decision/5b-local"],
+        )
+        lease = RuntimeReservationLease(
+            lease_id="lease-5b-local",
+            lifecycle_decision_id=decision.decision_id,
+            assignment_id=assignment_id,
+            dispatch_run_id=run_id,
+            target_runtime_instance_id=target_runtime_instance_id,
+            active=True,
+            status="active",
+            expires_at="2099-01-01T00:00:00+00:00",
+            policy_hash=decision.policy_hash,
+            idempotency_key=idempotency_key,
+        )
+        return decision, lease
 
 
 def _bounded_config(tmp_path, **overrides):
@@ -106,7 +145,11 @@ def test_start_once_bounded_loop_connects_subscribes_dispatches_and_records_cand
         ]
     )
 
-    result = run_start_once(config=_bounded_config(tmp_path), broker=broker)
+    result = run_start_once(
+        config=_bounded_config(tmp_path),
+        broker=broker,
+        lifecycle_provider=FakeResidentLifecycleProvider(),
+    )
 
     assert result.accepted is True
     assert result.daemon_started is True
@@ -166,7 +209,11 @@ def test_start_once_bounded_loop_requires_assignment_candidate_evidence_when_ena
         ]
     )
 
-    result = run_start_once(config=_bounded_config(tmp_path), broker=broker)
+    result = run_start_once(
+        config=_bounded_config(tmp_path),
+        broker=broker,
+        lifecycle_provider=FakeResidentLifecycleProvider(),
+    )
 
     assert result.accepted is False
     assert result.daemon_started is False
@@ -206,7 +253,11 @@ def test_start_once_bounded_loop_requires_offline_observation_after_drain(tmp_pa
         ]
     )
 
-    result = run_start_once(config=_bounded_config(tmp_path), broker=broker)
+    result = run_start_once(
+        config=_bounded_config(tmp_path),
+        broker=broker,
+        lifecycle_provider=FakeResidentLifecycleProvider(),
+    )
 
     assert result.accepted is False
     assert result.daemon_started is False
@@ -254,6 +305,7 @@ def test_cli_start_once_config_only_uses_bounded_runner(tmp_path, monkeypatch):
                     },
                 ]
             ),
+            lifecycle_provider=FakeResidentLifecycleProvider(),
         )
 
     monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")

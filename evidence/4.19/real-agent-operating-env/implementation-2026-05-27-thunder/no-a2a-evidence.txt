@@ -1,0 +1,4 @@
+﻿No-A2A evidence:
+nexus/mq/a2a_placeholder_marker.py only returns A2A_DEFERRED_TO_V0_2 and does not mutate state.
+pytest nexus/mq/tests/test_a2a_placeholder_boundary.py is included in focused-real-agent-pytest.txt and passed.
+No direct A2A route implementation was added.

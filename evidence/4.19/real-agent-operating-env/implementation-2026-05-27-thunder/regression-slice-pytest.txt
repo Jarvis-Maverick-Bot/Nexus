@@ -1,0 +1,8 @@
+﻿COMMAND: python -m pytest nexus/mq/tests/test_dispatch_eligibility.py nexus/mq/tests/test_operational_dispatch_assignment.py nexus/mq/tests/test_operational_dispatch_eligibility.py nexus/mq/tests/test_operational_dispatch_agent_access.py nexus/mq/tests/test_resident_controller_observer_dispatcher.py nexus/mq/tests/test_resident_controller_live_loop.py nexus/mq/tests/test_resident_controller_evidence_recovery.py nexus/mq/tests/test_resident_controller_config.py nexus/mq/tests/test_heartbeat_runtime.py nexus/mq/tests/test_heartbeat_presence_ttl.py nexus/mq/tests/test_heartbeat_registry_integration.py nexus/mq/tests/test_heartbeat_agent_access_projection.py nexus/mq/tests/test_candidate_runtime_lifecycle.py nexus/mq/tests/test_candidate_runtime_evidence.py nexus/mq/tests/test_agent_registry_readiness.py nexus/mq/tests/test_agent_access_evidence_export.py nexus/mq/tests/test_message_contracts.py nexus/mq/tests/test_private_agent_eligibility.py nexus/mq/tests/test_private_agent_contract.py -q
+CWD: D:\Projects\Nexus
+STARTED_AT: 2026-05-27T15:23:28.6470433+08:00
+........................................................................ [ 84%]
+.............                                                            [100%]
+85 passed in 2.52s
+EXIT_CODE: 0
+ENDED_AT: 2026-05-27T15:23:31.6441961+08:00

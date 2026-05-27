@@ -1,0 +1,92 @@
+﻿COMMAND: git diff --cached --stat; git diff --cached --name-only
+CWD: D:\Projects\Nexus
+STARTED_AT: 2026-05-27T15:24:17.7514519+08:00
+ ....19_REAL_AGENT_OPERATING_ENVIRONMENT_RUNBOOK.md | 116 +++++
+ .../CODE_TO_DESIGN_TRACEABILITY.md                 |  22 +
+ .../IMPLEMENTATION_EVIDENCE.md                     |  59 +++
+ .../PACKAGE_INDEX.md                               |  24 ++
+ .../SHA256SUMS.txt                                 |  17 +
+ .../branch-base.txt                                |  38 ++
+ .../candidate-resident-focused-pytest.txt          |   8 +
+ .../changed-files-source.txt                       |  24 ++
+ .../compileall-nexus-mq.txt                        |   5 +
+ .../design-to-code-deviation-report.md             |   8 +
+ .../diagnostic-readiness-evidence.txt              |   4 +
+ .../diff-summary.txt                               |  20 +
+ .../focused-real-agent-pytest.txt                  |   7 +
+ .../full-mq-pytest.txt                             | 104 +++++
+ .../git-diff-check.txt                             |   5 +
+ .../no-a2a-evidence.txt                            |   4 +
+ .../regression-slice-pytest.txt                    |   8 +
+ .../runbook-completeness.txt                       |   5 +
+ .../secret-scan.txt                                |   4 +
+ .../sha256-verify.txt                              |  19 +
+ nexus/mq/a2a_placeholder_marker.py                 |  44 ++
+ nexus/mq/agent_access_read_model.py                |   7 +
+ nexus/mq/candidate_adapter_profile_loader.py       |  16 +-
+ nexus/mq/eligibility_reservation_policy.py         | 197 +++++++++
+ nexus/mq/heartbeat_presence_controller.py          | 163 +++++++
+ nexus/mq/integrated_evidence_package_generator.py  | 112 +++++
+ nexus/mq/readiness_taxonomy.py                     |  74 ++++
+ nexus/mq/resident_controller/dispatcher.py         |  70 ++-
+ nexus/mq/resident_controller/live_loop.py          |  57 ++-
+ nexus/mq/runtime_lifecycle_controller.py           | 473 +++++++++++++++++++++
+ nexus/mq/runtime_metrics_projection.py             |  41 ++
+ nexus/mq/tests/test_a2a_placeholder_boundary.py    |  20 +
+ .../test_agent_access_real_agent_projection.py     |  40 ++
+ .../tests/test_candidate_adapter_profile_loader.py |  17 +
+ .../tests/test_eligibility_reservation_policy.py   | 126 ++++++
+ .../mq/tests/test_heartbeat_presence_controller.py |  53 +++
+ .../test_integrated_evidence_package_generator.py  |  60 +++
+ .../mq/tests/test_real_agent_operating_runbook.py  |  51 +++
+ .../mq/tests/test_real_agent_readiness_taxonomy.py |  49 +++
+ ...test_real_agent_runtime_lifecycle_controller.py | 143 +++++++
+ .../mq/tests/test_resident_controller_live_loop.py |  58 ++-
+ ...test_resident_controller_observer_dispatcher.py |  41 ++
+ ...test_resident_controller_real_agent_dispatch.py | 177 ++++++++
+ 43 files changed, 2572 insertions(+), 18 deletions(-)
+docs/runbooks/4.19_REAL_AGENT_OPERATING_ENVIRONMENT_RUNBOOK.md
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/CODE_TO_DESIGN_TRACEABILITY.md
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/IMPLEMENTATION_EVIDENCE.md
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/PACKAGE_INDEX.md
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/SHA256SUMS.txt
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/branch-base.txt
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/candidate-resident-focused-pytest.txt
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/changed-files-source.txt
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/compileall-nexus-mq.txt
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/design-to-code-deviation-report.md
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/diagnostic-readiness-evidence.txt
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/diff-summary.txt
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/focused-real-agent-pytest.txt
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/full-mq-pytest.txt
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/git-diff-check.txt
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/no-a2a-evidence.txt
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/regression-slice-pytest.txt
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/runbook-completeness.txt
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/secret-scan.txt
+evidence/4.19/real-agent-operating-env/implementation-2026-05-27-thunder/sha256-verify.txt
+nexus/mq/a2a_placeholder_marker.py
+nexus/mq/agent_access_read_model.py
+nexus/mq/candidate_adapter_profile_loader.py
+nexus/mq/eligibility_reservation_policy.py
+nexus/mq/heartbeat_presence_controller.py
+nexus/mq/integrated_evidence_package_generator.py
+nexus/mq/readiness_taxonomy.py
+nexus/mq/resident_controller/dispatcher.py
+nexus/mq/resident_controller/live_loop.py
+nexus/mq/runtime_lifecycle_controller.py
+nexus/mq/runtime_metrics_projection.py
+nexus/mq/tests/test_a2a_placeholder_boundary.py
+nexus/mq/tests/test_agent_access_real_agent_projection.py
+nexus/mq/tests/test_candidate_adapter_profile_loader.py
+nexus/mq/tests/test_eligibility_reservation_policy.py
+nexus/mq/tests/test_heartbeat_presence_controller.py
+nexus/mq/tests/test_integrated_evidence_package_generator.py
+nexus/mq/tests/test_real_agent_operating_runbook.py
+nexus/mq/tests/test_real_agent_readiness_taxonomy.py
+nexus/mq/tests/test_real_agent_runtime_lifecycle_controller.py
+nexus/mq/tests/test_resident_controller_live_loop.py
+nexus/mq/tests/test_resident_controller_observer_dispatcher.py
+nexus/mq/tests/test_resident_controller_real_agent_dispatch.py
+EXIT_CODE: 0
+ENDED_AT: 2026-05-27T15:24:17.8129660+08:00

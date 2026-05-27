@@ -17,6 +17,8 @@ from nexus.mq.candidate_adapter_subject_broker_policy import (
 
 CANDIDATE_ADAPTER_PROFILE_SCHEMA_VERSION = "4.19.candidate_adapter.profile.v1"
 CANDIDATE_ADAPTER_PROTOCOL_VERSION = "4.19.candidate_adapter.v1"
+REAL_AGENT_HEARTBEAT_INTERVAL_SECONDS = 15
+REAL_AGENT_HEARTBEAT_TTL_SECONDS = 60
 
 
 @dataclass
@@ -39,8 +41,8 @@ class CandidateAdapterProfile:
     credential_ref: str
     profile_schema_version: str = CANDIDATE_ADAPTER_PROFILE_SCHEMA_VERSION
     adapter_protocol_version: str = CANDIDATE_ADAPTER_PROTOCOL_VERSION
-    heartbeat_interval_seconds: int = 30
-    heartbeat_ttl_seconds: int = 90
+    heartbeat_interval_seconds: int = REAL_AGENT_HEARTBEAT_INTERVAL_SECONDS
+    heartbeat_ttl_seconds: int = REAL_AGENT_HEARTBEAT_TTL_SECONDS
     local_only_authorized: bool = False
     not_business_completion: bool = True
 
@@ -118,6 +120,12 @@ def validate_candidate_adapter_profile(
 
     errors.extend(validate_broker_endpoint(profile.broker_url, local_only_authorization=local_only_authorization).errors)
     errors.extend(validate_subject_patterns(profile.allowed_subject_patterns).errors)
+    if profile.heartbeat_interval_seconds <= 0:
+        errors.append("INVALID_HEARTBEAT_INTERVAL")
+    if profile.heartbeat_ttl_seconds <= 0:
+        errors.append("INVALID_HEARTBEAT_TTL")
+    if profile.heartbeat_ttl_seconds < profile.heartbeat_interval_seconds:
+        errors.append("HEARTBEAT_TTL_SHORTER_THAN_INTERVAL")
     errors.extend(secret_material_errors(profile.to_dict(), path="candidate_adapter_profile"))
     return _dedupe(errors)
 
@@ -173,8 +181,8 @@ def _profile_from_payload(payload: dict[str, Any]) -> CandidateAdapterProfile:
         adapter_protocol_version=str(
             payload.get("adapter_protocol_version") or CANDIDATE_ADAPTER_PROTOCOL_VERSION
         ),
-        heartbeat_interval_seconds=int(payload.get("heartbeat_interval_seconds") or 30),
-        heartbeat_ttl_seconds=int(payload.get("heartbeat_ttl_seconds") or 90),
+        heartbeat_interval_seconds=int(payload.get("heartbeat_interval_seconds") or REAL_AGENT_HEARTBEAT_INTERVAL_SECONDS),
+        heartbeat_ttl_seconds=int(payload.get("heartbeat_ttl_seconds") or REAL_AGENT_HEARTBEAT_TTL_SECONDS),
         local_only_authorized=bool(payload.get("local_only_authorized")),
         not_business_completion=bool(payload.get("not_business_completion", True)),
     )

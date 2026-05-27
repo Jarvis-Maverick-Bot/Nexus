@@ -1,0 +1,5 @@
+﻿Runbook completeness evidence:
+pytest nexus/mq/tests/test_real_agent_operating_runbook.py is included in focused-real-agent-pytest.txt and passed.
+Runbook path: docs/runbooks/4.19_REAL_AGENT_OPERATING_ENVIRONMENT_RUNBOOK.md
+Required roles covered: Alex, Nova, Jarvis runtime host, Thunder, Operator, Evidence reviewer.
+Distributed UAT topology covered: Nova-hosted Nexus NATS nats://192.168.31.124:7422, NATS_URL, NEXUS_RESIDENT_CONTROLLER_NATS_URL, firewall/auth/preflight, never OpenClaw 4222, never Jarvis-side 127.0.0.1.

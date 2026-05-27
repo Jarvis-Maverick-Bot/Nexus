@@ -12,6 +12,11 @@ from typing import Any, Optional
 
 from nexus.mq.agent_registry import AgentRegistryRecord
 from nexus.mq.agent_registry_events import secret_material_errors
+from nexus.mq.eligibility_reservation_policy import (
+    RuntimeEligibilityDecision,
+    RuntimeReservationLease,
+    validate_assignment_publish,
+)
 from nexus.mq.resident_controller.observer import evaluate_runtime_observation
 
 
@@ -62,6 +67,8 @@ class ResidentControllerDispatchRequest:
     command: str
     source_authority_ref: str
     no_go_scope_ref: str
+    lifecycle_decision_id: str = ""
+    reservation_lease_id: str = ""
     schema_version: str = RESIDENT_DISPATCH_REQUEST_SCHEMA_VERSION
     not_business_completion: bool = True
 
@@ -75,6 +82,8 @@ class ResidentControllerDispatchDecision:
     published: bool = False
     subject: Optional[str] = None
     message_id: Optional[str] = None
+    lifecycle_decision_id: str = ""
+    reservation_lease_id: str = ""
     duplicate_suppressed: bool = False
     errors: list[str] = field(default_factory=list)
     not_business_completion: bool = True
@@ -110,15 +119,10 @@ def evaluate_resident_dispatch(
     policy: ResidentControllerDispatchPolicy,
     now_at: str,
     prior_idempotency_keys: Optional[set[str]] = None,
+    lifecycle_decision: RuntimeEligibilityDecision | None = None,
+    reservation_lease: RuntimeReservationLease | None = None,
 ) -> ResidentControllerDispatchDecision:
     errors = _request_errors(request, subject_policy=subject_policy, policy=policy)
-    if request.idempotency_key and prior_idempotency_keys and request.idempotency_key in prior_idempotency_keys:
-        return ResidentControllerDispatchDecision(
-            accepted=True,
-            published=False,
-            duplicate_suppressed=True,
-            errors=["DUPLICATE_ASSIGNMENT_SUPPRESSED"],
-        )
     observation = evaluate_runtime_observation(runtime, now_at=now_at)
     if not observation.dispatch_eligible:
         errors.extend(observation.errors)
@@ -129,13 +133,43 @@ def evaluate_resident_dispatch(
     subject_result = validate_publish_subject(subject, subject_policy)
     if not subject_result.accepted:
         errors.extend(subject_result.errors)
+    errors.extend(
+        _lifecycle_identity_errors(
+            request=request,
+            lifecycle_decision=lifecycle_decision,
+            reservation_lease=reservation_lease,
+        )
+    )
+    publish_validation = validate_assignment_publish(
+        decision=lifecycle_decision,
+        lease=reservation_lease,
+        assignment_id=request.assignment_id,
+        dispatch_run_id=request.run_id,
+        runtime_instance_id=request.target_runtime_instance_id,
+        idempotency_key=request.idempotency_key,
+        now_at=now_at,
+    )
+    if not publish_validation.accepted:
+        errors.extend(publish_validation.errors)
     errors.extend(secret_material_errors(request.to_dict(), path="resident_dispatch_request"))
     if errors:
         return ResidentControllerDispatchDecision(
             accepted=False,
             published=False,
             subject=subject,
+            lifecycle_decision_id=request.lifecycle_decision_id,
+            reservation_lease_id=request.reservation_lease_id,
             errors=_dedupe(errors),
+        )
+    if request.idempotency_key and prior_idempotency_keys and request.idempotency_key in prior_idempotency_keys:
+        return ResidentControllerDispatchDecision(
+            accepted=True,
+            published=False,
+            subject=subject,
+            lifecycle_decision_id=request.lifecycle_decision_id,
+            reservation_lease_id=request.reservation_lease_id,
+            duplicate_suppressed=True,
+            errors=["DUPLICATE_ASSIGNMENT_SUPPRESSED"],
         )
     message_digest = sha256(f"{request.assignment_id}|{request.idempotency_key}|{subject}".encode("utf-8")).hexdigest()
     return ResidentControllerDispatchDecision(
@@ -143,6 +177,8 @@ def evaluate_resident_dispatch(
         published=False,
         subject=subject,
         message_id=f"resident-candidate-{message_digest[:16]}",
+        lifecycle_decision_id=request.lifecycle_decision_id,
+        reservation_lease_id=request.reservation_lease_id,
     )
 
 
@@ -180,6 +216,8 @@ def _request_errors(
         "command",
         "source_authority_ref",
         "no_go_scope_ref",
+        "lifecycle_decision_id",
+        "reservation_lease_id",
     ):
         if not getattr(request, field_name):
             errors.append(f"MISSING_RESIDENT_DISPATCH_FIELD: {field_name}")
@@ -187,6 +225,24 @@ def _request_errors(
         errors.append("DISPATCH_RUN_ID_MISMATCH")
     if request.target_agent_id not in subject_policy.allowed_agents:
         errors.append("TARGET_AGENT_NOT_ALLOWED")
+    return errors
+
+
+def _lifecycle_identity_errors(
+    *,
+    request: ResidentControllerDispatchRequest,
+    lifecycle_decision: RuntimeEligibilityDecision | None,
+    reservation_lease: RuntimeReservationLease | None,
+) -> list[str]:
+    errors: list[str] = []
+    if not request.lifecycle_decision_id:
+        errors.append("MISSING_LIFECYCLE_DECISION_ID")
+    if not request.reservation_lease_id:
+        errors.append("MISSING_RESERVATION_LEASE_ID")
+    if lifecycle_decision is not None and request.lifecycle_decision_id != lifecycle_decision.decision_id:
+        errors.append("LIFECYCLE_DECISION_ID_MISMATCH")
+    if reservation_lease is not None and request.reservation_lease_id != reservation_lease.lease_id:
+        errors.append("RESERVATION_LEASE_ID_MISMATCH")
     return errors
 
 
