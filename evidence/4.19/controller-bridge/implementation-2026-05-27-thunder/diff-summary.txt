@@ -7,32 +7,29 @@ warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-
 warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/changed-files-all.txt', CRLF will be replaced by LF the next time Git touches it
 warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/changed-files-source.txt', CRLF will be replaced by LF the next time Git touches it
 warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/compileall-nexus-mq.txt', CRLF will be replaced by LF the next time Git touches it
-warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/diff-summary.txt', CRLF will be replaced by LF the next time Git touches it
 warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/focused-controller-bridge-pytest.txt', CRLF will be replaced by LF the next time Git touches it
 warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/full-mq-pytest.txt', CRLF will be replaced by LF the next time Git touches it
 warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/git-diff-check.txt', CRLF will be replaced by LF the next time Git touches it
 warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/regression-slice-pytest.txt', CRLF will be replaced by LF the next time Git touches it
-warning: in the working copy of 'nexus/mq/controller_bridge_cli.py', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'nexus/mq/tests/test_controller_bridge_cli.py', LF will be replaced by CRLF the next time Git touches it
  ....19_REAL_AGENT_OPERATING_ENVIRONMENT_RUNBOOK.md |  27 ++
  .../.gitattributes                                 |   1 +
- .../CODE_TO_DESIGN_TRACEABILITY.md                 |  17 ++
- .../IMPLEMENTATION_EVIDENCE.md                     |  56 ++++
+ .../CODE_TO_DESIGN_TRACEABILITY.md                 |  18 ++
+ .../IMPLEMENTATION_EVIDENCE.md                     |  58 ++++
  .../SHA256SUMS.txt                                 |  16 ++
- .../branch-base.txt                                |   8 +
+ .../branch-base.txt                                |   9 +
  .../changed-files-all.txt                          |  35 +++
  .../changed-files-source.txt                       |  17 ++
  .../compileall-nexus-mq.txt                        |   3 +
- .../design-to-code-deviation-report.md             |  24 ++
- .../diff-summary.txt                               |  51 ++++
+ .../design-to-code-deviation-report.md             |  26 ++
+ .../diff-summary.txt                               |  52 ++++
  .../focused-controller-bridge-pytest.txt           |   5 +
  .../full-mq-pytest.txt                             | 102 +++++++
- .../git-diff-check.txt                             |  15 +
+ .../git-diff-check.txt                             |   5 +
  .../no-runtime-uat-evidence.txt                    |  19 ++
  .../regression-slice-pytest.txt                    |   6 +
  .../runbook-completeness.txt                       |  18 ++
  .../secret-scan.txt                                |   2 +
- .../sha256-verify.txt                              |  16 ++
+ .../sha256-verify.txt                              |  20 ++
  nexus/mq/controller_bridge_cli.py                  | 260 ++++++++++++++++++
  nexus/mq/controller_bridge_dispatch.py             | 302 +++++++++++++++++++++
  nexus/mq/controller_bridge_evidence.py             | 106 ++++++++
@@ -40,7 +37,7 @@ warning: in the working copy of 'nexus/mq/tests/test_controller_bridge_cli.py', 
  nexus/mq/controller_bridge_state_store.py          | 151 +++++++++++
  nexus/mq/eligibility_reservation_policy.py         |  15 +-
  nexus/mq/integrated_evidence_package_generator.py  |   5 +
- nexus/mq/runtime_lifecycle_controller.py           | 181 +++++++++++-
+ nexus/mq/runtime_lifecycle_controller.py           | 261 +++++++++++++++++-
  nexus/mq/tests/test_controller_bridge_cli.py       | 249 +++++++++++++++++
  nexus/mq/tests/test_controller_bridge_dispatch.py  | 282 +++++++++++++++++++
  nexus/mq/tests/test_controller_bridge_evidence.py  |  78 ++++++
@@ -48,5 +45,5 @@ warning: in the working copy of 'nexus/mq/tests/test_controller_bridge_cli.py', 
  .../tests/test_eligibility_reservation_policy.py   |  15 +
  .../test_integrated_evidence_package_generator.py  |  10 +
  .../mq/tests/test_real_agent_operating_runbook.py  |  17 ++
- ...test_real_agent_runtime_lifecycle_controller.py | 111 +++++++-
- 35 files changed, 2561 insertions(+), 8 deletions(-)
+ ...test_real_agent_runtime_lifecycle_controller.py | 170 +++++++++++-
+ 35 files changed, 2700 insertions(+), 9 deletions(-)

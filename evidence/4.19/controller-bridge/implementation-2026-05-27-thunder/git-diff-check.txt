@@ -2,14 +2,10 @@ command: git diff --check
 exit_code=0
 
 warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/branch-base.txt', CRLF will be replaced by LF the next time Git touches it
-warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/changed-files-all.txt', CRLF will be replaced by LF the next time Git touches it
-warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/compileall-nexus-mq.txt', CRLF will be replaced by LF the next time Git touches it
 warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/diff-summary.txt', CRLF will be replaced by LF the next time Git touches it
 warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/focused-controller-bridge-pytest.txt', CRLF will be replaced by LF the next time Git touches it
 warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/full-mq-pytest.txt', CRLF will be replaced by LF the next time Git touches it
 warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/git-diff-check.txt', CRLF will be replaced by LF the next time Git touches it
 warning: in the working copy of 'evidence/4.19/controller-bridge/implementation-2026-05-27-thunder/regression-slice-pytest.txt', CRLF will be replaced by LF the next time Git touches it
-warning: in the working copy of 'nexus/mq/controller_bridge_cli.py', LF will be replaced by CRLF the next time Git touches it
 warning: in the working copy of 'nexus/mq/runtime_lifecycle_controller.py', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'nexus/mq/tests/test_controller_bridge_cli.py', LF will be replaced by CRLF the next time Git touches it
 warning: in the working copy of 'nexus/mq/tests/test_real_agent_runtime_lifecycle_controller.py', LF will be replaced by CRLF the next time Git touches it

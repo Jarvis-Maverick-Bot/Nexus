@@ -348,7 +348,19 @@ class RuntimeLifecycleController:
         if decision.assignment_id != assignment_id:
             raise ValueError("DECISION_ASSIGNMENT_ID_MISMATCH")
         record = self.get_runtime(decision.target_runtime_instance_id)
-        lease_id = _stable_id("lease", decision.decision_id, assignment_id, now_at)
+        self._expire_active_reservations(record, now_at=now_at)
+        existing_lease = self._find_reservation_replay(decision, assignment_id=assignment_id, now_at=now_at)
+        if existing_lease is not None:
+            if existing_lease.active and existing_lease.status == "active":
+                _append_unique(record.active_reservation_lease_ids, existing_lease.lease_id)
+                self._reconcile_runtime_capacity_state(record)
+                record.updated_at = now_at
+                return existing_lease
+            raise ValueError("RESERVATION_REQUIRES_LIFECYCLE_REQUERY")
+        requery_errors = self._reservation_requery_errors(record, decision=decision, now_at=now_at)
+        if requery_errors:
+            raise ValueError("; ".join(requery_errors))
+        lease_id = _stable_id("lease", decision.decision_id, decision.request_id, decision.idempotency_key)
         expires_at = _future_iso(now_at, self.policy.lease_ttl_seconds)
         release_required_by = _future_iso(now_at, self.policy.release_deadline_seconds)
         lease = RuntimeReservationLease(
@@ -463,6 +475,56 @@ class RuntimeLifecycleController:
     def _expire_active_reservations(self, record: RuntimeLifecycleRecord, *, now_at: str) -> None:
         for lease_id in list(record.active_reservation_lease_ids):
             self.lease_status(lease_id, now_at=now_at)
+
+    def _find_reservation_replay(
+        self,
+        decision: RuntimeEligibilityDecision,
+        *,
+        assignment_id: str,
+        now_at: str,
+    ) -> RuntimeReservationLease | None:
+        record = self._records.get(decision.target_runtime_instance_id)
+        candidate_ids: list[str] = []
+        if record is not None:
+            candidate_ids.extend(record.active_reservation_lease_ids)
+        candidate_ids.extend(self._leases.keys())
+        for lease_id in dict.fromkeys(candidate_ids):
+            try:
+                lease = self.lease_status(lease_id, now_at=now_at)
+            except KeyError:
+                continue
+            if _lease_matches_decision(lease, decision, assignment_id=assignment_id):
+                return lease
+        return None
+
+    def _reservation_requery_errors(
+        self,
+        record: RuntimeLifecycleRecord,
+        *,
+        decision: RuntimeEligibilityDecision,
+        now_at: str,
+    ) -> list[str]:
+        errors: list[str] = []
+        if record.agent_id != decision.target_agent_id:
+            errors.append("RUNTIME_STATE_CHANGED_REQUERY_REQUIRED")
+        readiness_errors = _readiness_errors(record, now_at=now_at)
+        if readiness_errors:
+            errors.append("RUNTIME_STATE_CHANGED_REQUERY_REQUIRED")
+        presence = self._presence.evaluate_presence(runtime_instance_id=record.runtime_instance_id, now_at=now_at)
+        record.presence_state = presence.presence_state
+        if not presence.dispatch_fresh:
+            errors.append("RUNTIME_STATE_CHANGED_REQUERY_REQUIRED")
+        if record.lifecycle_state != "idle":
+            errors.append("RUNTIME_CAPACITY_CHANGED_REQUERY_REQUIRED")
+        if not record.accepting_new_work:
+            errors.append("RUNTIME_CAPACITY_CHANGED_REQUERY_REQUIRED")
+        if record.load_score >= 1.0:
+            errors.append("RUNTIME_CAPACITY_CHANGED_REQUERY_REQUIRED")
+        if record.active_reservation_lease_ids:
+            errors.append("RUNTIME_CAPACITY_CHANGED_REQUERY_REQUIRED")
+        if len(record.active_assignment_ids) >= self.policy.max_concurrent_assignments:
+            errors.append("RUNTIME_CAPACITY_CHANGED_REQUERY_REQUIRED")
+        return _dedupe(errors)
 
     def _apply_lease_transition(
         self,
@@ -615,6 +677,22 @@ def _append_unique(items: list[str], value: str) -> None:
 def _remove_value(items: list[str], value: str) -> None:
     while value in items:
         items.remove(value)
+
+
+def _lease_matches_decision(
+    lease: RuntimeReservationLease,
+    decision: RuntimeEligibilityDecision,
+    *,
+    assignment_id: str,
+) -> bool:
+    return (
+        lease.lifecycle_decision_id == decision.decision_id
+        and lease.assignment_id == assignment_id
+        and lease.dispatch_run_id == decision.dispatch_run_id
+        and lease.target_runtime_instance_id == decision.target_runtime_instance_id
+        and lease.policy_hash == decision.policy_hash
+        and lease.idempotency_key == decision.idempotency_key
+    )
 
 
 def _parse_iso(value: str | None) -> datetime | None:

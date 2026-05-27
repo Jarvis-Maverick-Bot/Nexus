@@ -1,3 +1,5 @@
+import pytest
+
 from nexus.mq.runtime_lifecycle_controller import (
     RuntimeEligibilityRequest,
     RuntimeLifecycleController,
@@ -177,6 +179,63 @@ def test_runtime_ack_consumes_lease():
     assert "assignment-001" in record.active_assignment_ids
     assert blocked.accepted is False
     assert "RUNTIME_CAPACITY_EXHAUSTED" in blocked.errors
+
+
+def test_runtime_reserve_capacity_replay_returns_same_active_lease():
+    controller = _ready_controller()
+    decision = controller.query_eligibility(_eligibility_request(), now_at=NOW)
+
+    first = controller.reserve_capacity(decision, assignment_id="assignment-001", now_at=NOW)
+    second = controller.reserve_capacity(
+        decision,
+        assignment_id="assignment-001",
+        now_at="2026-05-27T07:00:05+00:00",
+    )
+    record = controller.get_runtime("jarvis-runtime-001")
+
+    assert second.lease_id == first.lease_id
+    assert second.expires_at == first.expires_at
+    assert record.active_reservation_lease_ids == [first.lease_id]
+
+
+def test_runtime_reserve_capacity_rejects_stale_accepted_decision_after_reservation():
+    controller = _ready_controller()
+    first_decision = controller.query_eligibility(_eligibility_request(), now_at=NOW)
+    stale_decision = controller.query_eligibility(
+        _eligibility_request(request_id="eligibility-002", assignment_id="assignment-002", idempotency_key="idem-002"),
+        now_at=NOW,
+    )
+    controller.reserve_capacity(first_decision, assignment_id="assignment-001", now_at=NOW)
+
+    with pytest.raises(ValueError) as exc:
+        controller.reserve_capacity(
+            stale_decision,
+            assignment_id="assignment-002",
+            now_at="2026-05-27T07:00:05+00:00",
+        )
+
+    assert "RUNTIME_CAPACITY_CHANGED_REQUERY_REQUIRED" in str(exc.value)
+
+
+def test_runtime_reserve_capacity_rejects_capacity_changed_after_decision():
+    controller = _ready_controller()
+    decision = controller.query_eligibility(_eligibility_request(), now_at=NOW)
+    controller.record_heartbeat(
+        runtime_instance_id="jarvis-runtime-001",
+        sequence=2,
+        observed_at="2026-05-27T07:00:05+00:00",
+        load_score=0.1,
+        accepting_new_work=False,
+    )
+
+    with pytest.raises(ValueError) as exc:
+        controller.reserve_capacity(
+            decision,
+            assignment_id="assignment-001",
+            now_at="2026-05-27T07:00:05+00:00",
+        )
+
+    assert "RUNTIME_CAPACITY_CHANGED_REQUERY_REQUIRED" in str(exc.value)
 
 
 def test_runtime_release_and_revoke_reservation():

@@ -11,6 +11,8 @@
 - Added the missing `dispatch request-eligibility` CLI command and focused persistence/output test.
 - Added Runtime Lifecycle lease transition reconciliation for consume, release, revoke, and expiry.
 - Added focused tests for post-consume capacity blocking, post-release eligibility, and expired reservation cleanup.
+- Added Runtime Lifecycle reservation replay idempotency for the same lifecycle decision/idempotency identity while an active lease is valid.
+- Added fail-closed Runtime Lifecycle reservation behavior for stale accepted decisions after capacity/state changes, forcing lifecycle re-query instead of minting a second lease.
 
 ## No Design Deviations Requiring Approval
 
