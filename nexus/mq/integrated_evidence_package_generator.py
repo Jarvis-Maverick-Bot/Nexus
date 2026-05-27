@@ -25,6 +25,8 @@ class IntegratedEvidencePackageInput:
     diagnostic_readiness_evidence_ref: str
     secret_scan_passed: bool
     checksum_verification_passed: bool
+    controller_bridge_required: bool = False
+    controller_bridge_evidence_refs: list[str] = field(default_factory=list)
     not_business_completion: bool = True
 
 
@@ -74,6 +76,8 @@ def build_integrated_evidence_package(source: IntegratedEvidencePackageInput) ->
         errors.append("SECRET_SCAN_NOT_CLEAN")
     if source.checksum_verification_passed is not True:
         errors.append("CHECKSUM_VERIFICATION_FAILED")
+    if source.controller_bridge_required and not source.controller_bridge_evidence_refs:
+        errors.append("MISSING_CONTROLLER_BRIDGE_EVIDENCE_REFS")
     if source.not_business_completion is not True:
         errors.append("INTEGRATED_PACKAGE_CANNOT_BE_BUSINESS_COMPLETION")
 
@@ -100,6 +104,7 @@ def build_integrated_evidence_package(source: IntegratedEvidencePackageInput) ->
             "checksum_manifest": source.checksum_manifest_ref,
             "no_a2a": source.no_a2a_evidence_ref,
             "diagnostic_readiness": source.diagnostic_readiness_evidence_ref,
+            "controller_bridge": list(source.controller_bridge_evidence_refs),
         },
     )
 

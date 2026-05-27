@@ -1,0 +1,16 @@
+# Code-to-Design Traceability
+
+| Design requirement | Implementation / test evidence |
+| --- | --- |
+| Preserve Layer 1 decision authority before dispatch run creation | `nexus/mq/controller_bridge_models.py`, `nexus/mq/controller_bridge_dispatch.py`; `test_dispatch_validate_intent_rejects_missing_decision`, `test_dispatch_validate_intent_rejects_missing_source_authority` |
+| Create source-bound dispatch runs | `DispatchRun` and `ControllerBridgeDispatchController.create_run`; `test_assignment_publish_with_valid_lease_creates_request` |
+| Request lifecycle eligibility before assignment | `DispatchEligibilityRequest`, `request_eligibility`; `test_controller_does_not_mutate_registration_or_readiness` |
+| Runtime Lifecycle owns eligibility and lease state | `nexus/mq/runtime_lifecycle_controller.py`; `test_runtime_query_eligibility_blocks_no_registered_runtime`, `test_runtime_ack_consumes_lease`, `test_runtime_release_and_revoke_reservation` |
+| Dispatch publishes only with active matching decision and lease | `validate_assignment_publish`, `publish_assignment`; `test_assignment_publish_blocks_missing_lease`, `test_assignment_publish_blocks_expired_lease`, `test_assignment_publish_blocks_mismatched_lease`, `test_assignment_publish_with_valid_lease_creates_request` |
+| Duplicate replay suppressed only after lifecycle identity validation | `ControllerBridgeStateStore.record_replay`, `publish_assignment`; `test_duplicate_replay_same_idempotency_suppressed_after_lifecycle_validation`, `test_duplicate_replay_with_mismatched_decision_or_lease_blocks` |
+| Wrong subject/runtime rejected | `_subject_errors`, `record_result_candidate`; `test_assignment_publish_blocks_wrong_subject_or_runtime`, `test_wrong_runtime_result_rejected` |
+| Evidence builder blocks incomplete and diagnostic-only packages | `nexus/mq/controller_bridge_evidence.py`, `integrated_evidence_package_generator.py`; `test_evidence_package_requires_lifecycle_dispatch_mq_runtime_result_refs`, `test_phase3_transport_diagnostic_cannot_mark_pass`, `test_integrated_evidence_package_blocks_missing_controller_bridge_refs_when_required` |
+| Persistence backend is SQLite-backed DurableStateStore | `nexus/mq/controller_bridge_state_store.py`; `test_controller_bridge_state_store_persists_restart_replay_records` |
+| Bounded TTL defaults pinned | `ControllerBridgePolicy`, `RuntimeLifecyclePolicy`, runbook; `test_runtime_lifecycle_register_ready_heartbeat_idle_flow`, `test_runbook_documents_track2_controller_bridge_ttls_and_no_runtime_gate` |
+| No Layer 3 MQ or broker mutation | No changes to `nexus/mq/adapter.py`, `nexus/mq/adapter_nats.py`, broker config, credentials, or firewall files; see `changed-files-source.txt` |
+| No final PASS/live readiness claim | Evidence builders set final/live claim flags false; runbook forbids overclaim; see `test_phase3_transport_diagnostic_cannot_mark_pass` and `test_runbook_forbids_chat_only_pass_claims` |

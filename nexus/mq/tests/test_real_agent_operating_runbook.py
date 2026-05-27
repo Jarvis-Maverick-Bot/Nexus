@@ -49,3 +49,20 @@ def test_runbook_forbids_chat_only_pass_claims():
     assert "THUNDER_REAL_AGENT_OPERATING_ENVIRONMENT_READY" in text
     assert "must not be claimed from chat-only evidence" in text
     assert "MiniTest diagnostic only" in text
+
+
+def test_runbook_documents_track2_controller_bridge_ttls_and_no_runtime_gate():
+    text = RUNBOOK.read_text(encoding="utf-8")
+
+    for phrase in [
+        "Track 2 Agent Runtime Controller Bridge",
+        "Runtime eligibility decision validity: 30 seconds",
+        "Reservation lease expiry: 60 seconds",
+        "Release deadline: 15 seconds",
+        "Assignment TTL: 30 seconds",
+        "Result candidate timeout: 120 seconds",
+        "source-bound dispatch run",
+        "active matching Runtime Lifecycle reservation lease",
+        "does not authorize Phase 3 rerun",
+    ]:
+        assert phrase in text

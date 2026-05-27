@@ -1,0 +1,100 @@
+........................................................................ [ 11%]
+........................................................................ [ 23%]
+........................................................................ [ 35%]
+........................................................................ [ 47%]
+........................................................................ [ 58%]
+........................................................................ [ 70%]
+........................................................................ [ 82%]
+........................................................................ [ 94%]
+....................................                                     [100%]
+============================== warnings summary ===============================
+nexus/mq/tests/test_adapter_nats.py::test_publish_consume_roundtrip
+nexus/mq/tests/test_adapter_nats.py::test_consume_empty_queue_returns_none
+nexus/mq/tests/test_adapter_nats.py::test_ack_logged
+nexus/mq/tests/test_adapter_nats.py::test_dlq_on_retry_exhaustion
+nexus/mq/tests/test_adapter_nats.py::test_replay_returns_messages
+nexus/mq/tests/test_adapter_nats.py::test_sync_wrappers_safe_inside_async_context
+  C:\Users\John\AppData\Roaming\Python\Python314\site-packages\nats\aio\subscription.py:210: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if not asyncio.iscoroutinefunction(self._cb) and not (
+
+nexus/mq/tests/test_mq_skeleton.py::test_ack_means_intake_only
+  C:\Users\John\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but nexus/mq/tests/test_mq_skeleton.py::test_ack_means_intake_only returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+nexus/mq/tests/test_mq_skeleton.py::test_command_idempotent_dedupe
+  C:\Users\John\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but nexus/mq/tests/test_mq_skeleton.py::test_command_idempotent_dedupe returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+nexus/mq/tests/test_mq_skeleton.py::test_dlq_on_retry_exhaustion
+  C:\Users\John\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but nexus/mq/tests/test_mq_skeleton.py::test_dlq_on_retry_exhaustion returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+nexus/mq/tests/test_mq_skeleton.py::test_adapter_stub_publish_consume
+  C:\Users\John\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but nexus/mq/tests/test_mq_skeleton.py::test_adapter_stub_publish_consume returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+nexus/mq/tests/test_mq_skeleton.py::test_adapter_stub_ack_policy
+  C:\Users\John\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but nexus/mq/tests/test_mq_skeleton.py::test_adapter_stub_ack_policy returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+nexus/mq/tests/test_mq_skeleton.py::test_commit_boundary_accepts_full
+  C:\Users\John\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but nexus/mq/tests/test_mq_skeleton.py::test_commit_boundary_accepts_full returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+nexus/mq/tests/test_mq_skeleton.py::test_commit_boundary_rejects_partial
+  C:\Users\John\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but nexus/mq/tests/test_mq_skeleton.py::test_commit_boundary_rejects_partial returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+nexus/mq/tests/test_mq_skeleton.py::test_business_message_requires_commit_accepted
+  C:\Users\John\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but nexus/mq/tests/test_mq_skeleton.py::test_business_message_requires_commit_accepted returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+nexus/mq/tests/test_mq_skeleton.py::test_feedback_reject_stale
+  C:\Users\John\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but nexus/mq/tests/test_mq_skeleton.py::test_feedback_reject_stale returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+nexus/mq/tests/test_mq_skeleton.py::test_feedback_reject_revise_without_text
+  C:\Users\John\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but nexus/mq/tests/test_mq_skeleton.py::test_feedback_reject_revise_without_text returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+nexus/mq/tests/test_mq_skeleton.py::test_feedback_approve_requires_actor
+  C:\Users\John\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but nexus/mq/tests/test_mq_skeleton.py::test_feedback_approve_requires_actor returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+nexus/mq/tests/test_mq_skeleton.py::test_hitl_synthetic_feedback_resume
+  C:\Users\John\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but nexus/mq/tests/test_mq_skeleton.py::test_hitl_synthetic_feedback_resume returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+nexus/mq/tests/test_mq_skeleton.py::test_review_task_publish_requires_wait_state
+  C:\Users\John\AppData\Roaming\Python\Python314\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but nexus/mq/tests/test_mq_skeleton.py::test_review_task_publish_requires_wait_state returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+612 passed, 19 warnings in 18.66s
+exit_code=0

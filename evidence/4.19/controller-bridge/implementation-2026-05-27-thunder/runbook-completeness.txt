@@ -1,0 +1,18 @@
+Runbook completeness evidence
+
+Path: docs/runbooks/4.19_REAL_AGENT_OPERATING_ENVIRONMENT_RUNBOOK.md
+
+Covered strings verified by nexus/mq/tests/test_real_agent_operating_runbook.py:
+- Track 2 Agent Runtime Controller Bridge
+- Runtime eligibility decision validity: 30 seconds
+- Reservation lease expiry: 60 seconds
+- Release deadline: 15 seconds
+- Assignment TTL: 30 seconds
+- Result candidate timeout: 120 seconds
+- source-bound dispatch run
+- active matching Runtime Lifecycle reservation lease
+- does not authorize Phase 3 rerun
+- distributed UAT broker topology with NATS_URL and NEXUS_RESIDENT_CONTROLLER_NATS_URL
+- final readiness claim remains unauthorized
+
+Verification: focused-controller-bridge-pytest.txt, 41 passed.

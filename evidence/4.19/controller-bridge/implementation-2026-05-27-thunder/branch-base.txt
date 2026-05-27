@@ -1,0 +1,6 @@
+branch=codex/4.19-controller-bridge-implementation
+base=6599f17b37712eb8c17b3e8e1257a41475b30c3f
+origin_master=6599f17b37712eb8c17b3e8e1257a41475b30c3f
+merge_base=6599f17b37712eb8c17b3e8e1257a41475b30c3f
+pre_edit_head=a6b6943d14cea942ef71d8f964a1183f3ae04d54
+shared_docs_commit=c3ef7b3bdd1ceb3cc1117c2b95bd78a28282ce5f

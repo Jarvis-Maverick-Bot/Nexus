@@ -1,0 +1,17 @@
+docs/runbooks/4.19_REAL_AGENT_OPERATING_ENVIRONMENT_RUNBOOK.md
+nexus/mq/controller_bridge_cli.py
+nexus/mq/controller_bridge_dispatch.py
+nexus/mq/controller_bridge_evidence.py
+nexus/mq/controller_bridge_models.py
+nexus/mq/controller_bridge_state_store.py
+nexus/mq/eligibility_reservation_policy.py
+nexus/mq/integrated_evidence_package_generator.py
+nexus/mq/runtime_lifecycle_controller.py
+nexus/mq/tests/test_controller_bridge_cli.py
+nexus/mq/tests/test_controller_bridge_dispatch.py
+nexus/mq/tests/test_controller_bridge_evidence.py
+nexus/mq/tests/test_controller_bridge_state_store.py
+nexus/mq/tests/test_eligibility_reservation_policy.py
+nexus/mq/tests/test_integrated_evidence_package_generator.py
+nexus/mq/tests/test_real_agent_operating_runbook.py
+nexus/mq/tests/test_real_agent_runtime_lifecycle_controller.py

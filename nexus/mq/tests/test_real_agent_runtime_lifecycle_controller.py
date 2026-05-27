@@ -89,6 +89,8 @@ def test_runtime_lifecycle_register_ready_heartbeat_idle_flow():
     assert lease.active is True
     assert lease.lease_id
     assert lease.lifecycle_decision_id == decision.decision_id
+    assert decision.valid_until == "2026-05-27T07:00:30+00:00"
+    assert lease.release_required_by == "2026-05-27T07:00:15+00:00"
     assert controller.get_runtime("jarvis-runtime-001").lifecycle_state == "reserved"
 
 
@@ -141,3 +143,44 @@ def test_runtime_lifecycle_stale_heartbeat_blocks_eligibility():
 
     assert decision.accepted is False
     assert "HEARTBEAT_STALE" in decision.errors
+
+
+def test_runtime_query_eligibility_blocks_no_registered_runtime():
+    controller = RuntimeLifecycleController(policy=RuntimeLifecyclePolicy())
+
+    decision = controller.query_eligibility(_eligibility_request(), now_at=NOW)
+
+    assert decision.accepted is False
+    assert "RUNTIME_NOT_REGISTERED" in decision.errors
+
+
+def test_runtime_ack_consumes_lease():
+    controller = _ready_controller()
+    decision = controller.query_eligibility(_eligibility_request(), now_at=NOW)
+    lease = controller.reserve_capacity(decision, assignment_id="assignment-001", now_at=NOW)
+
+    consumed = controller.consume_reservation(lease.lease_id, consumed_at=NOW)
+
+    assert consumed.status == "consumed"
+    assert consumed.active is False
+    assert controller.lease_status(lease.lease_id, now_at=NOW).status == "consumed"
+
+
+def test_runtime_release_and_revoke_reservation():
+    controller = _ready_controller()
+    decision = controller.query_eligibility(_eligibility_request(), now_at=NOW)
+    released_lease = controller.reserve_capacity(decision, assignment_id="assignment-001", now_at=NOW)
+
+    released = controller.release_reservation(released_lease.lease_id, released_at=NOW, reason_ref="drain://run-001")
+
+    assert released.status == "released"
+    assert released.release_reason_ref == "drain://run-001"
+
+    controller = _ready_controller()
+    decision = controller.query_eligibility(_eligibility_request(), now_at=NOW)
+    revoked_lease = controller.reserve_capacity(decision, assignment_id="assignment-001", now_at=NOW)
+
+    revoked = controller.revoke_reservation(revoked_lease.lease_id, revoked_at=NOW, reason_ref="control://revoke")
+
+    assert revoked.status == "revoked"
+    assert revoked.revoked is True

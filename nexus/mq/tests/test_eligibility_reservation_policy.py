@@ -61,6 +61,21 @@ def test_assignment_publish_requires_allowed_decision_and_active_lease():
     assert result.errors == []
 
 
+def test_assignment_publish_blocks_expired_lifecycle_decision():
+    result = validate_assignment_publish(
+        decision=_decision(valid_until="2026-05-27T06:59:59+00:00"),
+        lease=_lease(),
+        assignment_id="assignment-001",
+        dispatch_run_id="run-001",
+        runtime_instance_id="jarvis-runtime-001",
+        idempotency_key="idem-001",
+        now_at=NOW,
+    )
+
+    assert result.accepted is False
+    assert "LIFECYCLE_DECISION_EXPIRED" in result.errors
+
+
 def test_assignment_publish_blocks_missing_decision_or_lease():
     result = validate_assignment_publish(
         decision=None,

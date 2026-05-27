@@ -7,7 +7,7 @@ It does not publish assignments or own broker transport behavior.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from typing import Any
@@ -20,8 +20,11 @@ from nexus.mq.heartbeat_presence_controller import HeartbeatPresenceController, 
 class RuntimeLifecyclePolicy:
     heartbeat_interval_seconds: int = 15
     heartbeat_ttl_seconds: int = 60
+    decision_validity_seconds: int = 30
     lease_ttl_seconds: int = 60
+    release_deadline_seconds: int = 15
     assignment_timeout_seconds: int = 30
+    result_timeout_seconds: int = 120
     stale_to_offline_grace_seconds: int = 180
     max_concurrent_assignments: int = 1
 
@@ -33,10 +36,16 @@ class RuntimeLifecyclePolicy:
             errors.append("INVALID_HEARTBEAT_TTL")
         if self.heartbeat_ttl_seconds < self.heartbeat_interval_seconds:
             errors.append("HEARTBEAT_TTL_SHORTER_THAN_INTERVAL")
+        if self.decision_validity_seconds <= 0:
+            errors.append("INVALID_DECISION_VALIDITY")
         if self.lease_ttl_seconds <= 0:
             errors.append("INVALID_LEASE_TTL")
+        if self.release_deadline_seconds <= 0:
+            errors.append("INVALID_RELEASE_DEADLINE")
         if self.assignment_timeout_seconds <= 0:
             errors.append("INVALID_ASSIGNMENT_TIMEOUT")
+        if self.result_timeout_seconds <= 0:
+            errors.append("INVALID_RESULT_TIMEOUT")
         if self.max_concurrent_assignments <= 0:
             errors.append("INVALID_MAX_CONCURRENT_ASSIGNMENTS")
         return errors
@@ -128,12 +137,14 @@ class RuntimeLifecycleControlResult:
 
 
 class RuntimeLifecycleController:
-    def __init__(self, *, policy: RuntimeLifecyclePolicy | None = None) -> None:
+    def __init__(self, *, policy: RuntimeLifecyclePolicy | None = None, state_store: Any | None = None) -> None:
         self.policy = policy or RuntimeLifecyclePolicy()
         errors = self.policy.validate()
         if errors:
             raise ValueError("; ".join(errors))
         self._records: dict[str, RuntimeLifecycleRecord] = {}
+        self._leases: dict[str, RuntimeReservationLease] = {}
+        self._state_store = state_store
         self._presence = HeartbeatPresenceController(
             policy=HeartbeatPresencePolicy(
                 heartbeat_interval_seconds=self.policy.heartbeat_interval_seconds,
@@ -274,9 +285,12 @@ class RuntimeLifecycleController:
     ) -> RuntimeEligibilityDecision:
         record = self._records.get(request.target_runtime_instance_id)
         errors: list[str] = _eligibility_request_errors(request)
+        valid_until = _future_iso(now_at, self.policy.decision_validity_seconds)
         if record is None:
             errors.append("RUNTIME_NOT_REGISTERED")
-            return _decision(request, errors=errors)
+            decision = _decision(request, errors=errors, valid_until=valid_until)
+            self._record_lifecycle_decision(decision)
+            return decision
 
         if record.agent_id != request.target_agent_id:
             errors.append("TARGET_AGENT_ID_MISMATCH")
@@ -305,7 +319,17 @@ class RuntimeLifecycleController:
             errors.append("NO_GO_SCOPE_MISMATCH")
         if request.required_protocol_version not in record.protocol_versions_supported:
             errors.append("PROTOCOL_VERSION_MISMATCH")
-        return _decision(request, record=record, errors=errors)
+        decision = _decision(request, record=record, errors=errors, valid_until=valid_until)
+        self._record_lifecycle_decision(decision)
+        return decision
+
+    def query_eligibility(
+        self,
+        request: RuntimeEligibilityRequest,
+        *,
+        now_at: str,
+    ) -> RuntimeEligibilityDecision:
+        return self.evaluate_eligibility(request, now_at=now_at)
 
     def reserve_runtime(
         self,
@@ -316,11 +340,16 @@ class RuntimeLifecycleController:
     ) -> RuntimeReservationLease:
         if not decision.accepted:
             raise ValueError("ELIGIBILITY_DECISION_NOT_ALLOWED")
+        valid_until = _parse_iso(decision.valid_until)
+        now = _parse_iso(now_at)
+        if valid_until is not None and now is not None and valid_until <= now:
+            raise ValueError("ELIGIBILITY_DECISION_EXPIRED")
         if decision.assignment_id != assignment_id:
             raise ValueError("DECISION_ASSIGNMENT_ID_MISMATCH")
         record = self.get_runtime(decision.target_runtime_instance_id)
         lease_id = _stable_id("lease", decision.decision_id, assignment_id, now_at)
-        expires_at = (_parse_iso(now_at) + timedelta(seconds=self.policy.lease_ttl_seconds)).isoformat()
+        expires_at = _future_iso(now_at, self.policy.lease_ttl_seconds)
+        release_required_by = _future_iso(now_at, self.policy.release_deadline_seconds)
         lease = RuntimeReservationLease(
             lease_id=lease_id,
             lifecycle_decision_id=decision.decision_id,
@@ -332,18 +361,76 @@ class RuntimeLifecycleController:
             expires_at=expires_at,
             policy_hash=decision.policy_hash,
             idempotency_key=decision.idempotency_key,
+            release_required_by=release_required_by,
+            runtime_role=record.role,
+            runtime_owner=record.owner_principal_id,
         )
         record.lifecycle_state = "reserved"
         _append_unique(record.active_decision_ids, decision.decision_id)
         _append_unique(record.active_reservation_lease_ids, lease_id)
         record.updated_at = now_at
+        self._leases[lease_id] = lease
+        self._record_reservation_lease(lease)
         return lease
+
+    def reserve_capacity(
+        self,
+        decision: RuntimeEligibilityDecision,
+        *,
+        assignment_id: str,
+        now_at: str,
+    ) -> RuntimeReservationLease:
+        return self.reserve_runtime(decision, assignment_id=assignment_id, now_at=now_at)
+
+    def lease_status(self, lease_id: str, *, now_at: str | None = None) -> RuntimeReservationLease:
+        lease = self._leases.get(lease_id)
+        if lease is None and self._state_store is not None:
+            lease = self._state_store.get_reservation_lease(lease_id)
+        if lease is None:
+            raise KeyError(f"reservation lease not found: {lease_id}")
+        if now_at and lease.active and lease.status == "active":
+            expires = _parse_iso(lease.expires_at)
+            now = _parse_iso(now_at)
+            if expires is not None and now is not None and expires <= now:
+                lease = replace(lease, active=False, status="expired")
+                self._leases[lease_id] = lease
+                self._record_reservation_lease(lease)
+        return lease
+
+    def consume_reservation(self, lease_id: str, *, consumed_at: str) -> RuntimeReservationLease:
+        lease = self.lease_status(lease_id, now_at=consumed_at)
+        updated = replace(lease, active=False, status="consumed", consumed_at=consumed_at)
+        self._leases[lease_id] = updated
+        self._record_reservation_lease(updated)
+        return updated
+
+    def release_reservation(self, lease_id: str, *, released_at: str, reason_ref: str) -> RuntimeReservationLease:
+        lease = self.lease_status(lease_id, now_at=released_at)
+        updated = replace(lease, active=False, status="released", released_at=released_at, release_reason_ref=reason_ref)
+        self._leases[lease_id] = updated
+        self._record_reservation_lease(updated)
+        return updated
+
+    def revoke_reservation(self, lease_id: str, *, revoked_at: str, reason_ref: str) -> RuntimeReservationLease:
+        lease = self.lease_status(lease_id, now_at=revoked_at)
+        updated = replace(lease, active=False, status="revoked", revoked=True, released_at=revoked_at, release_reason_ref=reason_ref)
+        self._leases[lease_id] = updated
+        self._record_reservation_lease(updated)
+        return updated
 
     def get_runtime(self, runtime_instance_id: str) -> RuntimeLifecycleRecord:
         record = self._records.get(runtime_instance_id)
         if record is None:
             raise KeyError(f"runtime not found: {runtime_instance_id}")
         return record
+
+    def _record_lifecycle_decision(self, decision: RuntimeEligibilityDecision) -> None:
+        if self._state_store is not None:
+            self._state_store.record_lifecycle_decision(decision)
+
+    def _record_reservation_lease(self, lease: RuntimeReservationLease) -> None:
+        if self._state_store is not None:
+            self._state_store.record_reservation_lease(lease)
 
 
 def _registration_errors(request: RuntimeRegistrationRequest) -> list[str]:
@@ -417,6 +504,7 @@ def _decision(
     *,
     record: RuntimeLifecycleRecord | None = None,
     errors: list[str],
+    valid_until: str,
 ) -> RuntimeEligibilityDecision:
     accepted = not errors
     decision_id = _stable_id(
@@ -438,6 +526,9 @@ def _decision(
         accepted=accepted,
         policy_hash=request.policy_hash,
         idempotency_key=request.idempotency_key,
+        valid_until=valid_until,
+        runtime_role=record.role if record is not None else "",
+        runtime_owner=record.owner_principal_id if record is not None else "",
         evidence_refs=[f"evidence://runtime-lifecycle/decision/{decision_id}"],
         errors=_dedupe(errors),
     )
@@ -463,6 +554,13 @@ def _parse_iso(value: str | None) -> datetime | None:
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=timezone.utc)
     return parsed
+
+
+def _future_iso(now_at: str, seconds: int) -> str:
+    now = _parse_iso(now_at)
+    if now is None:
+        now = datetime.now(timezone.utc)
+    return (now + timedelta(seconds=seconds)).isoformat()
 
 
 def _dedupe(errors: list[str]) -> list[str]:

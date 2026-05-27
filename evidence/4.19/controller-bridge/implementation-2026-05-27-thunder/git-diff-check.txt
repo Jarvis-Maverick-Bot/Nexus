@@ -1,0 +1,23 @@
+git : warning: in the working copy of 'docs/runbooks/4.19_REAL_AGENT_OPERATING_ENVIRONMENT_RUNBOOK.md', LF will be repl
+aced by CRLF the next time Git touches it
+At line:2 char:73
++ ... 7-thunder'; git diff --check *> (Join-Path $e 'git-diff-check.txt');  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: in the... Git touches it:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+warning: in the working copy of 'nexus/mq/eligibility_reservation_policy.py', LF will be replaced by CRLF the next time
+ Git touches it
+warning: in the working copy of 'nexus/mq/integrated_evidence_package_generator.py', LF will be replaced by CRLF the ne
+xt time Git touches it
+warning: in the working copy of 'nexus/mq/runtime_lifecycle_controller.py', LF will be replaced by CRLF the next time G
+it touches it
+warning: in the working copy of 'nexus/mq/tests/test_eligibility_reservation_policy.py', LF will be replaced by CRLF th
+e next time Git touches it
+warning: in the working copy of 'nexus/mq/tests/test_integrated_evidence_package_generator.py', LF will be replaced by
+CRLF the next time Git touches it
+warning: in the working copy of 'nexus/mq/tests/test_real_agent_operating_runbook.py', LF will be replaced by CRLF the
+next time Git touches it
+warning: in the working copy of 'nexus/mq/tests/test_real_agent_runtime_lifecycle_controller.py', LF will be replaced b
+y CRLF the next time Git touches it
+exit_code=0

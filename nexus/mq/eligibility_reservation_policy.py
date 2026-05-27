@@ -23,6 +23,9 @@ class RuntimeEligibilityDecision:
     accepted: bool
     policy_hash: str
     idempotency_key: str
+    valid_until: str = ""
+    runtime_role: str = ""
+    runtime_owner: str = ""
     evidence_refs: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     not_business_completion: bool = True
@@ -43,6 +46,9 @@ class RuntimeReservationLease:
     expires_at: str
     policy_hash: str
     idempotency_key: str
+    release_required_by: str = ""
+    runtime_role: str = ""
+    runtime_owner: str = ""
     revoked: bool = False
     consumed_at: str = ""
     released_at: str = ""
@@ -83,7 +89,7 @@ def validate_assignment_publish(
     if decision is None:
         errors.append("MISSING_LIFECYCLE_DECISION")
     else:
-        errors.extend(_decision_errors(decision, assignment_id, dispatch_run_id, runtime_instance_id, idempotency_key))
+        errors.extend(_decision_errors(decision, assignment_id, dispatch_run_id, runtime_instance_id, idempotency_key, now_at))
 
     if lease is None:
         errors.append("MISSING_RESERVATION_LEASE")
@@ -112,6 +118,7 @@ def _decision_errors(
     dispatch_run_id: str,
     runtime_instance_id: str,
     idempotency_key: str,
+    now_at: str,
 ) -> list[str]:
     errors: list[str] = []
     if not decision.decision_id:
@@ -126,6 +133,12 @@ def _decision_errors(
         errors.append("DECISION_RUNTIME_ID_MISMATCH")
     if decision.idempotency_key != idempotency_key:
         errors.append("DECISION_IDEMPOTENCY_KEY_MISMATCH")
+    valid_until = _parse_iso(decision.valid_until)
+    now = _parse_iso(now_at)
+    if decision.valid_until and valid_until is None:
+        errors.append("LIFECYCLE_DECISION_EXPIRY_INVALID")
+    elif valid_until is not None and now is not None and valid_until <= now:
+        errors.append("LIFECYCLE_DECISION_EXPIRED")
     if decision.not_business_completion is not True:
         errors.append("LIFECYCLE_DECISION_CANNOT_BE_BUSINESS_COMPLETION")
     return errors

@@ -58,3 +58,13 @@ def test_integrated_evidence_package_blocks_failed_secret_scan_or_checksum():
     assert package.accepted is False
     assert "SECRET_SCAN_NOT_CLEAN" in package.errors
     assert "CHECKSUM_VERIFICATION_FAILED" in package.errors
+
+
+def test_integrated_evidence_package_blocks_missing_controller_bridge_refs_when_required():
+    package = build_integrated_evidence_package(
+        _package_input(controller_bridge_required=True, controller_bridge_evidence_refs=[])
+    )
+
+    assert package.accepted is False
+    assert package.review_ready_candidate is False
+    assert "MISSING_CONTROLLER_BRIDGE_EVIDENCE_REFS" in package.errors
