@@ -1,0 +1,15 @@
+.gitattributes: OK
+branch-base.txt: OK
+changed-files-all.txt: OK
+changed-files-correction.txt: OK
+changed-files-full-branch.txt: OK
+compileall.txt: OK
+CORRECTION_REPORT.md: OK
+diff-summary-correction.txt: OK
+diff-summary-full-branch.txt: OK
+git-diff-check.txt: OK
+pytest-focused.txt: OK
+pytest-full-mq.txt: OK
+pytest-regression-slice.txt: OK
+secret-scan.txt: OK
+SHA256 verification against clean index export: OK

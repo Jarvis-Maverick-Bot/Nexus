@@ -1,0 +1,15 @@
+M	nexus/mq/candidate_adapter_assignment_validator.py
+M	nexus/mq/tests/test_candidate_adapter_api_cli.py
+A	evidence/4.19/assignment-subject-contract/correction-2026-05-28-thunder/.gitattributes
+A	evidence/4.19/assignment-subject-contract/correction-2026-05-28-thunder/CORRECTION_REPORT.md
+A	evidence/4.19/assignment-subject-contract/correction-2026-05-28-thunder/branch-base.txt
+A	evidence/4.19/assignment-subject-contract/correction-2026-05-28-thunder/changed-files-correction.txt
+A	evidence/4.19/assignment-subject-contract/correction-2026-05-28-thunder/changed-files-full-branch.txt
+A	evidence/4.19/assignment-subject-contract/correction-2026-05-28-thunder/compileall.txt
+A	evidence/4.19/assignment-subject-contract/correction-2026-05-28-thunder/diff-summary-correction.txt
+A	evidence/4.19/assignment-subject-contract/correction-2026-05-28-thunder/diff-summary-full-branch.txt
+A	evidence/4.19/assignment-subject-contract/correction-2026-05-28-thunder/git-diff-check.txt
+A	evidence/4.19/assignment-subject-contract/correction-2026-05-28-thunder/pytest-focused.txt
+A	evidence/4.19/assignment-subject-contract/correction-2026-05-28-thunder/pytest-full-mq.txt
+A	evidence/4.19/assignment-subject-contract/correction-2026-05-28-thunder/pytest-regression-slice.txt
+A	evidence/4.19/assignment-subject-contract/correction-2026-05-28-thunder/secret-scan.txt

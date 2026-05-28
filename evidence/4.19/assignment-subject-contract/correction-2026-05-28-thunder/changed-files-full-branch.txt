@@ -1,0 +1,12 @@
+M	nexus/mq/candidate_adapter_api.py
+M	nexus/mq/candidate_adapter_assignment_validator.py
+M	nexus/mq/candidate_adapter_subject_broker_policy.py
+M	nexus/mq/controller_bridge_dispatch.py
+M	nexus/mq/tests/test_candidate_adapter_api_cli.py
+M	nexus/mq/tests/test_candidate_adapter_assignment_validator.py
+M	nexus/mq/tests/test_candidate_adapter_event_mapper.py
+M	nexus/mq/tests/test_candidate_adapter_run_loop.py
+M	nexus/mq/tests/test_controller_bridge_cli.py
+M	nexus/mq/tests/test_controller_bridge_dispatch.py
+M	nexus/mq/tests/test_resident_controller_observer_dispatcher.py
+M	nexus/mq/tests/test_resident_controller_subject_policy.py

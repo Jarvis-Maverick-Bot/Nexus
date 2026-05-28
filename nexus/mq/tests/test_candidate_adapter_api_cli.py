@@ -283,6 +283,56 @@ def test_candidate_ack_duplicate_same_idempotency_suppressed_without_second_even
     assert len(broker.published_events) == 1
 
 
+def test_candidate_ack_duplicate_rejects_conflicting_decision_without_state_mutation(tmp_path):
+    broker = InMemoryAssignmentBroker()
+    lifecycle = InMemoryLifecycleProvider(leases={"lease-001": _lease()})
+    api = _connect_ready_api(tmp_path, broker=broker, lifecycle=lifecycle)
+    assert api.ack_assignment(tmp_path / "session.json", _assignment(), now_at=NOW).accepted is True
+    lifecycle.leases["lease-001"] = _lease(lifecycle_decision_id="decision-other")
+
+    conflict = api.ack_assignment(
+        tmp_path / "session.json",
+        _assignment(lifecycle_decision_id="decision-other"),
+        now_at=NOW,
+    )
+    session = CandidateAdapterSessionStore(tmp_path / "session.json").load()
+
+    assert conflict.accepted is False
+    assert "DUPLICATE_ASSIGNMENT_BINDING_CONFLICT" in conflict.errors
+    assert "DUPLICATE_ASSIGNMENT_DECISION_ID_CONFLICT" in conflict.errors
+    assert len(broker.published_events) == 1
+    assert session.active_decision_ids == ["decision-001"]
+    assert session.active_reservation_lease_ids == ["lease-001"]
+    assert session.active_idempotency_keys == ["idem-001"]
+
+
+def test_candidate_ack_duplicate_rejects_conflicting_lease_without_state_mutation(tmp_path):
+    broker = InMemoryAssignmentBroker()
+    lifecycle = InMemoryLifecycleProvider(
+        leases={
+            "lease-001": _lease(),
+            "lease-other": _lease(lease_id="lease-other"),
+        }
+    )
+    api = _connect_ready_api(tmp_path, broker=broker, lifecycle=lifecycle)
+    assert api.ack_assignment(tmp_path / "session.json", _assignment(), now_at=NOW).accepted is True
+
+    conflict = api.ack_assignment(
+        tmp_path / "session.json",
+        _assignment(reservation_lease_id="lease-other"),
+        now_at=NOW,
+    )
+    session = CandidateAdapterSessionStore(tmp_path / "session.json").load()
+
+    assert conflict.accepted is False
+    assert "DUPLICATE_ASSIGNMENT_BINDING_CONFLICT" in conflict.errors
+    assert "DUPLICATE_ASSIGNMENT_LEASE_ID_CONFLICT" in conflict.errors
+    assert len(broker.published_events) == 1
+    assert session.active_decision_ids == ["decision-001"]
+    assert session.active_reservation_lease_ids == ["lease-001"]
+    assert session.active_idempotency_keys == ["idem-001"]
+
+
 def test_candidate_ack_requires_register_readiness_and_heartbeat(tmp_path):
     lifecycle = InMemoryLifecycleProvider(leases={"lease-001": _lease()})
     api = _api(tmp_path, lifecycle=lifecycle)

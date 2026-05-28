@@ -1,0 +1,2 @@
+M	nexus/mq/candidate_adapter_assignment_validator.py
+M	nexus/mq/tests/test_candidate_adapter_api_cli.py

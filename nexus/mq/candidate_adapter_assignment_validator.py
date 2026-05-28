@@ -108,14 +108,7 @@ def validate_candidate_assignment(
     subject_decision = validate_assignment_subject(assignment.assignment_subject, session.allowed_subject_patterns)
     errors.extend(subject_decision.errors)
     errors.extend(_lease_errors(assignment, lease, now_at=now_at))
-    if assignment.assignment_id in session.active_assignment_refs:
-        try:
-            index = session.active_assignment_refs.index(assignment.assignment_id)
-        except ValueError:
-            index = -1
-        existing_key = session.active_idempotency_keys[index] if index >= 0 and index < len(session.active_idempotency_keys) else ""
-        if existing_key and existing_key != assignment.idempotency_key:
-            errors.append("DUPLICATE_ASSIGNMENT_IDEMPOTENCY_CONFLICT")
+    errors.extend(_duplicate_assignment_binding_errors(assignment, session=session))
     if assignment.not_business_completion is not True:
         errors.append("ASSIGNMENT_CANNOT_BE_BUSINESS_COMPLETION")
     return CandidateAssignmentValidationResult(not errors, _dedupe(errors), assignment=assignment)
@@ -176,6 +169,31 @@ def _lease_errors(
     if lease.not_business_completion is not True:
         errors.append("RESERVATION_LEASE_CANNOT_BE_BUSINESS_COMPLETION")
     return errors
+
+
+def _duplicate_assignment_binding_errors(
+    assignment: CandidateAssignmentEvent,
+    *,
+    session: CandidateAdapterSession,
+) -> list[str]:
+    try:
+        index = session.active_assignment_refs.index(assignment.assignment_id)
+    except ValueError:
+        return []
+
+    errors: list[str] = []
+    checks = (
+        (session.active_idempotency_keys, assignment.idempotency_key, "DUPLICATE_ASSIGNMENT_IDEMPOTENCY_CONFLICT"),
+        (session.active_decision_ids, assignment.lifecycle_decision_id, "DUPLICATE_ASSIGNMENT_DECISION_ID_CONFLICT"),
+        (session.active_reservation_lease_ids, assignment.reservation_lease_id, "DUPLICATE_ASSIGNMENT_LEASE_ID_CONFLICT"),
+    )
+    for recorded_values, current_value, error_code in checks:
+        recorded_value = recorded_values[index] if index < len(recorded_values) else ""
+        if recorded_value != current_value:
+            errors.append(error_code)
+    if errors:
+        return ["DUPLICATE_ASSIGNMENT_BINDING_CONFLICT"] + errors
+    return []
 
 
 def _parse_iso(value: str | None) -> datetime | None:
