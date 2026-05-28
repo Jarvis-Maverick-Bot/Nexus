@@ -10,6 +10,10 @@ from nexus.mq.candidate_adapter_session_store import CandidateAdapterSession
 
 
 NOW = "2026-05-26T12:00:00+00:00"
+RUN_ID = "uat-7-19-14-phase3-20260527T151120Z-nova"
+BASE_SUBJECT = f"nexus.4_19.wbs7_19_14.{RUN_ID}.jarvis"
+CANONICAL_ASSIGNMENT_SUBJECT = f"{BASE_SUBJECT}.assignment"
+RUNTIME_SCOPED_ASSIGNMENT_ALIAS = f"{BASE_SUBJECT}.jarvis-runtime-001.assignment"
 
 
 def _session(**overrides):
@@ -26,7 +30,7 @@ def _session(**overrides):
         "capabilities": ["implementation"],
         "no_go_scope": ["no business execution"],
         "allowed_message_families": ["assignment", "evidence"],
-        "allowed_subject_patterns": ["nexus.candidate.jarvis.assignment.*"],
+        "allowed_subject_patterns": [CANONICAL_ASSIGNMENT_SUBJECT],
         "evidence_output_ref": "evidence://candidate-adapter/jarvis",
         "profile_digest": "digest-001",
         "registration_ref": "registry://candidate/jarvis/jarvis-runtime-001",
@@ -45,7 +49,7 @@ def _assignment(**overrides):
         "idempotency_key": "idem-001",
         "lifecycle_decision_id": "decision-001",
         "reservation_lease_id": "lease-001",
-        "assignment_subject": "nexus.candidate.jarvis.assignment.001",
+        "assignment_subject": CANONICAL_ASSIGNMENT_SUBJECT,
         "agent_id": "jarvis",
         "runtime_instance_id": "jarvis-runtime-001",
         "adapter_protocol_version": CANDIDATE_ADAPTER_PROTOCOL_VERSION,
@@ -125,6 +129,43 @@ def test_candidate_ack_rejects_subject_outside_profile_allowlist():
 
     assert result.accepted is False
     assert "ASSIGNMENT_SUBJECT_NOT_ALLOWED: nexus.other.assignment.001" in result.errors
+
+
+def test_candidate_ack_rejects_runtime_scoped_alias_even_with_observation_pattern():
+    result = validate_candidate_assignment(
+        _assignment(assignment_subject=RUNTIME_SCOPED_ASSIGNMENT_ALIAS),
+        session=_session(allowed_subject_patterns=[f"{BASE_SUBJECT}.>"]),
+        lease=_lease(),
+        now_at=NOW,
+    )
+
+    assert result.accepted is False
+    assert "ASSIGNMENT_SUBJECT_RUNTIME_ALIAS_DIAGNOSTIC_ONLY" in result.errors
+
+
+def test_candidate_ack_rejects_wrong_runtime_payload():
+    result = validate_candidate_assignment(
+        _assignment(runtime_instance_id="other-runtime"),
+        session=_session(),
+        lease=_lease(),
+        now_at=NOW,
+    )
+
+    assert result.accepted is False
+    assert "ASSIGNMENT_RUNTIME_ID_MISMATCH" in result.errors
+    assert "LEASE_RUNTIME_ID_MISMATCH" in result.errors
+
+
+def test_candidate_ack_rejects_missing_not_business_completion_flag():
+    result = validate_candidate_assignment(
+        _assignment(not_business_completion=False),
+        session=_session(),
+        lease=_lease(),
+        now_at=NOW,
+    )
+
+    assert result.accepted is False
+    assert "ASSIGNMENT_CANNOT_BE_BUSINESS_COMPLETION" in result.errors
 
 
 def test_candidate_ack_rejects_protocol_mismatch():

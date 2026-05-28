@@ -28,6 +28,10 @@ from nexus.mq.eligibility_reservation_policy import validate_assignment_publish
 from nexus.mq.runtime_lifecycle_controller import RuntimeEligibilityRequest
 
 
+CANONICAL_ASSIGNMENT_NAMESPACE = "nexus.4_19.wbs7_19_14"
+CANONICAL_ASSIGNMENT_AGENT_ID = "jarvis"
+
+
 class ControllerBridgeDispatchController:
     def __init__(
         self,
@@ -181,7 +185,7 @@ class ControllerBridgeDispatchController:
                 errors.append("ASSIGNMENT_ID_MISMATCH")
         decision = self.state_store.get_lifecycle_decision(lifecycle_decision_id)
         lease = self.state_store.get_reservation_lease(reservation_lease_id)
-        errors.extend(_subject_errors(subject, dispatch_run_id, runtime_instance_id))
+        errors.extend(_subject_errors(subject, dispatch_run_id))
         validation = validate_assignment_publish(
             decision=decision,
             lease=lease,
@@ -281,7 +285,7 @@ class ControllerBridgeDispatchController:
         return ControllerBridgeOperationResult(True, "collect_evidence", payload={"evidence_refs": refs})
 
 
-def _subject_errors(subject: str, dispatch_run_id: str, runtime_instance_id: str) -> list[str]:
+def _subject_errors(subject: str, dispatch_run_id: str) -> list[str]:
     errors: list[str] = []
     if not subject:
         errors.append("MISSING_PUBLISH_SUBJECT")
@@ -289,13 +293,33 @@ def _subject_errors(subject: str, dispatch_run_id: str, runtime_instance_id: str
     if "*" in subject or ">" in subject:
         errors.append("PUBLISH_SUBJECT_CANNOT_CONTAIN_WILDCARD")
     parts = subject.split(".")
-    if len(parts) < 5 or parts[-1] != "assignment":
+    namespace_parts = CANONICAL_ASSIGNMENT_NAMESPACE.split(".")
+    expected_parts = namespace_parts + [dispatch_run_id, CANONICAL_ASSIGNMENT_AGENT_ID, "assignment"]
+    if _is_runtime_scoped_assignment_alias(parts, dispatch_run_id):
+        errors.append("PUBLISH_SUBJECT_RUNTIME_ALIAS_DIAGNOSTIC_ONLY")
+    elif parts != expected_parts:
         errors.append("PUBLISH_SUBJECT_MALFORMED")
-    if dispatch_run_id not in parts:
+    if parts[: len(namespace_parts)] != namespace_parts:
+        errors.append("PUBLISH_SUBJECT_NAMESPACE_MISMATCH")
+    run_index = len(namespace_parts)
+    agent_index = run_index + 1
+    if len(parts) <= run_index or parts[run_index] != dispatch_run_id:
         errors.append("PUBLISH_SUBJECT_RUN_MISMATCH")
-    if runtime_instance_id not in parts:
-        errors.append("PUBLISH_SUBJECT_RUNTIME_MISMATCH")
+    if len(parts) <= agent_index or parts[agent_index] != CANONICAL_ASSIGNMENT_AGENT_ID:
+        errors.append("PUBLISH_SUBJECT_AGENT_MISMATCH")
     return dedupe(errors)
+
+
+def _is_runtime_scoped_assignment_alias(parts: list[str], dispatch_run_id: str) -> bool:
+    namespace_parts = CANONICAL_ASSIGNMENT_NAMESPACE.split(".")
+    return (
+        len(parts) == len(namespace_parts) + 4
+        and parts[: len(namespace_parts)] == namespace_parts
+        and parts[len(namespace_parts)] == dispatch_run_id
+        and parts[len(namespace_parts) + 1] == CANONICAL_ASSIGNMENT_AGENT_ID
+        and bool(parts[len(namespace_parts) + 2])
+        and parts[-1] == "assignment"
+    )
 
 
 def _digest(*parts: str) -> str:

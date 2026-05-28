@@ -1,0 +1,7 @@
+COMMAND: python -m pytest nexus/mq/tests/test_controller_bridge_dispatch.py nexus/mq/tests/test_controller_bridge_cli.py nexus/mq/tests/test_candidate_adapter_assignment_validator.py nexus/mq/tests/test_candidate_adapter_api_cli.py nexus/mq/tests/test_candidate_adapter_run_loop.py nexus/mq/tests/test_candidate_adapter_event_mapper.py nexus/mq/tests/test_resident_controller_subject_policy.py nexus/mq/tests/test_resident_controller_observer_dispatcher.py nexus/mq/tests/test_resident_controller_live_loop.py -q
+STARTED_AT: 2026-05-28T15:02:57.3400780+08:00
+........................................................................ [ 80%]
+..................                                                       [100%]
+90 passed in 3.94s
+EXIT_CODE: 0
+ENDED_AT: 2026-05-28T15:03:01.6822149+08:00

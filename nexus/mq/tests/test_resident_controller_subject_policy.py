@@ -32,11 +32,18 @@ def test_resident_controller_subject_policy_requires_run_id():
     assert "PUBLISH_SUBJECT_RUN_ID_MISMATCH" in result.errors
 
 
-def test_resident_controller_subject_policy_accepts_scoped_assignment_subject():
+def test_resident_controller_subject_policy_accepts_canonical_assignment_subject_without_runtime_id():
     result = validate_publish_subject("nexus.4_19.wbs7_19_14.run-001.jarvis.assignment", _policy())
 
     assert result.accepted is True
     assert result.errors == []
+
+
+def test_resident_controller_subject_policy_rejects_runtime_scoped_assignment_alias():
+    result = validate_publish_subject("nexus.4_19.wbs7_19_14.run-001.jarvis.jarvis-runtime-001.assignment", _policy())
+
+    assert result.accepted is False
+    assert "PUBLISH_SUBJECT_NOT_ALLOWLISTED" in result.errors
 
 
 def test_resident_controller_subject_policy_rejects_extra_segments():

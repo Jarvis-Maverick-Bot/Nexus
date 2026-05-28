@@ -6,6 +6,8 @@ from nexus.mq.eligibility_reservation_policy import RuntimeEligibilityDecision, 
 
 
 NOW = "2026-05-27T12:00:00+00:00"
+CANONICAL_ASSIGNMENT_SUBJECT = "nexus.4_19.wbs7_19_14.run-001.jarvis.assignment"
+RUNTIME_SCOPED_ASSIGNMENT_ALIAS = "nexus.4_19.wbs7_19_14.run-001.jarvis.jarvis-runtime-001.assignment"
 
 
 def _store(tmp_path):
@@ -107,7 +109,7 @@ def _publish(controller, **overrides):
         "reservation_lease_id": "lease-001",
         "runtime_instance_id": "jarvis-runtime-001",
         "idempotency_key": "idem-001",
-        "subject": "nexus.4_19.controller_bridge.run-001.jarvis-runtime-001.assignment",
+        "subject": CANONICAL_ASSIGNMENT_SUBJECT,
         "now_at": NOW,
     }
     data.update(overrides)
@@ -195,14 +197,26 @@ def test_duplicate_replay_with_mismatched_decision_or_lease_blocks(tmp_path):
     assert "LIFECYCLE_DECISION_ID_MISMATCH" in second.errors
 
 
-def test_assignment_publish_blocks_wrong_subject_or_runtime(tmp_path):
+def test_assignment_publish_rejects_runtime_scoped_assignment_alias(tmp_path):
     controller = _controller(tmp_path)
     _prepare_valid_publish(controller)
 
-    result = _publish(controller, subject="nexus.4_19.controller_bridge.run-001.other-runtime.assignment")
+    result = _publish(controller, subject=RUNTIME_SCOPED_ASSIGNMENT_ALIAS)
 
     assert result.accepted is False
-    assert "PUBLISH_SUBJECT_RUNTIME_MISMATCH" in result.errors
+    assert "PUBLISH_SUBJECT_RUNTIME_ALIAS_DIAGNOSTIC_ONLY" in result.errors
+
+
+def test_assignment_publish_blocks_wrong_runtime_payload_with_canonical_subject(tmp_path):
+    controller = _controller(tmp_path)
+    _prepare_valid_publish(controller)
+
+    result = _publish(controller, runtime_instance_id="other-runtime")
+
+    assert result.accepted is False
+    assert "RUNTIME_INSTANCE_ID_MISMATCH" in result.errors
+    assert "DECISION_RUNTIME_ID_MISMATCH" in result.errors
+    assert "LEASE_RUNTIME_ID_MISMATCH" in result.errors
 
 
 def test_wrong_runtime_result_rejected(tmp_path):

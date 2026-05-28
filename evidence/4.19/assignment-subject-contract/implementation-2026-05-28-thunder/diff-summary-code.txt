@@ -1,0 +1,12 @@
+﻿ nexus/mq/candidate_adapter_api.py                  | 29 +++++++++++++
+ .../mq/candidate_adapter_subject_broker_policy.py  | 38 ++++++++++++++++-
+ nexus/mq/controller_bridge_dispatch.py             | 36 ++++++++++++++---
+ nexus/mq/tests/test_candidate_adapter_api_cli.py   | 43 +++++++++++++++++++-
+ .../test_candidate_adapter_assignment_validator.py | 45 ++++++++++++++++++++-
+ .../tests/test_candidate_adapter_event_mapper.py   |  9 ++++-
+ nexus/mq/tests/test_candidate_adapter_run_loop.py  | 31 +++++++++++++-
+ nexus/mq/tests/test_controller_bridge_cli.py       | 47 +++++++++++++++++++++-
+ nexus/mq/tests/test_controller_bridge_dispatch.py  | 22 ++++++++--
+ ...test_resident_controller_observer_dispatcher.py |  1 +
+ .../test_resident_controller_subject_policy.py     |  9 ++++-
+ 11 files changed, 288 insertions(+), 22 deletions(-)

@@ -206,6 +206,14 @@ class CandidateAdapterApi:
         validation = validate_candidate_assignment(assignment, session=session, lease=lease, now_at=now_at)
         if not validation.accepted:
             return CandidateAdapterOperationResult(False, "ack", errors=validation.errors, session=session)
+        if _has_matching_active_assignment(session, assignment):
+            return CandidateAdapterOperationResult(
+                True,
+                "ack",
+                errors=["DUPLICATE_ASSIGNMENT_SUPPRESSED"],
+                session=session,
+                payload={"assignment_id": assignment.assignment_id, "duplicate_suppressed": True},
+            )
         _append_unique(session.active_assignment_refs, assignment.assignment_id)
         _append_unique(session.active_decision_ids, assignment.lifecycle_decision_id)
         _append_unique(session.active_reservation_lease_ids, assignment.reservation_lease_id)
@@ -315,6 +323,27 @@ def _active_assignment_errors(session: CandidateAdapterSession, assignment_id: s
     if assignment_id not in session.active_assignment_refs:
         return [f"ASSIGNMENT_NOT_ACTIVE: {assignment_id}"]
     return []
+
+
+def _has_matching_active_assignment(session: CandidateAdapterSession, assignment: CandidateAssignmentEvent) -> bool:
+    try:
+        index = session.active_assignment_refs.index(assignment.assignment_id)
+    except ValueError:
+        return False
+    expected = {
+        "idempotency_key": session.active_idempotency_keys,
+        "lifecycle_decision_id": session.active_decision_ids,
+        "reservation_lease_id": session.active_reservation_lease_ids,
+    }
+    observed = {
+        "idempotency_key": assignment.idempotency_key,
+        "lifecycle_decision_id": assignment.lifecycle_decision_id,
+        "reservation_lease_id": assignment.reservation_lease_id,
+    }
+    for field_name, values in expected.items():
+        if index >= len(values) or values[index] != observed[field_name]:
+            return False
+    return True
 
 
 def _append_unique(items: list[str], value: str) -> None:

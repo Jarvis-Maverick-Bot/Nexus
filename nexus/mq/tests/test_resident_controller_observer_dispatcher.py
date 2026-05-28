@@ -145,5 +145,6 @@ def test_resident_controller_duplicate_replay_same_idempotency_key_suppressed():
 
     assert decision.accepted is True
     assert decision.published is False
+    assert decision.subject == "nexus.4_19.wbs7_19_14.run-001.jarvis.assignment"
     assert decision.duplicate_suppressed is True
     assert "DUPLICATE_ASSIGNMENT_SUPPRESSED" in decision.errors

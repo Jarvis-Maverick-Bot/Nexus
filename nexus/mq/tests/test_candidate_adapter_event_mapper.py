@@ -13,6 +13,11 @@ from nexus.mq.candidate_adapter_profile_loader import CANDIDATE_ADAPTER_PROTOCOL
 from nexus.mq.candidate_adapter_session_store import CandidateAdapterSession
 
 
+RUN_ID = "uat-7-19-14-phase3-20260527T151120Z-nova"
+BASE_SUBJECT = f"nexus.4_19.wbs7_19_14.{RUN_ID}.jarvis"
+CANONICAL_ASSIGNMENT_SUBJECT = f"{BASE_SUBJECT}.assignment"
+
+
 def _session(**overrides):
     data = {
         "session_id": "session-001",
@@ -27,7 +32,7 @@ def _session(**overrides):
         "capabilities": ["implementation"],
         "no_go_scope": ["no business execution"],
         "allowed_message_families": ["assignment", "evidence"],
-        "allowed_subject_patterns": ["nexus.candidate.jarvis.assignment.*"],
+        "allowed_subject_patterns": [CANONICAL_ASSIGNMENT_SUBJECT],
         "evidence_output_ref": "evidence://candidate-adapter/jarvis",
         "profile_digest": "digest-001",
         "lifecycle_state": "ready",
@@ -42,7 +47,7 @@ def _assignment(**overrides):
         "idempotency_key": "idem-001",
         "lifecycle_decision_id": "decision-001",
         "reservation_lease_id": "lease-001",
-        "assignment_subject": "nexus.candidate.jarvis.assignment.001",
+        "assignment_subject": CANONICAL_ASSIGNMENT_SUBJECT,
         "agent_id": "jarvis",
         "runtime_instance_id": "jarvis-runtime-001",
         "adapter_protocol_version": CANDIDATE_ADAPTER_PROTOCOL_VERSION,

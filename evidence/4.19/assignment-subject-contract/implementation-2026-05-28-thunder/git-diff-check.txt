@@ -1,0 +1,15 @@
+COMMAND: git diff --check
+STARTED_AT: 2026-05-28T15:02:57.1807890+08:00
+warning: in the working copy of 'nexus/mq/candidate_adapter_api.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'nexus/mq/candidate_adapter_subject_broker_policy.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'nexus/mq/controller_bridge_dispatch.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'nexus/mq/tests/test_candidate_adapter_api_cli.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'nexus/mq/tests/test_candidate_adapter_assignment_validator.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'nexus/mq/tests/test_candidate_adapter_event_mapper.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'nexus/mq/tests/test_candidate_adapter_run_loop.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'nexus/mq/tests/test_controller_bridge_cli.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'nexus/mq/tests/test_controller_bridge_dispatch.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'nexus/mq/tests/test_resident_controller_observer_dispatcher.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'nexus/mq/tests/test_resident_controller_subject_policy.py', LF will be replaced by CRLF the next time Git touches it
+EXIT_CODE: 0
+ENDED_AT: 2026-05-28T15:02:57.2387802+08:00

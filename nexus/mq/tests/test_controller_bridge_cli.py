@@ -8,6 +8,8 @@ from nexus.mq.durable_state import DurableStateStore
 
 
 NOW = "2026-05-27T12:00:00+00:00"
+CANONICAL_ASSIGNMENT_SUBJECT = "nexus.4_19.wbs7_19_14.run-001.jarvis.assignment"
+RUNTIME_SCOPED_ASSIGNMENT_ALIAS = "nexus.4_19.wbs7_19_14.run-001.jarvis.jarvis-runtime-001.assignment"
 
 
 def _write_json(path, payload):
@@ -131,7 +133,7 @@ def test_controller_bridge_cli_dispatch_validate_create_publish(tmp_path, capsys
                 "--idempotency-key",
                 "idem-001",
                 "--subject",
-                "nexus.4_19.controller_bridge.run-001.jarvis-runtime-001.assignment",
+                CANONICAL_ASSIGNMENT_SUBJECT,
                 "--now-at",
                 NOW,
             ]
@@ -141,6 +143,49 @@ def test_controller_bridge_cli_dispatch_validate_create_publish(tmp_path, capsys
     publish_output = json.loads(capsys.readouterr().out)
     assert publish_output["accepted"] is True
     assert publish_output["payload"]["assignment_publish_request"]["reservation_lease_id"] == "lease-001"
+
+
+def test_controller_bridge_cli_dispatch_publish_rejects_runtime_scoped_assignment_alias(tmp_path, capsys):
+    state_db = tmp_path / "bridge.sqlite3"
+    decision_json = _write_json(tmp_path / "decision.json", _decision_payload())
+    runtime_decision_json = _write_json(tmp_path / "runtime-decision.json", _runtime_decision_payload())
+
+    assert main(["dispatch", "create", "--state-db", str(state_db), "--decision-json", str(decision_json), "--run-id", "run-001", "--assignment-id", "assignment-001", "--now-at", NOW]) == 0
+    capsys.readouterr()
+    assert main(["runtime", "eligibility", "--state-db", str(state_db), "--decision-json", str(runtime_decision_json)]) == 0
+    capsys.readouterr()
+    assert main(["runtime", "reserve", "--state-db", str(state_db), "--decision-id", "runtime-decision-001", "--lease-id", "lease-001", "--now-at", NOW]) == 0
+    capsys.readouterr()
+
+    code = main(
+        [
+            "dispatch",
+            "publish-assignment",
+            "--state-db",
+            str(state_db),
+            "--run-id",
+            "run-001",
+            "--assignment-id",
+            "assignment-001",
+            "--decision-id",
+            "runtime-decision-001",
+            "--lease-id",
+            "lease-001",
+            "--runtime-instance-id",
+            "jarvis-runtime-001",
+            "--idempotency-key",
+            "idem-001",
+            "--subject",
+            RUNTIME_SCOPED_ASSIGNMENT_ALIAS,
+            "--now-at",
+            NOW,
+        ]
+    )
+    output = json.loads(capsys.readouterr().out)
+
+    assert code == 1
+    assert output["accepted"] is False
+    assert "PUBLISH_SUBJECT_RUNTIME_ALIAS_DIAGNOSTIC_ONLY" in output["errors"]
 
 
 def test_controller_bridge_cli_dispatch_request_eligibility_persists_lifecycle_decision_without_runtime_mutation(

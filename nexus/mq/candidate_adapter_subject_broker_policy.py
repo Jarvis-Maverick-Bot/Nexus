@@ -7,6 +7,8 @@ from urllib.parse import urlparse
 
 
 LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
+CANONICAL_ASSIGNMENT_NAMESPACE = "nexus.4_19.wbs7_19_14"
+CANONICAL_ASSIGNMENT_AGENT_ID = "jarvis"
 
 
 @dataclass
@@ -61,8 +63,10 @@ def validate_assignment_subject(subject: str, patterns: list[str]) -> CandidateA
     errors = list(pattern_decision.errors)
     if not subject:
         errors.append("MISSING_ASSIGNMENT_SUBJECT")
-    elif not any(subject_matches_pattern(subject, pattern) for pattern in patterns):
-        errors.append(f"ASSIGNMENT_SUBJECT_NOT_ALLOWED: {subject}")
+    else:
+        errors.extend(_canonical_assignment_subject_errors(subject))
+        if not any(subject_matches_pattern(subject, pattern) for pattern in patterns):
+            errors.append(f"ASSIGNMENT_SUBJECT_NOT_ALLOWED: {subject}")
     return CandidateAdapterPolicyDecision(not errors, _dedupe(errors))
 
 
@@ -89,6 +93,36 @@ def _is_broad_subject_pattern(pattern: str) -> bool:
     if stripped in {"nexus.>", "nexus.*", "nats.>"}:
         return True
     return False
+
+
+def _canonical_assignment_subject_errors(subject: str) -> list[str]:
+    parts = subject.split(".")
+    namespace_parts = CANONICAL_ASSIGNMENT_NAMESPACE.split(".")
+    if _is_runtime_scoped_assignment_alias(parts):
+        return ["ASSIGNMENT_SUBJECT_RUNTIME_ALIAS_DIAGNOSTIC_ONLY"]
+    if len(parts) != len(namespace_parts) + 3:
+        return [f"ASSIGNMENT_SUBJECT_NOT_CANONICAL: {subject}"]
+    if parts[: len(namespace_parts)] != namespace_parts:
+        return [f"ASSIGNMENT_SUBJECT_NOT_CANONICAL: {subject}"]
+    if not parts[len(namespace_parts)]:
+        return [f"ASSIGNMENT_SUBJECT_NOT_CANONICAL: {subject}"]
+    if parts[len(namespace_parts) + 1] != CANONICAL_ASSIGNMENT_AGENT_ID:
+        return [f"ASSIGNMENT_SUBJECT_NOT_CANONICAL: {subject}"]
+    if parts[-1] != "assignment":
+        return [f"ASSIGNMENT_SUBJECT_NOT_CANONICAL: {subject}"]
+    return []
+
+
+def _is_runtime_scoped_assignment_alias(parts: list[str]) -> bool:
+    namespace_parts = CANONICAL_ASSIGNMENT_NAMESPACE.split(".")
+    return (
+        len(parts) == len(namespace_parts) + 4
+        and parts[: len(namespace_parts)] == namespace_parts
+        and bool(parts[len(namespace_parts)])
+        and parts[len(namespace_parts) + 1] == CANONICAL_ASSIGNMENT_AGENT_ID
+        and bool(parts[len(namespace_parts) + 2])
+        and parts[-1] == "assignment"
+    )
 
 
 def _dedupe(errors: list[str]) -> list[str]:

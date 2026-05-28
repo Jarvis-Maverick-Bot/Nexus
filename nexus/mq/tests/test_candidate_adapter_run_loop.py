@@ -16,6 +16,10 @@ import json
 
 
 NOW = "2026-05-26T12:00:00+00:00"
+RUN_ID = "uat-7-19-14-phase3-20260527T151120Z-nova"
+BASE_SUBJECT = f"nexus.4_19.wbs7_19_14.{RUN_ID}.jarvis"
+CANONICAL_ASSIGNMENT_SUBJECT = f"{BASE_SUBJECT}.assignment"
+RUNTIME_SCOPED_ASSIGNMENT_ALIAS = f"{BASE_SUBJECT}.jarvis-runtime-001.assignment"
 
 
 def _write_profile(tmp_path, **overrides):
@@ -33,7 +37,7 @@ def _write_profile(tmp_path, **overrides):
         "no_go_scope": ["no business execution"],
         "broker_profile_ref": "broker-profile://nexus-distributed-uat",
         "broker_url": "nats://192.168.31.124:7422",
-        "allowed_subject_patterns": ["nexus.candidate.jarvis.assignment.*"],
+        "allowed_subject_patterns": [CANONICAL_ASSIGNMENT_SUBJECT],
         "allowed_message_families": ["assignment", "evidence"],
         "evidence_output_ref": str(tmp_path / "candidate-evidence"),
         "trust_material_ref": "trust-ref://jarvis",
@@ -51,7 +55,7 @@ def _assignment(**overrides):
         "idempotency_key": "idem-001",
         "lifecycle_decision_id": "decision-001",
         "reservation_lease_id": "lease-001",
-        "assignment_subject": "nexus.candidate.jarvis.assignment.001",
+        "assignment_subject": CANONICAL_ASSIGNMENT_SUBJECT,
         "agent_id": "jarvis",
         "runtime_instance_id": "jarvis-runtime-001",
         "adapter_protocol_version": CANDIDATE_ADAPTER_PROTOCOL_VERSION,
@@ -136,6 +140,29 @@ def test_run_loop_await_assignment_ack_progress_evidence_result_candidate(tmp_pa
         "offline",
     ]
     assert result.not_business_completion is True
+
+
+def test_run_loop_rejects_runtime_scoped_alias_before_ack(tmp_path):
+    api = _api(
+        tmp_path,
+        assignments=[_assignment(assignment_subject=RUNTIME_SCOPED_ASSIGNMENT_ALIAS)],
+        leases={"lease-001": _lease()},
+    )
+
+    result = run_candidate_adapter_loop(
+        api,
+        profile_path=_write_profile(tmp_path, allowed_subject_patterns=[f"{BASE_SUBJECT}.>"]),
+        session_path=tmp_path / "session.json",
+        startup_packet_ref="startup-packet://jarvis",
+        self_check_evidence_ref="evidence://readiness/jarvis",
+        heartbeat_sequence=1,
+        now_at=NOW,
+        max_assignments=1,
+    )
+
+    assert result.accepted is False
+    assert "ASSIGNMENT_SUBJECT_RUNTIME_ALIAS_DIAGNOSTIC_ONLY" in result.errors
+    assert "ack" not in result.trace
 
 
 def test_run_loop_rejects_assignment_before_ack_when_decision_missing(tmp_path):

@@ -19,6 +19,10 @@ from nexus.mq.candidate_adapter_session_store import CandidateAdapterSessionStor
 
 
 NOW = "2026-05-26T12:00:00+00:00"
+RUN_ID = "uat-7-19-14-phase3-20260527T151120Z-nova"
+BASE_SUBJECT = f"nexus.4_19.wbs7_19_14.{RUN_ID}.jarvis"
+CANONICAL_ASSIGNMENT_SUBJECT = f"{BASE_SUBJECT}.assignment"
+RUNTIME_SCOPED_ASSIGNMENT_ALIAS = f"{BASE_SUBJECT}.jarvis-runtime-001.assignment"
 
 
 def _write_profile(tmp_path, **overrides):
@@ -36,7 +40,7 @@ def _write_profile(tmp_path, **overrides):
         "no_go_scope": ["no business execution"],
         "broker_profile_ref": "broker-profile://nexus-distributed-uat",
         "broker_url": "nats://192.168.31.124:7422",
-        "allowed_subject_patterns": ["nexus.candidate.jarvis.assignment.*"],
+        "allowed_subject_patterns": [CANONICAL_ASSIGNMENT_SUBJECT],
         "allowed_message_families": ["assignment", "evidence"],
         "evidence_output_ref": str(tmp_path / "candidate-evidence"),
         "trust_material_ref": "trust-ref://jarvis",
@@ -82,7 +86,7 @@ def _assignment(**overrides):
         "idempotency_key": "idem-001",
         "lifecycle_decision_id": "decision-001",
         "reservation_lease_id": "lease-001",
-        "assignment_subject": "nexus.candidate.jarvis.assignment.001",
+        "assignment_subject": CANONICAL_ASSIGNMENT_SUBJECT,
         "agent_id": "jarvis",
         "runtime_instance_id": "jarvis-runtime-001",
         "adapter_protocol_version": CANDIDATE_ADAPTER_PROTOCOL_VERSION,
@@ -158,6 +162,26 @@ def test_candidate_await_assignment_only_accepts_allowlisted_subjects(tmp_path):
 
     assert result.accepted is False
     assert "ASSIGNMENT_SUBJECT_NOT_ALLOWED: nexus.other.assignment.001" in result.errors
+
+
+def test_candidate_await_assignment_rejects_runtime_scoped_alias_before_candidate_output(tmp_path):
+    profile = _write_profile(tmp_path, allowed_subject_patterns=[f"{BASE_SUBJECT}.>"])
+    broker = InMemoryAssignmentBroker(assignments=[_assignment(assignment_subject=RUNTIME_SCOPED_ASSIGNMENT_ALIAS)])
+    api = _api(tmp_path, broker=broker)
+    assert api.connect(profile, session_path=tmp_path / "session.json").accepted is True
+    assert api.register(tmp_path / "session.json").accepted is True
+    assert api.submit_readiness(
+        tmp_path / "session.json",
+        startup_packet_ref="startup-packet://jarvis",
+        self_check_evidence_ref="evidence://readiness/jarvis",
+    ).accepted is True
+    assert api.heartbeat(tmp_path / "session.json", sequence=1, observed_state={"runtime_instance_id": "jarvis-runtime-001"}).accepted is True
+
+    result = api.await_assignment(tmp_path / "session.json")
+
+    assert result.accepted is False
+    assert "ASSIGNMENT_SUBJECT_RUNTIME_ALIAS_DIAGNOSTIC_ONLY" in result.errors
+    assert result.payload == {}
 
 
 def test_candidate_await_assignment_serialized_result_hides_raw_assignment_payload_internals(tmp_path):
@@ -242,6 +266,21 @@ def test_candidate_ack_requires_validated_assignment(tmp_path):
 
     assert result.accepted is True
     assert result.payload["event"]["event_type"] == "assignment_ack"
+
+
+def test_candidate_ack_duplicate_same_idempotency_suppressed_without_second_event(tmp_path):
+    broker = InMemoryAssignmentBroker()
+    lifecycle = InMemoryLifecycleProvider(leases={"lease-001": _lease()})
+    api = _connect_ready_api(tmp_path, broker=broker, lifecycle=lifecycle)
+
+    first = api.ack_assignment(tmp_path / "session.json", _assignment(), now_at=NOW)
+    second = api.ack_assignment(tmp_path / "session.json", _assignment(), now_at=NOW)
+
+    assert first.accepted is True
+    assert second.accepted is True
+    assert second.payload["duplicate_suppressed"] is True
+    assert "DUPLICATE_ASSIGNMENT_SUPPRESSED" in second.errors
+    assert len(broker.published_events) == 1
 
 
 def test_candidate_ack_requires_register_readiness_and_heartbeat(tmp_path):
