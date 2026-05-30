@@ -10,6 +10,7 @@ from nexus.mq.codex_session_runner import (
     DisabledCodexSessionRunner,
     filter_codex_stdout_events,
     probe_codex_cli_path,
+    read_git_status_snapshot,
     select_codex_cli_path,
     validate_codex_session_run_request,
 )
@@ -155,6 +156,7 @@ def test_cli_codex_session_runner_maps_successful_process_to_result_candidate_ev
         ),
         probe=probe,
         process_runner=process_runner,
+        git_status_reader=lambda cwd: CodexCliGitStatusSnapshot(),
     )
 
     result = runner.run(_request())
@@ -185,6 +187,7 @@ def test_cli_codex_session_runner_reports_timeout_and_cleanup_without_pass_claim
             timed_out=True,
             cleanup_proven=True,
         ),
+        git_status_reader=lambda cwd: CodexCliGitStatusSnapshot(),
     )
 
     result = runner.run(_request())
@@ -213,6 +216,7 @@ def test_cli_codex_session_runner_suppresses_exact_duplicate_without_second_laun
         config=CodexCliRunnerConfig(cli_path="C:/Codex/bin/codex.exe", bounded_workdir="C:/bounded/workdir"),
         probe=lambda path: CodexCliPathProbeResult(path=path, version="codex-cli 0.133.0"),
         process_runner=process_runner,
+        git_status_reader=lambda cwd: CodexCliGitStatusSnapshot(),
     )
 
     first = runner.run(_request())
@@ -220,12 +224,14 @@ def test_cli_codex_session_runner_suppresses_exact_duplicate_without_second_laun
 
     assert calls["count"] == 1
     assert first.status == "completed_execution"
-    assert replay.status == "duplicate_suppressed"
+    assert replay.status == "blocked"
+    assert replay.errors == ["CODEX_DUPLICATE_SUPPRESSED"]
+    assert replay.error_code == "CODEX_DUPLICATE_SUPPRESSED"
     assert replay.result_candidate_ref == first.result_candidate_ref
     assert "codex-cli://duplicate/replay-suppressed" in replay.evidence_refs
 
 
-def test_cli_codex_session_runner_blocks_changed_duplicate_without_second_launch():
+def test_cli_codex_session_runner_suppresses_changed_duplicate_without_second_launch():
     calls = {"count": 0}
 
     def process_runner(command, *, cwd, timeout_seconds):
@@ -241,6 +247,7 @@ def test_cli_codex_session_runner_blocks_changed_duplicate_without_second_launch
         config=CodexCliRunnerConfig(cli_path="C:/Codex/bin/codex.exe", bounded_workdir="C:/bounded/workdir"),
         probe=lambda path: CodexCliPathProbeResult(path=path, version="codex-cli 0.133.0"),
         process_runner=process_runner,
+        git_status_reader=lambda cwd: CodexCliGitStatusSnapshot(),
     )
 
     first = runner.run(_request())
@@ -249,8 +256,9 @@ def test_cli_codex_session_runner_blocks_changed_duplicate_without_second_launch
     assert calls["count"] == 1
     assert first.status == "completed_execution"
     assert conflict.status == "blocked"
-    assert conflict.errors == ["CODEX_DUPLICATE_REQUEST_CONFLICT"]
-    assert conflict.error_code == "CODEX_DUPLICATE_REQUEST_CONFLICT"
+    assert conflict.errors == ["CODEX_DUPLICATE_SUPPRESSED"]
+    assert conflict.error_code == "CODEX_DUPLICATE_SUPPRESSED"
+    assert "codex-cli://duplicate/suppressed-conflict" in conflict.evidence_refs
 
 
 def test_cli_codex_session_runner_dirty_worktree_guard_blocks_launch():
@@ -273,6 +281,56 @@ def test_cli_codex_session_runner_dirty_worktree_guard_blocks_launch():
     assert result.status == "blocked"
     assert result.error_code == "CODEX_DIRTY_WORKTREE"
     assert result.changed_file_refs == ["nexus/mq/dirty.py"]
+
+
+def test_cli_codex_session_runner_blocks_when_pre_git_status_fails_closed():
+    calls = {"count": 0}
+
+    def process_runner(command, *, cwd, timeout_seconds):
+        calls["count"] += 1
+        return CodexCliProcessResult(exit_code=0, stdout=b"", stderr=b"")
+
+    runner = CliCodexSessionRunner(
+        config=CodexCliRunnerConfig(cli_path="C:/Codex/bin/codex.exe", bounded_workdir="C:/bounded/workdir"),
+        probe=lambda path: CodexCliPathProbeResult(path=path, version="codex-cli 0.133.0"),
+        process_runner=process_runner,
+        git_status_reader=lambda cwd: CodexCliGitStatusSnapshot(errors=["CODEX_GIT_STATUS_TIMEOUT"]),
+    )
+
+    result = runner.run(_request())
+
+    assert calls["count"] == 0
+    assert result.status == "blocked"
+    assert result.errors == ["CODEX_GIT_STATUS_TIMEOUT"]
+    assert result.error_code == "CODEX_GIT_STATUS_TIMEOUT"
+    assert "codex-cli://git-status/pre/unavailable" in result.evidence_refs
+
+
+def test_cli_codex_session_runner_quarantines_when_post_git_status_fails_closed():
+    snapshots = [
+        CodexCliGitStatusSnapshot(),
+        CodexCliGitStatusSnapshot(errors=["CODEX_GIT_STATUS_NONZERO_EXIT"]),
+    ]
+
+    runner = CliCodexSessionRunner(
+        config=CodexCliRunnerConfig(cli_path="C:/Codex/bin/codex.exe", bounded_workdir="C:/bounded/workdir"),
+        probe=lambda path: CodexCliPathProbeResult(path=path, version="codex-cli 0.133.0"),
+        process_runner=lambda command, *, cwd, timeout_seconds: CodexCliProcessResult(
+            exit_code=0,
+            stdout=b'{"type":"item.completed","item":{"text":"CODEX_CLI_PROOF_OK"}}\n',
+            stderr=b"",
+            cleanup_proven=True,
+        ),
+        git_status_reader=lambda cwd: snapshots.pop(0),
+    )
+
+    result = runner.run(_request())
+
+    assert result.status == "quarantined"
+    assert result.errors == ["CODEX_GIT_STATUS_NONZERO_EXIT"]
+    assert result.error_code == "CODEX_GIT_STATUS_NONZERO_EXIT"
+    assert result.drain_refs == ["codex-cli://drain/git-status-unavailable"]
+    assert "codex-cli://git-status/post/unavailable" in result.evidence_refs
 
 
 def test_cli_codex_session_runner_quarantines_disallowed_write_surface():
@@ -372,3 +430,39 @@ def test_probe_codex_cli_path_fails_closed_on_exec_help_os_error(monkeypatch):
     result = probe_codex_cli_path("C:/Codex/bin/codex.exe")
 
     assert result.errors == ["CODEX_CLI_NOT_FOUND"]
+
+
+def test_read_git_status_snapshot_fails_closed_on_timeout(monkeypatch):
+    def fake_run(command, **kwargs):
+        raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+
+    monkeypatch.setattr("nexus.mq.codex_session_runner.subprocess.run", fake_run)
+
+    result = read_git_status_snapshot("C:/bounded/workdir")
+
+    assert result.changed_file_refs == []
+    assert result.errors == ["CODEX_GIT_STATUS_TIMEOUT"]
+
+
+def test_read_git_status_snapshot_fails_closed_on_os_error(monkeypatch):
+    def fake_run(command, **kwargs):
+        raise OSError("git missing")
+
+    monkeypatch.setattr("nexus.mq.codex_session_runner.subprocess.run", fake_run)
+
+    result = read_git_status_snapshot("C:/bounded/workdir")
+
+    assert result.changed_file_refs == []
+    assert result.errors == ["CODEX_GIT_STATUS_OS_ERROR"]
+
+
+def test_read_git_status_snapshot_fails_closed_on_nonzero_exit(monkeypatch):
+    def fake_run(command, **kwargs):
+        return subprocess.CompletedProcess(command, 128, stdout=b"", stderr=b"not a worktree")
+
+    monkeypatch.setattr("nexus.mq.codex_session_runner.subprocess.run", fake_run)
+
+    result = read_git_status_snapshot("C:/bounded/workdir")
+
+    assert result.changed_file_refs == []
+    assert result.errors == ["CODEX_GIT_STATUS_NONZERO_EXIT"]

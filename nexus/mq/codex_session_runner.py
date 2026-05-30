@@ -126,6 +126,7 @@ class CodexCliProcessResult:
 @dataclass
 class CodexCliGitStatusSnapshot:
     changed_file_refs: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -174,14 +175,16 @@ class CliCodexSessionRunner:
             previous_fingerprint, previous_result = previous
             if previous_fingerprint == fingerprint:
                 replay = _copy_result(previous_result)
-                replay.status = "duplicate_suppressed"
+                replay.status = "blocked"
                 replay.started = False
+                replay.errors = _dedupe(replay.errors + ["CODEX_DUPLICATE_SUPPRESSED"])
+                replay.error_code = "CODEX_DUPLICATE_SUPPRESSED"
                 replay.evidence_refs = _dedupe(replay.evidence_refs + ["codex-cli://duplicate/replay-suppressed"])
                 return replay
             return _blocked_result(
                 request,
-                error_code="CODEX_DUPLICATE_REQUEST_CONFLICT",
-                evidence_refs=["codex-cli://duplicate/request-conflict"],
+                error_code="CODEX_DUPLICATE_SUPPRESSED",
+                evidence_refs=["codex-cli://duplicate/suppressed-conflict"],
             )
 
         if not self.config.bounded_workdir:
@@ -195,6 +198,14 @@ class CliCodexSessionRunner:
             )
 
         pre_status = self.git_status_reader(self.config.bounded_workdir)
+        if pre_status.errors:
+            result = _blocked_result(
+                request,
+                error_code=pre_status.errors[0],
+                evidence_refs=["codex-cli://git-status/pre/unavailable"],
+            )
+            self._assignment_results[request.assignment_id] = (fingerprint, result)
+            return result
         if pre_status.changed_file_refs:
             result = _blocked_result(
                 request,
@@ -249,7 +260,13 @@ class CliCodexSessionRunner:
         no_go_refs = _matching_write_refs(changed_file_refs, self.config.prohibited_write_surfaces)
         drain_refs: list[str] = []
         offline_refs: list[str] = []
-        if no_go_refs:
+        if post_status.errors:
+            errors.extend(post_status.errors)
+            status = "quarantined"
+            drain_refs.append("codex-cli://drain/git-status-unavailable")
+            evidence_refs.append("codex-cli://git-status/post/unavailable")
+            evidence_refs.extend(drain_refs)
+        elif no_go_refs:
             errors.append("CODEX_NO_GO_SCOPE_VIOLATION")
             status = "quarantined"
             offline_refs.append("codex-cli://offline/no-go-scope-violation")
@@ -385,10 +402,12 @@ def read_git_status_snapshot(cwd: str) -> CodexCliGitStatusSnapshot:
             timeout=10,
             check=False,
         )
-    except (OSError, subprocess.TimeoutExpired):
-        return CodexCliGitStatusSnapshot()
+    except subprocess.TimeoutExpired:
+        return CodexCliGitStatusSnapshot(errors=["CODEX_GIT_STATUS_TIMEOUT"])
+    except OSError:
+        return CodexCliGitStatusSnapshot(errors=["CODEX_GIT_STATUS_OS_ERROR"])
     if completed.returncode != 0:
-        return CodexCliGitStatusSnapshot()
+        return CodexCliGitStatusSnapshot(errors=["CODEX_GIT_STATUS_NONZERO_EXIT"])
     return CodexCliGitStatusSnapshot(changed_file_refs=_parse_git_status_paths(_decode_process_bytes(completed.stdout)))
 
 

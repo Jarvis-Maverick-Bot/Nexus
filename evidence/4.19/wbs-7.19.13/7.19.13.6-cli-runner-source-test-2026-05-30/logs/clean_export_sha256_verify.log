@@ -1,20 +1,14 @@
-﻿timestamp_utc=2026-05-30T12:21:32.1015496Z
-cwd=D:\Projects\Nexus
-command=git -c core.autocrlf=false checkout-index --prefix=<temp>/ -a
-checkout_index_exit=0
-package_export_root=C:\Users\John\AppData\Local\Temp\nexus-clean-export-7136-rc2-verify-17c54416930e4c5b926d4282cd7c252b\evidence\4.19\wbs-7.19.13\7.19.13.6-cli-runner-source-test-2026-05-30
-checksum_file=SHA256SUMS.txt
-excluded_from_checksum=SHA256SUMS.txt
-excluded_from_checksum=logs/clean_export_sha256_verify.log
+timestamp_utc=2026-05-30T12:50:38.1622669Z
+basis=git -c core.autocrlf=false checkout-index clean export of index
 verify_begin
-OK  logs/compileall_nexus_mq.log
-OK  logs/focused_codex_tests.log
-OK  logs/full_nexus_mq_tests.log
-OK  logs/git_diff_check.log
-OK  logs/refs.log
-OK  logs/secret_and_no_go_scan.log
-OK  MANIFEST.json
-OK  REQUEST_CHANGES_RESPONSE.md
-OK  SOURCE_TEST_PACKAGE.md
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/MANIFEST.json
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/REQUEST_CHANGES_RESPONSE.md
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/SOURCE_TEST_PACKAGE.md
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/compileall_nexus_mq.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/focused_codex_tests.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/full_nexus_mq_tests.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/git_diff_check.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/refs.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/secret_and_no_go_scan.log
 verify_end
-clean_export_sha256_verify=OK
+result=PASS

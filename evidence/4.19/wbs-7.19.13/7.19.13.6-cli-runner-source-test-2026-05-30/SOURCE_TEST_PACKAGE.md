@@ -32,8 +32,9 @@ Implemented behavior:
 - `DisabledCodexSessionRunner` remains unchanged and disabled by default.
 - `CliCodexSessionRunner` is a source-level candidate only; it is instantiated explicitly and is not wired into a live worker start path.
 - `CodexSessionRunnerResult` includes started, exit code, error code, changed-file refs, disallowed/no-go refs, cleanup/drain/offline refs, and result candidate ref mapping.
-- `CliCodexSessionRunner` suppresses exact duplicate replays and blocks changed duplicate requests without a second process launch.
-- Dirty worktree, disallowed write, and no-go write paths fail closed before acceptance of result evidence.
+- `CliCodexSessionRunner` suppresses exact duplicate replays and changed same-assignment duplicate requests without a second process launch.
+- Duplicate replay/conflict paths use `CODEX_DUPLICATE_SUPPRESSED` and do not emit public status `duplicate_suppressed`.
+- Dirty worktree, Git status failure, disallowed write, and no-go write paths fail closed before acceptance of result evidence.
 - Explicit configured CLI path is preferred.
 - Configured CLI path must pass probe contract.
 - AppData-local fallback discovery is supported through `discover_appdata_codex_cli_candidates`.
@@ -68,8 +69,9 @@ Added focused source tests for:
 - successful CLI process mapping to evidence refs
 - timeout/cleanup mapping without PASS claim
 - exact duplicate replay suppression
-- changed duplicate request conflict
+- changed duplicate request suppression using accepted duplicate taxonomy
 - dirty-worktree guard
+- Git status timeout/OS-error/nonzero fail-closed behavior
 - disallowed write-surface quarantine
 - no-go write-surface quarantine
 - version/help/exec-help timeout, permission, and OS error fail-closed probe paths
@@ -95,8 +97,8 @@ Logs:
 Observed results:
 
 - compileall: passed
-- focused Codex tests: `32 passed`
-- full `nexus/mq/tests`: `662 passed, 19 warnings`
+- focused Codex tests: `37 passed`
+- full `nexus/mq/tests`: `667 passed, 19 warnings`
 - `git diff --check`: passed
 - secret/no-go scan: no high-confidence matches; existing token fixture is documented as intentional validation test data
 

@@ -8,7 +8,7 @@ Final candidate verdict: READY_FOR_NOVA_SOURCE_TEST_REVIEW
 
 ## Review Result Received
 
-Nova returned `REQUEST_CHANGES` for WBS 7.19.13.6 source/test branch `codex/wbs-7-19-13-6-codex-session-runner-cli` at `188c529dbcdee1b42fe6363117b754b0ff7dbff5`.
+Nova returned a second `REQUEST_CHANGES` for WBS 7.19.13.6 source/test branch `codex/wbs-7-19-13-6-codex-session-runner-cli` at `e00345701ed7b5a73ace159a22be88d4e56a2faf`.
 
 Accepted as on-path:
 
@@ -46,11 +46,13 @@ Focused tests prove successful execution mapping, timeout mapping, cleanup refs,
 
 Implemented behavior:
 
-- exact replay returns `duplicate_suppressed`
+- exact replay returns public status `blocked`, not `duplicate_suppressed`
+- exact replay returns `CODEX_DUPLICATE_SUPPRESSED`
 - exact replay reuses the previous `result_candidate_ref`
 - exact replay adds `codex-cli://duplicate/replay-suppressed`
-- changed request for the same `assignment_id` returns `CODEX_DUPLICATE_REQUEST_CONFLICT`
-- duplicate conflict does not launch a second process
+- changed request for the same `assignment_id` also returns `CODEX_DUPLICATE_SUPPRESSED`
+- duplicate replay/conflict does not launch a second process
+- `CODEX_DUPLICATE_REQUEST_CONFLICT` is not emitted without a reviewed addendum
 
 ### 3. Write-Boundary Enforcement
 
@@ -64,8 +66,11 @@ Implemented source-testable write guards:
 - disallowed writes quarantine with `CODEX_WRITE_SURFACE_VIOLATION`
 - no-go writes quarantine with `CODEX_NO_GO_SCOPE_VIOLATION`
 - drain/offline refs for quarantine paths
+- pre/post Git status timeout, OS error, or nonzero exit fail closed instead of returning an empty clean snapshot
+- pre-run Git status failure blocks before process launch
+- post-run Git status failure quarantines with `codex-cli://drain/git-status-unavailable`
 
-Focused tests prove dirty-worktree blocking, disallowed-write quarantine, no-go-write quarantine, and no process launch on dirty guard.
+Focused tests prove dirty-worktree blocking, disallowed-write quarantine, no-go-write quarantine, no process launch on dirty/pre-status failure guards, and post-status failure quarantine.
 
 ### 4. CLI Probe Fail-Closed Behavior
 
@@ -82,9 +87,11 @@ Focused tests cover timeout, help permission error, and exec-help OS error.
 
 Added tests for:
 
-- exact duplicate replay suppression
-- changed duplicate request conflict
+- exact duplicate replay suppression using `CODEX_DUPLICATE_SUPPRESSED`
+- changed duplicate request suppression using `CODEX_DUPLICATE_SUPPRESSED`
+- absence of public `duplicate_suppressed` result status
 - dirty worktree blocking
+- Git status timeout/OS error/nonzero fail-closed behavior
 - disallowed write-surface quarantine
 - no-go write-surface quarantine
 - result contract fields on success and timeout
@@ -105,8 +112,8 @@ Updated logs:
 Observed results:
 
 - `python -m compileall nexus/mq`: passed
-- focused Codex tests: `32 passed`
-- full `nexus/mq/tests`: `662 passed, 19 warnings`
+- focused Codex tests: `37 passed`
+- full `nexus/mq/tests`: `667 passed, 19 warnings`
 - `git diff --check`: passed
 - high-confidence secret/no-go scan: passed
 - clean-export checksum verification: passed

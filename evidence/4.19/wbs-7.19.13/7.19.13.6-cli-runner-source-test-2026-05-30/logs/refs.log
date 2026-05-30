@@ -1,21 +1,13 @@
-﻿timestamp_utc=2026-05-30T12:19:42.3137390Z
+timestamp_utc=2026-05-30T12:50:08.5587709Z
 branch=codex/wbs-7-19-13-6-codex-session-runner-cli
-head_before_commit=188c529dbcdee1b42fe6363117b754b0ff7dbff5
-origin_branch=188c529dbcdee1b42fe6363117b754b0ff7dbff5
+package_head_note=verify final package head with git rev-parse HEAD or origin/codex/wbs-7-19-13-6-codex-session-runner-cli after push; tracked refs.log intentionally avoids self-referential final commit hash
+head_at_refs_capture=d3b87b29365348d72be35b6ade3777e12a609d11
 origin_master=71b101363efc5b6462dcb06d83cd7f580e865cfa
-accepted_adapter_branch=9797addfc4f1b323a0124bac095a235a51a60332
-option_a_proof_branch=6b0f27a8152dede25340f61db18491ab3662d940
-reviewed_commit=188c529dbcdee1b42fe6363117b754b0ff7dbff5
-status_begin
-## codex/wbs-7-19-13-6-codex-session-runner-cli...origin/codex/wbs-7-19-13-6-codex-session-runner-cli
- M evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/compileall_nexus_mq.log
- M evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/focused_codex_tests.log
- M evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/full_nexus_mq_tests.log
- M evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/secret_and_no_go_scan.log
- M nexus/mq/codex_session_runner.py
- M nexus/mq/tests/test_codex_session_runner.py
+accepted_adapter_head=9797addfc4f1b323a0124bac095a235a51a60332
+merge_base_with_origin_master=71b101363efc5b6462dcb06d83cd7f580e865cfa
+status_short_begin
 ?? evidence/4.19/wbs-7.19.14/resident-controller/5B-live-loop-proof-2026-05-25/
 ?? evidence/4.19/wbs-7.19.14/resident-controller/5B-merge-evidence-2026-05-26/
 ?? evidence/4.19/wbs-7.19.14/resident-controller/5B-patch-proof-2026-05-26/tools/
 ?? evidence/4.19/wbs-7.19.14/resident-controller/pre-merge-check-2026-05-25/
-status_end
+status_short_end
