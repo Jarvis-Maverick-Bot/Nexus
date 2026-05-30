@@ -1,4 +1,4 @@
-timestamp_utc=2026-05-30T12:50:38.1622669Z
+timestamp_utc=2026-05-30T13:05:22.3200584Z
 basis=git -c core.autocrlf=false checkout-index clean export of index
 verify_begin
 OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/MANIFEST.json
