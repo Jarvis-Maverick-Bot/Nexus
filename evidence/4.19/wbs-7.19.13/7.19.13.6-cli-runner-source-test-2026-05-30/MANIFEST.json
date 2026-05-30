@@ -1,0 +1,67 @@
+{
+  "schema_version": "4.19.wbs_7_19_13_6.cli_runner_source_test.v1",
+  "package_name": "7.19.13.6-cli-runner-source-test-2026-05-30",
+  "owner": "Thunder",
+  "runtime_call_sign": "Codex App",
+  "requester_decision_authority": "Alex",
+  "reviewer": "Nova",
+  "candidate_verdict": "READY_FOR_NOVA_SOURCE_TEST_REVIEW",
+  "prepared_date": "2026-05-30",
+  "repo_worktree_role": "Nexus local working tree",
+  "branch": "codex/wbs-7-19-13-6-codex-session-runner-cli",
+  "base_ref": "origin/master",
+  "base_head": "71b101363efc5b6462dcb06d83cd7f580e865cfa",
+  "accepted_adapter_ref": "origin/codex/wbs-7-19-13-codex-runtime-adapter",
+  "accepted_adapter_head": "9797addfc4f1b323a0124bac095a235a51a60332",
+  "accepted_option_a_proof_commit": "6b0f27a8152dede25340f61db18491ab3662d940",
+  "source_files": [
+    "nexus/mq/codex_session_runner.py",
+    "nexus/mq/tests/test_codex_session_runner.py"
+  ],
+  "package_files": [
+    "SOURCE_TEST_PACKAGE.md",
+    "MANIFEST.json",
+    "logs/refs.log",
+    "logs/compileall_nexus_mq.log",
+    "logs/focused_codex_tests.log",
+    "logs/full_nexus_mq_tests.log",
+    "logs/git_diff_check.log",
+    "logs/secret_and_no_go_scan.log",
+    "logs/clean_export_sha256_verify.log",
+    "SHA256SUMS.txt"
+  ],
+  "implemented_contracts": [
+    "configured_cli_path_preferred",
+    "appdata_discovery_fallback",
+    "newest_passing_candidate_selection",
+    "ambiguous_candidate_fail_closed",
+    "windowsapps_access_denied_fail_closed",
+    "stdout_json_event_filtering",
+    "optional_bom_tolerance",
+    "stderr_capture_evidence",
+    "timeout_cleanup_result",
+    "disabled_runner_default_unchanged"
+  ],
+  "verification_summary": {
+    "compileall": "passed",
+    "focused_codex_tests": "24 passed",
+    "full_nexus_mq_tests": "654 passed, 19 warnings",
+    "git_diff_check": "passed",
+    "secret_no_go_scan": "passed"
+  },
+  "checksum_basis": "Git-normalized clean export using git -c core.autocrlf=false checkout-index",
+  "checksum_self_exclusion": "SHA256SUMS.txt and logs/clean_export_sha256_verify.log are excluded from SHA256SUMS.txt to avoid self-referential verification drift",
+  "no_go_preserved": [
+    "no live worker",
+    "no persistent listener",
+    "no governed broker dispatch",
+    "no UAT",
+    "no Business Command",
+    "no broker/config/credential mutation",
+    "no WindowsApps permission mutation",
+    "no install repair",
+    "no private-agent invocation",
+    "no merge/deploy",
+    "no PASS/final PASS/live-readiness claim"
+  ]
+}

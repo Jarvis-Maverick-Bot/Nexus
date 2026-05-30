@@ -1,0 +1,17 @@
+﻿timestamp_utc=2026-05-30T10:40:14.5426938Z
+branch=codex/wbs-7-19-13-6-codex-session-runner-cli
+head_before_commit=7863fe65294389e19d588fc85c6a97daa09b00a4
+origin_master=71b101363efc5b6462dcb06d83cd7f580e865cfa
+accepted_adapter_branch=9797addfc4f1b323a0124bac095a235a51a60332
+merge_base_origin_master_adapter=bb241891a97057891d498b12f912a37d46c0657b
+option_a_proof_branch=6b0f27a8152dede25340f61db18491ab3662d940
+status_begin
+## codex/wbs-7-19-13-6-codex-session-runner-cli...origin/master [ahead 3]
+ M nexus/mq/codex_session_runner.py
+ M nexus/mq/tests/test_codex_session_runner.py
+?? evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/
+?? evidence/4.19/wbs-7.19.14/resident-controller/5B-live-loop-proof-2026-05-25/
+?? evidence/4.19/wbs-7.19.14/resident-controller/5B-merge-evidence-2026-05-26/
+?? evidence/4.19/wbs-7.19.14/resident-controller/5B-patch-proof-2026-05-26/tools/
+?? evidence/4.19/wbs-7.19.14/resident-controller/pre-merge-check-2026-05-25/
+status_end
