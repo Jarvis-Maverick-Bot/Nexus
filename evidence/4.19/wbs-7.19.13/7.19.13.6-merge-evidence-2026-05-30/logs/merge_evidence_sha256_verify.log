@@ -1,0 +1,15 @@
+timestamp_utc=2026-05-30T13:20:50.6125826Z
+basis=git -c core.autocrlf=false checkout-index clean export of index
+verify_begin
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-merge-evidence-2026-05-30/MERGE_EVIDENCE_REPORT.md
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-merge-evidence-2026-05-30/COMMAND_LOG.md
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-merge-evidence-2026-05-30/MANIFEST.json
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-merge-evidence-2026-05-30/logs/refs.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-merge-evidence-2026-05-30/logs/post_merge_git_diff_check.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-merge-evidence-2026-05-30/logs/source_merge_range_diff_check.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-merge-evidence-2026-05-30/logs/compileall_nexus_mq.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-merge-evidence-2026-05-30/logs/focused_codex_tests.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-merge-evidence-2026-05-30/logs/non_live_mq_tests_excluding_nats.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-merge-evidence-2026-05-30/logs/accepted_package_sha256_verify.log
+verify_end
+result=PASS

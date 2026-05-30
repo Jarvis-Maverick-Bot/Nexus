@@ -1,0 +1,15 @@
+timestamp_utc=2026-05-30T13:17:35.6109233Z
+target_branch=master
+merge_method=fast-forward
+pre_merge_master=71b101363efc5b6462dcb06d83cd7f580e865cfa
+accepted_branch=origin/codex/wbs-7-19-13-6-codex-session-runner-cli
+accepted_head=6d133d943386bcd755c7af8b171a465a048f1290
+post_source_merge_head=6d133d943386bcd755c7af8b171a465a048f1290
+origin_master_before_push=71b101363efc5b6462dcb06d83cd7f580e865cfa
+merge_base_with_previous_master=71b101363efc5b6462dcb06d83cd7f580e865cfa
+status_short_begin
+?? evidence/4.19/wbs-7.19.14/resident-controller/5B-live-loop-proof-2026-05-25/
+?? evidence/4.19/wbs-7.19.14/resident-controller/5B-merge-evidence-2026-05-26/
+?? evidence/4.19/wbs-7.19.14/resident-controller/5B-patch-proof-2026-05-26/tools/
+?? evidence/4.19/wbs-7.19.14/resident-controller/pre-merge-check-2026-05-25/
+status_short_end

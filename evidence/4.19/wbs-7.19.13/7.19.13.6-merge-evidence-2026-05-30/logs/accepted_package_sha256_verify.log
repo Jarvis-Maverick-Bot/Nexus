@@ -1,0 +1,14 @@
+timestamp_utc=2026-05-30T13:18:24.7878969Z
+basis=master clean export after fast-forward merge
+verify_begin
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/MANIFEST.json
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/REQUEST_CHANGES_RESPONSE.md
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/SOURCE_TEST_PACKAGE.md
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/compileall_nexus_mq.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/focused_codex_tests.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/full_nexus_mq_tests.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/git_diff_check.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/refs.log
+OK  evidence/4.19/wbs-7.19.13/7.19.13.6-cli-runner-source-test-2026-05-30/logs/secret_and_no_go_scan.log
+verify_end
+result=PASS
