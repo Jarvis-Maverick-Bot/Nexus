@@ -1,0 +1,6 @@
+﻿# Command: python -m pytest nexus/mq/tests/test_codex_runtime_adapter.py nexus/mq/tests/test_codex_assignment_guard.py nexus/mq/tests/test_codex_session_runner.py nexus/mq/tests/test_codex_worker.py -q
+# Started: 2026-05-24T21:45:34.1716262+08:00
+.................                                                        [100%]
+17 passed in 0.06s
+# ExitCode: 0
+# Finished: 2026-05-24T21:45:34.1716262+08:00
