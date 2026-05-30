@@ -6,6 +6,8 @@ Codex, start a daemon, or connect to live transport.
 
 from __future__ import annotations
 
+import fnmatch
+import hashlib
 import json
 import os
 import re
@@ -54,6 +56,16 @@ class CodexSessionRunnerResult:
     errors: list[str] = field(default_factory=list)
     live_execution_started: bool = False
     not_business_completion: bool = True
+    started: bool = False
+    exit_code: Optional[int] = None
+    error_code: Optional[str] = None
+    changed_file_refs: list[str] = field(default_factory=list)
+    disallowed_write_refs: list[str] = field(default_factory=list)
+    no_go_refs: list[str] = field(default_factory=list)
+    cleanup_refs: list[str] = field(default_factory=list)
+    drain_refs: list[str] = field(default_factory=list)
+    offline_refs: list[str] = field(default_factory=list)
+    result_candidate_ref: Optional[str] = None
 
 
 class CodexSessionRunner(Protocol):
@@ -80,6 +92,7 @@ class CodexCliRunnerConfig:
     bounded_workdir: Optional[str] = None
     timeout_seconds: int = 120
     appdata_bin_root: Optional[str] = None
+    prohibited_write_surfaces: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -111,6 +124,11 @@ class CodexCliProcessResult:
 
 
 @dataclass
+class CodexCliGitStatusSnapshot:
+    changed_file_refs: list[str] = field(default_factory=list)
+
+
+@dataclass
 class CodexStdoutFilterResult:
     events: list[dict[str, Any]]
     non_json_stdout: list[str] = field(default_factory=list)
@@ -123,6 +141,7 @@ class CodexCliProcessRunner(Protocol):
 
 
 CodexCliProbe = Callable[[str], CodexCliPathProbeResult]
+CodexCliGitStatusReader = Callable[[str], CodexCliGitStatusSnapshot]
 
 
 class CliCodexSessionRunner:
@@ -132,10 +151,13 @@ class CliCodexSessionRunner:
         config: CodexCliRunnerConfig,
         probe: Optional[CodexCliProbe] = None,
         process_runner: Optional[CodexCliProcessRunner] = None,
+        git_status_reader: Optional[CodexCliGitStatusReader] = None,
     ):
         self.config = config
         self.probe = probe or probe_codex_cli_path
         self.process_runner = process_runner or run_codex_cli_process
+        self.git_status_reader = git_status_reader or read_git_status_snapshot
+        self._assignment_results: dict[str, tuple[str, CodexSessionRunnerResult]] = {}
 
     def run(self, request: CodexSessionRunRequest) -> CodexSessionRunnerResult:
         validation = validate_codex_session_run_request(request)
@@ -146,13 +168,42 @@ class CliCodexSessionRunner:
                 errors=validation.errors,
                 live_execution_started=False,
             )
+        fingerprint = _request_fingerprint(request)
+        previous = self._assignment_results.get(request.assignment_id)
+        if previous:
+            previous_fingerprint, previous_result = previous
+            if previous_fingerprint == fingerprint:
+                replay = _copy_result(previous_result)
+                replay.status = "duplicate_suppressed"
+                replay.started = False
+                replay.evidence_refs = _dedupe(replay.evidence_refs + ["codex-cli://duplicate/replay-suppressed"])
+                return replay
+            return _blocked_result(
+                request,
+                error_code="CODEX_DUPLICATE_REQUEST_CONFLICT",
+                evidence_refs=["codex-cli://duplicate/request-conflict"],
+            )
+
         if not self.config.bounded_workdir:
             return CodexSessionRunnerResult(
                 status="blocked",
                 evidence_refs=[],
                 errors=["CODEX_CLI_BOUNDED_WORKDIR_REQUIRED"],
                 live_execution_started=False,
+                error_code="CODEX_CLI_BOUNDED_WORKDIR_REQUIRED",
+                result_candidate_ref=_result_candidate_ref(request, "blocked"),
             )
+
+        pre_status = self.git_status_reader(self.config.bounded_workdir)
+        if pre_status.changed_file_refs:
+            result = _blocked_result(
+                request,
+                error_code="CODEX_DIRTY_WORKTREE",
+                evidence_refs=["codex-cli://git-status/pre/dirty"],
+                changed_file_refs=pre_status.changed_file_refs,
+            )
+            self._assignment_results[request.assignment_id] = (fingerprint, result)
+            return result
 
         selection = select_codex_cli_path(
             config=self.config,
@@ -160,12 +211,13 @@ class CliCodexSessionRunner:
             probe=self.probe,
         )
         if not selection.selected_path:
-            return CodexSessionRunnerResult(
-                status="blocked",
+            result = _blocked_result(
+                request,
+                error_code=(selection.errors or ["CODEX_CLI_NOT_CONFIGURED"])[0],
                 evidence_refs=_selection_evidence_refs(selection),
-                errors=selection.errors or ["CODEX_CLI_NOT_CONFIGURED"],
-                live_execution_started=False,
             )
+            self._assignment_results[request.assignment_id] = (fingerprint, result)
+            return result
 
         command = _build_codex_exec_command(selection.selected_path, request, self.config.bounded_workdir)
         process = self.process_runner(
@@ -173,6 +225,7 @@ class CliCodexSessionRunner:
             cwd=self.config.bounded_workdir,
             timeout_seconds=self.config.timeout_seconds,
         )
+        post_status = self.git_status_reader(self.config.bounded_workdir)
         stdout = filter_codex_stdout_events(process.stdout)
         evidence_refs = _selection_evidence_refs(selection)
         evidence_refs.append(f"codex-cli://stdout/events/{len(stdout.events)}")
@@ -180,8 +233,10 @@ class CliCodexSessionRunner:
             evidence_refs.append(f"codex-cli://stdout/non-json/{len(stdout.non_json_stdout)}")
         if process.stderr:
             evidence_refs.append("codex-cli://stderr/captured")
+        cleanup_refs: list[str] = []
         if process.cleanup_proven:
-            evidence_refs.append("codex-cli://process/cleanup-proven")
+            cleanup_refs.append("codex-cli://process/cleanup-proven")
+            evidence_refs.extend(cleanup_refs)
 
         errors = list(stdout.errors)
         status = "completed_execution"
@@ -189,14 +244,42 @@ class CliCodexSessionRunner:
             errors.append("CODEX_CLI_TIMEOUT")
         elif process.exit_code != 0:
             errors.append("CODEX_CLI_NONZERO_EXIT")
+        changed_file_refs = list(post_status.changed_file_refs)
+        disallowed_write_refs = _disallowed_write_refs(changed_file_refs, request.allowed_write_surfaces)
+        no_go_refs = _matching_write_refs(changed_file_refs, self.config.prohibited_write_surfaces)
+        drain_refs: list[str] = []
+        offline_refs: list[str] = []
+        if no_go_refs:
+            errors.append("CODEX_NO_GO_SCOPE_VIOLATION")
+            status = "quarantined"
+            offline_refs.append("codex-cli://offline/no-go-scope-violation")
+            evidence_refs.extend(offline_refs)
+        elif disallowed_write_refs:
+            errors.append("CODEX_WRITE_SURFACE_VIOLATION")
+            status = "quarantined"
+            drain_refs.append("codex-cli://drain/write-surface-violation")
+            evidence_refs.extend(drain_refs)
         if errors:
-            status = "blocked"
-        return CodexSessionRunnerResult(
+            if status != "quarantined":
+                status = "blocked"
+        result = CodexSessionRunnerResult(
             status=status,
             evidence_refs=_dedupe(evidence_refs),
             errors=_dedupe(errors),
             live_execution_started=False,
+            started=True,
+            exit_code=process.exit_code,
+            error_code=_dedupe(errors)[0] if errors else None,
+            changed_file_refs=changed_file_refs,
+            disallowed_write_refs=disallowed_write_refs,
+            no_go_refs=no_go_refs,
+            cleanup_refs=cleanup_refs,
+            drain_refs=drain_refs,
+            offline_refs=offline_refs,
+            result_candidate_ref=_result_candidate_ref(request, status),
         )
+        self._assignment_results[request.assignment_id] = (fingerprint, result)
+        return result
 
 
 def validate_codex_session_run_request(request: CodexSessionRunRequest) -> CodexSessionValidationResult:
@@ -272,23 +355,41 @@ def discover_appdata_codex_cli_candidates(config: CodexCliRunnerConfig) -> list[
 
 
 def probe_codex_cli_path(path: str) -> CodexCliPathProbeResult:
-    try:
-        version = subprocess.run([path, "--version"], capture_output=True, timeout=10, check=False)
-    except PermissionError:
-        return CodexCliPathProbeResult(path=path, errors=["CODEX_CLI_ACCESS_DENIED"])
-    except OSError:
-        return CodexCliPathProbeResult(path=path, errors=["CODEX_CLI_NOT_FOUND"])
+    version, version_error = _run_cli_probe_command([path, "--version"])
+    if version_error:
+        return CodexCliPathProbeResult(path=path, errors=[version_error])
     if version.returncode != 0:
         return CodexCliPathProbeResult(path=path, errors=["CODEX_CLI_VERSION_FAILED"])
-    help_result = subprocess.run([path, "--help"], capture_output=True, timeout=10, check=False)
-    exec_help = subprocess.run([path, "exec", "--help"], capture_output=True, timeout=10, check=False)
     errors: list[str] = []
+    help_result, help_error = _run_cli_probe_command([path, "--help"])
+    if help_error:
+        errors.append(help_error)
+        return CodexCliPathProbeResult(path=path, version=_decode_process_bytes(version.stdout).strip(), errors=_dedupe(errors))
+    exec_help, exec_help_error = _run_cli_probe_command([path, "exec", "--help"])
+    if exec_help_error:
+        errors.append(exec_help_error)
+        return CodexCliPathProbeResult(path=path, version=_decode_process_bytes(version.stdout).strip(), errors=_dedupe(errors))
     if help_result.returncode != 0:
         errors.append("CODEX_CLI_HELP_FAILED")
     if exec_help.returncode != 0:
         errors.append("CODEX_CLI_EXEC_HELP_FAILED")
     decoded_version = _decode_process_bytes(version.stdout).strip()
     return CodexCliPathProbeResult(path=path, version=decoded_version, errors=errors)
+
+
+def read_git_status_snapshot(cwd: str) -> CodexCliGitStatusSnapshot:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", cwd, "status", "--short", "--untracked-files=all"],
+            capture_output=True,
+            timeout=10,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return CodexCliGitStatusSnapshot()
+    if completed.returncode != 0:
+        return CodexCliGitStatusSnapshot()
+    return CodexCliGitStatusSnapshot(changed_file_refs=_parse_git_status_paths(_decode_process_bytes(completed.stdout)))
 
 
 def run_codex_cli_process(command: list[str], *, cwd: str, timeout_seconds: int) -> CodexCliProcessResult:
@@ -371,10 +472,102 @@ def _selection_evidence_refs(selection: CodexCliPathSelectionResult) -> list[str
     return refs
 
 
+def _run_cli_probe_command(command: list[str]) -> tuple[Optional[subprocess.CompletedProcess], Optional[str]]:
+    try:
+        return subprocess.run(command, capture_output=True, timeout=10, check=False), None
+    except subprocess.TimeoutExpired:
+        return None, "CODEX_CLI_PROBE_TIMEOUT"
+    except PermissionError:
+        return None, "CODEX_CLI_ACCESS_DENIED"
+    except OSError:
+        return None, "CODEX_CLI_NOT_FOUND"
+
+
 def _decode_process_bytes(data: bytes) -> str:
     if data.startswith(b"\xff\xfe") or data.startswith(b"\xfe\xff"):
         return data.decode("utf-16", errors="replace")
     return data.decode("utf-8-sig", errors="replace")
+
+
+def _parse_git_status_paths(status_output: str) -> list[str]:
+    paths: list[str] = []
+    for line in status_output.splitlines():
+        if not line.strip():
+            continue
+        path = line[3:] if len(line) > 3 else line.strip()
+        if " -> " in path:
+            path = path.split(" -> ", 1)[1]
+        paths.append(_normalize_ref(path.strip()))
+    return paths
+
+
+def _disallowed_write_refs(changed_file_refs: list[str], allowed_write_surfaces: list[str]) -> list[str]:
+    return [
+        ref
+        for ref in changed_file_refs
+        if not _matches_any(ref, allowed_write_surfaces)
+    ]
+
+
+def _matching_write_refs(changed_file_refs: list[str], write_surfaces: list[str]) -> list[str]:
+    return [ref for ref in changed_file_refs if _matches_any(ref, write_surfaces)]
+
+
+def _matches_any(path: str, patterns: list[str]) -> bool:
+    normalized = _normalize_ref(path)
+    return any(fnmatch.fnmatch(normalized, _normalize_ref(pattern)) for pattern in patterns)
+
+
+def _normalize_ref(path: str) -> str:
+    return path.replace("\\", "/")
+
+
+def _request_fingerprint(request: CodexSessionRunRequest) -> str:
+    payload = json.dumps(request.to_dict(), sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _result_candidate_ref(request: CodexSessionRunRequest, status: str) -> str:
+    return f"codex-result-candidate://{request.run_id}/{request.assignment_id}/{status}"
+
+
+def _blocked_result(
+    request: CodexSessionRunRequest,
+    *,
+    error_code: str,
+    evidence_refs: Optional[list[str]] = None,
+    changed_file_refs: Optional[list[str]] = None,
+) -> CodexSessionRunnerResult:
+    return CodexSessionRunnerResult(
+        status="blocked",
+        evidence_refs=evidence_refs or [],
+        errors=[error_code],
+        live_execution_started=False,
+        started=False,
+        error_code=error_code,
+        changed_file_refs=changed_file_refs or [],
+        result_candidate_ref=_result_candidate_ref(request, "blocked"),
+    )
+
+
+def _copy_result(result: CodexSessionRunnerResult) -> CodexSessionRunnerResult:
+    return CodexSessionRunnerResult(
+        status=result.status,
+        evidence_refs=list(result.evidence_refs),
+        errors=list(result.errors),
+        live_execution_started=result.live_execution_started,
+        not_business_completion=result.not_business_completion,
+        started=result.started,
+        exit_code=result.exit_code,
+        error_code=result.error_code,
+        changed_file_refs=list(result.changed_file_refs),
+        disallowed_write_refs=list(result.disallowed_write_refs),
+        no_go_refs=list(result.no_go_refs),
+        cleanup_refs=list(result.cleanup_refs),
+        drain_refs=list(result.drain_refs),
+        offline_refs=list(result.offline_refs),
+        result_candidate_ref=result.result_candidate_ref,
+    )
 
 
 def _kill_process_tree(pid: int) -> bool:

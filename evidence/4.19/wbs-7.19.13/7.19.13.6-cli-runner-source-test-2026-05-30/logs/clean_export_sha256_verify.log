@@ -1,8 +1,8 @@
-﻿timestamp_utc=2026-05-30T10:42:08.0344386Z
+﻿timestamp_utc=2026-05-30T12:21:32.1015496Z
 cwd=D:\Projects\Nexus
 command=git -c core.autocrlf=false checkout-index --prefix=<temp>/ -a
 checkout_index_exit=0
-package_export_root=C:\Users\John\AppData\Local\Temp\nexus-clean-export-7136-final-verify-5db6fc56400f4dcdaeac75e29b17f8d7\evidence\4.19\wbs-7.19.13\7.19.13.6-cli-runner-source-test-2026-05-30
+package_export_root=C:\Users\John\AppData\Local\Temp\nexus-clean-export-7136-rc2-verify-17c54416930e4c5b926d4282cd7c252b\evidence\4.19\wbs-7.19.13\7.19.13.6-cli-runner-source-test-2026-05-30
 checksum_file=SHA256SUMS.txt
 excluded_from_checksum=SHA256SUMS.txt
 excluded_from_checksum=logs/clean_export_sha256_verify.log
@@ -14,6 +14,7 @@ OK  logs/git_diff_check.log
 OK  logs/refs.log
 OK  logs/secret_and_no_go_scan.log
 OK  MANIFEST.json
+OK  REQUEST_CHANGES_RESPONSE.md
 OK  SOURCE_TEST_PACKAGE.md
 verify_end
 clean_export_sha256_verify=OK

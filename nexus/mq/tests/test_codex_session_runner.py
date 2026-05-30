@@ -1,11 +1,15 @@
+import subprocess
+
 from nexus.mq.codex_session_runner import (
     CliCodexSessionRunner,
+    CodexCliGitStatusSnapshot,
     CodexCliPathProbeResult,
     CodexCliProcessResult,
     CodexCliRunnerConfig,
     CodexSessionRunRequest,
     DisabledCodexSessionRunner,
     filter_codex_stdout_events,
+    probe_codex_cli_path,
     select_codex_cli_path,
     validate_codex_session_run_request,
 )
@@ -157,6 +161,13 @@ def test_cli_codex_session_runner_maps_successful_process_to_result_candidate_ev
 
     assert result.status == "completed_execution"
     assert result.errors == []
+    assert result.started is True
+    assert result.exit_code == 0
+    assert result.error_code is None
+    assert result.changed_file_refs == []
+    assert result.disallowed_write_refs == []
+    assert result.no_go_refs == []
+    assert result.result_candidate_ref == "codex-result-candidate://run-codex-001/assign-codex-001/completed_execution"
     assert result.live_execution_started is False
     assert result.not_business_completion is True
     assert "codex-cli://C:/Codex/bin/codex.exe@codex-cli 0.133.0" in result.evidence_refs
@@ -180,4 +191,184 @@ def test_cli_codex_session_runner_reports_timeout_and_cleanup_without_pass_claim
 
     assert result.status == "blocked"
     assert result.errors == ["CODEX_CLI_TIMEOUT"]
+    assert result.error_code == "CODEX_CLI_TIMEOUT"
+    assert result.exit_code is None
+    assert result.cleanup_refs == ["codex-cli://process/cleanup-proven"]
     assert "codex-cli://process/cleanup-proven" in result.evidence_refs
+
+
+def test_cli_codex_session_runner_suppresses_exact_duplicate_without_second_launch():
+    calls = {"count": 0}
+
+    def process_runner(command, *, cwd, timeout_seconds):
+        calls["count"] += 1
+        return CodexCliProcessResult(
+            exit_code=0,
+            stdout=b'{"type":"item.completed","item":{"text":"CODEX_CLI_PROOF_OK"}}\n',
+            stderr=b"",
+            cleanup_proven=True,
+        )
+
+    runner = CliCodexSessionRunner(
+        config=CodexCliRunnerConfig(cli_path="C:/Codex/bin/codex.exe", bounded_workdir="C:/bounded/workdir"),
+        probe=lambda path: CodexCliPathProbeResult(path=path, version="codex-cli 0.133.0"),
+        process_runner=process_runner,
+    )
+
+    first = runner.run(_request())
+    replay = runner.run(_request())
+
+    assert calls["count"] == 1
+    assert first.status == "completed_execution"
+    assert replay.status == "duplicate_suppressed"
+    assert replay.result_candidate_ref == first.result_candidate_ref
+    assert "codex-cli://duplicate/replay-suppressed" in replay.evidence_refs
+
+
+def test_cli_codex_session_runner_blocks_changed_duplicate_without_second_launch():
+    calls = {"count": 0}
+
+    def process_runner(command, *, cwd, timeout_seconds):
+        calls["count"] += 1
+        return CodexCliProcessResult(
+            exit_code=0,
+            stdout=b'{"type":"item.completed","item":{"text":"CODEX_CLI_PROOF_OK"}}\n',
+            stderr=b"",
+            cleanup_proven=True,
+        )
+
+    runner = CliCodexSessionRunner(
+        config=CodexCliRunnerConfig(cli_path="C:/Codex/bin/codex.exe", bounded_workdir="C:/bounded/workdir"),
+        probe=lambda path: CodexCliPathProbeResult(path=path, version="codex-cli 0.133.0"),
+        process_runner=process_runner,
+    )
+
+    first = runner.run(_request())
+    conflict = runner.run(_request(required_commands=["python -m pytest other.py -q"]))
+
+    assert calls["count"] == 1
+    assert first.status == "completed_execution"
+    assert conflict.status == "blocked"
+    assert conflict.errors == ["CODEX_DUPLICATE_REQUEST_CONFLICT"]
+    assert conflict.error_code == "CODEX_DUPLICATE_REQUEST_CONFLICT"
+
+
+def test_cli_codex_session_runner_dirty_worktree_guard_blocks_launch():
+    calls = {"count": 0}
+
+    def process_runner(command, *, cwd, timeout_seconds):
+        calls["count"] += 1
+        return CodexCliProcessResult(exit_code=0, stdout=b"", stderr=b"")
+
+    runner = CliCodexSessionRunner(
+        config=CodexCliRunnerConfig(cli_path="C:/Codex/bin/codex.exe", bounded_workdir="C:/bounded/workdir"),
+        probe=lambda path: CodexCliPathProbeResult(path=path, version="codex-cli 0.133.0"),
+        process_runner=process_runner,
+        git_status_reader=lambda cwd: CodexCliGitStatusSnapshot(changed_file_refs=["nexus/mq/dirty.py"]),
+    )
+
+    result = runner.run(_request())
+
+    assert calls["count"] == 0
+    assert result.status == "blocked"
+    assert result.error_code == "CODEX_DIRTY_WORKTREE"
+    assert result.changed_file_refs == ["nexus/mq/dirty.py"]
+
+
+def test_cli_codex_session_runner_quarantines_disallowed_write_surface():
+    snapshots = [
+        CodexCliGitStatusSnapshot(),
+        CodexCliGitStatusSnapshot(changed_file_refs=["nexus/private.txt"]),
+    ]
+
+    runner = CliCodexSessionRunner(
+        config=CodexCliRunnerConfig(cli_path="C:/Codex/bin/codex.exe", bounded_workdir="C:/bounded/workdir"),
+        probe=lambda path: CodexCliPathProbeResult(path=path, version="codex-cli 0.133.0"),
+        process_runner=lambda command, *, cwd, timeout_seconds: CodexCliProcessResult(
+            exit_code=0,
+            stdout=b'{"type":"item.completed","item":{"text":"CODEX_CLI_PROOF_OK"}}\n',
+            stderr=b"",
+            cleanup_proven=True,
+        ),
+        git_status_reader=lambda cwd: snapshots.pop(0),
+    )
+
+    result = runner.run(_request())
+
+    assert result.status == "quarantined"
+    assert result.error_code == "CODEX_WRITE_SURFACE_VIOLATION"
+    assert result.disallowed_write_refs == ["nexus/private.txt"]
+    assert result.drain_refs == ["codex-cli://drain/write-surface-violation"]
+
+
+def test_cli_codex_session_runner_quarantines_no_go_write_surface():
+    snapshots = [
+        CodexCliGitStatusSnapshot(),
+        CodexCliGitStatusSnapshot(changed_file_refs=["secrets/prod.env"]),
+    ]
+
+    runner = CliCodexSessionRunner(
+        config=CodexCliRunnerConfig(
+            cli_path="C:/Codex/bin/codex.exe",
+            bounded_workdir="C:/bounded/workdir",
+            prohibited_write_surfaces=["secrets/*"],
+        ),
+        probe=lambda path: CodexCliPathProbeResult(path=path, version="codex-cli 0.133.0"),
+        process_runner=lambda command, *, cwd, timeout_seconds: CodexCliProcessResult(
+            exit_code=0,
+            stdout=b'{"type":"item.completed","item":{"text":"CODEX_CLI_PROOF_OK"}}\n',
+            stderr=b"",
+            cleanup_proven=True,
+        ),
+        git_status_reader=lambda cwd: snapshots.pop(0),
+    )
+
+    result = runner.run(_request(allowed_write_surfaces=["secrets/*"]))
+
+    assert result.status == "quarantined"
+    assert result.error_code == "CODEX_NO_GO_SCOPE_VIOLATION"
+    assert result.no_go_refs == ["secrets/prod.env"]
+    assert result.offline_refs == ["codex-cli://offline/no-go-scope-violation"]
+
+
+def test_probe_codex_cli_path_fails_closed_on_timeout(monkeypatch):
+    def fake_run(command, **kwargs):
+        raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+
+    monkeypatch.setattr("nexus.mq.codex_session_runner.subprocess.run", fake_run)
+
+    result = probe_codex_cli_path("C:/Codex/bin/codex.exe")
+
+    assert result.errors == ["CODEX_CLI_PROBE_TIMEOUT"]
+
+
+def test_probe_codex_cli_path_fails_closed_on_help_permission_error(monkeypatch):
+    calls = {"count": 0}
+
+    def fake_run(command, **kwargs):
+        calls["count"] += 1
+        if calls["count"] == 1:
+            return subprocess.CompletedProcess(command, 0, stdout=b"codex-cli 0.133.0", stderr=b"")
+        raise PermissionError("Access is denied")
+
+    monkeypatch.setattr("nexus.mq.codex_session_runner.subprocess.run", fake_run)
+
+    result = probe_codex_cli_path("C:/Codex/bin/codex.exe")
+
+    assert result.errors == ["CODEX_CLI_ACCESS_DENIED"]
+
+
+def test_probe_codex_cli_path_fails_closed_on_exec_help_os_error(monkeypatch):
+    calls = {"count": 0}
+
+    def fake_run(command, **kwargs):
+        calls["count"] += 1
+        if calls["count"] < 3:
+            return subprocess.CompletedProcess(command, 0, stdout=b"codex-cli 0.133.0", stderr=b"")
+        raise OSError("missing")
+
+    monkeypatch.setattr("nexus.mq.codex_session_runner.subprocess.run", fake_run)
+
+    result = probe_codex_cli_path("C:/Codex/bin/codex.exe")
+
+    assert result.errors == ["CODEX_CLI_NOT_FOUND"]

@@ -20,6 +20,7 @@
   ],
   "package_files": [
     "SOURCE_TEST_PACKAGE.md",
+    "REQUEST_CHANGES_RESPONSE.md",
     "MANIFEST.json",
     "logs/refs.log",
     "logs/compileall_nexus_mq.log",
@@ -40,12 +41,20 @@
     "optional_bom_tolerance",
     "stderr_capture_evidence",
     "timeout_cleanup_result",
+    "runner_result_contract_fields",
+    "result_candidate_ref_mapping",
+    "exact_duplicate_replay_suppression",
+    "changed_duplicate_request_conflict",
+    "dirty_worktree_guard",
+    "write_surface_violation_quarantine",
+    "no_go_scope_violation_quarantine",
+    "probe_timeout_permission_os_error_fail_closed",
     "disabled_runner_default_unchanged"
   ],
   "verification_summary": {
     "compileall": "passed",
-    "focused_codex_tests": "24 passed",
-    "full_nexus_mq_tests": "654 passed, 19 warnings",
+    "focused_codex_tests": "32 passed",
+    "full_nexus_mq_tests": "662 passed, 19 warnings",
     "git_diff_check": "passed",
     "secret_no_go_scan": "passed"
   },
