@@ -14,7 +14,7 @@ Nexus provides a Python-based foundation for governed delivery workflows:
 
 The project is under active early-stage development. It is not a claim of autonomous production readiness.
 
-![Nexus architecture overview](docs/assets/nexus-architecture.svg)
+![Nexus architecture overview](docs/assets/nexus-architecture.png)
 
 ## Why Governed Agentic Delivery Matters
 
@@ -61,7 +61,7 @@ The repository includes examples and evidence from active development. Some evid
 
 Nexus aims to become a practical foundation for auditable multi-agent engineering: agents can do useful work, but the system keeps authority, evidence, and promotion decisions visible.
 
-![Nexus future vision](docs/assets/nexus-vision.svg)
+![Nexus future vision](docs/assets/nexus-vision.png)
 
 Near-term goals:
 
