@@ -12,7 +12,9 @@ import json
 import os
 import re
 import subprocess
+import time
 from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Optional, Protocol
 
@@ -93,6 +95,8 @@ class CodexCliRunnerConfig:
     timeout_seconds: int = 120
     appdata_bin_root: Optional[str] = None
     prohibited_write_surfaces: list[str] = field(default_factory=list)
+    evidence_root: Optional[str] = None
+    stream_excerpt_bytes: int = 65536
 
 
 @dataclass
@@ -121,6 +125,25 @@ class CodexCliProcessResult:
     stderr: bytes
     timed_out: bool = False
     cleanup_proven: bool = False
+    pid: Optional[int] = None
+    command: list[str] = field(default_factory=list)
+    started_at: Optional[str] = None
+    timeout_at: Optional[str] = None
+    cleanup_started_at: Optional[str] = None
+    cleanup_ended_at: Optional[str] = None
+    ended_at: Optional[str] = None
+    elapsed_seconds: Optional[float] = None
+    timeout_seconds: Optional[int] = None
+    cleanup_command: list[str] = field(default_factory=list)
+    cleanup_exit_code: Optional[int] = None
+    cleanup_stdout: bytes = b""
+    cleanup_stderr: bytes = b""
+    process_tree_before_cleanup: Optional[str] = None
+    process_tree_after_cleanup: Optional[str] = None
+    post_cleanup_timeout_seconds: Optional[int] = None
+    drain_completed: bool = True
+    drain_timed_out: bool = False
+    drain_error: Optional[str] = None
 
 
 @dataclass
@@ -295,6 +318,15 @@ class CliCodexSessionRunner:
             offline_refs=offline_refs,
             result_candidate_ref=_result_candidate_ref(request, status),
         )
+        if process.timed_out and self.config.evidence_root:
+            timeout_refs = _persist_timeout_evidence(
+                evidence_root=self.config.evidence_root,
+                process=process,
+                request=request,
+                result=result,
+                stream_excerpt_bytes=self.config.stream_excerpt_bytes,
+            )
+            result.evidence_refs = _dedupe(result.evidence_refs + timeout_refs)
         self._assignment_results[request.assignment_id] = (fingerprint, result)
         return result
 
@@ -411,7 +443,15 @@ def read_git_status_snapshot(cwd: str) -> CodexCliGitStatusSnapshot:
     return CodexCliGitStatusSnapshot(changed_file_refs=_parse_git_status_paths(_decode_process_bytes(completed.stdout)))
 
 
-def run_codex_cli_process(command: list[str], *, cwd: str, timeout_seconds: int) -> CodexCliProcessResult:
+def run_codex_cli_process(
+    command: list[str],
+    *,
+    cwd: str,
+    timeout_seconds: int,
+    post_cleanup_timeout_seconds: int = 5,
+) -> CodexCliProcessResult:
+    started_at = _utc_now()
+    start_perf = time.perf_counter()
     process = subprocess.Popen(
         command,
         cwd=cwd,
@@ -420,21 +460,70 @@ def run_codex_cli_process(command: list[str], *, cwd: str, timeout_seconds: int)
     )
     try:
         stdout, stderr = process.communicate(timeout=timeout_seconds)
+        ended_at = _utc_now()
         return CodexCliProcessResult(
             exit_code=process.returncode,
             stdout=stdout,
             stderr=stderr,
             cleanup_proven=True,
+            pid=process.pid,
+            command=list(command),
+            started_at=started_at,
+            ended_at=ended_at,
+            elapsed_seconds=round(time.perf_counter() - start_perf, 6),
+            timeout_seconds=timeout_seconds,
         )
     except subprocess.TimeoutExpired as exc:
-        cleanup_proven = _kill_process_tree(process.pid)
-        stdout, stderr = process.communicate()
+        timeout_at = _utc_now()
+        process_tree_before = _process_tree_snapshot(process.pid)
+        cleanup_started_at = _utc_now()
+        cleanup = _kill_process_tree_result(process.pid)
+        cleanup_ended_at = _utc_now()
+        drain_completed = True
+        drain_timed_out = False
+        drain_error = None
+        try:
+            stdout, stderr = process.communicate(timeout=post_cleanup_timeout_seconds)
+        except subprocess.TimeoutExpired as drain_exc:
+            stdout = b""
+            stderr = b""
+            drain_completed = False
+            drain_timed_out = True
+            drain_error = "CODEX_CLI_POST_CLEANUP_DRAIN_TIMEOUT"
+            stdout = _timeout_stdout(drain_exc)
+            stderr = _timeout_stderr(drain_exc)
+        except OSError as drain_exc:
+            stdout = b""
+            stderr = b""
+            drain_completed = False
+            drain_error = f"CODEX_CLI_POST_CLEANUP_DRAIN_OS_ERROR: {drain_exc}"
+        process_tree_after = _process_tree_snapshot(process.pid)
+        ended_at = _utc_now()
         return CodexCliProcessResult(
             exit_code=None,
-            stdout=(exc.stdout or b"") + (stdout or b""),
-            stderr=(exc.stderr or b"") + (stderr or b""),
+            stdout=_timeout_stdout(exc) + (stdout or b""),
+            stderr=_timeout_stderr(exc) + (stderr or b""),
             timed_out=True,
-            cleanup_proven=cleanup_proven,
+            cleanup_proven=cleanup["cleanup_proven"],
+            pid=process.pid,
+            command=list(command),
+            started_at=started_at,
+            timeout_at=timeout_at,
+            cleanup_started_at=cleanup_started_at,
+            cleanup_ended_at=cleanup_ended_at,
+            ended_at=ended_at,
+            elapsed_seconds=round(time.perf_counter() - start_perf, 6),
+            timeout_seconds=timeout_seconds,
+            post_cleanup_timeout_seconds=post_cleanup_timeout_seconds,
+            cleanup_command=cleanup["command"],
+            cleanup_exit_code=cleanup["exit_code"],
+            cleanup_stdout=cleanup["stdout"],
+            cleanup_stderr=cleanup["stderr"],
+            process_tree_before_cleanup=process_tree_before,
+            process_tree_after_cleanup=process_tree_after,
+            drain_completed=drain_completed,
+            drain_timed_out=drain_timed_out,
+            drain_error=drain_error,
         )
 
 
@@ -590,14 +679,166 @@ def _copy_result(result: CodexSessionRunnerResult) -> CodexSessionRunnerResult:
 
 
 def _kill_process_tree(pid: int) -> bool:
+    return _kill_process_tree_result(pid)["cleanup_proven"]
+
+
+def _kill_process_tree_result(pid: int) -> dict[str, Any]:
     if os.name == "nt":
-        completed = subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"], capture_output=True, check=False)
-        return completed.returncode == 0
+        command = ["taskkill", "/PID", str(pid), "/T", "/F"]
+        completed = subprocess.run(command, capture_output=True, check=False)
+        return {
+            "cleanup_proven": completed.returncode == 0,
+            "command": command,
+            "exit_code": completed.returncode,
+            "stdout": completed.stdout,
+            "stderr": completed.stderr,
+        }
+    command = ["kill", "-9", str(pid)]
     try:
         os.kill(pid, 9)
-        return True
-    except OSError:
-        return False
+        return {"cleanup_proven": True, "command": command, "exit_code": 0, "stdout": b"", "stderr": b""}
+    except OSError as exc:
+        return {
+            "cleanup_proven": False,
+            "command": command,
+            "exit_code": 1,
+            "stdout": b"",
+            "stderr": str(exc).encode("utf-8", errors="replace"),
+        }
+
+
+def _persist_timeout_evidence(
+    *,
+    evidence_root: str,
+    process: CodexCliProcessResult,
+    request: CodexSessionRunRequest,
+    result: CodexSessionRunnerResult,
+    stream_excerpt_bytes: int,
+) -> list[str]:
+    root = Path(evidence_root)
+    root.mkdir(parents=True, exist_ok=True)
+    stdout_text, stdout_truncated = _stream_excerpt(process.stdout, stream_excerpt_bytes)
+    stderr_text, stderr_truncated = _stream_excerpt(process.stderr, stream_excerpt_bytes)
+    cleanup_stdout_text, cleanup_stdout_truncated = _stream_excerpt(process.cleanup_stdout, stream_excerpt_bytes)
+    cleanup_stderr_text, cleanup_stderr_truncated = _stream_excerpt(process.cleanup_stderr, stream_excerpt_bytes)
+
+    _write_text(root / "stdout_excerpt.txt", stdout_text)
+    _write_text(root / "stderr_excerpt.txt", stderr_text)
+    _write_text(root / "process_tree_before_cleanup.txt", process.process_tree_before_cleanup or "")
+    _write_text(root / "process_tree_after_cleanup.txt", process.process_tree_after_cleanup or "")
+
+    envelope = {
+        "error_code": "CODEX_CLI_TIMEOUT",
+        "run_id": request.run_id,
+        "assignment_id": request.assignment_id,
+        "task_id": request.task_id,
+        "runtime_instance_id": request.runtime_instance_id,
+        "result_candidate_ref": result.result_candidate_ref,
+        "command": _redact_command(process.command),
+        "pid": process.pid,
+        "started_at": process.started_at,
+        "timeout_at": process.timeout_at,
+        "cleanup_started_at": process.cleanup_started_at,
+        "cleanup_ended_at": process.cleanup_ended_at,
+        "ended_at": process.ended_at,
+        "elapsed_seconds": process.elapsed_seconds,
+        "timeout_seconds": process.timeout_seconds,
+        "streams": {
+            "stdout_ref": "stdout_excerpt.txt",
+            "stderr_ref": "stderr_excerpt.txt",
+            "stdout_truncated": stdout_truncated,
+            "stderr_truncated": stderr_truncated,
+            "stdout_bytes": len(process.stdout),
+            "stderr_bytes": len(process.stderr),
+        },
+        "process_tree": {
+            "before_cleanup_ref": "process_tree_before_cleanup.txt",
+            "after_cleanup_ref": "process_tree_after_cleanup.txt",
+        },
+        "cleanup": {
+            "command": process.cleanup_command,
+            "exit_code": process.cleanup_exit_code,
+            "cleanup_proven": process.cleanup_proven,
+            "stdout": cleanup_stdout_text,
+            "stderr": cleanup_stderr_text,
+            "stdout_truncated": cleanup_stdout_truncated,
+            "stderr_truncated": cleanup_stderr_truncated,
+        },
+        "drain": {
+            "completed": process.drain_completed,
+            "timed_out": process.drain_timed_out,
+            "error": process.drain_error,
+            "post_cleanup_timeout_seconds": process.post_cleanup_timeout_seconds,
+        },
+    }
+    _write_text(root / "timeout_envelope.json", json.dumps(envelope, indent=2, sort_keys=True))
+    return [
+        "codex-cli://timeout/envelope",
+        "codex-cli://timeout/stdout-excerpt",
+        "codex-cli://timeout/stderr-excerpt",
+        "codex-cli://timeout/process-tree-before-cleanup",
+        "codex-cli://timeout/process-tree-after-cleanup",
+    ]
+
+
+def _stream_excerpt(data: bytes, limit: int) -> tuple[str, bool]:
+    truncated = len(data) > limit
+    excerpt = data[:limit]
+    text = _decode_process_bytes(excerpt)
+    if truncated:
+        text += f"\n[TRUNCATED after {limit} bytes]\n"
+    return _redact_text(text), truncated
+
+
+def _write_text(path: Path, text: str) -> None:
+    path.write_text(text, encoding="utf-8", errors="replace")
+
+
+def _redact_command(command: list[str]) -> list[str]:
+    return [_redact_text(part) for part in command]
+
+
+def _redact_text(text: str) -> str:
+    patterns = [
+        (r"sk-[A-Za-z0-9]{20,}", "[REDACTED_OPENAI_KEY]"),
+        (r"(?i)(api[_-]?key|token|password|secret)(\s*[=:]\s*)\S+", r"\1\2[REDACTED]"),
+    ]
+    redacted = text
+    for pattern, replacement in patterns:
+        redacted = re.sub(pattern, replacement, redacted)
+    return redacted
+
+
+def _process_tree_snapshot(pid: int) -> str:
+    if os.name == "nt":
+        command = ["tasklist", "/FI", f"PID eq {pid}", "/FO", "LIST"]
+    else:
+        command = ["ps", "-o", "pid,ppid,command", "-p", str(pid)]
+    try:
+        completed = subprocess.run(command, capture_output=True, timeout=5, check=False)
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        return f"PROCESS_TREE_SNAPSHOT_FAILED: {type(exc).__name__}: {exc}"
+    return _decode_process_bytes(completed.stdout + completed.stderr)
+
+
+def _timeout_stdout(exc: subprocess.TimeoutExpired) -> bytes:
+    return _coerce_timeout_bytes(getattr(exc, "stdout", None) or getattr(exc, "output", None))
+
+
+def _timeout_stderr(exc: subprocess.TimeoutExpired) -> bytes:
+    return _coerce_timeout_bytes(getattr(exc, "stderr", None))
+
+
+def _coerce_timeout_bytes(value: Optional[bytes | str]) -> bytes:
+    if value is None:
+        return b""
+    if isinstance(value, bytes):
+        return value
+    return value.encode("utf-8", errors="replace")
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 def _version_sort_key(version: Optional[str]) -> tuple[int, ...]:

@@ -1,0 +1,16 @@
+{
+  "name": "@nexus/codex-sdk-sidecar",
+  "version": "0.0.0-wbs-7.19.13.7",
+  "private": true,
+  "type": "module",
+  "description": "Bounded Nexus Codex SDK sidecar for WBS 7.19.13.7",
+  "license": "UNLICENSED",
+  "scripts": {
+    "test": "node --test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openai/codex-sdk": "0.135.0"
+  },
+  "devDependencies": {}
+}
