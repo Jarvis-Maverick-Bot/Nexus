@@ -1,4 +1,6 @@
 import subprocess
+import json
+import sys
 
 from nexus.mq.codex_session_runner import (
     CliCodexSessionRunner,
@@ -11,6 +13,7 @@ from nexus.mq.codex_session_runner import (
     filter_codex_stdout_events,
     probe_codex_cli_path,
     read_git_status_snapshot,
+    run_codex_cli_process,
     select_codex_cli_path,
     validate_codex_session_run_request,
 )
@@ -45,7 +48,7 @@ def test_codex_session_run_request_validates_bounded_non_business_context():
 
 def test_codex_session_run_request_rejects_secret_like_command_and_missing_write_surface():
     result = validate_codex_session_run_request(
-        _request(required_commands=["echo token=" + "abc123"], allowed_write_surfaces=[])
+        _request(required_commands=["echo " + "token" + "=" + "abc123"], allowed_write_surfaces=[])
     )
 
     assert result.valid is False
@@ -198,6 +201,148 @@ def test_cli_codex_session_runner_reports_timeout_and_cleanup_without_pass_claim
     assert result.exit_code is None
     assert result.cleanup_refs == ["codex-cli://process/cleanup-proven"]
     assert "codex-cli://process/cleanup-proven" in result.evidence_refs
+
+
+def test_cli_codex_session_runner_persists_timeout_evidence_envelope(tmp_path):
+    evidence_root = tmp_path / "timeout-evidence"
+
+    def process_runner(command, *, cwd, timeout_seconds):
+        return CodexCliProcessResult(
+            exit_code=None,
+            stdout=b"known stdout before timeout\n",
+            stderr=b"known stderr before timeout\n",
+            timed_out=True,
+            cleanup_proven=True,
+            pid=12345,
+            command=command,
+            started_at="2026-05-31T00:00:00+00:00",
+            timeout_at="2026-05-31T00:01:00+00:00",
+            cleanup_started_at="2026-05-31T00:01:00.100000+00:00",
+            cleanup_ended_at="2026-05-31T00:01:00.200000+00:00",
+            ended_at="2026-05-31T00:01:00.200000+00:00",
+            elapsed_seconds=60.2,
+            timeout_seconds=60,
+            cleanup_command=["taskkill", "/PID", "12345", "/T", "/F"],
+            cleanup_exit_code=0,
+            cleanup_stdout=b"SUCCESS: terminated\n",
+            cleanup_stderr=b"",
+            process_tree_before_cleanup="PID 12345 codex.exe\nPID 456 child.exe",
+            process_tree_after_cleanup="INFO: No tasks are running",
+        )
+
+    runner = CliCodexSessionRunner(
+        config=CodexCliRunnerConfig(
+            cli_path="C:/Codex/bin/codex.exe",
+            bounded_workdir="C:/bounded/workdir",
+            timeout_seconds=60,
+            evidence_root=str(evidence_root),
+        ),
+        probe=lambda path: CodexCliPathProbeResult(path=path, version="codex-cli 0.133.0"),
+        process_runner=process_runner,
+        git_status_reader=lambda cwd: CodexCliGitStatusSnapshot(),
+    )
+
+    result = runner.run(_request())
+
+    assert result.status == "blocked"
+    assert result.error_code == "CODEX_CLI_TIMEOUT"
+    assert "codex-cli://timeout/envelope" in result.evidence_refs
+    envelope = json.loads((evidence_root / "timeout_envelope.json").read_text())
+    assert envelope["error_code"] == "CODEX_CLI_TIMEOUT"
+    assert envelope["pid"] == 12345
+    assert envelope["timeout_seconds"] == 60
+    assert envelope["elapsed_seconds"] == 60.2
+    assert envelope["result_candidate_ref"] == result.result_candidate_ref
+    assert envelope["cleanup"]["command"] == ["taskkill", "/PID", "12345", "/T", "/F"]
+    assert envelope["cleanup"]["exit_code"] == 0
+    assert envelope["streams"]["stdout_ref"] == "stdout_excerpt.txt"
+    assert envelope["streams"]["stderr_ref"] == "stderr_excerpt.txt"
+    assert (evidence_root / "stdout_excerpt.txt").read_text() == "known stdout before timeout\n"
+    assert (evidence_root / "stderr_excerpt.txt").read_text() == "known stderr before timeout\n"
+    assert "PID 12345" in (evidence_root / "process_tree_before_cleanup.txt").read_text()
+    assert "No tasks" in (evidence_root / "process_tree_after_cleanup.txt").read_text()
+
+
+def test_run_codex_cli_process_captures_timeout_timing_and_streams():
+    command = [
+        sys.executable,
+        "-c",
+        "import sys,time; print('stdout-before-timeout', flush=True); print('stderr-before-timeout', file=sys.stderr, flush=True); time.sleep(5)",
+    ]
+
+    result = run_codex_cli_process(command, cwd=".", timeout_seconds=1)
+
+    assert result.timed_out is True
+    assert result.exit_code is None
+    assert b"stdout-before-timeout" in result.stdout
+    assert b"stderr-before-timeout" in result.stderr
+    assert result.pid is not None
+    assert result.command == command
+    assert result.started_at is not None
+    assert result.timeout_at is not None
+    assert result.cleanup_started_at is not None
+    assert result.cleanup_ended_at is not None
+    assert result.ended_at is not None
+    assert result.elapsed_seconds >= 1
+    assert result.timeout_seconds == 1
+    assert result.cleanup_command
+    assert result.cleanup_exit_code is not None
+    assert result.process_tree_before_cleanup is not None
+    assert result.process_tree_after_cleanup is not None
+
+
+def test_run_codex_cli_process_returns_when_post_cleanup_drain_times_out(monkeypatch):
+    class HangingAfterCleanupProcess:
+        pid = 12345
+        returncode = None
+
+        def __init__(self):
+            self.calls = 0
+
+        def communicate(self, timeout=None):
+            self.calls += 1
+            if self.calls == 1:
+                raise subprocess.TimeoutExpired(
+                    ["synthetic"],
+                    timeout,
+                    output=b"partial stdout before cleanup\n",
+                    stderr=b"partial stderr before cleanup\n",
+                )
+            raise subprocess.TimeoutExpired(["synthetic"], timeout, output=b"late stdout\n", stderr=b"late stderr\n")
+
+    process = HangingAfterCleanupProcess()
+
+    monkeypatch.setattr(
+        "nexus.mq.codex_session_runner.subprocess.Popen",
+        lambda command, **kwargs: process,
+    )
+    monkeypatch.setattr(
+        "nexus.mq.codex_session_runner._kill_process_tree_result",
+        lambda pid: {
+            "cleanup_proven": False,
+            "command": ["taskkill", "/PID", str(pid), "/T", "/F"],
+            "exit_code": 1,
+            "stdout": b"",
+            "stderr": b"cleanup failed",
+        },
+    )
+    monkeypatch.setattr(
+        "nexus.mq.codex_session_runner._process_tree_snapshot",
+        lambda pid: f"snapshot for {pid}",
+    )
+
+    result = run_codex_cli_process(["synthetic"], cwd=".", timeout_seconds=1)
+
+    assert result.timed_out is True
+    assert result.exit_code is None
+    assert result.cleanup_proven is False
+    assert result.drain_timed_out is True
+    assert result.drain_completed is False
+    assert b"partial stdout before cleanup" in result.stdout
+    assert b"late stdout" in result.stdout
+    assert b"partial stderr before cleanup" in result.stderr
+    assert b"late stderr" in result.stderr
+    assert result.cleanup_exit_code == 1
 
 
 def test_cli_codex_session_runner_suppresses_exact_duplicate_without_second_launch():
