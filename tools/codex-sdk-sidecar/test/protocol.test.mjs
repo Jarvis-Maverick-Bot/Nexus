@@ -25,6 +25,22 @@ test("validateBridgeRequest accepts bounded non-business request", () => {
   assert.match(buildSdkPrompt(request), /not a Business Command/);
 });
 
+test("buildSdkPrompt constrains minimal non-business probe contract", () => {
+  const prompt = buildSdkPrompt({
+    run_id: "run-minimal-001",
+    assignment_id: "assign-minimal-001",
+    prompt_contract: "minimal_non_business_probe",
+  });
+
+  assert.match(prompt, /Do not use tools/);
+  assert.match(prompt, /Do not read files/);
+  assert.match(prompt, /Do not launch a nested sidecar/);
+  assert.match(prompt, /Return exactly one JSON object and no prose/);
+  assert.match(prompt, /"sdk_transport_probe":"minimal"/);
+  assert.doesNotMatch(prompt, /Required commands:/);
+  assert.doesNotMatch(prompt, /Evidence requirements:/);
+});
+
 test("validateBridgeRequest rejects business completion and secret-like values", () => {
   const errors = validateBridgeRequest({
     schema_version: "4.19.codex.sdk_bridge_request.v1",

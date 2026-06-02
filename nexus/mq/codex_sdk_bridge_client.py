@@ -42,6 +42,8 @@ class CodexSdkBridgeClientConfig:
     live_sdk_authorized: bool = False
     codex_path_override: Optional[str] = None
     reviewed_codex_cli_versions: list[str] = field(default_factory=list)
+    reviewed_codex_cli_paths: list[str] = field(default_factory=list)
+    prompt_contract: Optional[str] = None
 
 
 @dataclass
@@ -79,6 +81,11 @@ class CodexSdkBridgeResult:
     stderr_text: str = ""
     thread_id: Optional[str] = None
     turn_id: Optional[str] = None
+    sidecar_process_status: str = "not_started"
+    sdk_transport_status: str = "not_classified"
+    inner_codex_command_runner_status: str = "not_classified"
+    nexus_command_execution_status: str = "not_classified"
+    final_result_candidate_status: str = "not_classified"
 
 
 class CodexSdkBridgeClient:
@@ -185,9 +192,12 @@ def _request_payload(request: CodexSessionRunRequest, config: CodexSdkBridgeClie
         "not_business_completion": request.not_business_completion,
         "live_sdk_authorized": config.live_sdk_authorized,
         "reviewed_codex_cli_versions": list(config.reviewed_codex_cli_versions),
+        "reviewed_codex_cli_paths": list(config.reviewed_codex_cli_paths),
     }
     if config.codex_path_override:
         payload["codex_path_override"] = config.codex_path_override
+    if config.prompt_contract:
+        payload["prompt_contract"] = config.prompt_contract
     return payload
 
 
@@ -223,11 +233,13 @@ def _build_result(
     stderr_text = stderr.decode("utf-8", errors="replace")
     events, parse_errors = _parse_jsonl_events(stdout_text)
     final_result = _final_result(events)
+    final_result_error_code = final_result.get("error_code") if isinstance(final_result.get("error_code"), str) else None
     thread_id = _first_value(events, "thread_id") or final_result.get("thread_id")
     turn_id = _first_value(events, "turn_id") or final_result.get("turn_id")
     errors = list(parse_errors)
-    if error_code:
-        errors.append(error_code)
+    effective_error_code = error_code or final_result_error_code
+    if effective_error_code:
+        errors.append(effective_error_code)
     evidence_refs = ["sdk-bridge://events/jsonl"]
     if stderr:
         evidence_refs.append("sdk-bridge://stderr")
@@ -241,7 +253,7 @@ def _build_result(
         final_result=final_result,
         evidence_refs=_dedupe(evidence_refs),
         errors=_dedupe(errors),
-        error_code=error_code,
+        error_code=effective_error_code,
         timed_out=timed_out,
         pid=pid,
         command=list(command),
@@ -269,6 +281,11 @@ def _build_result(
         stderr_text=stderr_text,
         thread_id=thread_id,
         turn_id=turn_id,
+        sidecar_process_status=_sidecar_process_status(exit_code=exit_code, timed_out=timed_out, error_code=error_code),
+        sdk_transport_status=_string_value(final_result, "sdk_transport_status") or _string_value(final_result, "status") or "not_classified",
+        inner_codex_command_runner_status=_string_value(final_result, "inner_codex_command_runner_status") or "not_classified",
+        nexus_command_execution_status=_string_value(final_result, "nexus_command_execution_status") or "not_classified",
+        final_result_candidate_status=_string_value(final_result, "final_result_candidate_status") or _string_value(final_result, "status") or "not_classified",
     )
 
 
@@ -305,6 +322,25 @@ def _first_value(events: list[dict[str, Any]], key: str) -> Optional[str]:
     return None
 
 
+def _string_value(payload: dict[str, Any], key: str) -> Optional[str]:
+    value = payload.get(key)
+    if isinstance(value, str) and value:
+        return value
+    return None
+
+
+def _sidecar_process_status(*, exit_code: Optional[int], timed_out: bool, error_code: Optional[str]) -> str:
+    if timed_out:
+        return "timeout"
+    if error_code in {"CODEX_SDK_SIDECAR_SUBPROCESS_NOT_FOUND", "CODEX_SDK_SIDECAR_SUBPROCESS_ERROR"}:
+        return "failed_to_start"
+    if exit_code == 0:
+        return "exited_zero"
+    if exit_code is None:
+        return "not_available"
+    return "exited_nonzero"
+
+
 def _persist_sdk_bridge_evidence(
     config: CodexSdkBridgeClientConfig,
     request: CodexSessionRunRequest,
@@ -328,6 +364,11 @@ def _persist_sdk_bridge_evidence(
         "exit_code": result.exit_code,
         "error_code": result.error_code,
         "timed_out": result.timed_out,
+        "sidecar_process_status": result.sidecar_process_status,
+        "sdk_transport_status": result.sdk_transport_status,
+        "inner_codex_command_runner_status": result.inner_codex_command_runner_status,
+        "nexus_command_execution_status": result.nexus_command_execution_status,
+        "final_result_candidate_status": result.final_result_candidate_status,
         "started_at": result.started_at,
         "timeout_at": result.timeout_at,
         "cleanup_started_at": result.cleanup_started_at,

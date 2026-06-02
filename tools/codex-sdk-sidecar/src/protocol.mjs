@@ -38,6 +38,9 @@ export function validateBridgeRequest(request) {
 }
 
 export function buildSdkPrompt(request) {
+  if (request.prompt_contract === "minimal_non_business_probe") {
+    return buildMinimalNonBusinessProbePrompt(request);
+  }
   return [
     `Run ID: ${request.run_id}`,
     `Assignment ID: ${request.assignment_id}`,
@@ -48,6 +51,44 @@ export function buildSdkPrompt(request) {
     `Required commands: ${(request.required_commands || []).join("; ")}`,
     `Evidence requirements: ${(request.evidence_requirements || []).join("; ")}`,
     `No-go scope: ${(request.no_go_scope || []).join("; ")}`,
+  ].join("\n");
+}
+
+function buildMinimalNonBusinessProbePrompt(request) {
+  return [
+    "Nexus SDK bridge minimal non-business probe.",
+    "",
+    "Hard bounds:",
+    "- Do not use tools.",
+    "- Do not run shell commands.",
+    "- Do not read files, including skill files or repository files.",
+    "- Do not inspect the repository.",
+    "- Do not launch a nested sidecar, harness, CLI, MCP server, or Codex process.",
+    "- Do not write files.",
+    "- Do not perform Business Command, production, or private-agent work.",
+    "- Do not claim PASS, runtime promotion, or live-readiness.",
+    "",
+    "Return exactly one JSON object and no prose.",
+    "The JSON object must contain:",
+    "- run_id",
+    "- assignment_id",
+    "- status",
+    "- not_business_completion",
+    "- sdk_transport_probe",
+    "- message",
+    "",
+    `Use run_id: ${request.run_id}`,
+    `Use assignment_id: ${request.assignment_id}`,
+    "",
+    "Expected JSON:",
+    JSON.stringify({
+      run_id: request.run_id,
+      assignment_id: request.assignment_id,
+      status: "completed_execution",
+      not_business_completion: true,
+      sdk_transport_probe: "minimal",
+      message: "SDK bridge minimal non-business probe response generated without tool use.",
+    }),
   ].join("\n");
 }
 

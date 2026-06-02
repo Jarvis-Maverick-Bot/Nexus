@@ -91,8 +91,9 @@ class SdkCodexSessionRunner:
         bridge = self.bridge_runner(request)
         post_status = self.git_status_reader(self.config.bounded_workdir)
         errors = list(bridge.errors)
-        if bridge.error_code:
-            errors.append(bridge.error_code)
+        bridge_error_code = bridge.error_code or _bridge_final_error_code(bridge)
+        if bridge_error_code:
+            errors.append(bridge_error_code)
         elif bridge.exit_code not in (0, None):
             errors.append("CODEX_SDK_SIDECAR_NONZERO_EXIT")
         changed_file_refs = list(post_status.changed_file_refs)
@@ -133,6 +134,11 @@ class SdkCodexSessionRunner:
             drain_refs=drain_refs,
             offline_refs=offline_refs,
             result_candidate_ref=_result_candidate_ref(request, status),
+            sidecar_process_status=bridge.sidecar_process_status,
+            sdk_transport_status=bridge.sdk_transport_status,
+            inner_codex_command_runner_status=bridge.inner_codex_command_runner_status,
+            nexus_command_execution_status=bridge.nexus_command_execution_status,
+            final_result_candidate_status=bridge.final_result_candidate_status,
         )
         self._assignment_results[request.assignment_id] = (fingerprint, result)
         return result
@@ -145,6 +151,13 @@ def _bridge_status(bridge: CodexSdkBridgeResult) -> str:
     if bridge.error_code or bridge.timed_out or bridge.exit_code not in (0, None):
         return "blocked"
     return "completed_execution"
+
+
+def _bridge_final_error_code(bridge: CodexSdkBridgeResult) -> Optional[str]:
+    error_code = bridge.final_result.get("error_code")
+    if isinstance(error_code, str) and error_code:
+        return error_code
+    return None
 
 
 def _request_fingerprint(request: CodexSessionRunRequest) -> str:

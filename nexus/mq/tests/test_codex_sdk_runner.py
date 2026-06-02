@@ -107,6 +107,43 @@ def test_sdk_runner_fails_closed_on_timeout_from_sidecar():
     assert "sdk-bridge://timeout/envelope" in result.evidence_refs
 
 
+def test_sdk_runner_propagates_inner_sdk_command_runner_failure():
+    runner = SdkCodexSessionRunner(
+        config=CodexSdkRunnerConfig(bounded_workdir="C:/bounded/workdir"),
+        bridge_runner=lambda request: CodexSdkBridgeResult(
+            exit_code=0,
+            sidecar_process_status="exited_zero",
+            sdk_transport_status="blocked",
+            inner_codex_command_runner_status="blocked",
+            nexus_command_execution_status="not_started",
+            final_result_candidate_status="blocked",
+            final_result={
+                "status": "blocked",
+                "error_code": "CODEX_SDK_INNER_COMMAND_RUNNER_FAILED",
+                "sdk_transport_status": "blocked",
+                "inner_codex_command_runner_status": "blocked",
+                "nexus_command_execution_status": "not_started",
+                "final_result_candidate_status": "blocked",
+            },
+            evidence_refs=["sdk-bridge://result", "sdk-bridge://events/jsonl"],
+        ),
+        git_status_reader=lambda cwd: CodexCliGitStatusSnapshot(),
+    )
+
+    result = runner.run(_request())
+
+    assert result.status == "blocked"
+    assert result.exit_code == 0
+    assert result.error_code == "CODEX_SDK_INNER_COMMAND_RUNNER_FAILED"
+    assert result.errors == ["CODEX_SDK_INNER_COMMAND_RUNNER_FAILED"]
+    assert result.sidecar_process_status == "exited_zero"
+    assert result.sdk_transport_status == "blocked"
+    assert result.inner_codex_command_runner_status == "blocked"
+    assert result.nexus_command_execution_status == "not_started"
+    assert result.final_result_candidate_status == "blocked"
+    assert result.result_candidate_ref == "codex-result-candidate://run-sdk-001/assign-sdk-001/blocked"
+
+
 def test_sdk_runner_quarantines_disallowed_writes_after_sidecar_result():
     calls = {"count": 0}
 

@@ -68,6 +68,11 @@ class CodexSessionRunnerResult:
     drain_refs: list[str] = field(default_factory=list)
     offline_refs: list[str] = field(default_factory=list)
     result_candidate_ref: Optional[str] = None
+    sidecar_process_status: str = "not_applicable"
+    sdk_transport_status: str = "not_applicable"
+    inner_codex_command_runner_status: str = "not_applicable"
+    nexus_command_execution_status: str = "not_applicable"
+    final_result_candidate_status: str = "not_applicable"
 
 
 class CodexSessionRunner(Protocol):
@@ -675,6 +680,11 @@ def _copy_result(result: CodexSessionRunnerResult) -> CodexSessionRunnerResult:
         drain_refs=list(result.drain_refs),
         offline_refs=list(result.offline_refs),
         result_candidate_ref=result.result_candidate_ref,
+        sidecar_process_status=result.sidecar_process_status,
+        sdk_transport_status=result.sdk_transport_status,
+        inner_codex_command_runner_status=result.inner_codex_command_runner_status,
+        nexus_command_execution_status=result.nexus_command_execution_status,
+        final_result_candidate_status=result.final_result_candidate_status,
     )
 
 

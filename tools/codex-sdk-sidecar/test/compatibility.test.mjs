@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync } from "node:fs";
-import { cp, mkdir, writeFile } from "node:fs/promises";
+import { chmod, cp, mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -112,6 +112,68 @@ test("runtime compatibility fails closed when evidence cannot be written", async
   assert.equal(result.error_code, "CODEX_SDK_RUNTIME_COMPATIBILITY_EVIDENCE_FAILED");
 });
 
+test("runtime compatibility requires reviewed codex path override for live transport", async () => {
+  const root = await fixtureRoot();
+  const evidencePath = join(root, "runtime_compatibility_check.json");
+
+  const result = await runRuntimeCompatibilityCheck({
+    packageRoot: root,
+    evidencePath,
+    sdkModule: { Codex: GoodCodex },
+    sidecarProtocolVersion: "4.19.codex.sdk_sidecar.v1",
+    requireCodexPathOverride: true,
+  });
+
+  assert.equal(result.ok, false);
+  assert.equal(result.error_code, "CODEX_SDK_CODEX_PATH_OVERRIDE_REQUIRED");
+  const evidence = JSON.parse(readFileSync(evidencePath, "utf8"));
+  assert.equal(evidence.codex_app.require_codex_path_override, true);
+  assert.equal(evidence.codex_app.codex_path_override, null);
+});
+
+test("runtime compatibility fails closed on unreviewed codex path override", async () => {
+  const root = await fixtureRoot();
+  const codexPath = await fakeCodex(root, "codex-cli 0.130.0-alpha.5");
+
+  const result = await runRuntimeCompatibilityCheck({
+    packageRoot: root,
+    evidencePath: join(root, "runtime_compatibility_check.json"),
+    sdkModule: { Codex: GoodCodex },
+    sidecarProtocolVersion: "4.19.codex.sdk_sidecar.v1",
+    requireCodexPathOverride: true,
+    codexPathOverride: codexPath,
+    reviewedCodexCliVersions: ["codex-cli 0.130.0-alpha.5"],
+  });
+
+  assert.equal(result.ok, false);
+  assert.equal(result.error_code, "CODEX_APP_VERSION_MISMATCH");
+});
+
+test("runtime compatibility accepts reviewed codex path override and records diagnostics", async () => {
+  const root = await fixtureRoot();
+  const codexPath = await fakeCodex(root, "codex-cli 0.130.0-alpha.5");
+
+  const result = await runRuntimeCompatibilityCheck({
+    packageRoot: root,
+    evidencePath: join(root, "runtime_compatibility_check.json"),
+    sdkModule: { Codex: GoodCodex },
+    sidecarProtocolVersion: "4.19.codex.sdk_sidecar.v1",
+    requireCodexPathOverride: true,
+    codexPathOverride: codexPath,
+    reviewedCodexCliVersions: ["codex-cli 0.130.0-alpha.5"],
+    reviewedCodexCliPaths: [codexPath],
+  });
+
+  assert.equal(result.ok, true);
+  const evidence = JSON.parse(readFileSync(join(root, "runtime_compatibility_check.json"), "utf8"));
+  assert.equal(evidence.codex_app.reviewed_path_allowed, true);
+  assert.equal(evidence.codex_app.reviewed_version_allowed, true);
+  assert.equal(evidence.codex_app.version, "codex-cli 0.130.0-alpha.5");
+  assert.match(evidence.codex_app.sha256, /^[a-f0-9]{64}$/);
+  assert.equal(evidence.codex_app.command_runner.exists, true);
+  assert.equal(evidence.codex_app.sandbox_setup.exists, true);
+});
+
 async function fixtureRoot(overrides = {}) {
   const root = mkdtempSync(join(tmpdir(), "nexus-sdk-compat-"));
   await cp("tools/codex-sdk-sidecar/package.json", join(root, "package.json"));
@@ -128,4 +190,19 @@ async function fixtureRoot(overrides = {}) {
   }
   await mkdir(join(root, "evidence"), { recursive: true });
   return root;
+}
+
+async function fakeCodex(root, version) {
+  const codexPath = join(root, process.platform === "win32" ? "codex.cmd" : "codex");
+  const commandRunner = join(root, "codex-command-runner.exe");
+  const sandboxSetup = join(root, "codex-windows-sandbox-setup.exe");
+  if (process.platform === "win32") {
+    await writeFile(codexPath, `@echo off\r\necho ${version}\r\n`);
+  } else {
+    await writeFile(codexPath, `#!/bin/sh\necho '${version}'\n`);
+    await chmod(codexPath, 0o755);
+  }
+  await writeFile(commandRunner, "fake command runner");
+  await writeFile(sandboxSetup, "fake sandbox setup");
+  return codexPath;
 }

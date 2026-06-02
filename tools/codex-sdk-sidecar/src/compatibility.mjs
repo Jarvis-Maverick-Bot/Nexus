@@ -1,12 +1,15 @@
 import { createHash } from "node:crypto";
+import { execFile } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
+import { promisify } from "node:util";
 
 export const EXPECTED_SDK_VERSION = "0.135.0";
 export const EXPECTED_TRANSITIVE_CODEX_VERSION = "0.135.0";
 export const EXPECTED_SDK_INTEGRITY =
   "sha512-4FziwR9RmYexAkAUqnWBQRUcFGWpBeBwDJpJKlabnuUXxaKQtBtKMTEYBA27ymn8W6mxxDMmwZC+inw7foFFaA==";
 export const SIDECAR_PROTOCOL_VERSION = "4.19.codex.sdk_sidecar.v1";
+const execFileAsync = promisify(execFile);
 
 export async function runRuntimeCompatibilityCheck({
   packageRoot,
@@ -15,6 +18,8 @@ export async function runRuntimeCompatibilityCheck({
   sidecarProtocolVersion,
   codexPathOverride = null,
   reviewedCodexCliVersions = [],
+  reviewedCodexCliPaths = [],
+  requireCodexPathOverride = false,
   sourceCommitHead = null,
   boundedSourceIdentity = "bounded-untracked-sdk-bridge-source-state",
   sidecarSourceRef = "tools/codex-sdk-sidecar",
@@ -29,6 +34,12 @@ export async function runRuntimeCompatibilityCheck({
     const packageLockBytes = await readFile(`${packageRoot}/package-lock.json`);
     packageJson = JSON.parse(packageJsonBytes.toString("utf8"));
     packageLock = JSON.parse(packageLockBytes.toString("utf8"));
+    const codexApp = await inspectCodexApp({
+      codexPathOverride,
+      reviewedCodexCliVersions,
+      reviewedCodexCliPaths,
+      requireCodexPathOverride,
+    });
     evidence = buildEvidence({
       startedAt,
       packageJson,
@@ -39,6 +50,9 @@ export async function runRuntimeCompatibilityCheck({
       sidecarProtocolVersion,
       codexPathOverride,
       reviewedCodexCliVersions,
+      reviewedCodexCliPaths,
+      requireCodexPathOverride,
+      codexApp,
       sourceCommitHead,
       boundedSourceIdentity,
       sidecarSourceRef,
@@ -83,6 +97,9 @@ function buildEvidence({
   sidecarProtocolVersion,
   codexPathOverride,
   reviewedCodexCliVersions,
+  reviewedCodexCliPaths,
+  requireCodexPathOverride,
+  codexApp,
   sourceCommitHead,
   boundedSourceIdentity,
   sidecarSourceRef,
@@ -129,10 +146,7 @@ function buildEvidence({
       provided: sidecarProtocolVersion || null,
       event_mapping_contract_version: eventMappingContractVersion,
     },
-    codex_app: {
-      codex_path_override: codexPathOverride || null,
-      reviewed_versions: reviewedCodexCliVersions,
-    },
+    codex_app: codexApp,
     compatibility_result: "compatible",
     errors: [],
   };
@@ -178,10 +192,106 @@ function firstCompatibilityError(evidence) {
   if (evidence.sidecar_protocol.provided !== SIDECAR_PROTOCOL_VERSION) {
     return "CODEX_SDK_RUNTIME_COMPATIBILITY_REVIEW_REQUIRED";
   }
-  if (evidence.codex_app.codex_path_override && evidence.codex_app.reviewed_versions.length === 0) {
+  if (evidence.codex_app.require_codex_path_override && !evidence.codex_app.codex_path_override) {
+    return "CODEX_SDK_CODEX_PATH_OVERRIDE_REQUIRED";
+  }
+  if (evidence.codex_app.codex_path_override && !evidence.codex_app.reviewed_path_allowed) {
     return "CODEX_APP_VERSION_MISMATCH";
   }
+  if (evidence.codex_app.codex_path_override && !evidence.codex_app.reviewed_version_allowed) {
+    return "CODEX_APP_VERSION_MISMATCH";
+  }
+  if (evidence.codex_app.codex_path_override && !evidence.codex_app.sha256) {
+    return "CODEX_SDK_RUNTIME_COMPATIBILITY_REVIEW_REQUIRED";
+  }
   return null;
+}
+
+async function inspectCodexApp({
+  codexPathOverride,
+  reviewedCodexCliVersions,
+  reviewedCodexCliPaths,
+  requireCodexPathOverride,
+}) {
+  const normalizedPath = codexPathOverride || null;
+  const evidence = {
+    codex_path_override: normalizedPath,
+    require_codex_path_override: requireCodexPathOverride,
+    reviewed_versions: reviewedCodexCliVersions,
+    reviewed_paths: reviewedCodexCliPaths,
+    reviewed_path_allowed: !normalizedPath ? false : reviewedCodexCliPaths.includes(normalizedPath),
+    version: null,
+    reviewed_version_allowed: false,
+    sha256: null,
+    command_runner: {
+      path: null,
+      exists: false,
+      sha256: null,
+    },
+    sandbox_setup: {
+      path: null,
+      exists: false,
+      sha256: null,
+    },
+  };
+  if (!normalizedPath) {
+    return evidence;
+  }
+  try {
+    const bytes = await readFile(normalizedPath);
+    evidence.sha256 = sha256Hex(bytes);
+  } catch {
+    return evidence;
+  }
+  try {
+    const { stdout } = await runVersionProbe(normalizedPath);
+    evidence.version = stdout.trim();
+    evidence.reviewed_version_allowed = reviewedCodexCliVersions.includes(evidence.version);
+  } catch {
+    evidence.version = null;
+  }
+  const siblingDiagnostics = await inspectSiblingDiagnostics(normalizedPath);
+  evidence.command_runner = siblingDiagnostics.commandRunner;
+  evidence.sandbox_setup = siblingDiagnostics.sandboxSetup;
+  return evidence;
+}
+
+async function runVersionProbe(executablePath) {
+  if (process.platform === "win32" && /\.(cmd|bat)$/i.test(executablePath)) {
+    return execFileAsync(process.env.ComSpec || "cmd.exe", ["/c", executablePath, "--version"], { timeout: 10000 });
+  }
+  return execFileAsync(executablePath, ["--version"], { timeout: 10000 });
+}
+
+async function inspectSiblingDiagnostics(codexPathOverride) {
+  const appDataCommandRunner = join(dirname(codexPathOverride), "codex-command-runner.exe");
+  const appDataSandboxSetup = join(dirname(codexPathOverride), "codex-windows-sandbox-setup.exe");
+  const vendorCommandRunner = join(dirname(codexPathOverride), "..", "codex-resources", "codex-command-runner.exe");
+  const vendorSandboxSetup = join(dirname(codexPathOverride), "..", "codex-resources", "codex-windows-sandbox-setup.exe");
+  return {
+    commandRunner: await firstExistingDiagnostic([appDataCommandRunner, vendorCommandRunner]),
+    sandboxSetup: await firstExistingDiagnostic([appDataSandboxSetup, vendorSandboxSetup]),
+  };
+}
+
+async function firstExistingDiagnostic(paths) {
+  for (const path of paths) {
+    try {
+      const bytes = await readFile(path);
+      return {
+        path,
+        exists: true,
+        sha256: sha256Hex(bytes),
+      };
+    } catch {
+      // keep looking
+    }
+  }
+  return {
+    path: paths[0] || null,
+    exists: false,
+    sha256: null,
+  };
 }
 
 async function writeEvidence(evidencePath, evidence) {

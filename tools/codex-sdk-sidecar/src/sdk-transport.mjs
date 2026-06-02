@@ -40,6 +40,8 @@ export async function runCodexSdkTransport({
     sidecarProtocolVersion: request.sidecar_protocol_version,
     codexPathOverride: request.codex_path_override,
     reviewedCodexCliVersions: request.reviewed_codex_cli_versions || [],
+    reviewedCodexCliPaths: request.reviewed_codex_cli_paths || [],
+    requireCodexPathOverride: request.live_sdk_authorized === true,
     sourceCommitHead: request.source_commit_head || request.source_identity?.source_commit_head || null,
     boundedSourceIdentity:
       request.bounded_source_identity ||
@@ -104,6 +106,17 @@ export async function runCodexSdkTransport({
     emit(result);
     return result;
   } catch (error) {
+    if (hasCompletedTurn(normalizedEvents) && isPostTurnProcessTerminationDiagnostic(error)) {
+      const result = resultFromNormalizedEvents(normalizedEvents);
+      result.compatibility = { ok: compatibility.ok, evidence_path: compatibility.evidence_path };
+      result.post_turn_diagnostic = {
+        status: "observed_after_turn_completed",
+        message: String(error?.message || error),
+      };
+      await persistTransportEvidence(evidenceRoot, request, result, compatibility, rawEvents, normalizedEvents);
+      emit(result);
+      return result;
+    }
     const errorCode = timeoutFired || error?.name === "AbortError" ? "CODEX_SDK_TURN_TIMEOUT" : "CODEX_SDK_TRANSPORT_ERROR";
     const result = blockedResult(errorCode, {
       started_at: startedAt,
@@ -119,6 +132,15 @@ export async function runCodexSdkTransport({
       clearTimeout(timer);
     }
   }
+}
+
+function hasCompletedTurn(events) {
+  return events.some((event) => event?.type === "turn.completed");
+}
+
+function isPostTurnProcessTerminationDiagnostic(error) {
+  const message = String(error?.message || error || "");
+  return /Failed to parse item:/i.test(message) && /SUCCESS:/i.test(message) && /process with PID/i.test(message) && /terminated/i.test(message);
 }
 
 function threadOptions(request) {
@@ -165,6 +187,10 @@ async function persistEnvelope(evidenceRoot, { request, result, compatibility, e
     runtime_instance_id: request.runtime_instance_id,
     status: result.status,
     error_code: result.error_code || null,
+    sdk_transport_status: result.sdk_transport_status || result.status,
+    inner_codex_command_runner_status: result.inner_codex_command_runner_status || "not_classified",
+    nexus_command_execution_status: result.nexus_command_execution_status || "not_classified",
+    final_result_candidate_status: result.final_result_candidate_status || result.status,
     thread_id: result.thread_id || null,
     turn_id: result.turn_id || null,
     compatibility: {
