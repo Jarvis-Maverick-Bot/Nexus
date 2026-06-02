@@ -3,9 +3,12 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { chmod, cp, mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { runRuntimeCompatibilityCheck } from "../src/compatibility.mjs";
+
+const packageRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 
 class GoodCodex {
   startThread() {}
@@ -176,8 +179,8 @@ test("runtime compatibility accepts reviewed codex path override and records dia
 
 async function fixtureRoot(overrides = {}) {
   const root = mkdtempSync(join(tmpdir(), "nexus-sdk-compat-"));
-  await cp("tools/codex-sdk-sidecar/package.json", join(root, "package.json"));
-  await cp("tools/codex-sdk-sidecar/package-lock.json", join(root, "package-lock.json"));
+  await cp(join(packageRoot, "package.json"), join(root, "package.json"));
+  await cp(join(packageRoot, "package-lock.json"), join(root, "package-lock.json"));
   if (overrides.packageDependency) {
     const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
     packageJson.dependencies["@openai/codex-sdk"] = overrides.packageDependency;
