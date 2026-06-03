@@ -11,6 +11,9 @@ RUNTIME_SCOPED_ASSIGNMENT_ALIAS = "nexus.4_19.wbs7_19_14.run-001.jarvis.jarvis-r
 WBS_7_19_15_ASSIGNMENT_SUBJECT = (
     "nexus.4_19.wbs7_19_15.wbs-7-19-15-2-jarvis-business-command-20260603T081653Z.jarvis.assignment"
 )
+THUNDER_ASSIGNMENT_SUBJECT = (
+    "nexus.4_19.wbs7_19_15.wbs-7-19-15-3-thunder-codex-app-business-command-20260603T081653Z.thunder_codex_app.assignment"
+)
 
 
 def _store(tmp_path):
@@ -275,6 +278,34 @@ def test_assignment_publish_accepts_wbs_7_19_15_namespace(tmp_path):
 
     assert result.accepted is True
     assert result.payload["assignment_publish_request"].subject == WBS_7_19_15_ASSIGNMENT_SUBJECT
+
+
+def test_assignment_publish_accepts_thunder_codex_app_agent_subject(tmp_path):
+    dispatch_run_id = "wbs-7-19-15-3-thunder-codex-app-business-command-20260603T081653Z"
+    controller = _controller(tmp_path)
+    create = controller.create_run(
+        decision=_decision(
+            dispatch_packet_ref=f"dispatch-packet://controller-bridge/{dispatch_run_id}",
+            target_agent_id="thunder_codex_app",
+        ),
+        dispatch_run_id=dispatch_run_id,
+        assignment_id="assignment-001",
+        now_at=NOW,
+    )
+    assert create.accepted is True
+    controller.state_store.record_lifecycle_decision(
+        _lifecycle_decision(dispatch_run_id=dispatch_run_id, target_agent_id="thunder_codex_app")
+    )
+    controller.state_store.record_reservation_lease(_lease(dispatch_run_id=dispatch_run_id))
+
+    result = _publish(
+        controller,
+        dispatch_run_id=dispatch_run_id,
+        subject=THUNDER_ASSIGNMENT_SUBJECT,
+    )
+
+    assert result.accepted is True
+    assert result.payload["assignment_publish_request"].subject == THUNDER_ASSIGNMENT_SUBJECT
 
 
 def test_controller_init_not_public_runtime_prerequisite(tmp_path):

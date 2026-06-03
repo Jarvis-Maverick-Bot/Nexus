@@ -11,6 +11,8 @@ CANONICAL_ASSIGNMENT_NAMESPACE = "nexus.4_19.wbs7_19_15"
 LEGACY_ASSIGNMENT_NAMESPACES = ("nexus.4_19.wbs7_19_14",)
 ALLOWED_ASSIGNMENT_NAMESPACES = (CANONICAL_ASSIGNMENT_NAMESPACE, *LEGACY_ASSIGNMENT_NAMESPACES)
 CANONICAL_ASSIGNMENT_AGENT_ID = "jarvis"
+ADDITIONAL_ASSIGNMENT_AGENT_IDS = ("thunder_codex_app",)
+ALLOWED_ASSIGNMENT_AGENT_IDS = (CANONICAL_ASSIGNMENT_AGENT_ID, *ADDITIONAL_ASSIGNMENT_AGENT_IDS)
 
 
 @dataclass
@@ -109,7 +111,7 @@ def _canonical_assignment_subject_errors(subject: str) -> list[str]:
         return [f"ASSIGNMENT_SUBJECT_NOT_CANONICAL: {subject}"]
     if not parts[len(namespace_parts)]:
         return [f"ASSIGNMENT_SUBJECT_NOT_CANONICAL: {subject}"]
-    if parts[len(namespace_parts) + 1] != CANONICAL_ASSIGNMENT_AGENT_ID:
+    if parts[len(namespace_parts) + 1] not in ALLOWED_ASSIGNMENT_AGENT_IDS:
         return [f"ASSIGNMENT_SUBJECT_NOT_CANONICAL: {subject}"]
     if parts[-1] != "assignment":
         return [f"ASSIGNMENT_SUBJECT_NOT_CANONICAL: {subject}"]
@@ -123,7 +125,7 @@ def _is_runtime_scoped_assignment_alias(parts: list[str]) -> bool:
     return (
         len(parts) == len(namespace_parts) + 4
         and bool(parts[len(namespace_parts)])
-        and parts[len(namespace_parts) + 1] == CANONICAL_ASSIGNMENT_AGENT_ID
+        and parts[len(namespace_parts) + 1] in ALLOWED_ASSIGNMENT_AGENT_IDS
         and bool(parts[len(namespace_parts) + 2])
         and parts[-1] == "assignment"
     )

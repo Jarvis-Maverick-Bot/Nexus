@@ -32,6 +32,8 @@ CANONICAL_ASSIGNMENT_NAMESPACE = "nexus.4_19.wbs7_19_15"
 LEGACY_ASSIGNMENT_NAMESPACES = ("nexus.4_19.wbs7_19_14",)
 ALLOWED_ASSIGNMENT_NAMESPACES = (CANONICAL_ASSIGNMENT_NAMESPACE, *LEGACY_ASSIGNMENT_NAMESPACES)
 CANONICAL_ASSIGNMENT_AGENT_ID = "jarvis"
+ADDITIONAL_ASSIGNMENT_AGENT_IDS = ("thunder_codex_app",)
+ALLOWED_ASSIGNMENT_AGENT_IDS = (CANONICAL_ASSIGNMENT_AGENT_ID, *ADDITIONAL_ASSIGNMENT_AGENT_IDS)
 
 
 class ControllerBridgeDispatchController:
@@ -187,7 +189,8 @@ class ControllerBridgeDispatchController:
                 errors.append("ASSIGNMENT_ID_MISMATCH")
         decision = self.state_store.get_lifecycle_decision(lifecycle_decision_id)
         lease = self.state_store.get_reservation_lease(reservation_lease_id)
-        errors.extend(_subject_errors(subject, dispatch_run_id))
+        expected_agent_id = run.target_agent_id if run is not None else None
+        errors.extend(_subject_errors(subject, dispatch_run_id, expected_agent_id=expected_agent_id))
         validation = validate_assignment_publish(
             decision=decision,
             lease=lease,
@@ -287,7 +290,7 @@ class ControllerBridgeDispatchController:
         return ControllerBridgeOperationResult(True, "collect_evidence", payload={"evidence_refs": refs})
 
 
-def _subject_errors(subject: str, dispatch_run_id: str) -> list[str]:
+def _subject_errors(subject: str, dispatch_run_id: str, *, expected_agent_id: str | None = None) -> list[str]:
     errors: list[str] = []
     if not subject:
         errors.append("MISSING_PUBLISH_SUBJECT")
@@ -298,8 +301,11 @@ def _subject_errors(subject: str, dispatch_run_id: str) -> list[str]:
     namespace_parts = _matching_namespace_parts(parts)
     if namespace_parts is None:
         namespace_parts = CANONICAL_ASSIGNMENT_NAMESPACE.split(".")
-    expected_parts = namespace_parts + [dispatch_run_id, CANONICAL_ASSIGNMENT_AGENT_ID, "assignment"]
-    if _is_runtime_scoped_assignment_alias(parts, dispatch_run_id):
+    agent_id = expected_agent_id or CANONICAL_ASSIGNMENT_AGENT_ID
+    if agent_id not in ALLOWED_ASSIGNMENT_AGENT_IDS:
+        errors.append("PUBLISH_SUBJECT_AGENT_NOT_ALLOWED")
+    expected_parts = namespace_parts + [dispatch_run_id, agent_id, "assignment"]
+    if _is_runtime_scoped_assignment_alias(parts, dispatch_run_id, expected_agent_id=agent_id):
         errors.append("PUBLISH_SUBJECT_RUNTIME_ALIAS_DIAGNOSTIC_ONLY")
     elif parts != expected_parts:
         errors.append("PUBLISH_SUBJECT_MALFORMED")
@@ -309,19 +315,26 @@ def _subject_errors(subject: str, dispatch_run_id: str) -> list[str]:
     agent_index = run_index + 1
     if len(parts) <= run_index or parts[run_index] != dispatch_run_id:
         errors.append("PUBLISH_SUBJECT_RUN_MISMATCH")
-    if len(parts) <= agent_index or parts[agent_index] != CANONICAL_ASSIGNMENT_AGENT_ID:
+    if len(parts) <= agent_index or parts[agent_index] != agent_id:
         errors.append("PUBLISH_SUBJECT_AGENT_MISMATCH")
     return dedupe(errors)
 
 
-def _is_runtime_scoped_assignment_alias(parts: list[str], dispatch_run_id: str) -> bool:
+def _is_runtime_scoped_assignment_alias(
+    parts: list[str],
+    dispatch_run_id: str,
+    *,
+    expected_agent_id: str | None = None,
+) -> bool:
     namespace_parts = _matching_namespace_parts(parts)
     if namespace_parts is None:
         return False
+    agent_id = expected_agent_id or CANONICAL_ASSIGNMENT_AGENT_ID
     return (
         len(parts) == len(namespace_parts) + 4
         and parts[len(namespace_parts)] == dispatch_run_id
-        and parts[len(namespace_parts) + 1] == CANONICAL_ASSIGNMENT_AGENT_ID
+        and parts[len(namespace_parts) + 1] == agent_id
+        and agent_id in ALLOWED_ASSIGNMENT_AGENT_IDS
         and bool(parts[len(namespace_parts) + 2])
         and parts[-1] == "assignment"
     )
