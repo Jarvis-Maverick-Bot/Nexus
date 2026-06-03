@@ -28,7 +28,9 @@ from nexus.mq.eligibility_reservation_policy import validate_assignment_publish
 from nexus.mq.runtime_lifecycle_controller import RuntimeEligibilityRequest
 
 
-CANONICAL_ASSIGNMENT_NAMESPACE = "nexus.4_19.wbs7_19_14"
+CANONICAL_ASSIGNMENT_NAMESPACE = "nexus.4_19.wbs7_19_15"
+LEGACY_ASSIGNMENT_NAMESPACES = ("nexus.4_19.wbs7_19_14",)
+ALLOWED_ASSIGNMENT_NAMESPACES = (CANONICAL_ASSIGNMENT_NAMESPACE, *LEGACY_ASSIGNMENT_NAMESPACES)
 CANONICAL_ASSIGNMENT_AGENT_ID = "jarvis"
 
 
@@ -293,7 +295,9 @@ def _subject_errors(subject: str, dispatch_run_id: str) -> list[str]:
     if "*" in subject or ">" in subject:
         errors.append("PUBLISH_SUBJECT_CANNOT_CONTAIN_WILDCARD")
     parts = subject.split(".")
-    namespace_parts = CANONICAL_ASSIGNMENT_NAMESPACE.split(".")
+    namespace_parts = _matching_namespace_parts(parts)
+    if namespace_parts is None:
+        namespace_parts = CANONICAL_ASSIGNMENT_NAMESPACE.split(".")
     expected_parts = namespace_parts + [dispatch_run_id, CANONICAL_ASSIGNMENT_AGENT_ID, "assignment"]
     if _is_runtime_scoped_assignment_alias(parts, dispatch_run_id):
         errors.append("PUBLISH_SUBJECT_RUNTIME_ALIAS_DIAGNOSTIC_ONLY")
@@ -311,15 +315,24 @@ def _subject_errors(subject: str, dispatch_run_id: str) -> list[str]:
 
 
 def _is_runtime_scoped_assignment_alias(parts: list[str], dispatch_run_id: str) -> bool:
-    namespace_parts = CANONICAL_ASSIGNMENT_NAMESPACE.split(".")
+    namespace_parts = _matching_namespace_parts(parts)
+    if namespace_parts is None:
+        return False
     return (
         len(parts) == len(namespace_parts) + 4
-        and parts[: len(namespace_parts)] == namespace_parts
         and parts[len(namespace_parts)] == dispatch_run_id
         and parts[len(namespace_parts) + 1] == CANONICAL_ASSIGNMENT_AGENT_ID
         and bool(parts[len(namespace_parts) + 2])
         and parts[-1] == "assignment"
     )
+
+
+def _matching_namespace_parts(parts: list[str]) -> list[str] | None:
+    for namespace in ALLOWED_ASSIGNMENT_NAMESPACES:
+        namespace_parts = namespace.split(".")
+        if parts[: len(namespace_parts)] == namespace_parts:
+            return namespace_parts
+    return None
 
 
 def _digest(*parts: str) -> str:

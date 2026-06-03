@@ -13,7 +13,9 @@ from nexus.mq.agent_registry_events import secret_material_errors
 RESIDENT_CONTROLLER_CONFIG_SCHEMA_VERSION = "resident_controller.v0.2"
 ALLOWED_LAUNCH_MODES = {"disabled", "bounded_uat"}
 ALLOWED_COMMANDS = {"controller_init", "bounded_assignment", "duplicate_replay", "drain"}
-REQUIRED_NAMESPACE = "nexus.4_19.wbs7_19_14"
+REQUIRED_NAMESPACE = "nexus.4_19.wbs7_19_15"
+LEGACY_NAMESPACES = ("nexus.4_19.wbs7_19_14",)
+ALLOWED_NAMESPACES = (REQUIRED_NAMESPACE, *LEGACY_NAMESPACES)
 
 
 @dataclass
@@ -64,7 +66,7 @@ def validate_resident_controller_config(config: dict[str, Any]) -> ResidentContr
         errors,
     )
 
-    if subjects.get("namespace") != REQUIRED_NAMESPACE:
+    if subjects.get("namespace") not in ALLOWED_NAMESPACES:
         errors.append(f"UNSUPPORTED_SUBJECT_NAMESPACE: {subjects.get('namespace')}")
     if not subjects.get("subscribe_allowlist"):
         errors.append("MISSING_SUBSCRIBE_ALLOWLIST")

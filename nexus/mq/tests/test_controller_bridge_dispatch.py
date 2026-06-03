@@ -8,6 +8,9 @@ from nexus.mq.eligibility_reservation_policy import RuntimeEligibilityDecision, 
 NOW = "2026-05-27T12:00:00+00:00"
 CANONICAL_ASSIGNMENT_SUBJECT = "nexus.4_19.wbs7_19_14.run-001.jarvis.assignment"
 RUNTIME_SCOPED_ASSIGNMENT_ALIAS = "nexus.4_19.wbs7_19_14.run-001.jarvis.jarvis-runtime-001.assignment"
+WBS_7_19_15_ASSIGNMENT_SUBJECT = (
+    "nexus.4_19.wbs7_19_15.wbs-7-19-15-2-jarvis-business-command-20260603T081653Z.jarvis.assignment"
+)
 
 
 def _store(tmp_path):
@@ -249,6 +252,29 @@ def test_assignment_publish_with_valid_lease_creates_request(tmp_path):
     assert result.accepted is True
     assert result.payload["assignment_publish_request"].lifecycle_decision_id == "runtime-decision-001"
     assert result.payload["assignment_publish_request"].reservation_lease_id == "lease-001"
+
+
+def test_assignment_publish_accepts_wbs_7_19_15_namespace(tmp_path):
+    dispatch_run_id = "wbs-7-19-15-2-jarvis-business-command-20260603T081653Z"
+    controller = _controller(tmp_path)
+    create = controller.create_run(
+        decision=_decision(dispatch_packet_ref=f"dispatch-packet://controller-bridge/{dispatch_run_id}"),
+        dispatch_run_id=dispatch_run_id,
+        assignment_id="assignment-001",
+        now_at=NOW,
+    )
+    assert create.accepted is True
+    controller.state_store.record_lifecycle_decision(_lifecycle_decision(dispatch_run_id=dispatch_run_id))
+    controller.state_store.record_reservation_lease(_lease(dispatch_run_id=dispatch_run_id))
+
+    result = _publish(
+        controller,
+        dispatch_run_id=dispatch_run_id,
+        subject=WBS_7_19_15_ASSIGNMENT_SUBJECT,
+    )
+
+    assert result.accepted is True
+    assert result.payload["assignment_publish_request"].subject == WBS_7_19_15_ASSIGNMENT_SUBJECT
 
 
 def test_controller_init_not_public_runtime_prerequisite(tmp_path):

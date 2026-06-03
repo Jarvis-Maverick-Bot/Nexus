@@ -23,6 +23,8 @@ RUN_ID = "uat-7-19-14-phase3-20260527T151120Z-nova"
 BASE_SUBJECT = f"nexus.4_19.wbs7_19_14.{RUN_ID}.jarvis"
 CANONICAL_ASSIGNMENT_SUBJECT = f"{BASE_SUBJECT}.assignment"
 RUNTIME_SCOPED_ASSIGNMENT_ALIAS = f"{BASE_SUBJECT}.jarvis-runtime-001.assignment"
+WBS_7_19_15_RUN_ID = "wbs-7-19-15-2-jarvis-business-command-20260603T081653Z"
+WBS_7_19_15_ASSIGNMENT_SUBJECT = f"nexus.4_19.wbs7_19_15.{WBS_7_19_15_RUN_ID}.jarvis.assignment"
 
 
 def _write_profile(tmp_path, **overrides):
@@ -162,6 +164,19 @@ def test_candidate_await_assignment_only_accepts_allowlisted_subjects(tmp_path):
 
     assert result.accepted is False
     assert "ASSIGNMENT_SUBJECT_NOT_ALLOWED: nexus.other.assignment.001" in result.errors
+
+
+def test_candidate_await_assignment_accepts_wbs_7_19_15_subject(tmp_path):
+    broker = InMemoryAssignmentBroker(assignments=[_assignment(assignment_subject=WBS_7_19_15_ASSIGNMENT_SUBJECT)])
+    api = _connect_ready_api(tmp_path, broker=broker)
+    session = api.session_store.load()
+    session.allowed_subject_patterns = [WBS_7_19_15_ASSIGNMENT_SUBJECT]
+    api.session_store.save(session)
+
+    result = api.await_assignment(tmp_path / "session.json")
+
+    assert result.accepted is True
+    assert result.payload["assignment"]["assignment_subject"] == WBS_7_19_15_ASSIGNMENT_SUBJECT
 
 
 def test_candidate_await_assignment_rejects_runtime_scoped_alias_before_candidate_output(tmp_path):
