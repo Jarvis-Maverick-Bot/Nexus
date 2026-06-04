@@ -128,6 +128,52 @@ class AssignmentPublishRequest:
 
 
 @dataclass
+class DuplicateReplayPayload:
+    schema_version: str
+    replay_id: str
+    replay_kind: str
+    original_assignment_subject: str
+    duplicate_assignment_subject: str
+    assignment_id: str
+    dispatch_run_id: str
+    idempotency_key: str
+    lifecycle_decision_id: str
+    reservation_lease_id: str
+    runtime_instance_id: str
+    target_agent_id: str
+    original_message_id: str
+    duplicate_message_id: str
+    original_payload_hash: str
+    duplicate_payload_hash: str
+    expected_action: str
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class CleanRunIdentity:
+    wbs_ref: str
+    run_id: str
+    dispatch_run_id: str
+    assignment_id: str
+    idempotency_key: str
+    lifecycle_decision_id: str
+    reservation_lease_id: str
+    runtime_instance_id: str
+    package_name: str
+    package_version: str
+    source_authority_hash: str
+    correction_parent_package: str = ""
+    correction_reason: str = ""
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
 class RuntimeResultCandidate:
     dispatch_run_id: str
     assignment_id: str

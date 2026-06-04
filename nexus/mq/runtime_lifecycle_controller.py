@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
+import json
 from typing import Any
 
 from nexus.mq.eligibility_reservation_policy import RuntimeEligibilityDecision, RuntimeReservationLease
@@ -120,6 +121,41 @@ class RuntimeLifecycleRecord:
     evidence_refs: list[str] = field(default_factory=list)
     created_at: str = ""
     updated_at: str = ""
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class RunStateSnapshot:
+    snapshot_id: str
+    schema_version: str
+    wbs_ref: str
+    run_id: str
+    dispatch_run_id: str
+    assignment_id: str
+    target_agent_id: str
+    runtime_instance_id: str
+    package_name: str
+    package_version: str
+    package_manifest_hash: str
+    local_state_verdict: str
+    package_verdict: str
+    duplicate_replay_status: str
+    lifecycle_phase: str
+    reservation_lease_status: str
+    clean_run_tuple: dict[str, str]
+    source_authority_refs: list[str]
+    package_manifest_ref: str
+    local_state_ref: str
+    evidence_refs: list[str]
+    correction_refs: list[str]
+    created_at: str
+    observed_at: str
+    stale_after: str
+    snapshot_hash: str
+    stale: bool = False
     not_business_completion: bool = True
 
     def to_dict(self) -> dict[str, Any]:
@@ -416,6 +452,96 @@ class RuntimeLifecycleController:
                 )
         return lease
 
+    def build_run_state_snapshot(
+        self,
+        *,
+        wbs_ref: str,
+        run_id: str,
+        dispatch_run_id: str,
+        assignment_id: str,
+        runtime_instance_id: str,
+        package_name: str,
+        package_version: str,
+        package_manifest_hash: str = "",
+        local_state_verdict: str,
+        package_verdict: str,
+        duplicate_replay_status: str,
+        reservation_lease_status: str = "",
+        idempotency_key: str,
+        lifecycle_decision_id: str,
+        reservation_lease_id: str,
+        package_manifest_ref: str,
+        local_state_ref: str,
+        source_authority_refs: list[str],
+        evidence_refs: list[str],
+        observed_at: str,
+        stale_after: str,
+        correction_refs: list[str] | None = None,
+    ) -> RunStateSnapshot:
+        record = self.get_runtime(runtime_instance_id)
+        snapshot_payload = {
+            "schema_version": "4.19.run_state_snapshot.v1",
+            "wbs_ref": wbs_ref,
+            "run_id": run_id,
+            "dispatch_run_id": dispatch_run_id,
+            "assignment_id": assignment_id,
+            "target_agent_id": record.agent_id,
+            "runtime_instance_id": runtime_instance_id,
+            "package_name": package_name,
+            "package_version": package_version,
+            "package_manifest_hash": package_manifest_hash,
+            "local_state_verdict": local_state_verdict,
+            "package_verdict": package_verdict,
+            "duplicate_replay_status": duplicate_replay_status,
+            "lifecycle_phase": record.lifecycle_state,
+            "reservation_lease_status": reservation_lease_status,
+            "clean_run_tuple": {
+                "wbs_ref": wbs_ref,
+                "run_id": run_id,
+                "dispatch_run_id": dispatch_run_id,
+                "assignment_id": assignment_id,
+                "idempotency_key": idempotency_key,
+                "lifecycle_decision_id": lifecycle_decision_id,
+                "reservation_lease_id": reservation_lease_id,
+                "runtime_instance_id": runtime_instance_id,
+            },
+            "source_authority_refs": list(source_authority_refs),
+            "package_manifest_ref": package_manifest_ref,
+            "local_state_ref": local_state_ref,
+            "evidence_refs": list(evidence_refs),
+            "correction_refs": list(correction_refs or []),
+            "created_at": record.created_at,
+            "stale_after": stale_after,
+            "not_business_completion": True,
+        }
+        snapshot_hash = _stable_json_hash(snapshot_payload)
+        snapshot_id = f"run-state-snapshot-{snapshot_hash[:12]}"
+        stale = _is_stale(stale_after, observed_at)
+        snapshot = RunStateSnapshot(
+            snapshot_id=snapshot_id,
+            observed_at=observed_at,
+            snapshot_hash=snapshot_hash,
+            stale=stale,
+            **snapshot_payload,
+        )
+        if self._state_store is not None:
+            self._state_store.record_run_state_snapshot(snapshot)
+        return snapshot
+
+    def validate_run_state_snapshot_for_package(self, snapshot: RunStateSnapshot, *, now_at: str) -> list[str]:
+        errors: list[str] = []
+        if snapshot.schema_version != "4.19.run_state_snapshot.v1":
+            errors.append("RUN_STATE_SNAPSHOT_SCHEMA_MISMATCH")
+        if snapshot.not_business_completion is not True:
+            errors.append("RUN_STATE_SNAPSHOT_CANNOT_BE_BUSINESS_COMPLETION")
+        if _is_stale(snapshot.stale_after, now_at):
+            errors.append("RUN_STATE_SNAPSHOT_STALE")
+        if snapshot.local_state_verdict != snapshot.package_verdict and not snapshot.correction_refs:
+            errors.append("RUN_STATE_PACKAGE_LOCAL_MISMATCH")
+        if not snapshot.package_manifest_ref:
+            errors.append("MISSING_PACKAGE_MANIFEST_REF")
+        return _dedupe(errors)
+
     def consume_reservation(self, lease_id: str, *, consumed_at: str) -> RuntimeReservationLease:
         lease = self.lease_status(lease_id, now_at=consumed_at)
         if not lease.active or lease.status != "active":
@@ -667,6 +793,17 @@ def _decision(
 def _stable_id(prefix: str, *parts: str) -> str:
     digest = sha256("|".join(str(part) for part in parts).encode("utf-8")).hexdigest()[:16]
     return f"{prefix}-{digest}"
+
+
+def _stable_json_hash(payload: dict[str, Any]) -> str:
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
+    return sha256(encoded).hexdigest()
+
+
+def _is_stale(stale_after: str, now_at: str) -> bool:
+    stale_at = _parse_iso(stale_after)
+    now = _parse_iso(now_at)
+    return stale_at is None or now is None or stale_at <= now
 
 
 def _append_unique(items: list[str], value: str) -> None:

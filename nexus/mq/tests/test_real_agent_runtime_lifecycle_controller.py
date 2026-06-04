@@ -6,6 +6,8 @@ from nexus.mq.runtime_lifecycle_controller import (
     RuntimeLifecyclePolicy,
     RuntimeRegistrationRequest,
 )
+from nexus.mq.controller_bridge_state_store import ControllerBridgeStateStore
+from nexus.mq.durable_state import DurableStateStore
 
 
 NOW = "2026-05-27T07:00:00+00:00"
@@ -72,6 +74,27 @@ def _ready_controller(policy=None):
         accepting_new_work=True,
     )
     return controller
+
+
+def _durable_ready_controller(tmp_path):
+    state_store = ControllerBridgeStateStore(DurableStateStore(str(tmp_path / "run-state.sqlite3")))
+    controller = RuntimeLifecycleController(policy=RuntimeLifecyclePolicy(), state_store=state_store)
+    controller.register_runtime(_registration(), now_at=NOW)
+    controller.submit_readiness(
+        runtime_instance_id="jarvis-runtime-001",
+        startup_packet_ref="startup://jarvis/run-001",
+        readiness_evidence_ref="evidence://jarvis/readiness",
+        startup_packet_expires_at=READY_EXPIRES,
+        now_at=NOW,
+    )
+    controller.record_heartbeat(
+        runtime_instance_id="jarvis-runtime-001",
+        sequence=1,
+        observed_at=NOW,
+        load_score=0.1,
+        accepting_new_work=True,
+    )
+    return controller, state_store
 
 
 def test_runtime_lifecycle_register_ready_heartbeat_idle_flow():
@@ -326,3 +349,154 @@ def test_runtime_expired_reservation_reconciles_capacity_and_allows_new_eligibil
     assert record.active_assignment_ids == []
     assert record.lifecycle_state == "idle"
     assert post_expiry.accepted is True
+
+
+def test_run_state_snapshot_stale_blocks_final_package_label():
+    controller = _ready_controller()
+
+    snapshot = controller.build_run_state_snapshot(
+        wbs_ref="7.19.15.6",
+        run_id="run-001",
+        dispatch_run_id="run-001",
+        assignment_id="assignment-001",
+        runtime_instance_id="jarvis-runtime-001",
+        package_name="package-v0.1",
+        package_version="v0.1",
+        local_state_verdict="ready_for_review",
+        package_verdict="ready_for_review",
+        duplicate_replay_status="suppressed",
+        idempotency_key="idem-001",
+        lifecycle_decision_id="runtime-decision-001",
+        reservation_lease_id="lease-001",
+        package_manifest_ref="manifest://package-v0.1",
+        local_state_ref="local://run-state",
+        source_authority_refs=["review://nova"],
+        evidence_refs=["evidence://run-state"],
+        observed_at="2026-05-27T07:02:01+00:00",
+        stale_after="2026-05-27T07:02:00+00:00",
+    )
+
+    errors = controller.validate_run_state_snapshot_for_package(snapshot, now_at="2026-05-27T07:02:01+00:00")
+
+    assert snapshot.schema_version == "4.19.run_state_snapshot.v1"
+    assert snapshot.stale is True
+    assert "RUN_STATE_SNAPSHOT_STALE" in errors
+
+
+def test_package_local_verdict_mismatch_requires_reconciliation_or_correction():
+    controller = _ready_controller()
+
+    snapshot = controller.build_run_state_snapshot(
+        wbs_ref="7.19.15.6",
+        run_id="run-001",
+        dispatch_run_id="run-001",
+        assignment_id="assignment-001",
+        runtime_instance_id="jarvis-runtime-001",
+        package_name="package-v0.1",
+        package_version="v0.1",
+        local_state_verdict="blocked",
+        package_verdict="ready_for_review",
+        duplicate_replay_status="suppressed",
+        idempotency_key="idem-001",
+        lifecycle_decision_id="runtime-decision-001",
+        reservation_lease_id="lease-001",
+        package_manifest_ref="manifest://package-v0.1",
+        local_state_ref="local://run-state",
+        source_authority_refs=["review://nova"],
+        evidence_refs=["evidence://run-state"],
+        observed_at=NOW,
+        stale_after="2026-05-27T07:10:00+00:00",
+    )
+
+    errors = controller.validate_run_state_snapshot_for_package(snapshot, now_at=NOW)
+
+    assert "RUN_STATE_PACKAGE_LOCAL_MISMATCH" in errors
+
+
+def test_correction_resubmission_allows_snapshot_verdict_mismatch_with_lineage():
+    controller = _ready_controller()
+
+    snapshot = controller.build_run_state_snapshot(
+        wbs_ref="7.19.15.6",
+        run_id="run-001",
+        dispatch_run_id="run-001",
+        assignment_id="assignment-001",
+        runtime_instance_id="jarvis-runtime-001",
+        package_name="package-v0.2",
+        package_version="v0.2",
+        local_state_verdict="corrected_blocked",
+        package_verdict="ready_for_review",
+        duplicate_replay_status="suppressed",
+        idempotency_key="idem-001",
+        lifecycle_decision_id="runtime-decision-001",
+        reservation_lease_id="lease-001",
+        package_manifest_ref="manifest://package-v0.2",
+        local_state_ref="local://run-state",
+        source_authority_refs=["review://nova"],
+        evidence_refs=["evidence://run-state"],
+        correction_refs=["package://package-v0.1", "correction://lineage"],
+        observed_at=NOW,
+        stale_after="2026-05-27T07:10:00+00:00",
+    )
+
+    errors = controller.validate_run_state_snapshot_for_package(snapshot, now_at=NOW)
+
+    assert "RUN_STATE_PACKAGE_LOCAL_MISMATCH" not in errors
+
+
+def test_run_state_snapshot_query_apis_select_by_required_fields(tmp_path):
+    controller, state_store = _durable_ready_controller(tmp_path)
+    first = controller.build_run_state_snapshot(
+        wbs_ref="7.19.15.6",
+        run_id="run-001",
+        dispatch_run_id="dispatch-001",
+        assignment_id="assignment-001",
+        runtime_instance_id="jarvis-runtime-001",
+        package_name="package-v0.1",
+        package_version="v0.1",
+        package_manifest_hash="manifest-hash-001",
+        local_state_verdict="ready_for_review",
+        package_verdict="ready_for_review",
+        duplicate_replay_status="suppressed",
+        reservation_lease_status="consumed",
+        idempotency_key="idem-001",
+        lifecycle_decision_id="runtime-decision-001",
+        reservation_lease_id="lease-001",
+        package_manifest_ref="manifest://package-v0.1",
+        local_state_ref="local://run-state",
+        source_authority_refs=["review://nova"],
+        evidence_refs=["evidence://run-state"],
+        observed_at=NOW,
+        stale_after="2026-05-27T07:10:00+00:00",
+    )
+    second = controller.build_run_state_snapshot(
+        wbs_ref="7.19.15.6",
+        run_id="run-001",
+        dispatch_run_id="dispatch-001",
+        assignment_id="assignment-001",
+        runtime_instance_id="jarvis-runtime-001",
+        package_name="package-v0.1",
+        package_version="v0.2",
+        package_manifest_hash="manifest-hash-002",
+        local_state_verdict="ready_for_review",
+        package_verdict="ready_for_review",
+        duplicate_replay_status="suppressed",
+        reservation_lease_status="consumed",
+        idempotency_key="idem-001",
+        lifecycle_decision_id="runtime-decision-001",
+        reservation_lease_id="lease-001",
+        package_manifest_ref="manifest://package-v0.2",
+        local_state_ref="local://run-state",
+        source_authority_refs=["review://nova"],
+        evidence_refs=["evidence://run-state"],
+        observed_at="2026-05-27T07:01:00+00:00",
+        stale_after="2026-05-27T07:10:00+00:00",
+    )
+
+    assert state_store.get_run_state_snapshot(first.snapshot_id)["snapshot_id"] == first.snapshot_id
+    assert [item["snapshot_id"] for item in state_store.query_run_state_snapshots(snapshot_id=first.snapshot_id)] == [first.snapshot_id]
+    assert len(state_store.query_run_state_snapshots(run_id="run-001")) == 2
+    assert len(state_store.query_run_state_snapshots(wbs_ref="7.19.15.6")) == 2
+    assert len(state_store.query_run_state_snapshots(assignment_id="assignment-001")) == 2
+    assert len(state_store.query_run_state_snapshots(package_name="package-v0.1")) == 2
+    assert state_store.latest_run_state_snapshot(run_id="run-001")["snapshot_id"] == second.snapshot_id
