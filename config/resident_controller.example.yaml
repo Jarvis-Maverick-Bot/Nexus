@@ -4,30 +4,30 @@ controller:
   runtime_instance_id: resident-controller-RUN_ID
   environment: bounded_uat
   launch_mode: disabled
-  run_authorization_ref: review-evidence/nova/2026-XX-XX_4_19_WBS_7_19_14_5_ALEX_UAT_AUTHORIZATION.md
+  run_authorization_ref: review-evidence/nova/2026-XX-XX_4_19_WBS_7_19_15_ALEX_UAT_AUTHORIZATION.md
   allowed_wbs_ids:
-    - "7.19.14.5"
+    - "7.19.15"
 broker:
   nats_url_ref: env:NEXUS_RESIDENT_CONTROLLER_NATS_URL
   auth_ref: env:NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF
   connect_timeout_seconds: 10
   subscription_ready_timeout_seconds: 10
 subjects:
-  namespace: nexus.4_19.wbs7_19_14
+  namespace: nexus.4_19.wbs7_19_15
   subscribe_allowlist:
-    - nexus.4_19.wbs7_19_14.*.registration.>
-    - nexus.4_19.wbs7_19_14.*.readiness.>
-    - nexus.4_19.wbs7_19_14.*.heartbeat.>
-    - nexus.4_19.wbs7_19_14.*.ack.>
-    - nexus.4_19.wbs7_19_14.*.progress.>
-    - nexus.4_19.wbs7_19_14.*.evidence.>
-    - nexus.4_19.wbs7_19_14.*.result_candidate.>
-    - nexus.4_19.wbs7_19_14.*.offline.>
+    - nexus.4_19.wbs7_19_15.*.registration.>
+    - nexus.4_19.wbs7_19_15.*.readiness.>
+    - nexus.4_19.wbs7_19_15.*.heartbeat.>
+    - nexus.4_19.wbs7_19_15.*.ack.>
+    - nexus.4_19.wbs7_19_15.*.progress.>
+    - nexus.4_19.wbs7_19_15.*.evidence.>
+    - nexus.4_19.wbs7_19_15.*.result_candidate.>
+    - nexus.4_19.wbs7_19_15.*.offline.>
   publish_allowlist:
-    - nexus.4_19.wbs7_19_14.*.controller.init
-    - nexus.4_19.wbs7_19_14.*.assignment
-    - nexus.4_19.wbs7_19_14.*.assignment.duplicate_replay
-    - nexus.4_19.wbs7_19_14.*.drain
+    - nexus.4_19.wbs7_19_15.*.controller.init
+    - nexus.4_19.wbs7_19_15.*.assignment
+    - nexus.4_19.wbs7_19_15.*.assignment.duplicate_replay
+    - nexus.4_19.wbs7_19_15.*.drain
 runtimes:
   allowed_agents:
     - jarvis
@@ -47,7 +47,7 @@ policy:
     - duplicate_replay
     - drain
 evidence:
-  root: evidence/4.19/wbs-7.19.14/resident-controller/RUN_ID
+  root: evidence/4.19/wbs-7.19.15/resident-controller/RUN_ID
   raw_log: events.jsonl
   manifest: manifest.json
   summary: verdict_report.md

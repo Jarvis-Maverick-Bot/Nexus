@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import json
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +24,7 @@ from nexus.mq.candidate_adapter_session_store import (
     CandidateAdapterSessionStore,
     build_session_from_profile,
 )
+from nexus.mq.candidate_adapter_state_reconciliation import reconcile_run_state
 from nexus.mq.candidate_adapter_subject_broker_policy import validate_assignment_subject
 
 
@@ -307,6 +309,36 @@ class CandidateAdapterApi:
             evidence_refs=[final_evidence_ref],
         )
         return CandidateAdapterOperationResult(True, "offline", session=session, payload={"event": event.to_dict()})
+
+    def reconcile_run_state(
+        self,
+        session_path: str | Path,
+        *,
+        platform_snapshot: dict[str, Any],
+        package_manifest: dict[str, Any],
+        generated_at: str,
+    ) -> CandidateAdapterOperationResult:
+        session = self._load(session_path)
+        reconciliation = reconcile_run_state(
+            session=session,
+            platform_snapshot=platform_snapshot,
+            package_manifest=package_manifest,
+            generated_at=generated_at,
+        )
+        reconciliation_path = Path(session_path).parent / f"{reconciliation.reconciliation_id}.json"
+        reconciliation.reconciliation_record_ref = str(reconciliation_path)
+        reconciliation_path.write_text(
+            json.dumps(reconciliation.to_dict(), sort_keys=True, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        errors = [reconciliation.error_code] if reconciliation.error_code else []
+        return CandidateAdapterOperationResult(
+            accepted=not errors,
+            operation="run_state_reconciliation",
+            errors=errors,
+            session=session,
+            payload={"reconciliation": reconciliation.to_dict()},
+        )
 
     def _load(self, session_path: str | Path) -> CandidateAdapterSession:
         self.session_store.bind(session_path)

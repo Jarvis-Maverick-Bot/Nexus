@@ -1,5 +1,5 @@
 from nexus.mq.controller_bridge_dispatch import ControllerBridgeDispatchController
-from nexus.mq.controller_bridge_models import Layer1ApprovedDecision, RuntimeResultCandidate
+from nexus.mq.controller_bridge_models import CleanRunIdentity, Layer1ApprovedDecision, RuntimeResultCandidate
 from nexus.mq.controller_bridge_state_store import ControllerBridgeStateStore
 from nexus.mq.durable_state import DurableStateStore
 from nexus.mq.eligibility_reservation_policy import RuntimeEligibilityDecision, RuntimeReservationLease
@@ -8,6 +8,12 @@ from nexus.mq.eligibility_reservation_policy import RuntimeEligibilityDecision, 
 NOW = "2026-05-27T12:00:00+00:00"
 CANONICAL_ASSIGNMENT_SUBJECT = "nexus.4_19.wbs7_19_14.run-001.jarvis.assignment"
 RUNTIME_SCOPED_ASSIGNMENT_ALIAS = "nexus.4_19.wbs7_19_14.run-001.jarvis.jarvis-runtime-001.assignment"
+WBS_7_19_15_ASSIGNMENT_SUBJECT = (
+    "nexus.4_19.wbs7_19_15.wbs-7-19-15-2-jarvis-business-command-20260603T081653Z.jarvis.assignment"
+)
+THUNDER_ASSIGNMENT_SUBJECT = (
+    "nexus.4_19.wbs7_19_15.wbs-7-19-15-3-thunder-codex-app-business-command-20260603T081653Z.thunder_codex_app.assignment"
+)
 
 
 def _store(tmp_path):
@@ -197,6 +203,80 @@ def test_duplicate_replay_with_mismatched_decision_or_lease_blocks(tmp_path):
     assert "LIFECYCLE_DECISION_ID_MISMATCH" in second.errors
 
 
+def test_duplicate_replay_validator_rejects_invalid_payload_identity(tmp_path):
+    controller = _controller(tmp_path)
+    _prepare_valid_publish(controller)
+    published = _publish(controller)
+    request = published.payload["assignment_publish_request"]
+
+    result = controller.build_duplicate_replay_payload(
+        assignment_publish_request=request,
+        duplicate_assignment_subject=f"{request.subject}.duplicate_replay",
+        original_message_id="message-original",
+        duplicate_message_id="message-duplicate",
+        original_payload_hash="hash-original",
+        duplicate_payload_hash="hash-changed",
+    )
+
+    assert result.accepted is False
+    assert "DUPLICATE_REPLAY_PAYLOAD_HASH_MISMATCH" in result.errors
+
+
+def test_duplicate_replay_builder_accepts_canonical_suppression_payload(tmp_path):
+    controller = _controller(tmp_path)
+    _prepare_valid_publish(controller)
+    published = _publish(controller)
+    request = published.payload["assignment_publish_request"]
+
+    result = controller.build_duplicate_replay_payload(
+        assignment_publish_request=request,
+        duplicate_assignment_subject=f"{request.subject}.duplicate_replay",
+        original_message_id="message-original",
+        duplicate_message_id="message-duplicate",
+        original_payload_hash="hash-original",
+        duplicate_payload_hash="hash-original",
+    )
+
+    assert result.accepted is True
+    assert result.payload["duplicate_replay"].replay_kind == "assignment_duplicate_replay"
+
+
+def test_duplicate_replay_builder_rejects_missing_duplicate_payload_hash(tmp_path):
+    controller = _controller(tmp_path)
+    _prepare_valid_publish(controller)
+    published = _publish(controller)
+    request = published.payload["assignment_publish_request"]
+
+    result = controller.build_duplicate_replay_payload(
+        assignment_publish_request=request,
+        duplicate_assignment_subject=f"{request.subject}.duplicate_replay",
+        original_message_id="message-original",
+        duplicate_message_id="message-duplicate",
+        original_payload_hash="hash-original",
+    )
+
+    assert result.accepted is False
+    assert "MISSING_DUPLICATE_PAYLOAD_HASH" in result.errors
+
+
+def test_duplicate_replay_builder_computes_hash_from_observed_canonical_payload(tmp_path):
+    controller = _controller(tmp_path)
+    _prepare_valid_publish(controller)
+    published = _publish(controller)
+    request = published.payload["assignment_publish_request"]
+
+    result = controller.build_duplicate_replay_payload(
+        assignment_publish_request=request,
+        duplicate_assignment_subject=f"{request.subject}.duplicate_replay",
+        original_message_id="message-original",
+        duplicate_message_id="message-duplicate",
+        original_payload_hash="1501210c27e3d79e56882f28d4b17d63cf386c3438b87affcbef60c41cac19d9",
+        duplicate_payload_bytes={"assignment_id": "assignment-001", "idempotency_key": "idem-001"},
+    )
+
+    assert result.accepted is True
+
+
 def test_assignment_publish_rejects_runtime_scoped_assignment_alias(tmp_path):
     controller = _controller(tmp_path)
     _prepare_valid_publish(controller)
@@ -251,6 +331,57 @@ def test_assignment_publish_with_valid_lease_creates_request(tmp_path):
     assert result.payload["assignment_publish_request"].reservation_lease_id == "lease-001"
 
 
+def test_assignment_publish_accepts_wbs_7_19_15_namespace(tmp_path):
+    dispatch_run_id = "wbs-7-19-15-2-jarvis-business-command-20260603T081653Z"
+    controller = _controller(tmp_path)
+    create = controller.create_run(
+        decision=_decision(dispatch_packet_ref=f"dispatch-packet://controller-bridge/{dispatch_run_id}"),
+        dispatch_run_id=dispatch_run_id,
+        assignment_id="assignment-001",
+        now_at=NOW,
+    )
+    assert create.accepted is True
+    controller.state_store.record_lifecycle_decision(_lifecycle_decision(dispatch_run_id=dispatch_run_id))
+    controller.state_store.record_reservation_lease(_lease(dispatch_run_id=dispatch_run_id))
+
+    result = _publish(
+        controller,
+        dispatch_run_id=dispatch_run_id,
+        subject=WBS_7_19_15_ASSIGNMENT_SUBJECT,
+    )
+
+    assert result.accepted is True
+    assert result.payload["assignment_publish_request"].subject == WBS_7_19_15_ASSIGNMENT_SUBJECT
+
+
+def test_assignment_publish_accepts_thunder_codex_app_agent_subject(tmp_path):
+    dispatch_run_id = "wbs-7-19-15-3-thunder-codex-app-business-command-20260603T081653Z"
+    controller = _controller(tmp_path)
+    create = controller.create_run(
+        decision=_decision(
+            dispatch_packet_ref=f"dispatch-packet://controller-bridge/{dispatch_run_id}",
+            target_agent_id="thunder_codex_app",
+        ),
+        dispatch_run_id=dispatch_run_id,
+        assignment_id="assignment-001",
+        now_at=NOW,
+    )
+    assert create.accepted is True
+    controller.state_store.record_lifecycle_decision(
+        _lifecycle_decision(dispatch_run_id=dispatch_run_id, target_agent_id="thunder_codex_app")
+    )
+    controller.state_store.record_reservation_lease(_lease(dispatch_run_id=dispatch_run_id))
+
+    result = _publish(
+        controller,
+        dispatch_run_id=dispatch_run_id,
+        subject=THUNDER_ASSIGNMENT_SUBJECT,
+    )
+
+    assert result.accepted is True
+    assert result.payload["assignment_publish_request"].subject == THUNDER_ASSIGNMENT_SUBJECT
+
+
 def test_controller_init_not_public_runtime_prerequisite(tmp_path):
     controller = _controller(tmp_path)
 
@@ -294,3 +425,49 @@ def test_controller_does_not_mutate_registration_or_readiness(tmp_path):
     assert result.accepted is True
     assert probe.query_calls == 1
     assert probe.mutating_calls == []
+
+
+def _clean_run_identity(**overrides):
+    data = {
+        "wbs_ref": "7.19.15.6",
+        "run_id": "run-001",
+        "dispatch_run_id": "run-001",
+        "assignment_id": "assignment-001",
+        "idempotency_key": "idem-001",
+        "lifecycle_decision_id": "runtime-decision-001",
+        "reservation_lease_id": "lease-001",
+        "runtime_instance_id": "jarvis-runtime-001",
+        "package_name": "package-v0.1",
+        "package_version": "v0.1",
+        "source_authority_hash": "source-hash-001",
+    }
+    data.update(overrides)
+    return CleanRunIdentity(**data)
+
+
+def test_clean_run_identity_guard_rejects_reused_tuple_without_lineage(tmp_path):
+    controller = _controller(tmp_path)
+    identity = _clean_run_identity()
+
+    first = controller.record_clean_run_identity(identity)
+    second = controller.record_clean_run_identity(identity)
+
+    assert first.accepted is True
+    assert second.accepted is False
+    assert "CLEAN_RUN_IDENTITY_REUSED_WITHOUT_CORRECTION_LINEAGE" in second.errors
+
+
+def test_correction_resubmission_allows_tuple_reuse_with_lineage_only(tmp_path):
+    controller = _controller(tmp_path)
+    identity = _clean_run_identity()
+    correction = _clean_run_identity(
+        correction_parent_package="package://package-v0.1",
+        correction_reason="corrected package/local mismatch evidence",
+    )
+
+    first = controller.record_clean_run_identity(identity)
+    second = controller.record_clean_run_identity(correction)
+
+    assert first.accepted is True
+    assert second.accepted is True
+    assert second.payload["status"] == "correction_lineage"

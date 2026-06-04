@@ -14,6 +14,10 @@ RUN_ID = "uat-7-19-14-phase3-20260527T151120Z-nova"
 BASE_SUBJECT = f"nexus.4_19.wbs7_19_14.{RUN_ID}.jarvis"
 CANONICAL_ASSIGNMENT_SUBJECT = f"{BASE_SUBJECT}.assignment"
 RUNTIME_SCOPED_ASSIGNMENT_ALIAS = f"{BASE_SUBJECT}.jarvis-runtime-001.assignment"
+WBS_7_19_15_RUN_ID = "wbs-7-19-15-2-jarvis-business-command-20260603T081653Z"
+WBS_7_19_15_ASSIGNMENT_SUBJECT = f"nexus.4_19.wbs7_19_15.{WBS_7_19_15_RUN_ID}.jarvis.assignment"
+THUNDER_RUN_ID = "wbs-7-19-15-3-thunder-codex-app-business-command-20260603T081653Z"
+THUNDER_ASSIGNMENT_SUBJECT = f"nexus.4_19.wbs7_19_15.{THUNDER_RUN_ID}.thunder_codex_app.assignment"
 
 
 def _session(**overrides):
@@ -76,6 +80,30 @@ def _lease(**overrides):
 
 def test_candidate_ack_requires_active_lease_and_matching_decision():
     result = validate_candidate_assignment(_assignment(), session=_session(), lease=_lease(), now_at=NOW)
+
+    assert result.accepted is True
+    assert result.errors == []
+
+
+def test_candidate_ack_accepts_wbs_7_19_15_assignment_namespace():
+    result = validate_candidate_assignment(
+        _assignment(assignment_subject=WBS_7_19_15_ASSIGNMENT_SUBJECT),
+        session=_session(allowed_subject_patterns=[WBS_7_19_15_ASSIGNMENT_SUBJECT]),
+        lease=_lease(),
+        now_at=NOW,
+    )
+
+    assert result.accepted is True
+    assert result.errors == []
+
+
+def test_candidate_ack_accepts_thunder_codex_app_assignment_agent():
+    result = validate_candidate_assignment(
+        _assignment(agent_id="thunder_codex_app", assignment_subject=THUNDER_ASSIGNMENT_SUBJECT),
+        session=_session(agent_id="thunder_codex_app", allowed_subject_patterns=[THUNDER_ASSIGNMENT_SUBJECT]),
+        lease=_lease(),
+        now_at=NOW,
+    )
 
     assert result.accepted is True
     assert result.errors == []
