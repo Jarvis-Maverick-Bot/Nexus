@@ -21,7 +21,12 @@ from nexus.mq.resident_controller.observer import evaluate_runtime_observation
 
 
 RESIDENT_DISPATCH_REQUEST_SCHEMA_VERSION = "4.19.resident_controller.dispatch_request.v1"
-ALLOWED_ASSIGNMENT_KINDS = {"non_business_probe", "readiness_probe", "diagnostic_probe"}
+ALLOWED_ASSIGNMENT_KINDS = {
+    "non_business_probe",
+    "readiness_probe",
+    "diagnostic_probe",
+    "synthetic_business_command_acceptance",
+}
 DEFAULT_ALLOWED_WBS_IDS = {"7.19.14.5", "7.19.15", "7.19.15.2"}
 COMMAND_TO_FAMILY = {
     "controller_init": "controller.init",
@@ -253,7 +258,7 @@ def _matches_publish_allowlist(subject: str, policy: ResidentControllerSubjectPo
             prefix, suffix = pattern.split("*", 1)
             if subject.startswith(prefix) and subject.endswith(suffix):
                 middle = subject[len(prefix) : len(subject) - len(suffix)]
-                if len([part for part in middle.split(".") if part]) == 2:
+                if len([part for part in middle.split(".") if part]) in {1, 2}:
                     return True
             continue
         pattern_parts = pattern.split(".")

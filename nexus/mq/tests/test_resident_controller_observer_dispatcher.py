@@ -160,6 +160,7 @@ def test_resident_controller_default_dispatch_policy_accepts_wbs_7_19_15_2():
     request = _dispatch_request(
         run_id="run-7152",
         wbs_id="7.19.15.2",
+        assignment_kind="synthetic_business_command_acceptance",
         no_go_scope_ref="no-go://wbs-7.19.15.2",
     )
     runtime = _record(authority_scopes=["wbs://7.19.15.2"])

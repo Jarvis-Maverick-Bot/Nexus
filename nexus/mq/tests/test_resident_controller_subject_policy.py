@@ -39,6 +39,20 @@ def test_resident_controller_subject_policy_accepts_canonical_assignment_subject
     assert result.errors == []
 
 
+def test_resident_controller_subject_policy_accepts_candidate_pinned_assignment_allowlist():
+    policy = ResidentControllerSubjectPolicy(
+        namespace="nexus.4_19.wbs7_19_15",
+        run_id="run-7152",
+        allowed_agents=["jarvis"],
+        publish_allowlist=["nexus.4_19.wbs7_19_15.*.jarvis.assignment"],
+    )
+
+    result = validate_publish_subject("nexus.4_19.wbs7_19_15.run-7152.jarvis.assignment", policy)
+
+    assert result.accepted is True
+    assert result.errors == []
+
+
 def test_resident_controller_subject_policy_rejects_runtime_scoped_assignment_alias():
     result = validate_publish_subject("nexus.4_19.wbs7_19_14.run-001.jarvis.jarvis-runtime-001.assignment", _policy())
 

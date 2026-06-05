@@ -179,56 +179,58 @@ def test_start_once_bounded_loop_uses_configured_wbs_7_19_15_2_identity(tmp_path
     config["controller"]["allowed_wbs_ids"] = ["7.19.15.2"]
     config["subjects"]["namespace"] = "nexus.4_19.wbs7_19_15"
     config["subjects"]["subscribe_allowlist"] = [
-        "nexus.4_19.wbs7_19_15.*.registration.>",
-        "nexus.4_19.wbs7_19_15.*.readiness.>",
-        "nexus.4_19.wbs7_19_15.*.heartbeat.>",
-        "nexus.4_19.wbs7_19_15.*.ack.>",
-        "nexus.4_19.wbs7_19_15.*.progress.>",
-        "nexus.4_19.wbs7_19_15.*.evidence.>",
-        "nexus.4_19.wbs7_19_15.*.result_candidate.>",
-        "nexus.4_19.wbs7_19_15.*.offline.>",
+        "nexus.4_19.wbs7_19_15.*.jarvis.registration",
+        "nexus.4_19.wbs7_19_15.*.jarvis.readiness",
+        "nexus.4_19.wbs7_19_15.*.jarvis.heartbeat",
+        "nexus.4_19.wbs7_19_15.*.jarvis.ack",
+        "nexus.4_19.wbs7_19_15.*.jarvis.progress",
+        "nexus.4_19.wbs7_19_15.*.jarvis.evidence",
+        "nexus.4_19.wbs7_19_15.*.jarvis.result_candidate",
+        "nexus.4_19.wbs7_19_15.*.jarvis.offline",
     ]
     config["subjects"]["publish_allowlist"] = [
-        "nexus.4_19.wbs7_19_15.*.controller.init",
-        "nexus.4_19.wbs7_19_15.*.assignment",
-        "nexus.4_19.wbs7_19_15.*.assignment.duplicate_replay",
-        "nexus.4_19.wbs7_19_15.*.drain",
+        "nexus.4_19.wbs7_19_15.*.jarvis.controller.init",
+        "nexus.4_19.wbs7_19_15.*.jarvis.assignment",
+        "nexus.4_19.wbs7_19_15.*.jarvis.assignment.duplicate_replay",
+        "nexus.4_19.wbs7_19_15.*.jarvis.drain",
     ]
     config["evidence"]["root"] = str(tmp_path / "evidence" / "RUN_ID")
     config["uat"]["assignment_id"] = "assign-wbs-7-19-15-2-001"
     config["uat"]["idempotency_key"] = "idem-wbs-7-19-15-2-001"
+    config["uat"]["target_runtime_instance_id"] = "jarvis-wbs-7-19-15-2-resident-controller-rerun-20260605T091050Z"
+    config["uat"]["assignment_kind"] = "synthetic_business_command_acceptance"
     broker = FakeResidentBroker(
         inbound_events=[
             {
-                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.registration.ready",
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.registration",
                 "payload": {"agent_id": "jarvis"},
             },
             {
-                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.readiness.ready",
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.readiness",
                 "payload": {"agent_id": "jarvis"},
             },
             {
-                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.heartbeat.tick",
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.heartbeat",
                 "payload": {"agent_id": "jarvis"},
             },
             {
-                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.ack.assignment",
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.ack",
                 "payload": {"assignment_id": "assign-wbs-7-19-15-2-001"},
             },
             {
-                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.progress.assignment",
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.progress",
                 "payload": {"assignment_id": "assign-wbs-7-19-15-2-001"},
             },
             {
-                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.evidence.assignment",
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.evidence",
                 "payload": {"assignment_id": "assign-wbs-7-19-15-2-001"},
             },
             {
-                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.result_candidate.done",
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.result_candidate",
                 "payload": {"assignment_id": "assign-wbs-7-19-15-2-001"},
             },
             {
-                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.offline.done",
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.offline",
                 "payload": {"agent_id": "jarvis"},
             },
         ]
@@ -243,6 +245,7 @@ def test_start_once_bounded_loop_uses_configured_wbs_7_19_15_2_identity(tmp_path
     assert result.accepted is True
     assignment_payload = next(payload for subject, payload in broker.published if subject.endswith(".assignment"))
     assert assignment_payload["wbs_id"] == "7.19.15.2"
+    assert assignment_payload["assignment_kind"] == "synthetic_business_command_acceptance"
     assert assignment_payload["no_go_scope_ref"] == "no-go://wbs-7.19.15.2"
     assert result.evidence_package.manifest_path.parent == tmp_path / "evidence" / run_id
     assignment_record = next(

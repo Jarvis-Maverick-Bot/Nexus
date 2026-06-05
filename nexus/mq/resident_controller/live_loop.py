@@ -436,7 +436,12 @@ def _publish_assignment(
         uat_authorized=True,
         allowed_wbs_ids={wbs_id},
     )
-    if request.assignment_kind not in {"non_business_probe", "readiness_probe", "diagnostic_probe"}:
+    if request.assignment_kind not in {
+        "non_business_probe",
+        "readiness_probe",
+        "diagnostic_probe",
+        "synthetic_business_command_acceptance",
+    }:
         errors.append("BUSINESS_EXECUTION_NOT_AUTHORIZED")
         return
     # Build a deterministic message id without letting dispatcher publish or claim completion.
@@ -581,7 +586,21 @@ def _run_scoped_subscriptions(*, patterns: list[str], namespace: str, run_id: st
     prefix = f"{namespace}.*."
     for pattern in patterns:
         if pattern.startswith(prefix):
-            scoped.append(f"{namespace}.{run_id}.*.{pattern[len(prefix):]}")
+            suffix = pattern[len(prefix):]
+            first_suffix_segment = suffix.split(".", 1)[0]
+            if first_suffix_segment in {
+                "registration",
+                "readiness",
+                "heartbeat",
+                "ack",
+                "progress",
+                "evidence",
+                "result_candidate",
+                "offline",
+            }:
+                scoped.append(f"{namespace}.{run_id}.*.{suffix}")
+            else:
+                scoped.append(f"{namespace}.{run_id}.{suffix}")
         elif pattern.startswith(f"{namespace}.{run_id}."):
             scoped.append(pattern)
     return _dedupe(scoped)
