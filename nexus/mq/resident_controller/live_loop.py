@@ -36,6 +36,7 @@ except ImportError:  # pragma: no cover - covered by runtime posture evidence wh
 
 
 MessageHandler = Callable[[str, dict[str, Any]], None]
+DEFAULT_POST_ASSIGNMENT_OBSERVATION_SECONDS = 60.0
 
 
 class ResidentBrokerClient(Protocol):
@@ -146,6 +147,14 @@ class ResidentStartOnceRuntimeResult:
     status_snapshot: dict[str, Any] = field(default_factory=dict)
     evidence_package: EvidencePackageResult | None = None
     not_business_completion: bool = True
+
+
+@dataclass
+class PublishedAssignment:
+    agent_id: str
+    subject: str
+    payload: dict[str, Any]
+    published_at: str
 
 
 class NatsResidentBrokerClient:
@@ -324,7 +333,7 @@ def run_start_once(
         "duplicate_replay_at": "",
         "drain_at": "",
     }
-    assignment_published_agents: set[str] = set()
+    published_assignments: list[PublishedAssignment] = []
 
     def handle_event(subject: str, payload: dict[str, Any]) -> None:
         family, agent_id = _event_family(subject, namespace=str(subjects.get("namespace")), run_id=run_id)
@@ -394,7 +403,7 @@ def run_start_once(
                 if agent_id not in observed["readiness"] or agent_id not in observed["heartbeat"]:
                     errors.append(f"ASSIGNMENT_READINESS_HEARTBEAT_NOT_OBSERVED: {agent_id}")
                     continue
-                published_at = _publish_assignment(
+                published = _publish_assignment(
                     client=client,
                     subject_policy=subject_policy,
                     run_id=run_id,
@@ -406,16 +415,34 @@ def run_start_once(
                     record=record,
                     errors=errors,
                 )
-                if published_at:
-                    assignment_published_agents.add(agent_id)
-                    event_timestamps["assignment_published_at"] = published_at
+                if published is not None:
+                    published_assignments.append(published)
+                    event_timestamps["assignment_published_at"] = published.published_at
 
-        _wait_for_runtime_window(float(uat_config.get("post_assignment_seconds", 0)))
+        if published_assignments:
+            _wait_for_candidate_observations(
+                observed=observed,
+                allowed_agents=[assignment.agent_id for assignment in published_assignments],
+                timeout_seconds=_post_assignment_observation_timeout_seconds(uat_config),
+            )
+            if observed["result_candidate"]:
+                for assignment in published_assignments:
+                    duplicate_replay_at = _publish_duplicate_replay(
+                        client=client,
+                        subject_policy=subject_policy,
+                        assignment=assignment,
+                        record=record,
+                        errors=errors,
+                    )
+                    if duplicate_replay_at:
+                        event_timestamps["duplicate_replay_at"] = duplicate_replay_at
+        else:
+            _wait_for_runtime_window(float(uat_config.get("post_assignment_seconds", 0)))
         if bool(uat_config.get("assignment_enabled")):
             _require_candidate_observations(
                 observed=observed,
                 errors=errors,
-                assignment_published=bool(assignment_published_agents),
+                assignment_published=bool(published_assignments),
             )
         for agent_id in allowed_agents:
             drain_at = _publish_allowed_command(
@@ -485,7 +512,7 @@ def _publish_assignment(
     lifecycle_provider: ResidentLifecycleProvider,
     record: Callable[[str, dict[str, Any]], None],
     errors: list[str],
-) -> str:
+) -> PublishedAssignment | None:
     now_at = _now()
     assignment_id = str(uat_config.get("assignment_id") or f"{run_id}-assignment")
     idempotency_key = str(uat_config.get("idempotency_key") or f"{run_id}-idempotency")
@@ -517,7 +544,7 @@ def _publish_assignment(
     subject_result = validate_publish_subject(subject, subject_policy)
     if not subject_result.accepted:
         errors.extend(subject_result.errors)
-        return ""
+        return None
     dispatch_policy = ResidentControllerDispatchPolicy(
         dispatch_enabled=True,
         uat_authorized=True,
@@ -530,7 +557,7 @@ def _publish_assignment(
         "synthetic_business_command_acceptance",
     }:
         errors.append("BUSINESS_EXECUTION_NOT_AUTHORIZED")
-        return ""
+        return None
     # Build a deterministic message id without letting dispatcher publish or claim completion.
     decision = evaluate_resident_dispatch(
         request=request,
@@ -543,9 +570,10 @@ def _publish_assignment(
     )
     if not decision.accepted:
         errors.extend(decision.errors)
-        return ""
-    client.publish(subject, {**request.to_dict(), "message_id": decision.message_id, "candidate_only": True})
-    return record(
+        return None
+    payload = {**request.to_dict(), "message_id": decision.message_id, "candidate_only": True}
+    client.publish(subject, payload)
+    published_at = record(
         "bounded_assignment_published",
         {
             "subject": _redact_subject(subject),
@@ -555,6 +583,41 @@ def _publish_assignment(
             "runtime_authority_scopes": [f"wbs://{wbs_id}"],
             "lifecycle_decision_id": request.lifecycle_decision_id,
             "reservation_lease_id": request.reservation_lease_id,
+        },
+    )
+    return PublishedAssignment(agent_id=agent_id, subject=subject, payload=payload, published_at=published_at)
+
+
+def _publish_duplicate_replay(
+    *,
+    client: ResidentBrokerClient,
+    subject_policy: ResidentControllerSubjectPolicy,
+    assignment: PublishedAssignment,
+    record: Callable[[str, dict[str, Any]], str],
+    errors: list[str],
+) -> str:
+    subject = f"{assignment.subject}.duplicate_replay"
+    subject_result = validate_publish_subject(subject, subject_policy)
+    if not subject_result.accepted:
+        errors.extend(subject_result.errors)
+        return ""
+    payload = {
+        **assignment.payload,
+        "duplicate_replay": True,
+        "duplicate_replay_of_subject": assignment.subject,
+        "duplicate_replay_of_message_id": assignment.payload.get("message_id", ""),
+        "not_business_completion": True,
+        "candidate_only": True,
+    }
+    client.publish(subject, payload)
+    return record(
+        "duplicate_replay_published",
+        {
+            "subject": _redact_subject(subject),
+            "original_subject": _redact_subject(assignment.subject),
+            "assignment_id": assignment.payload.get("assignment_id", ""),
+            "idempotency_key": assignment.payload.get("idempotency_key", ""),
+            "duplicate_suppression_expected": True,
         },
     )
 
@@ -742,6 +805,41 @@ def _wait_for_assignment_readiness(
         if max_runtime_seconds <= 0:
             return
         time.sleep(min(0.2, max(0.0, deadline - time.monotonic())))
+
+
+def _wait_for_candidate_observations(
+    *,
+    observed: dict[str, set[str]],
+    allowed_agents: list[str],
+    timeout_seconds: float,
+) -> None:
+    if timeout_seconds <= 0 or not allowed_agents:
+        return
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() <= deadline:
+        if _candidate_observations_complete(observed=observed, allowed_agents=allowed_agents):
+            return
+        time.sleep(min(0.2, max(0.0, deadline - time.monotonic())))
+
+
+def _candidate_observations_complete(*, observed: dict[str, set[str]], allowed_agents: list[str]) -> bool:
+    return all(
+        agent in observed["ack"]
+        and agent in observed["progress"]
+        and agent in observed["evidence"]
+        and agent in observed["result_candidate"]
+        for agent in allowed_agents
+    )
+
+
+def _post_assignment_observation_timeout_seconds(uat_config: dict[str, Any]) -> float:
+    configured = float(uat_config.get("post_assignment_observation_seconds") or 0)
+    legacy_window = float(uat_config.get("post_assignment_seconds") or 0)
+    if configured > 0:
+        return max(configured, legacy_window)
+    if legacy_window > 0:
+        return max(legacy_window, DEFAULT_POST_ASSIGNMENT_OBSERVATION_SECONDS)
+    return 0.0
 
 
 def _status(

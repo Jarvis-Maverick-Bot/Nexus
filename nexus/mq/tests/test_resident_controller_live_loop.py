@@ -1,4 +1,6 @@
 import json
+import threading
+import time
 
 from nexus.mq.eligibility_reservation_policy import RuntimeEligibilityDecision, RuntimeReservationLease
 from nexus.mq.resident_controller.cli import main
@@ -36,6 +38,38 @@ class FakeResidentBroker:
 
     def close(self):
         self.closed = True
+
+
+class DelayedResultResidentBroker(FakeResidentBroker):
+    def __init__(self, inbound_events=None, *, delayed_result_subject="", delayed_result_payload=None, delay_seconds=0.05):
+        super().__init__(inbound_events)
+        self.handlers = []
+        self.delayed_result_subject = delayed_result_subject
+        self.delayed_result_payload = dict(delayed_result_payload or {})
+        self.delay_seconds = delay_seconds
+        self._threads = []
+
+    def subscribe(self, subject, handler):
+        self.handlers.append((subject, handler))
+        super().subscribe(subject, handler)
+
+    def publish(self, subject, payload):
+        super().publish(subject, payload)
+        if subject.endswith(".assignment") and self.delayed_result_subject:
+            thread = threading.Thread(target=self._deliver_result_after_delay, daemon=True)
+            thread.start()
+            self._threads.append(thread)
+
+    def close(self):
+        for thread in self._threads:
+            thread.join(timeout=1)
+        super().close()
+
+    def _deliver_result_after_delay(self):
+        time.sleep(self.delay_seconds)
+        for pattern, handler in list(self.handlers):
+            if _subject_matches(pattern, self.delayed_result_subject):
+                handler(self.delayed_result_subject, self.delayed_result_payload)
 
 
 class FakeResidentLifecycleProvider:
@@ -431,6 +465,102 @@ def test_start_once_records_observed_event_timestamps(tmp_path, monkeypatch):
     assert timestamps["result_candidate_at"]
     assert timestamps["drain_at"]
     assert result.status_snapshot["last_heartbeat_at"] == timestamps["heartbeat_at"]
+
+
+def test_start_once_waits_beyond_short_post_assignment_window_for_result_candidate(tmp_path, monkeypatch):
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")
+    config = _bounded_config(tmp_path)
+    config["uat"]["post_assignment_seconds"] = 0.01
+    result_subject = "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.result_candidate.done"
+    broker = DelayedResultResidentBroker(
+        inbound_events=[
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.readiness.ready",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.heartbeat.tick",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.ack.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.progress.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.evidence.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.offline.done",
+                "payload": {"agent_id": "jarvis"},
+            },
+        ],
+        delayed_result_subject=result_subject,
+        delayed_result_payload={"assignment_id": "assign-5b-local", "result": "synthetic"},
+        delay_seconds=0.05,
+    )
+
+    result = run_start_once(config=config, broker=broker)
+
+    assert result.accepted is True
+    assert "RESULT_CANDIDATE_NOT_OBSERVED" not in result.errors
+    assert result.status_snapshot["event_timestamps"]["result_candidate_at"]
+
+
+def test_start_once_publishes_duplicate_replay_after_result_candidate_before_drain(tmp_path, monkeypatch):
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")
+    broker = FakeResidentBroker(
+        inbound_events=[
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.readiness.ready",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.heartbeat.tick",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.ack.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.progress.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.evidence.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.result_candidate.done",
+                "payload": {"assignment_id": "assign-5b-local", "result": "synthetic"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.offline.done",
+                "payload": {"agent_id": "jarvis"},
+            },
+        ]
+    )
+
+    result = run_start_once(config=_bounded_config(tmp_path), broker=broker)
+
+    assert result.accepted is True
+    subjects = [subject for subject, _ in broker.published]
+    assignment_index = subjects.index("nexus.4_19.wbs7_19_14.run-5b-local.jarvis.assignment")
+    duplicate_index = subjects.index("nexus.4_19.wbs7_19_14.run-5b-local.jarvis.assignment.duplicate_replay")
+    drain_index = subjects.index("nexus.4_19.wbs7_19_14.run-5b-local.jarvis.drain")
+    assert assignment_index < duplicate_index < drain_index
+    duplicate_payload = broker.published[duplicate_index][1]
+    assert duplicate_payload["assignment_id"] == "assign-5b-local"
+    assert duplicate_payload["idempotency_key"] == "idem-5b-local"
+    assert duplicate_payload["duplicate_replay"] is True
+    assert result.status_snapshot["event_timestamps"]["duplicate_replay_at"]
 
 
 def test_start_once_publishes_assignment_once_after_duplicate_readiness_and_heartbeat(tmp_path, monkeypatch):
