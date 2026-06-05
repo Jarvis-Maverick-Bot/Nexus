@@ -108,6 +108,7 @@ def build_status_snapshot(
     last_heartbeat_at: str,
     pending_assignments: list[str],
     evidence_root: str,
+    event_timestamps: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     return {
         "schema_version": "4.19.resident_controller.status.v1",
@@ -115,6 +116,7 @@ def build_status_snapshot(
         "broker_connected": broker_connected,
         "subscriptions_ready": subscriptions_ready,
         "last_heartbeat_at": last_heartbeat_at,
+        "event_timestamps": dict(event_timestamps or {}),
         "pending_assignments": list(pending_assignments),
         "evidence_root": evidence_root,
         "operational_status_only": True,

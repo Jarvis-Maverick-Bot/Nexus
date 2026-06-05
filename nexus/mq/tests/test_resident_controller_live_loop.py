@@ -2,7 +2,7 @@ import json
 
 from nexus.mq.eligibility_reservation_policy import RuntimeEligibilityDecision, RuntimeReservationLease
 from nexus.mq.resident_controller.cli import main
-from nexus.mq.resident_controller.live_loop import run_start_once
+from nexus.mq.resident_controller.live_loop import MissingResidentLifecycleProvider, run_start_once
 from nexus.mq.tests.test_resident_controller_config import _config
 
 
@@ -12,19 +12,23 @@ class FakeResidentBroker:
         self.connected_url = ""
         self.subscriptions = []
         self.published = []
+        self.actions = []
         self.drained = False
         self.closed = False
 
     def connect(self, *, nats_url, auth_ref, connect_timeout_seconds):
+        self.actions.append(("connect", nats_url))
         self.connected_url = nats_url
 
     def subscribe(self, subject, handler):
+        self.actions.append(("subscribe", subject))
         self.subscriptions.append(subject)
         for event in self.inbound_events:
             if _subject_matches(subject, event["subject"]):
                 handler(event["subject"], event["payload"])
 
     def publish(self, subject, payload):
+        self.actions.append(("publish", subject))
         self.published.append((subject, payload))
 
     def drain(self):
@@ -254,6 +258,228 @@ def test_start_once_bounded_loop_uses_configured_wbs_7_19_15_2_identity(tmp_path
         if record.record_type == "bounded_assignment_published"
     )
     assert assignment_record.payload["runtime_authority_scopes"] == ["wbs://7.19.15.2"]
+
+
+def test_start_once_publishes_assignment_promptly_after_readiness_and_heartbeat(tmp_path, monkeypatch):
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")
+    config = _bounded_config(tmp_path)
+    config["uat"]["max_runtime_seconds"] = 1800
+    broker = FakeResidentBroker(
+        inbound_events=[
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.readiness.ready",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.heartbeat.tick",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.ack.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.progress.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.evidence.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.result_candidate.done",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.offline.done",
+                "payload": {"agent_id": "jarvis"},
+            },
+        ]
+    )
+
+    def record_wait(seconds):
+        broker.actions.append(("wait", seconds))
+
+    monkeypatch.setattr("nexus.mq.resident_controller.live_loop._wait_for_runtime_window", record_wait)
+
+    result = run_start_once(config=config, broker=broker)
+
+    assert result.accepted is True
+    assignment_index = broker.actions.index(("publish", "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.assignment"))
+    max_runtime_wait_indexes = [
+        index for index, action in enumerate(broker.actions) if action == ("wait", 1800.0)
+    ]
+    assert not max_runtime_wait_indexes or assignment_index < max_runtime_wait_indexes[0]
+
+
+def test_start_once_default_bounded_lifecycle_provider_dispatches_valid_assignment(tmp_path, monkeypatch):
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")
+    broker = FakeResidentBroker(
+        inbound_events=[
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.readiness.ready",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.heartbeat.tick",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.ack.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.progress.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.evidence.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.result_candidate.done",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.offline.done",
+                "payload": {"agent_id": "jarvis"},
+            },
+        ]
+    )
+
+    result = run_start_once(config=_bounded_config(tmp_path), broker=broker)
+
+    assert result.accepted is True
+    assignment_payload = next(payload for subject, payload in broker.published if subject.endswith(".assignment"))
+    assert assignment_payload["lifecycle_decision_id"].startswith("decision-run-5b-local-assign-5b-local-")
+    assert assignment_payload["reservation_lease_id"].startswith("lease-run-5b-local-assign-5b-local-")
+
+
+def test_start_once_missing_lifecycle_provider_fails_closed_without_assignment(tmp_path, monkeypatch):
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")
+    broker = FakeResidentBroker(
+        inbound_events=[
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.readiness.ready",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.heartbeat.tick",
+                "payload": {"agent_id": "jarvis"},
+            },
+        ]
+    )
+
+    result = run_start_once(
+        config=_bounded_config(tmp_path),
+        broker=broker,
+        lifecycle_provider=MissingResidentLifecycleProvider(),
+    )
+
+    assert result.accepted is False
+    assert "MISSING_LIFECYCLE_DECISION_ID" in result.errors
+    assert "MISSING_RESERVATION_LEASE_ID" in result.errors
+    assert all(not subject.endswith(".assignment") for subject, _ in broker.published)
+
+
+def test_start_once_records_observed_event_timestamps(tmp_path, monkeypatch):
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")
+    broker = FakeResidentBroker(
+        inbound_events=[
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.readiness.ready",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.heartbeat.tick",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.ack.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.progress.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.evidence.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.result_candidate.done",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.offline.done",
+                "payload": {"agent_id": "jarvis"},
+            },
+        ]
+    )
+
+    result = run_start_once(config=_bounded_config(tmp_path), broker=broker)
+
+    timestamps = result.status_snapshot["event_timestamps"]
+    assert timestamps["readiness_at"]
+    assert timestamps["heartbeat_at"]
+    assert timestamps["assignment_published_at"]
+    assert timestamps["ack_at"]
+    assert timestamps["result_candidate_at"]
+    assert timestamps["drain_at"]
+    assert result.status_snapshot["last_heartbeat_at"] == timestamps["heartbeat_at"]
+
+
+def test_start_once_publishes_assignment_once_after_duplicate_readiness_and_heartbeat(tmp_path, monkeypatch):
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")
+    broker = FakeResidentBroker(
+        inbound_events=[
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.readiness.ready",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.readiness.again",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.heartbeat.tick",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.heartbeat.again",
+                "payload": {"agent_id": "jarvis"},
+            },
+        ]
+    )
+
+    result = run_start_once(config=_bounded_config(tmp_path), broker=broker)
+
+    assignment_subjects = [subject for subject, _ in broker.published if subject.endswith(".assignment")]
+    assert assignment_subjects == ["nexus.4_19.wbs7_19_14.run-5b-local.jarvis.assignment"]
+    assert "ACK_CANDIDATE_NOT_OBSERVED" in result.errors
+
+
+def test_start_once_does_not_publish_assignment_before_readiness_and_heartbeat(tmp_path, monkeypatch):
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")
+    broker = FakeResidentBroker(
+        inbound_events=[
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.readiness.ready",
+                "payload": {"agent_id": "jarvis"},
+            },
+        ]
+    )
+
+    result = run_start_once(config=_bounded_config(tmp_path), broker=broker)
+
+    assert all(not subject.endswith(".assignment") for subject, _ in broker.published)
+    assert "ASSIGNMENT_READINESS_HEARTBEAT_NOT_OBSERVED: jarvis" in result.errors
 
 
 def test_start_once_bounded_loop_fails_closed_without_bounded_uat_launch_mode(tmp_path, monkeypatch):

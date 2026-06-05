@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from hashlib import sha256
 from pathlib import Path
 from typing import Any, Callable, Protocol
 from urllib.parse import urlparse
@@ -80,6 +81,59 @@ class MissingResidentLifecycleProvider:
         now_at: str,
     ) -> tuple[RuntimeEligibilityDecision | None, RuntimeReservationLease | None]:
         return None, None
+
+
+class BoundedUatResidentLifecycleProvider:
+    """Builds bounded non-production lifecycle evidence for start-once UAT dispatch."""
+
+    def assignment_decision_and_lease(
+        self,
+        *,
+        run_id: str,
+        agent_id: str,
+        assignment_id: str,
+        idempotency_key: str,
+        target_runtime_instance_id: str,
+        now_at: str,
+    ) -> tuple[RuntimeEligibilityDecision | None, RuntimeReservationLease | None]:
+        suffix = sha256(
+            f"{run_id}|{agent_id}|{assignment_id}|{idempotency_key}|{target_runtime_instance_id}".encode("utf-8")
+        ).hexdigest()[:12]
+        expires_at = _iso_after(now_at, seconds=3600)
+        policy_hash = f"bounded-uat-{suffix}"
+        decision = RuntimeEligibilityDecision(
+            decision_id=f"decision-{run_id}-{assignment_id}-{suffix}",
+            request_id=f"eligibility-{run_id}-{assignment_id}-{suffix}",
+            dispatch_run_id=run_id,
+            assignment_id=assignment_id,
+            target_agent_id=agent_id,
+            target_runtime_instance_id=target_runtime_instance_id,
+            accepted=True,
+            policy_hash=policy_hash,
+            idempotency_key=idempotency_key,
+            valid_until=expires_at,
+            runtime_role="bounded_uat_candidate",
+            runtime_owner=agent_id,
+            evidence_refs=[f"evidence://resident-controller/{run_id}/bounded-uat-lifecycle/{assignment_id}"],
+            not_business_completion=True,
+        )
+        lease = RuntimeReservationLease(
+            lease_id=f"lease-{run_id}-{assignment_id}-{suffix}",
+            lifecycle_decision_id=decision.decision_id,
+            assignment_id=assignment_id,
+            dispatch_run_id=run_id,
+            target_runtime_instance_id=target_runtime_instance_id,
+            active=True,
+            status="active",
+            expires_at=expires_at,
+            policy_hash=policy_hash,
+            idempotency_key=idempotency_key,
+            release_required_by=expires_at,
+            runtime_role="bounded_uat_candidate",
+            runtime_owner=agent_id,
+            not_business_completion=True,
+        )
+        return decision, lease
 
 
 @dataclass
@@ -182,17 +236,19 @@ def run_start_once(
     errors: list[str] = []
     sequence = 0
 
-    def record(record_type: str, payload: dict[str, Any]) -> None:
+    def record(record_type: str, payload: dict[str, Any]) -> str:
         nonlocal sequence
         sequence += 1
+        event_time = _now()
         records.append(
             ResidentEvidenceRecord(
                 sequence=sequence,
                 record_type=record_type,
-                event_time=_now(),
+                event_time=event_time,
                 payload={**payload, "not_business_completion": True},
             )
         )
+        return event_time
 
     config_result = validate_resident_controller_config(config)
     record(
@@ -234,7 +290,7 @@ def run_start_once(
 
     status_state = "blocked" if errors else "starting"
     if errors:
-        status = _status(status_state, False, False, "", evidence_config)
+        status = _status(status_state, False, False, "", evidence_config, event_timestamps={})
         return ResidentStartOnceRuntimeResult(
             accepted=False,
             daemon_started=False,
@@ -245,7 +301,7 @@ def run_start_once(
         )
 
     client = broker or NatsResidentBrokerClient()
-    lifecycle_provider = lifecycle_provider or MissingResidentLifecycleProvider()
+    lifecycle_provider = lifecycle_provider or BoundedUatResidentLifecycleProvider()
     observed: dict[str, set[str]] = {
         "registration": set(),
         "readiness": set(),
@@ -256,6 +312,19 @@ def run_start_once(
         "result_candidate": set(),
         "offline": set(),
     }
+    event_timestamps: dict[str, str] = {
+        "registration_at": "",
+        "readiness_at": "",
+        "heartbeat_at": "",
+        "assignment_published_at": "",
+        "ack_at": "",
+        "progress_at": "",
+        "evidence_at": "",
+        "result_candidate_at": "",
+        "duplicate_replay_at": "",
+        "drain_at": "",
+    }
+    assignment_published_agents: set[str] = set()
 
     def handle_event(subject: str, payload: dict[str, Any]) -> None:
         family, agent_id = _event_family(subject, namespace=str(subjects.get("namespace")), run_id=run_id)
@@ -264,7 +333,7 @@ def run_start_once(
             return
         if agent_id:
             observed[family].add(agent_id)
-        record(
+        event_time = record(
             _record_type_for_family(family),
             {
                 "subject": _redact_subject(subject),
@@ -273,6 +342,9 @@ def run_start_once(
                 "candidate_evidence_only": family in {"ack", "progress", "evidence", "result_candidate"},
             },
         )
+        timestamp_key = f"{family}_at" if family != "result_candidate" else "result_candidate_at"
+        if timestamp_key in event_timestamps:
+            event_timestamps[timestamp_key] = event_time
 
     try:
         client.connect(
@@ -312,12 +384,17 @@ def run_start_once(
                 errors=errors,
             )
 
-        _wait_for_runtime_window(float(uat_config.get("max_runtime_seconds", 5)))
         if bool(uat_config.get("assignment_enabled")):
+            _wait_for_assignment_readiness(
+                observed=observed,
+                allowed_agents=allowed_agents,
+                max_runtime_seconds=float(uat_config.get("max_runtime_seconds", 5)),
+            )
             for agent_id in allowed_agents:
                 if agent_id not in observed["readiness"] or agent_id not in observed["heartbeat"]:
+                    errors.append(f"ASSIGNMENT_READINESS_HEARTBEAT_NOT_OBSERVED: {agent_id}")
                     continue
-                _publish_assignment(
+                published_at = _publish_assignment(
                     client=client,
                     subject_policy=subject_policy,
                     run_id=run_id,
@@ -329,12 +406,19 @@ def run_start_once(
                     record=record,
                     errors=errors,
                 )
+                if published_at:
+                    assignment_published_agents.add(agent_id)
+                    event_timestamps["assignment_published_at"] = published_at
 
         _wait_for_runtime_window(float(uat_config.get("post_assignment_seconds", 0)))
         if bool(uat_config.get("assignment_enabled")):
-            _require_candidate_observations(observed=observed, errors=errors)
+            _require_candidate_observations(
+                observed=observed,
+                errors=errors,
+                assignment_published=bool(assignment_published_agents),
+            )
         for agent_id in allowed_agents:
-            _publish_allowed_command(
+            drain_at = _publish_allowed_command(
                 client=client,
                 subject_policy=subject_policy,
                 command="drain",
@@ -344,6 +428,8 @@ def run_start_once(
                 record=record,
                 errors=errors,
             )
+            if drain_at:
+                event_timestamps["drain_at"] = drain_at
         _wait_for_runtime_window(float(uat_config.get("post_drain_seconds", 0.5)))
         if not observed["offline"]:
             errors.append("OFFLINE_NOT_OBSERVED_AFTER_DRAIN")
@@ -370,6 +456,7 @@ def run_start_once(
         subscriptions_ready=not errors,
         last_heartbeat_at=_now() if observed["heartbeat"] else "",
         evidence_config=evidence_config,
+        event_timestamps=event_timestamps,
     )
     default_evidence_root = f"evidence/4.19/wbs-{configured_wbs_id or '7.19.15'}/resident-controller/RUN_ID"
     evidence_root = Path(str(evidence_config.get("root") or default_evidence_root).replace("RUN_ID", run_id))
@@ -398,7 +485,7 @@ def _publish_assignment(
     lifecycle_provider: ResidentLifecycleProvider,
     record: Callable[[str, dict[str, Any]], None],
     errors: list[str],
-) -> None:
+) -> str:
     now_at = _now()
     assignment_id = str(uat_config.get("assignment_id") or f"{run_id}-assignment")
     idempotency_key = str(uat_config.get("idempotency_key") or f"{run_id}-idempotency")
@@ -430,7 +517,7 @@ def _publish_assignment(
     subject_result = validate_publish_subject(subject, subject_policy)
     if not subject_result.accepted:
         errors.extend(subject_result.errors)
-        return
+        return ""
     dispatch_policy = ResidentControllerDispatchPolicy(
         dispatch_enabled=True,
         uat_authorized=True,
@@ -443,7 +530,7 @@ def _publish_assignment(
         "synthetic_business_command_acceptance",
     }:
         errors.append("BUSINESS_EXECUTION_NOT_AUTHORIZED")
-        return
+        return ""
     # Build a deterministic message id without letting dispatcher publish or claim completion.
     decision = evaluate_resident_dispatch(
         request=request,
@@ -456,9 +543,9 @@ def _publish_assignment(
     )
     if not decision.accepted:
         errors.extend(decision.errors)
-        return
+        return ""
     client.publish(subject, {**request.to_dict(), "message_id": decision.message_id, "candidate_only": True})
-    record(
+    return record(
         "bounded_assignment_published",
         {
             "subject": _redact_subject(subject),
@@ -466,11 +553,20 @@ def _publish_assignment(
             "wbs_id": wbs_id,
             "no_go_scope_ref": request.no_go_scope_ref,
             "runtime_authority_scopes": [f"wbs://{wbs_id}"],
+            "lifecycle_decision_id": request.lifecycle_decision_id,
+            "reservation_lease_id": request.reservation_lease_id,
         },
     )
 
 
-def _require_candidate_observations(*, observed: dict[str, set[str]], errors: list[str]) -> None:
+def _require_candidate_observations(
+    *,
+    observed: dict[str, set[str]],
+    errors: list[str],
+    assignment_published: bool,
+) -> None:
+    if not assignment_published:
+        return
     if not observed["ack"]:
         errors.append("ACK_CANDIDATE_NOT_OBSERVED")
     if not observed["progress"]:
@@ -521,15 +617,15 @@ def _publish_allowed_command(
     payload: dict[str, Any],
     record: Callable[[str, dict[str, Any]], None],
     errors: list[str],
-) -> None:
+) -> str:
     family = {"controller_init": "controller.init", "drain": "drain"}[command]
     subject = f"{subject_policy.namespace}.{run_id}.{agent_id}.{family}"
     subject_result = validate_publish_subject(subject, subject_policy)
     if not subject_result.accepted:
         errors.extend(subject_result.errors)
-        return
+        return ""
     client.publish(subject, payload)
-    record(f"{command}_published", {"subject": _redact_subject(subject)})
+    return record(f"{command}_published", {"subject": _redact_subject(subject)})
 
 
 def _configured_wbs_id(allowed_wbs_ids: Any) -> str:
@@ -631,20 +727,39 @@ def _wait_for_runtime_window(seconds: float) -> None:
     time.sleep(seconds)
 
 
+def _wait_for_assignment_readiness(
+    *,
+    observed: dict[str, set[str]],
+    allowed_agents: list[str],
+    max_runtime_seconds: float,
+) -> None:
+    if not allowed_agents:
+        return
+    deadline = time.monotonic() + max(0.0, max_runtime_seconds)
+    while time.monotonic() <= deadline:
+        if any(agent in observed["readiness"] and agent in observed["heartbeat"] for agent in allowed_agents):
+            return
+        if max_runtime_seconds <= 0:
+            return
+        time.sleep(min(0.2, max(0.0, deadline - time.monotonic())))
+
+
 def _status(
     service_state: str,
     broker_connected: bool,
     subscriptions_ready: bool,
     last_heartbeat_at: str,
     evidence_config: dict[str, Any],
+    event_timestamps: dict[str, str],
 ) -> dict[str, Any]:
     return build_status_snapshot(
         service_state=service_state,
         broker_connected=broker_connected,
         subscriptions_ready=subscriptions_ready,
-        last_heartbeat_at=last_heartbeat_at,
+        last_heartbeat_at=event_timestamps.get("heartbeat_at") or last_heartbeat_at,
         pending_assignments=[],
         evidence_root=str(evidence_config.get("root") or ""),
+        event_timestamps=event_timestamps,
     )
 
 
@@ -654,6 +769,16 @@ def _redact_subject(subject: str) -> str:
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _iso_after(value: str, *, seconds: int) -> str:
+    try:
+        base = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        base = datetime.now(timezone.utc)
+    if base.tzinfo is None:
+        base = base.replace(tzinfo=timezone.utc)
+    return (base + timedelta(seconds=seconds)).isoformat()
 
 
 def _dedupe(values: list[str]) -> list[str]:
