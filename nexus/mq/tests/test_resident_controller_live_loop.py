@@ -4,15 +4,21 @@ import time
 
 from nexus.mq.eligibility_reservation_policy import RuntimeEligibilityDecision, RuntimeReservationLease
 from nexus.mq.resident_controller.cli import main
-from nexus.mq.resident_controller.live_loop import MissingResidentLifecycleProvider, run_start_once
+from nexus.mq.resident_controller.live_loop import (
+    MissingResidentLifecycleProvider,
+    _post_assignment_observation_timeout_seconds,
+    run_start_once,
+)
 from nexus.mq.tests.test_resident_controller_config import _config
 
 
 class FakeResidentBroker:
-    def __init__(self, inbound_events=None):
+    def __init__(self, inbound_events=None, *, auto_duplicate_suppression=True):
         self.inbound_events = list(inbound_events or [])
+        self.auto_duplicate_suppression = auto_duplicate_suppression
         self.connected_url = ""
         self.subscriptions = []
+        self.registered_handlers = []
         self.published = []
         self.actions = []
         self.drained = False
@@ -25,6 +31,7 @@ class FakeResidentBroker:
     def subscribe(self, subject, handler):
         self.actions.append(("subscribe", subject))
         self.subscriptions.append(subject)
+        self.registered_handlers.append((subject, handler))
         for event in self.inbound_events:
             if _subject_matches(subject, event["subject"]):
                 handler(event["subject"], event["payload"])
@@ -32,6 +39,20 @@ class FakeResidentBroker:
     def publish(self, subject, payload):
         self.actions.append(("publish", subject))
         self.published.append((subject, payload))
+        if self.auto_duplicate_suppression and subject.endswith(".assignment.duplicate_replay"):
+            suppression_payload = {
+                "assignment_id": payload.get("assignment_id", ""),
+                "duplicate_replay_suppressed": True,
+                "error_code": "DUPLICATE_ASSIGNMENT_SUPPRESSED",
+            }
+            suppression_subjects = [
+                subject.rsplit(".assignment.duplicate_replay", 1)[0] + ".evidence.duplicate_replay",
+                subject.rsplit(".assignment.duplicate_replay", 1)[0] + ".evidence",
+            ]
+            for pattern, handler in list(self.registered_handlers):
+                for suppression_subject in suppression_subjects:
+                    if _subject_matches(pattern, suppression_subject):
+                        handler(suppression_subject, suppression_payload)
 
     def drain(self):
         self.drained = True
@@ -70,6 +91,45 @@ class DelayedResultResidentBroker(FakeResidentBroker):
         for pattern, handler in list(self.handlers):
             if _subject_matches(pattern, self.delayed_result_subject):
                 handler(self.delayed_result_subject, self.delayed_result_payload)
+
+
+class DuplicateSuppressionResidentBroker(FakeResidentBroker):
+    def __init__(
+        self,
+        inbound_events=None,
+        *,
+        suppression_subject="",
+        suppression_payload=None,
+        delay_seconds=0.01,
+    ):
+        super().__init__(inbound_events, auto_duplicate_suppression=False)
+        self.handlers = []
+        self.suppression_subject = suppression_subject
+        self.suppression_payload = dict(suppression_payload or {})
+        self.delay_seconds = delay_seconds
+        self._threads = []
+
+    def subscribe(self, subject, handler):
+        self.handlers.append((subject, handler))
+        super().subscribe(subject, handler)
+
+    def publish(self, subject, payload):
+        super().publish(subject, payload)
+        if subject.endswith(".assignment.duplicate_replay") and self.suppression_subject:
+            thread = threading.Thread(target=self._deliver_suppression_after_delay, daemon=True)
+            thread.start()
+            self._threads.append(thread)
+
+    def close(self):
+        for thread in self._threads:
+            thread.join(timeout=1)
+        super().close()
+
+    def _deliver_suppression_after_delay(self):
+        time.sleep(self.delay_seconds)
+        for pattern, handler in list(self.handlers):
+            if _subject_matches(pattern, self.suppression_subject):
+                handler(self.suppression_subject, self.suppression_payload)
 
 
 class FakeResidentLifecycleProvider:
@@ -512,6 +572,15 @@ def test_start_once_waits_beyond_short_post_assignment_window_for_result_candida
     assert result.status_snapshot["event_timestamps"]["result_candidate_at"]
 
 
+def test_post_assignment_observation_window_uses_recovery_timeout_minimum_for_7_19_15_2():
+    timeout = _post_assignment_observation_timeout_seconds(
+        {"post_assignment_seconds": 1},
+        {"result_candidate_timeout_seconds": 120},
+    )
+
+    assert timeout >= 120
+
+
 def test_start_once_publishes_duplicate_replay_after_result_candidate_before_drain(tmp_path, monkeypatch):
     monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")
     monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")
@@ -563,9 +632,110 @@ def test_start_once_publishes_duplicate_replay_after_result_candidate_before_dra
     assert result.status_snapshot["event_timestamps"]["duplicate_replay_at"]
 
 
+def test_start_once_blocks_drain_when_duplicate_suppression_evidence_missing(tmp_path, monkeypatch):
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")
+    config = _bounded_config(tmp_path)
+    config["uat"]["duplicate_replay_suppression_timeout_seconds"] = 0.01
+    broker = FakeResidentBroker(
+        inbound_events=[
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.readiness.ready",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.heartbeat.tick",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.ack.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.progress.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.evidence.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.result_candidate.done",
+                "payload": {"assignment_id": "assign-5b-local", "result": "synthetic"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.offline.done",
+                "payload": {"agent_id": "jarvis"},
+            },
+        ],
+        auto_duplicate_suppression=False,
+    )
+
+    result = run_start_once(config=config, broker=broker)
+
+    assert result.accepted is False
+    assert "DUPLICATE_REPLAY_SUPPRESSION_NOT_OBSERVED: jarvis" in result.errors
+    subjects = [subject for subject, _ in broker.published]
+    assert "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.assignment.duplicate_replay" in subjects
+    assert "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.drain" not in subjects
+
+
+def test_start_once_waits_for_duplicate_suppression_evidence_before_drain(tmp_path, monkeypatch):
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")
+    broker = DuplicateSuppressionResidentBroker(
+        inbound_events=[
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.readiness.ready",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.heartbeat.tick",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.ack.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.progress.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.evidence.assignment",
+                "payload": {"assignment_id": "assign-5b-local"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.result_candidate.done",
+                "payload": {"assignment_id": "assign-5b-local", "result": "synthetic"},
+            },
+            {
+                "subject": "nexus.4_19.wbs7_19_14.run-5b-local.jarvis.offline.done",
+                "payload": {"agent_id": "jarvis"},
+            },
+        ],
+        suppression_subject="nexus.4_19.wbs7_19_14.run-5b-local.jarvis.evidence.duplicate_replay",
+        suppression_payload={
+            "assignment_id": "assign-5b-local",
+            "duplicate_replay_suppressed": True,
+            "error_code": "DUPLICATE_ASSIGNMENT_SUPPRESSED",
+        },
+    )
+
+    result = run_start_once(config=_bounded_config(tmp_path), broker=broker)
+
+    assert result.accepted is True
+    subjects = [subject for subject, _ in broker.published]
+    duplicate_index = subjects.index("nexus.4_19.wbs7_19_14.run-5b-local.jarvis.assignment.duplicate_replay")
+    drain_index = subjects.index("nexus.4_19.wbs7_19_14.run-5b-local.jarvis.drain")
+    assert duplicate_index < drain_index
+    assert result.status_snapshot["event_timestamps"]["duplicate_suppression_at"]
+
+
 def test_start_once_publishes_assignment_once_after_duplicate_readiness_and_heartbeat(tmp_path, monkeypatch):
     monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")
     monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")
+    monkeypatch.setattr("nexus.mq.resident_controller.live_loop._wait_for_candidate_observations", lambda **kwargs: None)
     broker = FakeResidentBroker(
         inbound_events=[
             {
@@ -639,6 +809,7 @@ def test_start_once_bounded_loop_rejects_default_production_port(tmp_path, monke
 def test_start_once_bounded_loop_requires_assignment_candidate_evidence_when_enabled(tmp_path, monkeypatch):
     monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")
     monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")
+    monkeypatch.setattr("nexus.mq.resident_controller.live_loop._wait_for_candidate_observations", lambda **kwargs: None)
     broker = FakeResidentBroker(
         inbound_events=[
             {

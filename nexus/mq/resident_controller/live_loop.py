@@ -36,7 +36,8 @@ except ImportError:  # pragma: no cover - covered by runtime posture evidence wh
 
 
 MessageHandler = Callable[[str, dict[str, Any]], None]
-DEFAULT_POST_ASSIGNMENT_OBSERVATION_SECONDS = 60.0
+MIN_POST_ASSIGNMENT_OBSERVATION_SECONDS = 90.0
+DEFAULT_DUPLICATE_REPLAY_SUPPRESSION_TIMEOUT_SECONDS = 30.0
 
 
 class ResidentBrokerClient(Protocol):
@@ -319,6 +320,7 @@ def run_start_once(
         "progress": set(),
         "evidence": set(),
         "result_candidate": set(),
+        "duplicate_suppression": set(),
         "offline": set(),
     }
     event_timestamps: dict[str, str] = {
@@ -331,6 +333,7 @@ def run_start_once(
         "evidence_at": "",
         "result_candidate_at": "",
         "duplicate_replay_at": "",
+        "duplicate_suppression_at": "",
         "drain_at": "",
     }
     published_assignments: list[PublishedAssignment] = []
@@ -342,6 +345,9 @@ def run_start_once(
             return
         if agent_id:
             observed[family].add(agent_id)
+        duplicate_suppression = family == "evidence" and _is_duplicate_replay_suppression_evidence(payload)
+        if duplicate_suppression and agent_id:
+            observed["duplicate_suppression"].add(agent_id)
         event_time = record(
             _record_type_for_family(family),
             {
@@ -349,11 +355,14 @@ def run_start_once(
                 "agent_id": agent_id,
                 "payload_keys": sorted(payload),
                 "candidate_evidence_only": family in {"ack", "progress", "evidence", "result_candidate"},
+                "duplicate_replay_suppression": duplicate_suppression,
             },
         )
         timestamp_key = f"{family}_at" if family != "result_candidate" else "result_candidate_at"
         if timestamp_key in event_timestamps:
             event_timestamps[timestamp_key] = event_time
+        if duplicate_suppression:
+            event_timestamps["duplicate_suppression_at"] = event_time
 
     try:
         client.connect(
@@ -423,9 +432,10 @@ def run_start_once(
             _wait_for_candidate_observations(
                 observed=observed,
                 allowed_agents=[assignment.agent_id for assignment in published_assignments],
-                timeout_seconds=_post_assignment_observation_timeout_seconds(uat_config),
+                timeout_seconds=_post_assignment_observation_timeout_seconds(uat_config, dict(config.get("recovery") or {})),
             )
             if observed["result_candidate"]:
+                duplicate_replay_agents: list[str] = []
                 for assignment in published_assignments:
                     duplicate_replay_at = _publish_duplicate_replay(
                         client=client,
@@ -436,6 +446,18 @@ def run_start_once(
                     )
                     if duplicate_replay_at:
                         event_timestamps["duplicate_replay_at"] = duplicate_replay_at
+                        duplicate_replay_agents.append(assignment.agent_id)
+                if duplicate_replay_agents:
+                    _wait_for_duplicate_suppression(
+                        observed=observed,
+                        allowed_agents=duplicate_replay_agents,
+                        timeout_seconds=_duplicate_replay_suppression_timeout_seconds(uat_config),
+                    )
+                    _require_duplicate_suppression(
+                        observed=observed,
+                        allowed_agents=duplicate_replay_agents,
+                        errors=errors,
+                    )
         else:
             _wait_for_runtime_window(float(uat_config.get("post_assignment_seconds", 0)))
         if bool(uat_config.get("assignment_enabled")):
@@ -444,30 +466,31 @@ def run_start_once(
                 errors=errors,
                 assignment_published=bool(published_assignments),
             )
-        for agent_id in allowed_agents:
-            drain_at = _publish_allowed_command(
-                client=client,
-                subject_policy=subject_policy,
-                command="drain",
-                run_id=run_id,
-                agent_id=agent_id,
-                payload=_command_payload("drain", run_id, agent_id, controller),
-                record=record,
-                errors=errors,
+        if not errors:
+            for agent_id in allowed_agents:
+                drain_at = _publish_allowed_command(
+                    client=client,
+                    subject_policy=subject_policy,
+                    command="drain",
+                    run_id=run_id,
+                    agent_id=agent_id,
+                    payload=_command_payload("drain", run_id, agent_id, controller),
+                    record=record,
+                    errors=errors,
+                )
+                if drain_at:
+                    event_timestamps["drain_at"] = drain_at
+            _wait_for_runtime_window(float(uat_config.get("post_drain_seconds", 0.5)))
+            if not observed["offline"]:
+                errors.append("OFFLINE_NOT_OBSERVED_AFTER_DRAIN")
+            client.drain()
+            record(
+                "drain_offline",
+                {
+                    "drain_published": True,
+                    "offline_observed_agents": sorted(observed["offline"]),
+                },
             )
-            if drain_at:
-                event_timestamps["drain_at"] = drain_at
-        _wait_for_runtime_window(float(uat_config.get("post_drain_seconds", 0.5)))
-        if not observed["offline"]:
-            errors.append("OFFLINE_NOT_OBSERVED_AFTER_DRAIN")
-        client.drain()
-        record(
-            "drain_offline",
-            {
-                "drain_published": True,
-                "offline_observed_agents": sorted(observed["offline"]),
-            },
-        )
     except Exception as exc:  # noqa: BLE001 - fail closed with evidence
         errors.append(f"BROKER_RUNTIME_ERROR: {type(exc).__name__}")
     finally:
@@ -638,6 +661,17 @@ def _require_candidate_observations(
         errors.append("EVIDENCE_CANDIDATE_NOT_OBSERVED")
     if not observed["result_candidate"]:
         errors.append("RESULT_CANDIDATE_NOT_OBSERVED")
+
+
+def _require_duplicate_suppression(
+    *,
+    observed: dict[str, set[str]],
+    allowed_agents: list[str],
+    errors: list[str],
+) -> None:
+    for agent in allowed_agents:
+        if agent not in observed["duplicate_suppression"]:
+            errors.append(f"DUPLICATE_REPLAY_SUPPRESSION_NOT_OBSERVED: {agent}")
 
 
 def _runtime_record_for_assignment(*, agent_id: str, request: ResidentControllerDispatchRequest, wbs_id: str) -> Any:
@@ -822,6 +856,21 @@ def _wait_for_candidate_observations(
         time.sleep(min(0.2, max(0.0, deadline - time.monotonic())))
 
 
+def _wait_for_duplicate_suppression(
+    *,
+    observed: dict[str, set[str]],
+    allowed_agents: list[str],
+    timeout_seconds: float,
+) -> None:
+    if timeout_seconds <= 0 or not allowed_agents:
+        return
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() <= deadline:
+        if all(agent in observed["duplicate_suppression"] for agent in allowed_agents):
+            return
+        time.sleep(min(0.2, max(0.0, deadline - time.monotonic())))
+
+
 def _candidate_observations_complete(*, observed: dict[str, set[str]], allowed_agents: list[str]) -> bool:
     return all(
         agent in observed["ack"]
@@ -832,14 +881,33 @@ def _candidate_observations_complete(*, observed: dict[str, set[str]], allowed_a
     )
 
 
-def _post_assignment_observation_timeout_seconds(uat_config: dict[str, Any]) -> float:
+def _post_assignment_observation_timeout_seconds(uat_config: dict[str, Any], recovery_config: dict[str, Any] | None = None) -> float:
     configured = float(uat_config.get("post_assignment_observation_seconds") or 0)
     legacy_window = float(uat_config.get("post_assignment_seconds") or 0)
+    recovery_window = float((recovery_config or {}).get("result_candidate_timeout_seconds") or 0)
+    minimum_window = max(MIN_POST_ASSIGNMENT_OBSERVATION_SECONDS, recovery_window)
     if configured > 0:
-        return max(configured, legacy_window)
+        return max(configured, legacy_window, minimum_window)
     if legacy_window > 0:
-        return max(legacy_window, DEFAULT_POST_ASSIGNMENT_OBSERVATION_SECONDS)
-    return 0.0
+        return max(legacy_window, minimum_window)
+    return recovery_window
+
+
+def _duplicate_replay_suppression_timeout_seconds(uat_config: dict[str, Any]) -> float:
+    configured = float(uat_config.get("duplicate_replay_suppression_timeout_seconds") or 0)
+    if configured > 0:
+        return configured
+    return DEFAULT_DUPLICATE_REPLAY_SUPPRESSION_TIMEOUT_SECONDS
+
+
+def _is_duplicate_replay_suppression_evidence(payload: dict[str, Any]) -> bool:
+    if payload.get("duplicate_replay_suppressed") is True:
+        return True
+    if payload.get("duplicate_suppressed") is True:
+        return True
+    error_code = str(payload.get("error_code") or "")
+    errors = [str(error) for error in payload.get("errors") or []]
+    return error_code == "DUPLICATE_ASSIGNMENT_SUPPRESSED" or "DUPLICATE_ASSIGNMENT_SUPPRESSED" in errors
 
 
 def _status(
