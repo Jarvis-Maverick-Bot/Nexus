@@ -15,6 +15,7 @@ import time
 from nexus.mq.eligibility_reservation_policy import RuntimeEligibilityDecision, RuntimeReservationLease
 from nexus.mq.resident_controller.config import validate_resident_controller_config
 from nexus.mq.resident_controller.dispatcher import (
+    DEFAULT_ALLOWED_WBS_IDS,
     ResidentControllerDispatchPolicy,
     ResidentControllerDispatchRequest,
     ResidentControllerSubjectPolicy,
@@ -214,13 +215,14 @@ def run_start_once(
     uat_config = dict(config.get("uat") or {})
     run_id = str(controller.get("run_id") or controller.get("runtime_instance_id") or "")
     allowed_agents = [str(agent) for agent in runtimes.get("allowed_agents") or []]
+    configured_wbs_id = _configured_wbs_id(controller.get("allowed_wbs_ids") or [])
 
     if controller.get("launch_mode") != "bounded_uat":
         errors.append("BOUNDED_UAT_LAUNCH_MODE_REQUIRED")
     if not controller.get("run_authorization_ref"):
         errors.append("MISSING_UAT_AUTHORIZATION")
-    if "7.19.14.5" not in set(controller.get("allowed_wbs_ids") or []):
-        errors.append("WBS_7_19_14_5_NOT_AUTHORIZED")
+    if not configured_wbs_id:
+        errors.append("SUPPORTED_WBS_ID_NOT_AUTHORIZED")
 
     nats_url = _resolve_env_ref(broker_config.get("nats_url_ref"), field_name="broker.nats_url_ref", errors=errors)
     auth_ref = _resolve_env_ref(broker_config.get("auth_ref"), field_name="broker.auth_ref", errors=errors)
@@ -322,6 +324,7 @@ def run_start_once(
                     agent_id=agent_id,
                     controller=controller,
                     uat_config=uat_config,
+                    wbs_id=configured_wbs_id,
                     lifecycle_provider=lifecycle_provider,
                     record=record,
                     errors=errors,
@@ -368,7 +371,8 @@ def run_start_once(
         last_heartbeat_at=_now() if observed["heartbeat"] else "",
         evidence_config=evidence_config,
     )
-    evidence_root = Path(str(evidence_config.get("root") or "evidence/4.19/wbs-7.19.14/resident-controller/RUN_ID").replace("RUN_ID", run_id))
+    default_evidence_root = f"evidence/4.19/wbs-{configured_wbs_id or '7.19.15'}/resident-controller/RUN_ID"
+    evidence_root = Path(str(evidence_config.get("root") or default_evidence_root).replace("RUN_ID", run_id))
     package = build_evidence_package(run_id=run_id, evidence_root=evidence_root, records=records, status_summary=status)
     errors.extend(package.errors)
     return ResidentStartOnceRuntimeResult(
@@ -390,6 +394,7 @@ def _publish_assignment(
     agent_id: str,
     controller: dict[str, Any],
     uat_config: dict[str, Any],
+    wbs_id: str,
     lifecycle_provider: ResidentLifecycleProvider,
     record: Callable[[str, dict[str, Any]], None],
     errors: list[str],
@@ -410,13 +415,13 @@ def _publish_assignment(
         assignment_id=assignment_id,
         idempotency_key=idempotency_key,
         run_id=run_id,
-        wbs_id="7.19.14.5",
+        wbs_id=wbs_id,
         target_agent_id=agent_id,
         target_runtime_instance_id=target_runtime_instance_id,
         assignment_kind=str(uat_config.get("assignment_kind") or "non_business_probe"),
         command="bounded_assignment",
         source_authority_ref=str(controller.get("run_authorization_ref") or ""),
-        no_go_scope_ref="no-go://wbs-7.19.14.5",
+        no_go_scope_ref=f"no-go://wbs-{wbs_id}",
         lifecycle_decision_id=lifecycle_decision.decision_id if lifecycle_decision is not None else "",
         reservation_lease_id=reservation_lease.lease_id if reservation_lease is not None else "",
         not_business_completion=True,
@@ -426,14 +431,18 @@ def _publish_assignment(
     if not subject_result.accepted:
         errors.extend(subject_result.errors)
         return
-    dispatch_policy = ResidentControllerDispatchPolicy(dispatch_enabled=True, uat_authorized=True)
+    dispatch_policy = ResidentControllerDispatchPolicy(
+        dispatch_enabled=True,
+        uat_authorized=True,
+        allowed_wbs_ids={wbs_id},
+    )
     if request.assignment_kind not in {"non_business_probe", "readiness_probe", "diagnostic_probe"}:
         errors.append("BUSINESS_EXECUTION_NOT_AUTHORIZED")
         return
     # Build a deterministic message id without letting dispatcher publish or claim completion.
     decision = evaluate_resident_dispatch(
         request=request,
-        runtime=_runtime_record_for_assignment(agent_id=agent_id, request=request),
+        runtime=_runtime_record_for_assignment(agent_id=agent_id, request=request, wbs_id=wbs_id),
         subject_policy=subject_policy,
         policy=dispatch_policy,
         now_at=now_at,
@@ -444,7 +453,16 @@ def _publish_assignment(
         errors.extend(decision.errors)
         return
     client.publish(subject, {**request.to_dict(), "message_id": decision.message_id, "candidate_only": True})
-    record("bounded_assignment_published", {"subject": _redact_subject(subject), "message_id": decision.message_id})
+    record(
+        "bounded_assignment_published",
+        {
+            "subject": _redact_subject(subject),
+            "message_id": decision.message_id,
+            "wbs_id": wbs_id,
+            "no_go_scope_ref": request.no_go_scope_ref,
+            "runtime_authority_scopes": [f"wbs://{wbs_id}"],
+        },
+    )
 
 
 def _require_candidate_observations(*, observed: dict[str, set[str]], errors: list[str]) -> None:
@@ -458,7 +476,7 @@ def _require_candidate_observations(*, observed: dict[str, set[str]], errors: li
         errors.append("RESULT_CANDIDATE_NOT_OBSERVED")
 
 
-def _runtime_record_for_assignment(*, agent_id: str, request: ResidentControllerDispatchRequest) -> Any:
+def _runtime_record_for_assignment(*, agent_id: str, request: ResidentControllerDispatchRequest, wbs_id: str) -> Any:
     from nexus.mq.agent_registry import AgentRegistryRecord
 
     now = _now()
@@ -470,7 +488,7 @@ def _runtime_record_for_assignment(*, agent_id: str, request: ResidentController
         runtime_type="agent",
         channel_bindings=["nats"],
         capabilities=["controlled_uat_handoff_receive"],
-        authority_scopes=["wbs://7.19.14.5"],
+        authority_scopes=[f"wbs://{wbs_id}"],
         allowed_task_boundaries=["non_business_probe"],
         initialization_status="ready",
         registry_status="active",
@@ -507,6 +525,17 @@ def _publish_allowed_command(
         return
     client.publish(subject, payload)
     record(f"{command}_published", {"subject": _redact_subject(subject)})
+
+
+def _configured_wbs_id(allowed_wbs_ids: Any) -> str:
+    allowed = [str(wbs_id) for wbs_id in allowed_wbs_ids]
+    for preferred in ("7.19.15.2", "7.19.15", "7.19.14.5"):
+        if preferred in allowed and preferred in DEFAULT_ALLOWED_WBS_IDS:
+            return preferred
+    for wbs_id in allowed:
+        if wbs_id in DEFAULT_ALLOWED_WBS_IDS:
+            return wbs_id
+    return ""
 
 
 def _command_payload(command: str, run_id: str, agent_id: str, controller: dict[str, Any]) -> dict[str, Any]:

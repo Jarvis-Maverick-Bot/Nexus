@@ -169,6 +169,90 @@ def test_start_once_bounded_loop_connects_subscribes_dispatches_and_records_cand
     assert result.evidence_package.review_ready is True
 
 
+def test_start_once_bounded_loop_uses_configured_wbs_7_19_15_2_identity(tmp_path, monkeypatch):
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://192.168.31.124:7422")
+    monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")
+    run_id = "wbs-7-19-15-2-jarvis-resident-controller-run-window-20260605T091050Z"
+    config = _bounded_config(tmp_path)
+    config["controller"]["run_id"] = run_id
+    config["controller"]["runtime_instance_id"] = run_id
+    config["controller"]["allowed_wbs_ids"] = ["7.19.15.2"]
+    config["subjects"]["namespace"] = "nexus.4_19.wbs7_19_15"
+    config["subjects"]["subscribe_allowlist"] = [
+        "nexus.4_19.wbs7_19_15.*.registration.>",
+        "nexus.4_19.wbs7_19_15.*.readiness.>",
+        "nexus.4_19.wbs7_19_15.*.heartbeat.>",
+        "nexus.4_19.wbs7_19_15.*.ack.>",
+        "nexus.4_19.wbs7_19_15.*.progress.>",
+        "nexus.4_19.wbs7_19_15.*.evidence.>",
+        "nexus.4_19.wbs7_19_15.*.result_candidate.>",
+        "nexus.4_19.wbs7_19_15.*.offline.>",
+    ]
+    config["subjects"]["publish_allowlist"] = [
+        "nexus.4_19.wbs7_19_15.*.controller.init",
+        "nexus.4_19.wbs7_19_15.*.assignment",
+        "nexus.4_19.wbs7_19_15.*.assignment.duplicate_replay",
+        "nexus.4_19.wbs7_19_15.*.drain",
+    ]
+    config["evidence"]["root"] = str(tmp_path / "evidence" / "RUN_ID")
+    config["uat"]["assignment_id"] = "assign-wbs-7-19-15-2-001"
+    config["uat"]["idempotency_key"] = "idem-wbs-7-19-15-2-001"
+    broker = FakeResidentBroker(
+        inbound_events=[
+            {
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.registration.ready",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.readiness.ready",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.heartbeat.tick",
+                "payload": {"agent_id": "jarvis"},
+            },
+            {
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.ack.assignment",
+                "payload": {"assignment_id": "assign-wbs-7-19-15-2-001"},
+            },
+            {
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.progress.assignment",
+                "payload": {"assignment_id": "assign-wbs-7-19-15-2-001"},
+            },
+            {
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.evidence.assignment",
+                "payload": {"assignment_id": "assign-wbs-7-19-15-2-001"},
+            },
+            {
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.result_candidate.done",
+                "payload": {"assignment_id": "assign-wbs-7-19-15-2-001"},
+            },
+            {
+                "subject": f"nexus.4_19.wbs7_19_15.{run_id}.jarvis.offline.done",
+                "payload": {"agent_id": "jarvis"},
+            },
+        ]
+    )
+
+    result = run_start_once(
+        config=config,
+        broker=broker,
+        lifecycle_provider=FakeResidentLifecycleProvider(),
+    )
+
+    assert result.accepted is True
+    assignment_payload = next(payload for subject, payload in broker.published if subject.endswith(".assignment"))
+    assert assignment_payload["wbs_id"] == "7.19.15.2"
+    assert assignment_payload["no_go_scope_ref"] == "no-go://wbs-7.19.15.2"
+    assert result.evidence_package.manifest_path.parent == tmp_path / "evidence" / run_id
+    assignment_record = next(
+        record
+        for record in result.evidence_records
+        if record.record_type == "bounded_assignment_published"
+    )
+    assert assignment_record.payload["runtime_authority_scopes"] == ["wbs://7.19.15.2"]
+
+
 def test_start_once_bounded_loop_fails_closed_without_bounded_uat_launch_mode(tmp_path, monkeypatch):
     monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_URL", "nats://127.0.0.1:7422")
     monkeypatch.setenv("NEXUS_RESIDENT_CONTROLLER_NATS_AUTH_REF", "local-uat-auth-ref")

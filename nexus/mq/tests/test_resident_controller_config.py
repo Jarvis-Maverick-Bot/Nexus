@@ -162,6 +162,29 @@ def test_resident_controller_config_accepts_wbs_7_19_15_namespace():
     assert result.live_runtime_allowed is True
 
 
+def test_resident_controller_config_accepts_wbs_7_19_15_2_namespace():
+    config = _config(
+        controller={
+            "controller_id": "resident-controller-nova-mac",
+            "runtime_instance_id": "resident-controller-run-001",
+            "environment": "bounded_uat",
+            "launch_mode": "bounded_uat",
+            "run_authorization_ref": "review-evidence/nova/uat-auth.md",
+            "allowed_wbs_ids": ["7.19.15.2"],
+        },
+        subjects={
+            "namespace": "nexus.4_19.wbs7_19_15",
+            "subscribe_allowlist": ["nexus.4_19.wbs7_19_15.*.heartbeat.>"],
+            "publish_allowlist": ["nexus.4_19.wbs7_19_15.*.controller.init"],
+        },
+    )
+
+    result = validate_resident_controller_config(config)
+
+    assert result.valid is True
+    assert result.live_runtime_allowed is True
+
+
 def test_resident_controller_config_rejects_unknown_namespace():
     config = _config(
         subjects={

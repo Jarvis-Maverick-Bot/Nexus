@@ -148,3 +148,31 @@ def test_resident_controller_duplicate_replay_same_idempotency_key_suppressed():
     assert decision.subject == "nexus.4_19.wbs7_19_14.run-001.jarvis.assignment"
     assert decision.duplicate_suppressed is True
     assert "DUPLICATE_ASSIGNMENT_SUPPRESSED" in decision.errors
+
+
+def test_resident_controller_default_dispatch_policy_accepts_wbs_7_19_15_2():
+    subject_policy = ResidentControllerSubjectPolicy(
+        namespace="nexus.4_19.wbs7_19_15",
+        run_id="run-7152",
+        allowed_agents=["jarvis"],
+        publish_allowlist=["nexus.4_19.wbs7_19_15.*.assignment"],
+    )
+    request = _dispatch_request(
+        run_id="run-7152",
+        wbs_id="7.19.15.2",
+        no_go_scope_ref="no-go://wbs-7.19.15.2",
+    )
+    runtime = _record(authority_scopes=["wbs://7.19.15.2"])
+
+    decision = evaluate_resident_dispatch(
+        request=request,
+        runtime=runtime,
+        subject_policy=subject_policy,
+        policy=ResidentControllerDispatchPolicy(dispatch_enabled=True, uat_authorized=True),
+        now_at=NOW,
+        lifecycle_decision=_decision(dispatch_run_id="run-7152"),
+        reservation_lease=_lease(dispatch_run_id="run-7152"),
+    )
+
+    assert decision.accepted is True
+    assert decision.subject == "nexus.4_19.wbs7_19_15.run-7152.jarvis.assignment"

@@ -22,6 +22,7 @@ from nexus.mq.resident_controller.observer import evaluate_runtime_observation
 
 RESIDENT_DISPATCH_REQUEST_SCHEMA_VERSION = "4.19.resident_controller.dispatch_request.v1"
 ALLOWED_ASSIGNMENT_KINDS = {"non_business_probe", "readiness_probe", "diagnostic_probe"}
+DEFAULT_ALLOWED_WBS_IDS = {"7.19.14.5", "7.19.15", "7.19.15.2"}
 COMMAND_TO_FAMILY = {
     "controller_init": "controller.init",
     "bounded_assignment": "assignment",
@@ -50,7 +51,7 @@ class ResidentControllerSubjectPolicy:
 class ResidentControllerDispatchPolicy:
     dispatch_enabled: bool = False
     uat_authorized: bool = False
-    allowed_wbs_ids: set[str] = field(default_factory=lambda: {"7.19.14.5"})
+    allowed_wbs_ids: set[str] = field(default_factory=lambda: set(DEFAULT_ALLOWED_WBS_IDS))
     allowed_commands: set[str] = field(default_factory=lambda: set(COMMAND_TO_FAMILY))
     business_execution_allowed: bool = False
 
