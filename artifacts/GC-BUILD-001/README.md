@@ -1,20 +1,24 @@
-# Grid Chase — Build Candidate (GC-BUILD-001)
+# Grid Chase - Build Candidate (GC-BUILD-001)
 
 **Artifact ID:** GC-BUILD-001
-**Author:** Viper (engineering) — embodied internally for V1.7
+**Author:** Viper (engineering) - embodied internally for V1.7
 **Date:** 2026-04-12
-**Status:** VERIFIED — local runnable
-**Stage:** 4 — Production Build
+**Status:** VERIFIED - local runnable
+**Stage:** 4 - Production Build
+
+This is a historical build-candidate artifact. Keep it as evidence of a local runnable candidate at the time it was produced; do not treat it as the current Nexus runtime architecture or a production deployment approval.
 
 ## What This Is
 
 Minimal agent-playable Grid Chase build candidate for V1.7.
 
 Delivers:
-- Python game engine (state/action/scoring per SPEC §2–4)
-- Flask REST API (agent interface per SPEC §6.3)
+- Python game engine (state/action/scoring per SPEC sections 2-4)
+- Flask REST API (agent interface per SPEC section 6.3)
 - Basic web dashboard (human observation only)
 - Single-process local operation
+
+This artifact is separate from the current 4.19 runtime module vocabulary. Active documentation should use Runtime Lifecycle Controller, Dispatch Controller, Candidate Agent Adapter, External Agent Runtime, and Resident Controller Service Package where those concepts apply.
 
 ## Files
 
@@ -52,4 +56,4 @@ python api.py
 
 - Engine: 8/8 unit tests pass (grid init, movement, token collection, wall bump, obstacle, termination, scoring formula)
 - API: All 7 endpoints respond correctly
-- Scoring formula matches SPEC §4 exactly
+- Scoring formula matches SPEC section 4 exactly

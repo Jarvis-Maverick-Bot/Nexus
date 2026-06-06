@@ -1,6 +1,8 @@
 # Grid Escape
 
-First AI-native game product for the Jarvis/Viper governance platform.
+Grid Escape is a public, agent-playable example workflow for Nexus.
+
+It is useful for exercising bounded command loops, deterministic completion evidence, scoring, and simple agent-facing task interaction. It is not a production runtime, Dispatch Controller workflow, or Runtime Lifecycle Controller test by itself.
 
 ## Quick Start
 
@@ -50,6 +52,8 @@ Example:
 ESCAPED|8|Grid(7x7, seed=3)|2026-04-14T13:35:14
 ```
 
+Treat the completion line as local task evidence for this example game only. It does not imply governance final acceptance, runtime promotion, production deploy, or live-readiness for any unrelated WBS.
+
 ## Scoring Tiers
 
 After ESCAPED, the tier is computed from steps vs optimal:
@@ -64,7 +68,7 @@ After ESCAPED, the tier is computed from steps vs optimal:
 
 ## Architecture
 
-```
+```text
 games/
   grid_escape.py        # Fallback runner (works without -m)
   __init__.py           # Package marker

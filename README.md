@@ -8,7 +8,7 @@ Nexus provides a Python-based foundation for governed delivery workflows:
 
 - role and authority models for human/agent collaboration;
 - state machines for gated delivery stages;
-- runtime lifecycle and heartbeat patterns;
+- runtime lifecycle, readiness, and heartbeat patterns;
 - evidence records for review, UAT, and release decisions;
 - fail-closed controls for unsafe or incomplete automation.
 
@@ -51,7 +51,7 @@ Nexus is for builders experimenting with agentic development systems who need mo
 Nexus is organized around a few public-facing layers:
 
 - **Governance model**: roles, authority tiers, gates, state transitions, and human approval boundaries.
-- **Runtime and messaging layer**: candidate adapters, lifecycle controllers, heartbeat/presence flows, and message contracts.
+- **Runtime and messaging layer**: Runtime Lifecycle Controller, Dispatch Controller, Candidate Agent Adapter, External Agent Runtime contracts, heartbeat/presence flows, and message contracts.
 - **Evidence layer**: review records, UAT reports, event logs, and decision packages that make delivery traceable.
 - **Delivery surfaces**: PMO CLI/UI, example game workflows, and integration/runbook artifacts.
 
@@ -74,6 +74,8 @@ Near-term goals:
 ## Project Status
 
 Nexus is an active early-stage project.
+
+The 4.19 multi-channel agent runtime compatibility WBS is officially complete as of 2026-06-06 with the governance status `ALEX_ACCEPTED_4_19_OFFICIALLY_COMPLETE`. That status means the 4.19 controlled-validation and documentation gates are accepted. It does not authorize production deploy, live-readiness promotion, always-on runtime operation, credential/config mutation, or default-on dispatch.
 
 Current public focus:
 
@@ -118,20 +120,33 @@ Some historical scripts in the repository were created for specific sprint gates
 
 ```text
 nexus/
-  mq/                         Runtime, messaging, lifecycle, evidence, and adapter modules
+  mq/                         Runtime lifecycle, dispatch, Candidate Agent Adapter, evidence, and MQ contracts
 governance/
-  cli/                        PMO command-line surfaces
-  collab/                     Collaboration/runtime experiments and workflow records
+  cli/                        PMO command-line surfaces and task/action inventory
+  control/                    Local governance control models and task store helpers
+  collab/                     Collaboration protocol experiments and workflow records
   routing/                    Routing engine components
   ui/                         Governance dashboard surfaces
 games/
-  grid_escape.py              Public example game workflow
+  grid_escape.py              Public agent-playable example workflow
 docs/
   runbooks/                   Runtime and operating environment runbooks
 evidence/
   */                          Historical evidence records and governed delivery traces
 tests/                        Test coverage for public and internal surfaces
 ```
+
+## Core Module Vocabulary
+
+Use these names in active documentation and implementation notes:
+
+- **Runtime Lifecycle Controller** owns runtime supply state: registration, readiness, heartbeat freshness, lifecycle control, eligibility decisions, and reservation leases.
+- **Dispatch Controller** owns dispatch-side intent validation, dispatch run records, assignment publish requests, duplicate replay handling, and evidence collection. It does not own runtime registration/readiness/heartbeat.
+- **Candidate Agent Adapter** is the candidate-runtime-facing adapter API/CLI for connection, registration, readiness, heartbeat, assignment intake, result events, and state reconciliation.
+- **External Agent Runtime** refers to a bounded runtime instance outside the governance core that can register, report readiness, heartbeat, and receive assignments through approved contracts.
+- **Resident Controller Service Package** refers to the default-off service package for resident controller operations. It remains gated unless explicitly authorized and configured.
+
+Historical evidence, branch names, and archived filenames may still contain older terms. Treat those as literal records, not current module names.
 
 ## Contributing
 

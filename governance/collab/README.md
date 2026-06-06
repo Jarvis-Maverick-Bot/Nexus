@@ -1,64 +1,43 @@
-# NATS Collaboration Module — Nova Side
+# Governance Collaboration Module
 
-## Files
+`governance/collab` contains collaboration protocol experiments, workflow records, and helper scripts for governed handoff between runtime participants.
 
-- `envelope.py` — Message envelope schema (message_id, collab_id, from, to, artifact_path, timestamp)
-- `state_store.py` — Durable collab state (JSON) + message log (JSONL append-only)
-- `handler.py` — Processes inbound commands, emits ACKs, updates state
-- `listener.py` — Standing listener (long-lived process)
-- `__init__.py` — Package init
+This module is a governance-support surface. It is not the Runtime Lifecycle Controller, the Dispatch Controller, or the Candidate Agent Adapter.
 
-## Running the listener
+## Scope
 
-```bash
-cd /Users/alex/Nova-Jarvis-Shared/working/01-projects/Nexus/V2.0/collab_module
-/Users/alex/.openclaw/tools/nats-venv39/bin/python3 listener.py nova
+- message envelope and ACK contracts for collaboration records;
+- local state and message-log helpers under `governance/data/`;
+- workflow capture, review, and foundation-execution helpers;
+- NATS-style listener and daemon experiments;
+- protocol notes for collaboration flow and runtime contract mapping.
+
+## Key Files
+
+- `envelope.py` - Collaboration message envelope schema.
+- `state_store.py` - JSON/JSONL-backed collaboration state and message log helpers.
+- `handler.py` - Inbound command handling and ACK generation.
+- `listener.py` - Listener entry point for collaboration messages.
+- `collab_daemon.py` - Collaboration daemon experiment with guarded workflow execution.
+- `runtime_contract_map.py` - Mapping between collaboration workflows and runtime contract boundaries.
+- `COLLAB_FLOW_SPEC.md` - Collaboration protocol flow notes.
+- `PHASE2_OPERATION_GUIDE.md` - Historical operation guide for the phase 2 collaboration path.
+- `CONFIG_README.md` - Configuration notes.
+
+## State Files
+
+The default repo-local state location is:
+
+```text
+governance/data/collab_state.json
+governance/data/collab_messages.jsonl
 ```
 
-## Subjects (4 separate)
+Local deployments may override paths through configuration. Do not hard-code private host paths, credentials, or operator-specific shares in public README content.
 
-- `gov.collab.command` — workflow-driving messages
-- `gov.collab.ack` — acknowledgments (received/processed)
-- `gov.collab.event` — state transitions (future)
-- `gov.collab.notify` — Alex notifications (future)
+## Boundaries
 
-## Message envelope (v0.2)
-
-```json
-{
-  "message_id": "msg-xxx",
-  "collab_id": "collab-v2-foundation-001",
-  "message_type": "review_request",
-  "protocol_version": "0.2",
-  "from": "nova",
-  "to": "jarvis",
-  "artifact_type": "scope",
-  "artifact_path": "\\\\192.168.31.124\\Nova-Jarvis-Shared\\working\\Nexus\\V2.0\\V2_0_SCOPE_V0_1.md",
-  "payload": {},
-  "summary": "Please review...",
-  "timestamp": "2026-04-16T22:00:00+08:00"
-}
-```
-
-## ACK envelope
-
-```json
-{
-  "message_id": "ack-xxx",
-  "ack_for": "msg-xxx",
-  "collab_id": "collab-v2-foundation-001",
-  "from": "jarvis",
-  "to": "nova",
-  "status": "received",
-  "result": "review_started",
-  "protocol_version": "0.2",
-  "timestamp": "2026-04-16T22:00:01+08:00"
-}
-```
-
-## State store
-
-- `governance/data/collab_state.json` — current collab states
-- `governance/data/collab_messages.jsonl` — append-only message log
-
-State store is on Jarvis side (D:\Projects\gov_langgraph\governance\data\). Nova side is write-only log for her own visibility.
+- Collaboration ACKs and workflow events are evidence records, not production release approval.
+- Listener or daemon operation does not authorize live runtime promotion, deploy, credential mutation, or config enablement.
+- Runtime registration, readiness, heartbeat, eligibility, and leases belong to the Runtime Lifecycle Controller.
+- Assignment intent, assignment publish requests, duplicate replay handling, and dispatch evidence belong to the Dispatch Controller.
