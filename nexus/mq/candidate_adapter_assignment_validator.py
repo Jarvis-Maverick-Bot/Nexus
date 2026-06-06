@@ -139,6 +139,8 @@ def assignment_intake_prerequisite_errors(
 def _allowed_assignment_states(operation: str) -> set[str]:
     if operation == "ACK":
         return {"idle", "assigned"}
+    if operation == "INTAKE":
+        return {"idle", "assigned"}
     return {"idle"}
 
 

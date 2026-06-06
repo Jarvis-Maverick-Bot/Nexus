@@ -107,6 +107,8 @@ def _canonical_assignment_subject_errors(subject: str) -> list[str]:
     namespace_parts = _matching_namespace_parts(parts)
     if namespace_parts is None:
         return [f"ASSIGNMENT_SUBJECT_NOT_CANONICAL: {subject}"]
+    if _is_canonical_duplicate_replay_subject(parts, namespace_parts):
+        return []
     if len(parts) != len(namespace_parts) + 3:
         return [f"ASSIGNMENT_SUBJECT_NOT_CANONICAL: {subject}"]
     if not parts[len(namespace_parts)]:
@@ -116,6 +118,15 @@ def _canonical_assignment_subject_errors(subject: str) -> list[str]:
     if parts[-1] != "assignment":
         return [f"ASSIGNMENT_SUBJECT_NOT_CANONICAL: {subject}"]
     return []
+
+
+def _is_canonical_duplicate_replay_subject(parts: list[str], namespace_parts: list[str]) -> bool:
+    return (
+        len(parts) == len(namespace_parts) + 4
+        and bool(parts[len(namespace_parts)])
+        and parts[len(namespace_parts) + 1] in ALLOWED_ASSIGNMENT_AGENT_IDS
+        and parts[-2:] == ["assignment", "duplicate_replay"]
+    )
 
 
 def _is_runtime_scoped_assignment_alias(parts: list[str]) -> bool:
