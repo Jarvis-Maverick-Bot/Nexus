@@ -200,7 +200,7 @@ class FoundationDaemonRuntime:
         delivery = _consume_one(self.adapter)
         if delivery is None:
             return {
-                "accepted": True,
+                "accepted": False,
                 "duplicate": False,
                 "action": "delivery_not_observed",
                 "broker_ack": broker_ack,

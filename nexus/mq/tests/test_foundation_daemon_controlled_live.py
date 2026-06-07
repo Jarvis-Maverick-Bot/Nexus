@@ -8,6 +8,7 @@ from nexus.mq.foundation_daemon_lifecycle import build_drain_result
 from nexus.mq.foundation_daemon_runtime import FoundationDaemonRuntime
 from nexus.mq.foundation_daemon_status import build_foundation_daemon_status
 from nexus.mq.message_contracts import build_execution_envelope
+from nexus.mq.protocol_routing import route_execution_envelope_dict
 
 
 RUN_SCOPE = "3_5_wbs15_9_g6_20260607"
@@ -201,6 +202,51 @@ def test_foundation_daemon_controlled_live_run_authorized_with_injected_adapter(
     assert payload["daemon_started"] is True
     assert payload["result"]["accepted"] is True
     assert payload["result"]["not_business_completion"] is True
+
+
+class _MissingDeliveryAdapter(MqAdapterStub):
+    def consume(self, timeout_ms=None):
+        return None
+
+
+def test_foundation_daemon_controlled_live_missing_delivery_fails_closed(tmp_path):
+    runtime = FoundationDaemonRuntime(
+        config=_controlled_live_config(),
+        adapter=_MissingDeliveryAdapter(),
+        state_store=DurableStateStore(tmp_path / "controlled-live.sqlite3"),
+        evidence_root=tmp_path / "evidence",
+    )
+
+    result = runtime.run_controlled_live_diagnostic(_diagnostic_envelope())
+    runtime.close()
+
+    assert result["accepted"] is False
+    assert result["action"] == "delivery_not_observed"
+    assert result["errors"] == ["CONTROLLED_LIVE_DELIVERY_NOT_OBSERVED"]
+
+
+def test_foundation_daemon_controlled_live_cli_missing_delivery_fails_closed(tmp_path):
+    config = _controlled_live_config()
+    config["stores"]["durable_state"]["dsn"] = f"sqlite:///{tmp_path.as_posix()}/{RUN_SCOPE}/foundation.sqlite3"
+    config["stores"]["evidence"]["dsn"] = f"file://{tmp_path.as_posix()}/{RUN_SCOPE}/evidence"
+
+    payload = _handle("run", config, adapter=_MissingDeliveryAdapter())
+
+    assert payload["blocked"] is True
+    assert payload["daemon_started"] is False
+    assert payload["cycles_completed"] == 0
+    assert payload["block_reason"] == "CONTROLLED_LIVE_DELIVERY_NOT_OBSERVED"
+    assert payload["result"]["accepted"] is False
+
+
+def test_foundation_daemon_controlled_live_rejects_out_of_scope_test_route():
+    envelope = _diagnostic_envelope()
+    envelope["subject"] = "nexus.3_5.test.other_scope.inbox"
+
+    result = route_execution_envelope_dict(envelope)
+
+    assert result.valid is False
+    assert "UNAUTHORIZED_CONTROLLED_3_5_UAT_SUBJECT_SCOPE" in result.errors
 
 
 def test_foundation_daemon_controlled_live_diagnostic_publish_consume_result(tmp_path):

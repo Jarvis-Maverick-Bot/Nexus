@@ -18,6 +18,8 @@ SUBJECT_OPS_TIMEOUT = "ops.timeout"
 SUBJECT_OPS_DLQ = "ops.dlq"
 AGENT_TRANSPORT_SUBJECT_PREFIX = "nexus.agent_transport"
 AGENT_TRANSPORT_LEGACY_BROAD_SUBJECT_PREFIXES = ("agent.", "workflow.")
+CONTROLLED_3_5_UAT_RUN_SCOPE = "3_5_wbs15_9_g6_20260607"
+CONTROLLED_3_5_UAT_SUBJECT_PREFIX = f"nexus.3_5.test.{CONTROLLED_3_5_UAT_RUN_SCOPE}."
 
 
 @dataclass
@@ -152,14 +154,14 @@ def route_execution_envelope_dict(envelope_dict: dict) -> RoutingResult:
     if workflow_type == "agent_transport":
         return _route_agent_transport_envelope_dict(envelope_dict)
 
-    if (
-        explicit_subject
-        and workflow_type == "controlled_3_5_uat"
-        and str(explicit_subject).startswith("nexus.3_5.test.")
-        and "*" not in str(explicit_subject)
-        and ">" not in str(explicit_subject)
-    ):
-        return RoutingResult(valid=True, subject=str(explicit_subject))
+    if explicit_subject and workflow_type == "controlled_3_5_uat":
+        subject = str(explicit_subject)
+        if "*" in subject or ">" in subject:
+            return RoutingResult(valid=False, errors=["UNAUTHORIZED_CONTROLLED_3_5_UAT_SUBJECT_SCOPE"])
+        if subject.startswith(CONTROLLED_3_5_UAT_SUBJECT_PREFIX):
+            return RoutingResult(valid=True, subject=subject)
+        if subject.startswith("nexus.3_5.test."):
+            return RoutingResult(valid=False, errors=["UNAUTHORIZED_CONTROLLED_3_5_UAT_SUBJECT_SCOPE"])
 
     if explicit_subject and str(explicit_subject).startswith(f"{AGENT_TRANSPORT_SUBJECT_PREFIX}."):
         return validate_agent_transport_subject(str(explicit_subject), envelope_dict.get("workflow_instance_id"))
