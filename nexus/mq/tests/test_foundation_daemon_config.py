@@ -134,6 +134,25 @@ def test_foundation_daemon_cli_validate_config_reads_committed_yaml():
     assert payload["not_business_completion"] is True
 
 
+def test_foundation_daemon_cli_validate_controlled_live_example_config():
+    command = [
+        sys.executable,
+        "-m",
+        "nexus.mq.foundation_daemon",
+        "validate-config",
+        "--config",
+        "config/mq/foundation_daemon.controlled-live.example.yaml",
+    ]
+
+    completed = subprocess.run(command, check=False, capture_output=True, text=True)
+    payload = json.loads(completed.stdout)
+
+    assert completed.returncode == 0
+    assert payload["valid"] is True
+    assert payload["not_business_completion"] is True
+    assert payload["redacted_config"]["feature_flags"]["business_dispatch_enabled"] is False
+
+
 def test_foundation_daemon_load_config_supports_yaml(tmp_path):
     path = tmp_path / "foundation.yaml"
     path.write_text(

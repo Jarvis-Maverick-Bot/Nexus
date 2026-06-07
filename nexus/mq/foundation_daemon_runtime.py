@@ -9,7 +9,11 @@ from typing import Any
 from nexus.mq.ack_policy import WorkflowStateSeparator
 from nexus.mq.adapter import MqAdapterStub
 from nexus.mq.durable_state import DurableStateStore
-from nexus.mq.foundation_daemon_config import subject_allowed, validate_foundation_daemon_config
+from nexus.mq.foundation_daemon_config import (
+    is_controlled_live_authorized,
+    subject_allowed,
+    validate_foundation_daemon_config,
+)
 from nexus.mq.foundation_daemon_evidence import FoundationEvidenceRecorder
 from nexus.mq.message_contracts import validate_execution_message
 
@@ -85,6 +89,189 @@ class FoundationDaemonRuntime:
         contract = validate_execution_message(envelope)
         errors.extend(contract.errors)
         return PublishGuardResult(allowed=not errors, errors=list(dict.fromkeys(errors)))
+
+    def run_controlled_live_diagnostic(self, envelope: dict[str, Any]) -> dict[str, Any]:
+        subject = str(envelope.get("subject") or (self.config.get("broker", {}) or {}).get("filter_subject", ""))
+        errors = self._controlled_live_diagnostic_errors(subject, envelope)
+        if errors:
+            return {
+                "accepted": False,
+                "duplicate": False,
+                "action": "blocked",
+                "errors": errors,
+                "not_business_completion": True,
+            }
+
+        dedupe_key = str(envelope.get("idempotency_key"))
+        existing = self.state_store.find_phase5_durable_record("foundation_intake", dedupe_key)
+        if existing is not None:
+            action = "duplicate_inflight_reconciled" if existing.status == "inflight" else "duplicate_suppressed"
+            self.evidence.write_record(
+                "ack",
+                str(envelope.get("message_id", "unknown")),
+                {
+                    "subject": subject,
+                    "message_id": envelope.get("message_id"),
+                    "workflow_instance_id": envelope.get("workflow_instance_id"),
+                    "correlation_id": envelope.get("correlation_id"),
+                    "duplicate_of_record_ref": existing.record_id,
+                    "duplicate_action": action,
+                    "ack_level": "consumer_intake",
+                    "ack_after_duplicate_evidence": True,
+                    "ack_is_not_progress": True,
+                    "controlled_live": True,
+                    "not_business_completion": True,
+                },
+            )
+            ack = self.adapter.ack(str(envelope.get("message_id", "")))
+            return {
+                "accepted": True,
+                "duplicate": True,
+                "action": action,
+                "intake_ack": ack,
+                "evidence_ref": existing.record_id,
+                "not_business_completion": True,
+            }
+
+        pre_ack_evidence_ref = self.evidence.write_record(
+            "intake",
+            f"{envelope.get('message_id', 'unknown')}-controlled-live-pre-ack",
+            {
+                "subject": subject,
+                "message_id": envelope.get("message_id"),
+                "workflow_instance_id": envelope.get("workflow_instance_id"),
+                "correlation_id": envelope.get("correlation_id"),
+                "controlled_live": True,
+                "ack_emitted": False,
+                "ack_after_evidence_and_durable_state": True,
+                "not_business_completion": True,
+            },
+        )
+        record = self.state_store.create_phase5_durable_record(
+            family="foundation_intake",
+            status="controlled_live_intake_recorded",
+            workflow_instance_id=envelope.get("workflow_instance_id"),
+            target_ref=subject,
+            dedupe_key=dedupe_key,
+            payload={
+                "message_id": envelope.get("message_id"),
+                "subject": subject,
+                "correlation_id": envelope.get("correlation_id"),
+                "ack_level": "consumer_intake",
+                "ack_is_not_progress": True,
+                "ack_after_evidence_and_durable_state": True,
+                "controlled_live": True,
+                "evidence_ref": pre_ack_evidence_ref,
+                "not_business_completion": True,
+            },
+        )
+
+        try:
+            broker_ack = self.adapter.publish(envelope)
+        except Exception as exc:
+            return {
+                "accepted": False,
+                "duplicate": False,
+                "action": "publish_blocked",
+                "errors": [f"CONTROLLED_LIVE_PUBLISH_FAILED: {exc}"],
+                "evidence_ref": record.record_id,
+                "not_business_completion": True,
+            }
+
+        intake_ack = self.adapter.ack(str(envelope.get("message_id", "")))
+        ack_evidence_ref = self.evidence.write_record(
+            "ack",
+            str(envelope.get("message_id", "unknown")),
+            {
+                "subject": subject,
+                "message_id": envelope.get("message_id"),
+                "workflow_instance_id": envelope.get("workflow_instance_id"),
+                "correlation_id": envelope.get("correlation_id"),
+                "broker_ack": broker_ack,
+                "intake_ack": intake_ack,
+                "durable_record_ref": record.record_id,
+                "pre_ack_evidence_ref": pre_ack_evidence_ref,
+                "ack_is_not_progress": True,
+                "ack_after_evidence_and_durable_state": True,
+                "controlled_live": True,
+                "not_business_completion": True,
+            },
+        )
+        delivery = _consume_one(self.adapter)
+        if delivery is None:
+            return {
+                "accepted": True,
+                "duplicate": False,
+                "action": "delivery_not_observed",
+                "broker_ack": broker_ack,
+                "intake_ack": intake_ack,
+                "evidence_ref": record.record_id,
+                "ack_evidence_ref": ack_evidence_ref,
+                "errors": ["CONTROLLED_LIVE_DELIVERY_NOT_OBSERVED"],
+                "not_business_completion": True,
+            }
+
+        result_candidate = {
+            "result_type": "controlled_live_diagnostic",
+            "message_id": envelope.get("message_id"),
+            "workflow_instance_id": envelope.get("workflow_instance_id"),
+            "correlation_id": envelope.get("correlation_id"),
+            "subject": subject,
+            "delivery_status": delivery.get("status", "delivered"),
+            "not_business_completion": True,
+        }
+        result_evidence_ref = self.evidence.write_record(
+            "result",
+            str(envelope.get("message_id", "unknown")),
+            {
+                "result_candidate": result_candidate,
+                "controlled_live": True,
+                "not_business_completion": True,
+            },
+        )
+        self.state_store.create_phase5_durable_record(
+            family="foundation_result",
+            status="controlled_live_result_recorded",
+            workflow_instance_id=envelope.get("workflow_instance_id"),
+            target_ref=subject,
+            related_record_id=record.record_id,
+            dedupe_key=f"result:{dedupe_key}",
+            payload={
+                "message_id": envelope.get("message_id"),
+                "correlation_id": envelope.get("correlation_id"),
+                "result_evidence_ref": result_evidence_ref,
+                "not_business_completion": True,
+            },
+        )
+        return {
+            "accepted": True,
+            "duplicate": False,
+            "action": "controlled_live_diagnostic_result",
+            "broker_ack": broker_ack,
+            "intake_ack": intake_ack,
+            "delivery": delivery,
+            "result_candidate": result_candidate,
+            "evidence_ref": record.record_id,
+            "ack_evidence_ref": ack_evidence_ref,
+            "result_evidence_ref": result_evidence_ref,
+            "not_business_completion": True,
+        }
+
+    def _controlled_live_diagnostic_errors(self, subject: str, envelope: dict[str, Any]) -> list[str]:
+        errors: list[str] = []
+        validation = validate_foundation_daemon_config(self.config)
+        errors.extend(validation.errors)
+        if not is_controlled_live_authorized(self.config):
+            errors.append("CONTROLLED_LIVE_NOT_AUTHORIZED")
+        allowlist = (self.config.get("subjects", {}) or {}).get("allowlist", [])
+        if not subject_allowed(subject, allowlist):
+            errors.append(f"SUBJECT_NOT_ALLOWED: {subject}")
+        if not self.evidence_available:
+            errors.append("EVIDENCE_STORE_UNAVAILABLE")
+        contract = validate_execution_message(envelope)
+        errors.extend(contract.errors)
+        errors.extend(_source_intake_scope_errors(envelope))
+        return list(dict.fromkeys(errors))
 
     def intake_message(self, subject: str, envelope: dict[str, Any]) -> IntakeResult:
         errors: list[str] = []
@@ -249,3 +436,10 @@ def _source_intake_scope_errors(envelope: dict[str, Any]) -> list[str]:
     ):
         errors.append("PRIVATE_AGENT_INVOCATION_OUT_OF_SCOPE")
     return errors
+
+
+def _consume_one(adapter: Any) -> dict[str, Any] | None:
+    try:
+        return adapter.consume(timeout_ms=5000)
+    except TypeError:
+        return adapter.consume()

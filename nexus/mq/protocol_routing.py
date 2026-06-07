@@ -152,6 +152,15 @@ def route_execution_envelope_dict(envelope_dict: dict) -> RoutingResult:
     if workflow_type == "agent_transport":
         return _route_agent_transport_envelope_dict(envelope_dict)
 
+    if (
+        explicit_subject
+        and workflow_type == "controlled_3_5_uat"
+        and str(explicit_subject).startswith("nexus.3_5.test.")
+        and "*" not in str(explicit_subject)
+        and ">" not in str(explicit_subject)
+    ):
+        return RoutingResult(valid=True, subject=str(explicit_subject))
+
     if explicit_subject and str(explicit_subject).startswith(f"{AGENT_TRANSPORT_SUBJECT_PREFIX}."):
         return validate_agent_transport_subject(str(explicit_subject), envelope_dict.get("workflow_instance_id"))
 

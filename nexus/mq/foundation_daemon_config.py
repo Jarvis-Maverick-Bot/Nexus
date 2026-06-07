@@ -14,6 +14,12 @@ from nexus.mq.agent_registry_events import secret_material_errors
 
 
 FOUNDATION_DAEMON_SCHEMA_VERSION = "3.5.foundation-daemon.v1"
+CONTROLLED_LIVE_ALLOWED_BROKER_URL = "nats://127.0.0.1:7422"
+CONTROLLED_LIVE_BLOCKED_BROKER_URLS = {"nats://127.0.0.1:4222"}
+CONTROLLED_LIVE_RUN_SCOPE = "3_5_wbs15_9_g6_20260607"
+CONTROLLED_LIVE_SUBJECT_PREFIX = f"nexus.3_5.test.{CONTROLLED_LIVE_RUN_SCOPE}."
+SOURCE_ONLY_ROLLOUT_PHASES = {"source_only", "dry_run", "disabled"}
+ALLOWED_ROLLOUT_PHASES = SOURCE_ONLY_ROLLOUT_PHASES | {"controlled_live"}
 
 
 @dataclass
@@ -76,7 +82,7 @@ def validate_foundation_daemon_config(config: dict[str, Any]) -> FoundationDaemo
         _require(daemon, "service_name", "daemon", errors)
         if daemon.get("default_enabled") is not False:
             errors.append("DEFAULT_ENABLED_NOT_ALLOWED_IN_SOURCE_PACKAGE")
-        if daemon.get("rollout_phase") not in {"source_only", "dry_run", "disabled"}:
+        if daemon.get("rollout_phase") not in ALLOWED_ROLLOUT_PHASES:
             errors.append(f"INVALID_ROLLOUT_PHASE: {daemon.get('rollout_phase')}")
 
     if broker:
@@ -111,13 +117,20 @@ def validate_foundation_daemon_config(config: dict[str, Any]) -> FoundationDaemo
         _validate_store(stores, "durable_state", errors)
         _validate_store(stores, "evidence", errors)
 
+    rollout_phase = daemon.get("rollout_phase") if daemon else None
+    controlled_live = rollout_phase == "controlled_live"
+
     if feature_flags:
-        if feature_flags.get("live_publish_enabled") is not False:
+        if controlled_live:
+            errors.extend(_controlled_live_authorization_errors(config, broker, subjects, stores, feature_flags))
+        elif feature_flags.get("live_publish_enabled") is not False:
             errors.append("LIVE_PUBLISH_NOT_AUTHORIZED_FOR_SOURCE_GATE")
         if feature_flags.get("business_dispatch_enabled") is not False:
             errors.append("BUSINESS_DISPATCH_OUT_OF_SCOPE")
         if feature_flags.get("broker_setup_enabled") is not False:
             errors.append("BROKER_SETUP_MUTATION_OUT_OF_SCOPE")
+        if feature_flags.get("private_agent_invocation_enabled") is True:
+            errors.append("PRIVATE_AGENT_INVOCATION_OUT_OF_SCOPE")
 
     errors.extend(secret_material_errors(config, path="config"))
     return _validation(errors, warnings, config)
@@ -146,6 +159,15 @@ def config_hash(config: dict[str, Any]) -> str:
 
 def subject_allowed(subject: str, allowlist: list[str]) -> bool:
     return any(_subject_pattern_matches(subject, str(pattern)) for pattern in allowlist)
+
+
+def is_controlled_live_requested(config: dict[str, Any]) -> bool:
+    daemon = config.get("daemon", {}) if isinstance(config, dict) else {}
+    return daemon.get("rollout_phase") == "controlled_live"
+
+
+def is_controlled_live_authorized(config: dict[str, Any]) -> bool:
+    return is_controlled_live_requested(config) and validate_foundation_daemon_config(config).valid
 
 
 def _subject_pattern_matches(subject: str, pattern: str) -> bool:
@@ -201,6 +223,74 @@ def _validate_store(stores: dict[str, Any], name: str, errors: list[str]) -> Non
         return
     _require(store, "dsn", f"stores.{name}", errors)
     _require_list(store, "required_families", f"stores.{name}", errors)
+
+
+def _controlled_live_authorization_errors(
+    config: dict[str, Any],
+    broker: dict[str, Any],
+    subjects: dict[str, Any],
+    stores: dict[str, Any],
+    feature_flags: dict[str, Any],
+) -> list[str]:
+    errors: list[str] = []
+    controlled_live = config.get("controlled_live")
+    if not isinstance(controlled_live, dict):
+        errors.append("MISSING_REQUIRED_SECTION: controlled_live")
+        return errors
+
+    for field_name in ("run_id", "run_packet_ref", "authorization_ref", "route_scope"):
+        if controlled_live.get(field_name) in (None, ""):
+            errors.append(f"MISSING_REQUIRED_FIELD: controlled_live.{field_name}")
+
+    if controlled_live.get("run_id") != CONTROLLED_LIVE_RUN_SCOPE:
+        errors.append("CONTROLLED_LIVE_RUN_SCOPE_NOT_AUTHORIZED")
+    if controlled_live.get("route_scope") != "nexus_local_test_only":
+        errors.append("CONTROLLED_LIVE_ROUTE_SCOPE_NOT_AUTHORIZED")
+
+    if feature_flags.get("live_publish_enabled") is not True:
+        errors.append("CONTROLLED_LIVE_REQUIRES_LIVE_PUBLISH_ENABLED")
+
+    urls = broker.get("urls") if isinstance(broker, dict) else None
+    if not isinstance(urls, list) or urls != [CONTROLLED_LIVE_ALLOWED_BROKER_URL]:
+        errors.append("CONTROLLED_LIVE_ROUTE_NOT_AUTHORIZED")
+    elif any(str(url) in CONTROLLED_LIVE_BLOCKED_BROKER_URLS for url in urls):
+        errors.append("CONTROLLED_LIVE_ROUTE_NOT_AUTHORIZED")
+
+    scoped_broker_values = [
+        broker.get("stream"),
+        broker.get("consumer"),
+        broker.get("filter_subject"),
+        broker.get("dlq_subject"),
+    ]
+    if not all(_contains_run_scope(value) for value in scoped_broker_values):
+        errors.append("CONTROLLED_LIVE_BROKER_SCOPE_NOT_RUN_SCOPED")
+
+    allowlist = subjects.get("allowlist") if isinstance(subjects, dict) else None
+    if not isinstance(allowlist, list) or not allowlist:
+        errors.append("CONTROLLED_LIVE_SUBJECT_SCOPE_NOT_TEST_SCOPED")
+    else:
+        for subject in allowlist:
+            value = str(subject)
+            if "*" in value or ">" in value or not value.startswith(CONTROLLED_LIVE_SUBJECT_PREFIX):
+                errors.append("CONTROLLED_LIVE_SUBJECT_SCOPE_NOT_TEST_SCOPED")
+                break
+        for field_name in ("filter_subject", "dlq_subject"):
+            value = str(broker.get(field_name, ""))
+            if not value.startswith(CONTROLLED_LIVE_SUBJECT_PREFIX):
+                errors.append("CONTROLLED_LIVE_SUBJECT_SCOPE_NOT_TEST_SCOPED")
+                break
+
+    for store_name in ("durable_state", "evidence"):
+        store = stores.get(store_name) if isinstance(stores, dict) else None
+        dsn = store.get("dsn") if isinstance(store, dict) else ""
+        if CONTROLLED_LIVE_RUN_SCOPE not in str(dsn):
+            errors.append(f"CONTROLLED_LIVE_STORE_NOT_RUN_SCOPED: stores.{store_name}")
+
+    return errors
+
+
+def _contains_run_scope(value: Any) -> bool:
+    return CONTROLLED_LIVE_RUN_SCOPE.lower() in str(value or "").lower()
 
 
 def _redact_url(value: str) -> str:

@@ -107,6 +107,7 @@ class MqAdapterNats:
         consumer_name: Optional[str] = None,
         consumer_filter_subject: Optional[str] = None,
         enable_protocol_subjects: bool = False,
+        allow_broker_setup: bool = True,
     ):
         if not HAS_NATS:
             raise RuntimeError(
@@ -123,6 +124,7 @@ class MqAdapterNats:
         self._dlq_stream_name = dlq_stream_name
         self._consumer_filter_subject = consumer_filter_subject
         self._enable_protocol_subjects = enable_protocol_subjects
+        self._allow_broker_setup = allow_broker_setup
         if stream_subjects:
             self._stream_subjects = list(stream_subjects)
         else:
@@ -165,27 +167,31 @@ class MqAdapterNats:
 
         self._connected = True
 
-        try:
-            await self._js.add_stream(
-                name=self._stream_name,
-                subjects=self._stream_subjects,
-                storage="file",
-                retention="workqueue",
-                max_bytes=10_000_000,
-            )
-        except Exception:
-            pass  # stream already exists
+        if self._allow_broker_setup:
+            try:
+                await self._js.add_stream(
+                    name=self._stream_name,
+                    subjects=self._stream_subjects,
+                    storage="file",
+                    retention="workqueue",
+                    max_bytes=10_000_000,
+                )
+            except Exception:
+                pass  # stream already exists
 
-        # Ensure DLQ stream
-        try:
-            await self._js.add_stream(
-                name=self._dlq_stream_name,
-                subjects=[self._dlq_subject],
-                storage="file",
-                retention="limits",
-            )
-        except Exception:
-            pass  # DLQ stream already exists
+            # Ensure DLQ stream
+            try:
+                await self._js.add_stream(
+                    name=self._dlq_stream_name,
+                    subjects=[self._dlq_subject],
+                    storage="file",
+                    retention="limits",
+                )
+            except Exception:
+                pass  # DLQ stream already exists
+        else:
+            await self._js.stream_info(self._stream_name)
+            await self._js.consumer_info(self._stream_name, self._consumer_name)
 
     async def _ensure_consumer(self, consumer_name: str) -> str:
         """Ensure an ephemeral consumer exists for the stream, return consumer_name."""
@@ -522,7 +528,8 @@ class MqAdapterNats:
                 "ack_boundary": "consumer_intake_only",
             },
             "dlq_distinct_from_handler_exhausted": True,
-            "live_mutation_required_for_evidence": False,
+            "broker_setup_enabled": self._allow_broker_setup,
+            "live_mutation_required_for_evidence": self._allow_broker_setup,
             "not_business_completion": True,
         }
 
