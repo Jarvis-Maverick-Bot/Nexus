@@ -1,0 +1,5 @@
+{
+    "command":  "git diff --check",
+    "exit_code":  0,
+    "output":  "warning: in the working copy of \u0027nexus/governance/errors.py\u0027, LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of \u0027nexus/governance/no_go.py\u0027, LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of \u0027nexus/governance/service_contract.py\u0027, LF will be replaced by CRLF the next time Git touches it"
+}

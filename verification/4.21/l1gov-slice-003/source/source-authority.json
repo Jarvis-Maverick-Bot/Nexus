@@ -1,0 +1,13 @@
+{
+    "source_root":  "D:\\Nova-Jarvis-Shared-Docs",
+    "observed_remote":  "git@github-thunder:Nova-Mini/Nova-Jarvis-Shared-Docs.git",
+    "required_repo":  "git@github.com:Nova-Mini/Nova-Jarvis-Shared-Docs.git",
+    "source_root_is_smb":  false,
+    "verified_commits":  [
+                             "9870aac7 Approve 4.21 slice 003 task package",
+                             "4dfd3d84 Accept 4.21 slice roadmap planning model",
+                             "59812f82 Approve 4.21 slice 002 PR10"
+                         ],
+    "slice003_package_path":  "\\\\192.168.31.124\\Nova-Jarvis-Inbox\\Thunder\\_submitted\\2026-06-12_4.21_slice003_task_package_thunder_v0.1\\",
+    "pr10_merge_commit":  "5f94c27038d4b8f84361d2336a6a826afcdea987"
+}

@@ -1,0 +1,12 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "scope and no-go must be paired"
+  ],
+  "error_code": "ERR_STANDARDIZATION_RECORD_INVALID",
+  "invalid_items": [],
+  "message": "standardization record rejected",
+  "missing_fields": [
+    "no_go"
+  ]
+}

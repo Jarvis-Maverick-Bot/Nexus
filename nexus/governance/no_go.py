@@ -48,6 +48,11 @@ class NoGoBoundaryPolicy:
                 "workspace_init_approval_bypass": ErrorCode.NO_GO_BOUNDARY,
                 "workspace_init_runtime_dispatch": ErrorCode.NO_GO_BOUNDARY,
                 "shared_docs_mutation": ErrorCode.NO_GO_BOUNDARY,
+                "standardization_approval_bypass": ErrorCode.NO_GO_BOUNDARY,
+                "standardization_runtime_dispatch": ErrorCode.NO_GO_BOUNDARY,
+                "standardization_project_execution_packet_generation": ErrorCode.NO_GO_BOUNDARY,
+                "standardization_monitor_criteria_invention": ErrorCode.NO_GO_BOUNDARY,
+                "standardization_feedback_policy_bypass": ErrorCode.RAW_FEEDBACK_NO_AUTHORITY_MUTATION,
             }
         )
 

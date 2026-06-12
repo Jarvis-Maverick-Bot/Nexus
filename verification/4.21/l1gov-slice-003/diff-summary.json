@@ -1,0 +1,37 @@
+{
+    "branch":  "codex/4.21-slice003-standardization",
+    "base":  "origin/master",
+    "required_base_commit":  "5f94c27038d4b8f84361d2336a6a826afcdea987",
+    "working_tree_status":  [
+                                " M nexus/governance/errors.py",
+                                " M nexus/governance/no_go.py",
+                                " M nexus/governance/service_contract.py",
+                                "?? nexus/governance/standardization.py",
+                                "?? nexus/governance/tests/fixtures/standardization.py",
+                                "?? nexus/governance/tests/test_standardization_no_go.py",
+                                "?? nexus/governance/tests/test_standardization_profile_policy.py",
+                                "?? nexus/governance/tests/test_standardization_records.py",
+                                "?? nexus/governance/tests/test_standardization_service_contract.py",
+                                "?? verification/4.21/l1gov-slice-003/"
+                            ],
+    "tracked_diff_name_status":  [
+                                     "M\tnexus/governance/errors.py",
+                                     "M\tnexus/governance/no_go.py",
+                                     "M\tnexus/governance/service_contract.py"
+                                 ],
+    "tracked_diff_stat":  [
+                              " nexus/governance/errors.py           |  4 ++++",
+                              " nexus/governance/no_go.py            |  5 +++++",
+                              " nexus/governance/service_contract.py | 12 +++++++-----",
+                              " 3 files changed, 16 insertions(+), 5 deletions(-)"
+                          ],
+    "untracked_files":  [
+                            "nexus/governance/standardization.py",
+                            "nexus/governance/tests/fixtures/standardization.py",
+                            "nexus/governance/tests/test_standardization_no_go.py",
+                            "nexus/governance/tests/test_standardization_profile_policy.py",
+                            "nexus/governance/tests/test_standardization_records.py",
+                            "nexus/governance/tests/test_standardization_service_contract.py",
+                            "verification/4.21/l1gov-slice-003/"
+                        ]
+}

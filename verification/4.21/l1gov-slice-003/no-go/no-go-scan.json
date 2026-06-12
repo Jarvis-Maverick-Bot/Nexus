@@ -1,0 +1,18 @@
+{
+    "changed_files_within_allowed_boundary":  true,
+    "no_disallowed_path_changes":  true,
+    "disallowed_path_changes":  [
+
+                                ],
+    "no_nexus_mq_imports":  true,
+    "production_source_forbidden_matches":  [
+
+                                            ],
+    "blocked_standardization_no_go_actions":  [
+                                                  "standardization_approval_bypass",
+                                                  "standardization_runtime_dispatch",
+                                                  "standardization_project_execution_packet_generation",
+                                                  "standardization_monitor_criteria_invention",
+                                                  "standardization_feedback_policy_bypass"
+                                              ]
+}

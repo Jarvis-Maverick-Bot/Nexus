@@ -1,0 +1,30 @@
+{
+  "command_type": "SubmitStandardizationDraft",
+  "payload": {
+    "ambiguity_register_ref": "AmbiguityRegister:ambiguityregister-421",
+    "criteria_ref": "RequirementsSuccessCriteria:requirementssuccesscriteria-421",
+    "expected_version": 4,
+    "feedback_metric_policy_ref": "FeedbackMetricPolicy:feedbackmetricpolicy-421",
+    "idempotency_key": "slice003-submit-draft-plan-421",
+    "normalized_input_ref": "NormalizedInputMap:normalizedinputmap-421",
+    "planning_input_ref": "PlanningInputPackage:planninginputpackage-421",
+    "profile_refs": [
+      "DeliverableEvaluationProfile:deliverableevaluationprofile-421"
+    ],
+    "project_id": "project-421",
+    "projection_type": "standardization-draft",
+    "source_refs": [
+      "solution-design/subtopics/4_21_PROJECT_STANDARDIZATION_DETAILED_DESIGN.md",
+      "implementation-design/subtopics/L1_11_3_PROJECT_STANDARDIZATION_IMPLEMENTATION_DESIGN.md",
+      "review-evidence/2026-06-11_NOVA_L1_11_QA_FEEDBACK_METRICS_CORRECTION.md",
+      "PR10:5f94c27038d4b8f84361d2336a6a826afcdea987"
+    ],
+    "workspace_id": "ws-421",
+    "workspace_manifest_ref": "manifest-ws-421:kernel-accepted"
+  },
+  "validation": {
+    "accepted": true,
+    "error_code": null,
+    "message": ""
+  }
+}

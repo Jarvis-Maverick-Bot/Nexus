@@ -1,0 +1,126 @@
+{
+    "slice":  "L1GOV-SLICE-003",
+    "final_status":  "PR_READY_FOR_NOVA_REVIEW",
+    "generated_at":  "2026-06-12T18:45:49.0683899+08:00",
+    "evidence_files":  [
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\diff-check.json",
+                               "length":  481
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\diff-summary.json",
+                               "length":  2389
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\evidence-index.json",
+                               "length":  6770
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\file-list.json",
+                               "length":  2999
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\approval-bypass-block.json",
+                               "length":  200
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\execution-packet-generation-block.json",
+                               "length":  240
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\feedback-policy-bypass-block.json",
+                               "length":  234
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\import-scan.json",
+                               "length":  190
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\monitor-criteria-invention-block.json",
+                               "length":  222
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\no-go-scan.json",
+                               "length":  872
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\runtime-dispatch-block.json",
+                               "length":  202
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\service\\approval-packet-response.json",
+                               "length":  230
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\service\\no-go-before-standardization.json",
+                               "length":  276
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\service\\source-before-standardization.json",
+                               "length":  235
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\source\\source-authority.json",
+                               "length":  761
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\common-base-field-block.json",
+                               "length":  265
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\critical-ambiguity-block.json",
+                               "length":  263
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\evaluation-profile-field-block.json",
+                               "length":  267
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\evaluation-profile-policy.json",
+                               "length":  181
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\execution-plan-review-ref-block.json",
+                               "length":  234
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\expected-version-bool-block.json",
+                               "length":  148
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\feedback-policy.json",
+                               "length":  283
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\missing-profile.json",
+                               "length":  290
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\scope-no-go-pairing-block.json",
+                               "length":  265
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\self-approval-block.json",
+                               "length":  129
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\submit-draft-command-envelope.json",
+                               "length":  1277
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\test-output\\full-governance-pytest-output.json",
+                               "length":  291
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\test-output\\targeted-pytest-output.json",
+                               "length":  420
+                           }
+                       ],
+    "changed_files_within_allowed_boundary":  true,
+    "no_shared_docs_writes":  true,
+    "no_package_manager_mutation":  true,
+    "no_nexus_mq_imports":  true,
+    "diff_check_exit_code":  0,
+    "pytest_full":  "verification/4.21/l1gov-slice-003/test-output/full-governance-pytest-output.json",
+    "pytest_targeted":  "verification/4.21/l1gov-slice-003/test-output/targeted-pytest-output.json"
+}

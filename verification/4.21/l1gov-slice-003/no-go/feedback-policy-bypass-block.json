@@ -1,0 +1,6 @@
+{
+  "blocked": true,
+  "category": "standardization_feedback_policy_bypass",
+  "error_code": "ERR_RAW_FEEDBACK_NO_AUTHORITY_MUTATION",
+  "message": "blocked by Slice 001 no-go boundary: standardization_feedback_policy_bypass"
+}

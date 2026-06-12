@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [],
+  "error_code": "ERR_STANDARDIZATION_RECORD_INVALID",
+  "invalid_items": [],
+  "message": "standardization record rejected",
+  "missing_fields": [
+    "evidence_map_ref"
+  ]
+}
