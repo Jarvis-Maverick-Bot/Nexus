@@ -1,0 +1,13 @@
+{
+  "accepted": true,
+  "required_commits": [
+    "7e2774d",
+    "1c29365",
+    "fce663a",
+    "70ba8aa",
+    "4dfd3d8",
+    "f9eaa5b"
+  ],
+  "shared_docs_remote": "git@github.com:Nova-Mini/Nova-Jarvis-Shared-Docs.git",
+  "source_root": "D:\\Nova-Jarvis-Shared-Docs"
+}

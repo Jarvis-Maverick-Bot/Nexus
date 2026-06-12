@@ -1,0 +1,122 @@
+{
+  "slice": "L1GOV-SLICE-001",
+  "final_status": "PR_READY_FOR_NOVA_REVIEW",
+  "generated_at": "2026-06-12T14:48:35.445501+08:00",
+  "evidence_files": [
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\app\\read-only-view-model.json",
+      "length": 391
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\evidence-index.json",
+      "length": 4306
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\kernel\\replay-authority.json",
+      "length": 191
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\kernel\\version-idempotency.json",
+      "length": 238
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\no-go\\ack-as-acceptance.json",
+      "length": 341
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\no-go\\direct-ui-approval.json",
+      "length": 277
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\no-go\\import-scan.json",
+      "length": 8391
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\no-go\\lower-layer-runtime-control.json",
+      "length": 304
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\no-go\\missing-evaluation-profile.json",
+      "length": 346
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\no-go\\raw-feedback-mutation.json",
+      "length": 453
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\no-go\\stale-wbs-source-authority.json",
+      "length": 408
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\projection\\projection-snapshot.json",
+      "length": 382
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\schema\\common-schema.json",
+      "length": 57
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\service\\command-envelope.json",
+      "length": 213
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\service\\no-go-before-kernel.json",
+      "length": 267
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\source\\authority-commit-verification.json",
+      "length": 1200
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\source\\missing-final-assessment.json",
+      "length": 295
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\source\\no-go-policy.json",
+      "length": 184
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\source\\remote-mismatch-block.json",
+      "length": 264
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\source\\smb-source-root-block.json",
+      "length": 293
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\source\\source-authority.json",
+      "length": 282
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\source\\stale-source-block.json",
+      "length": 184
+    },
+    {
+      "path": "verification\\4.21\\l1gov-slice-001\\test-output\\targeted-pytest-output.json",
+      "length": 2264
+    }
+  ],
+  "allowed_scope_status": [
+    " M nexus/governance/source_authority.py",
+    " M nexus/governance/tests/fixtures/first_slice_no_go.py",
+    " M nexus/governance/tests/test_first_slice_no_go.py",
+    " M nexus/governance/tests/test_source_authority.py",
+    " M verification/4.21/l1gov-slice-001/evidence-index.json",
+    " M verification/4.21/l1gov-slice-001/no-go/import-scan.json",
+    " M verification/4.21/l1gov-slice-001/source/authority-commit-verification.json",
+    " M verification/4.21/l1gov-slice-001/source/source-authority.json",
+    " M verification/4.21/l1gov-slice-001/test-output/targeted-pytest-output.json",
+    "?? verification/4.21/l1gov-slice-001/no-go/stale-wbs-source-authority.json",
+    "?? verification/4.21/l1gov-slice-001/source/remote-mismatch-block.json",
+    "?? verification/4.21/l1gov-slice-001/source/smb-source-root-block.json"
+  ],
+  "outside_authorized_scope_tracked_diff": [],
+  "no_shared_docs_writes": true,
+  "no_package_manager_mutation": true,
+  "no_nexus_mq_imports": true,
+  "pytest_full": {
+    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests -q",
+    "exit_code": 0,
+    "output": "........................................                                 [100%]\n40 passed in 0.05s"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "accepted": false,
+  "error_code": "ERR_STALE_SOURCE_AUTHORITY",
+  "expected": "verified Shared Docs Git clone/worktree",
+  "message": "source root is not a verified Shared Docs Git clone/worktree",
+  "missing_commits": [],
+  "observed": "\\\\192.168.31.124\\Nova-Jarvis-Shared"
+}

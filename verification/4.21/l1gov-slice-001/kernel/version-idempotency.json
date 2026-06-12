@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "aggregate_id": "layer1-governance",
+  "error_code": "ERR_STALE_EXPECTED_VERSION",
+  "message": "expected version 0, observed 1",
+  "record_id": null,
+  "state": "authority_initialized",
+  "version": 1
+}

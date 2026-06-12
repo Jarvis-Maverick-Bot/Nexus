@@ -1,0 +1,8 @@
+{
+  "accepted": false,
+  "error_code": "ERR_STALE_SOURCE_AUTHORITY",
+  "expected": "git@github.com:Nova-Mini/Nova-Jarvis-Shared-Docs.git",
+  "message": "Shared Docs remote mismatch",
+  "missing_commits": [],
+  "observed": "git@github.com:other/repo.git"
+}

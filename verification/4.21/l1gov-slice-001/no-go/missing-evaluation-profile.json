@@ -1,0 +1,10 @@
+{
+  "blocked": true,
+  "category": "accept_without_evaluation_profile",
+  "error_code": "ERR_MISSING_EVALUATION_PROFILE",
+  "fixture": {
+    "action": "accept_without_evaluation_profile",
+    "expected_error": "ERR_MISSING_EVALUATION_PROFILE"
+  },
+  "message": "blocked by Slice 001 no-go boundary: accept_without_evaluation_profile"
+}

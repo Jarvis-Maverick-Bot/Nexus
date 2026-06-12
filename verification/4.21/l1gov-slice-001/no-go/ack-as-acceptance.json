@@ -1,0 +1,13 @@
+{
+  "blocked": true,
+  "category": "ack_as_acceptance",
+  "error_code": "ERR_ACK_NOT_ACCEPTANCE",
+  "fixture": {
+    "action": "ack_as_acceptance",
+    "expected_error": "ERR_ACK_NOT_ACCEPTANCE",
+    "required_terms": [
+      "DispatchDecision"
+    ]
+  },
+  "message": "blocked by Slice 001 no-go boundary: ack_as_acceptance"
+}

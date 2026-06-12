@@ -1,0 +1,20 @@
+{
+  "disabled_commands": [
+    "approve",
+    "complete",
+    "archive",
+    "baseline",
+    "no_go",
+    "final_pass"
+  ],
+  "framework": null,
+  "freshness_chips": [
+    "source",
+    "kernel",
+    "projection"
+  ],
+  "read_only": true,
+  "workspace_id": "workspace-001",
+  "workspace_picker_creates_authority": false,
+  "workspace_picker_mode": "projection_overlay"
+}
