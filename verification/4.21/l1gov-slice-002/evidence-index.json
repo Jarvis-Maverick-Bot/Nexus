@@ -1,11 +1,11 @@
 {
     "slice":  "L1GOV-SLICE-002",
     "final_status":  "PR_READY_FOR_NOVA_REVIEW",
-    "generated_at":  "2026-06-12T17:38:54.6163388+08:00",
+    "generated_at":  "2026-06-12T17:55:10.5886051+08:00",
     "evidence_files":  [
                            {
                                "path":  "verification\\4.21\\l1gov-slice-002\\diff-summary.json",
-                               "length":  4603
+                               "length":  3946
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-002\\evidence-index.json",
@@ -13,7 +13,7 @@
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-002\\file-list.json",
-                               "length":  6506
+                               "length":  7237
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\approval-bypass-block.json",
@@ -68,6 +68,26 @@
                                "length":  546
                            },
                            {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\expected-kernel-version-bool-block.json",
+                               "length":  149
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\expected-kernel-version-mismatch-block.json",
+                               "length":  163
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\expected-version-bool-block.json",
+                               "length":  142
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\expected-version-mismatch-block.json",
+                               "length":  156
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\idempotency-key-mismatch-block.json",
+                               "length":  154
+                           },
+                           {
                                "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\kernel-submit-init-record.json",
                                "length":  186
                            },
@@ -119,15 +139,17 @@
     "pytest_full":  {
                         "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests -q",
                         "exit_code":  0,
-                        "output":  "........................................................................ [ 94%]\n....                                                                     [100%]\n76 passed in 0.09s"
+                        "output":  "........................................................................ [ 88%]\n.........                                                                [100%]\n81 passed in 0.09s"
                     },
     "review_response":  {
                             "pr":  "https://github.com/Jarvis-Maverick-Bot/Nexus/pull/10",
-                            "review_artifact_commit":  "4993768",
+                            "review_artifact_commit":  "5bc8c7d",
+                            "reviewed_head":  "1131d2fd67cde80e8e906845b88d042d000af697",
                             "addressed_blockers":  [
-                                                       "WorkspaceManifest.status legal-state validation",
-                                                       "Workspace Init payload enforcement for source_refs, expected_version, expected_kernel_version",
-                                                       "Service-contract coverage for payloads, source/no-go ordering, normalized response envelope"
+                                                       "Boolean expected_version and expected_kernel_version values rejected",
+                                                       "Payload expected_version must match CommandEnvelope.expected_version",
+                                                       "Payload expected_kernel_version must match CommandEnvelope.expected_version",
+                                                       "CreateWorkspaceCandidate payload idempotency_key must match CommandEnvelope.idempotency_key"
                                                    ]
                         }
 }

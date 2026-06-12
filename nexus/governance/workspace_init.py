@@ -294,6 +294,12 @@ def validate_workspace_init_command(command: CommandEnvelope) -> ValidationResul
             ErrorCode.WORKSPACE_COMMAND_INVALID,
             "expected_version must be a non-negative integer",
         )
+    if "expected_version" in required_fields and not _payload_version_matches_envelope(command, "expected_version"):
+        return ValidationResult(
+            False,
+            ErrorCode.WORKSPACE_COMMAND_INVALID,
+            "payload expected_version must match envelope expected_version",
+        )
     if "expected_kernel_version" in required_fields and not _is_non_negative_int(
         command.payload["expected_kernel_version"]
     ):
@@ -301,6 +307,20 @@ def validate_workspace_init_command(command: CommandEnvelope) -> ValidationResul
             False,
             ErrorCode.WORKSPACE_COMMAND_INVALID,
             "expected_kernel_version must be a non-negative integer",
+        )
+    if "expected_kernel_version" in required_fields and not _payload_version_matches_envelope(
+        command, "expected_kernel_version"
+    ):
+        return ValidationResult(
+            False,
+            ErrorCode.WORKSPACE_COMMAND_INVALID,
+            "payload expected_kernel_version must match envelope expected_version",
+        )
+    if "idempotency_key" in required_fields and command.payload["idempotency_key"] != command.idempotency_key:
+        return ValidationResult(
+            False,
+            ErrorCode.WORKSPACE_COMMAND_INVALID,
+            "payload idempotency_key must match envelope idempotency_key",
         )
     return ValidationResult(True)
 
@@ -377,7 +397,11 @@ def _payload_field_missing(payload: dict[str, Any], field_name: str) -> bool:
 
 
 def _is_non_negative_int(value: Any) -> bool:
-    return isinstance(value, int) and value >= 0
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def _payload_version_matches_envelope(command: CommandEnvelope, payload_field: str) -> bool:
+    return _is_non_negative_int(command.expected_version) and command.payload[payload_field] == command.expected_version
 
 
 def _has_required_base_fields(item: WorkspaceInitOutputBase) -> bool:

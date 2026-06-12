@@ -60,12 +60,12 @@ def test_malformed_workspace_init_command_is_rejected() -> None:
     assert result.message == "workspace_id is required"
 
 
-def workspace_command(command_type: str, payload: dict[str, object]) -> CommandEnvelope:
+def workspace_command(command_type: str, payload: dict[str, object], expected_version: object = 0) -> CommandEnvelope:
     return CommandEnvelope(
         command_type=command_type,
         actor=ActorRef("agent:thunder", "implementation"),
         authority_refs=SOURCE_REFS,
-        expected_version=0,
+        expected_version=expected_version,
         idempotency_key=f"{command_type}-ws-421",
         payload=payload,
     )
@@ -82,6 +82,7 @@ def test_validate_workspace_manifest_payload_requires_source_refs_and_expected_v
             "source_refs": SOURCE_REFS,
             "expected_version": 1,
         },
+        expected_version=1,
     )
 
     result = validate_workspace_init_command(command)
@@ -142,6 +143,7 @@ def test_submit_workspace_init_record_payload_requires_source_refs_and_expected_
             "source_refs": SOURCE_REFS,
             "expected_kernel_version": 3,
         },
+        expected_version=3,
     )
 
     result = validate_workspace_init_command(command)
@@ -190,6 +192,121 @@ def test_submit_workspace_init_record_payload_rejects_missing_source_refs() -> N
     assert result.message == "source_refs is required"
 
 
+def test_validate_workspace_manifest_payload_rejects_boolean_expected_version() -> None:
+    command = workspace_command(
+        "ValidateWorkspaceManifest",
+        {
+            "workspace_id": "ws-421",
+            "manifest_id": "manifest-ws-421",
+            "manifest_version": 1,
+            "required_surfaces": ("evidence_path",),
+            "source_refs": SOURCE_REFS,
+            "expected_version": True,
+        },
+        expected_version=True,
+    )
+
+    result = validate_workspace_init_command(command)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.WORKSPACE_COMMAND_INVALID
+    assert result.message == "expected_version must be a non-negative integer"
+    write_evidence("workspace/expected-version-bool-block.json", result.to_evidence(), slice_id="l1gov-slice-002")
+
+
+def test_validate_workspace_manifest_payload_rejects_expected_version_envelope_mismatch() -> None:
+    command = workspace_command(
+        "ValidateWorkspaceManifest",
+        {
+            "workspace_id": "ws-421",
+            "manifest_id": "manifest-ws-421",
+            "manifest_version": 1,
+            "required_surfaces": ("evidence_path",),
+            "source_refs": SOURCE_REFS,
+            "expected_version": 1,
+        },
+        expected_version=0,
+    )
+
+    result = validate_workspace_init_command(command)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.WORKSPACE_COMMAND_INVALID
+    assert result.message == "payload expected_version must match envelope expected_version"
+    write_evidence("workspace/expected-version-mismatch-block.json", result.to_evidence(), slice_id="l1gov-slice-002")
+
+
+def test_submit_workspace_init_record_payload_rejects_boolean_expected_kernel_version() -> None:
+    command = workspace_command(
+        "SubmitWorkspaceInitRecord",
+        {
+            "workspace_id": "ws-421",
+            "manifest_ref": "manifest-ws-421",
+            "validation_report_ref": "validation-ws-421",
+            "source_refs": SOURCE_REFS,
+            "expected_kernel_version": True,
+        },
+        expected_version=True,
+    )
+
+    result = validate_workspace_init_command(command)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.WORKSPACE_COMMAND_INVALID
+    assert result.message == "expected_kernel_version must be a non-negative integer"
+    write_evidence(
+        "workspace/expected-kernel-version-bool-block.json",
+        result.to_evidence(),
+        slice_id="l1gov-slice-002",
+    )
+
+
+def test_submit_workspace_init_record_payload_rejects_expected_kernel_version_envelope_mismatch() -> None:
+    command = workspace_command(
+        "SubmitWorkspaceInitRecord",
+        {
+            "workspace_id": "ws-421",
+            "manifest_ref": "manifest-ws-421",
+            "validation_report_ref": "validation-ws-421",
+            "source_refs": SOURCE_REFS,
+            "expected_kernel_version": 3,
+        },
+        expected_version=0,
+    )
+
+    result = validate_workspace_init_command(command)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.WORKSPACE_COMMAND_INVALID
+    assert result.message == "payload expected_kernel_version must match envelope expected_version"
+    write_evidence(
+        "workspace/expected-kernel-version-mismatch-block.json",
+        result.to_evidence(),
+        slice_id="l1gov-slice-002",
+    )
+
+
+def test_create_workspace_candidate_payload_rejects_idempotency_key_envelope_mismatch() -> None:
+    command = create_workspace_candidate_command(
+        actor=ActorRef("agent:thunder", "implementation"),
+        authority_refs=SOURCE_REFS,
+        workspace_id="ws-421",
+        requested_project_ref="project-authority:421",
+        requested_root_path=WORKSPACE_ROOT,
+        template_profile_ref="workspace-template:standard-init:v1",
+        expected_version=0,
+        idempotency_key="slice002-create-ws-421",
+    )
+    command.payload["idempotency_key"] = "different-idempotency-key"
+
+    result = validate_workspace_init_command(command)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.WORKSPACE_COMMAND_INVALID
+    assert result.message == "payload idempotency_key must match envelope idempotency_key"
+    write_evidence("workspace/idempotency-key-mismatch-block.json", result.to_evidence(), slice_id="l1gov-slice-002")
+
+
 def workspace_service(
     source_wbs_version: str = "V0.6",
     kernel: GovernanceKernel | None = None,
@@ -234,6 +351,7 @@ def test_service_no_go_runs_before_kernel_for_workspace_command() -> None:
             "source_refs": SOURCE_REFS,
             "expected_kernel_version": 3,
         },
+        expected_version=3,
     )
 
     response = workspace_service(kernel=kernel).handle(command, intent={"action": "workspace_init_runtime_dispatch"})
@@ -254,6 +372,7 @@ def test_service_returns_normalized_response_for_workspace_submit() -> None:
             "source_refs": SOURCE_REFS,
             "expected_kernel_version": 3,
         },
+        expected_version=3,
     )
 
     response = workspace_service(kernel=kernel_ready_for_workspace_init()).handle(command)

@@ -101,7 +101,7 @@
     },
     {
         "path":  "nexus\\governance\\tests\\test_workspace_init_service_contract.py",
-        "length":  9688
+        "length":  14207
     },
     {
         "path":  "nexus\\governance\\tests\\test_workspace_init_source_authority.py",
@@ -113,11 +113,11 @@
     },
     {
         "path":  "nexus\\governance\\workspace_init.py",
-        "length":  13905
+        "length":  15095
     },
     {
         "path":  "verification\\4.21\\l1gov-slice-002\\diff-summary.json",
-        "length":  4004
+        "length":  4603
     },
     {
         "path":  "verification\\4.21\\l1gov-slice-002\\evidence-index.json",
@@ -125,7 +125,7 @@
     },
     {
         "path":  "verification\\4.21\\l1gov-slice-002\\file-list.json",
-        "length":  6507
+        "length":  6506
     },
     {
         "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\approval-bypass-block.json",
@@ -178,6 +178,26 @@
     {
         "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\create-command-envelope.json",
         "length":  546
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\expected-kernel-version-bool-block.json",
+        "length":  149
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\expected-kernel-version-mismatch-block.json",
+        "length":  163
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\expected-version-bool-block.json",
+        "length":  142
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\expected-version-mismatch-block.json",
+        "length":  156
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\idempotency-key-mismatch-block.json",
+        "length":  154
     },
     {
         "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\kernel-submit-init-record.json",
