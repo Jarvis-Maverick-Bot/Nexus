@@ -1,0 +1,19 @@
+{
+  "command_type": "SubmitWorkspaceInitRecord",
+  "payload": {
+    "expected_kernel_version": 3,
+    "manifest_ref": "manifest-ws-421",
+    "source_refs": [
+      "WBS V0.6",
+      "L1.11.2",
+      "PR9:7007b4a"
+    ],
+    "validation_report_ref": "validation-ws-421",
+    "workspace_id": "ws-421"
+  },
+  "validation": {
+    "accepted": true,
+    "error_code": null,
+    "message": ""
+  }
+}

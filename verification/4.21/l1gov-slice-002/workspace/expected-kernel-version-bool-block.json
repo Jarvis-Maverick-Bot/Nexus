@@ -1,0 +1,5 @@
+{
+  "accepted": false,
+  "error_code": "ERR_WORKSPACE_COMMAND_INVALID",
+  "message": "expected_kernel_version must be a non-negative integer"
+}

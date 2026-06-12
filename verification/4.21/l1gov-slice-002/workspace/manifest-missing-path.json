@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [],
+  "error_code": "ERR_WORKSPACE_MANIFEST_INVALID",
+  "invalid_items": [],
+  "message": "workspace manifest rejected",
+  "missing_paths": [
+    "decision_log_path"
+  ]
+}

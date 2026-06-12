@@ -1,0 +1,8 @@
+{
+    "command":  "rg -n \"runtime/live/private-agent invocation|resident controller|transport/adapter|final PASS|production readiness|Shared Docs write|package-manager/dependency change\" nexus/governance",
+    "exit_code":  1,
+    "no_go_boundary_clear":  true,
+    "matches":  [
+
+                ]
+}

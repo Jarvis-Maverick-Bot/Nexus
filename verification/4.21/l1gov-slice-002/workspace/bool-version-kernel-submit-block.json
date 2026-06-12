@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "aggregate_id": "layer1-governance",
+  "error_code": "ERR_WORKSPACE_COMMAND_INVALID",
+  "message": "expected_kernel_version must be a non-negative integer",
+  "record_id": null,
+  "state": "projection_contract_ready",
+  "version": 1
+}
