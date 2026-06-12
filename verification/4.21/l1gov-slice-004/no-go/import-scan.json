@@ -1,0 +1,7 @@
+{
+    "command":  "rg -n \u0027(^|\\\\s)(from|import)\\\\s+nexus\\\\.mq|nexus\\\\.mq\u0027 nexus/governance",
+    "no_nexus_mq_imports":  true,
+    "matches":  [
+
+                ]
+}

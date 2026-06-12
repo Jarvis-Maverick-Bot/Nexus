@@ -1,0 +1,13 @@
+{
+  "accepted": false,
+  "blocked_reasons": [],
+  "error_code": "ERR_EXECUTION_WORKPACKET_INVALID",
+  "invalid_items": [],
+  "message": "Layer1WorkPacket contract incomplete",
+  "missing_fields": [
+    "no_go",
+    "expected_outputs",
+    "evidence_contract_ref",
+    "stop_rules"
+  ]
+}

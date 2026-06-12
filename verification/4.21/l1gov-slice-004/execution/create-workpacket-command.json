@@ -1,0 +1,57 @@
+{
+  "command_type": "CreateLayer1WorkPacket",
+  "payload": {
+    "acceptance_criteria": [
+      "review-ready packet contract"
+    ],
+    "approval_decision_ref": "human-decision:nova-approved-plan-421",
+    "approved_plan_ref": "ExecutionPlanCandidate:plan-421-s003:v1",
+    "blocked_return_schema": {
+      "blocked_reason": "string"
+    },
+    "evidence_contract_ref": "EvidenceExpectationMap:evidence-421",
+    "expected_outputs": [
+      "nexus/governance/execution.py"
+    ],
+    "expected_version": 5,
+    "forbidden_outputs": [
+      "runtime dispatch"
+    ],
+    "human_review_required": true,
+    "idempotency_key": "slice004-create-workpacket-421",
+    "kernel_acceptance_record_ref": "kernel-record:plan-baseline-000001",
+    "no_go": [
+      "no direct 4.19 controller call"
+    ],
+    "objective": "create packet contract foundation",
+    "owner_role": "implementation-agent",
+    "packet_id": "wp-421-001",
+    "packet_version": 1,
+    "project_id": "project-421",
+    "projection_type": "execution-workpacket",
+    "required_capability": "local schema/test implementation",
+    "reviewer_role": "Nova",
+    "scope": [
+      "Project Execution records"
+    ],
+    "source_refs": [
+      "solution-design/subtopics/4_21_PROJECT_EXECUTION_DETAILED_DESIGN.md",
+      "implementation-design/subtopics/L1_11_4_PROJECT_EXECUTION_IMPLEMENTATION_DESIGN.md",
+      "PR11:0fc70602cc864eb6eb8fe82f7707371f1adbba6e"
+    ],
+    "stop_rules": [
+      "stop on direct controller call"
+    ],
+    "validation_plan": [
+      "pytest governance tests"
+    ],
+    "work_type": "governance-contract",
+    "workspace_id": "ws-421",
+    "workspace_manifest_ref": "manifest-ws-421:kernel-accepted"
+  },
+  "validation": {
+    "accepted": true,
+    "error_code": null,
+    "message": ""
+  }
+}

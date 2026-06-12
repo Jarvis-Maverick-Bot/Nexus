@@ -1,0 +1,29 @@
+{
+    "branch":  "codex/4.21-slice004-project-execution",
+    "changed_files":  [
+                          "nexus/governance/execution.py",
+                          "nexus/governance/tests/test_execution_records.py",
+                          "nexus/governance/tests/test_execution_service_contract.py",
+                          "nexus/governance/tests/test_execution_workpacket_contract.py",
+                          "verification/4.21/l1gov-slice-004/diff-check.json",
+                          "verification/4.21/l1gov-slice-004/diff-summary.json",
+                          "verification/4.21/l1gov-slice-004/execution/controller-call-shape-block.json",
+                          "verification/4.21/l1gov-slice-004/execution/dispatch-contract-ref-shape-block.json",
+                          "verification/4.21/l1gov-slice-004/execution/nested-requested-action-dispatch-block.json",
+                          "verification/4.21/l1gov-slice-004/execution/readiness-status-active-block.json",
+                          "verification/4.21/l1gov-slice-004/execution/readiness-status-closed-block.json",
+                          "verification/4.21/l1gov-slice-004/execution/readiness-status-submitted-block.json",
+                          "verification/4.21/l1gov-slice-004/execution/requested-action-dispatch-block.json",
+                          "verification/4.21/l1gov-slice-004/execution/workpacket-status-active-block.json",
+                          "verification/4.21/l1gov-slice-004/execution/workpacket-status-closed-block.json",
+                          "verification/4.21/l1gov-slice-004/execution/workpacket-status-submitted-block.json",
+                          "verification/4.21/l1gov-slice-004/file-list.json",
+                          "verification/4.21/l1gov-slice-004/no-go/no-go-scan.json",
+                          "verification/4.21/l1gov-slice-004/test-output/full-governance-pytest-output.json",
+                          "verification/4.21/l1gov-slice-004/test-output/targeted-pytest-output.json"
+                      ],
+    "changed_files_within_allowed_boundary":  true,
+    "outside_allowed_boundary":  [
+
+                                 ]
+}

@@ -1,0 +1,5 @@
+{
+    "command":  "python -m pytest nexus/governance/tests/test_execution_records.py nexus/governance/tests/test_execution_dependency_graph.py nexus/governance/tests/test_execution_workpacket_contract.py nexus/governance/tests/test_execution_service_contract.py nexus/governance/tests/test_execution_no_go.py -q",
+    "exit_code":  0,
+    "output":  "...........................................                              [100%]\r\n43 passed in 0.09s"
+}

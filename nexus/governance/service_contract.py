@@ -4,6 +4,7 @@ from dataclasses import dataclass, replace
 from typing import Any
 
 from .errors import ErrorCode
+from .execution import EXECUTION_COMMAND_TYPES, validate_execution_command
 from .kernel import GovernanceKernel
 from .no_go import NoGoBoundaryPolicy
 from .schemas import CommandEnvelope, CommandResponse, validate_command_envelope
@@ -37,6 +38,8 @@ class GovernanceServiceContract:
             validation = validate_workspace_init_command(command)
         elif command.command_type in STANDARDIZATION_COMMAND_TYPES:
             validation = validate_standardization_command(command)
+        elif command.command_type in EXECUTION_COMMAND_TYPES:
+            validation = validate_execution_command(command)
         else:
             validation = validate_command_envelope(command)
         if not validation.accepted:

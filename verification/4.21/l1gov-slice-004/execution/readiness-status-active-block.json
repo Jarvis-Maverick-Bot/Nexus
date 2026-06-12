@@ -1,0 +1,11 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "PacketReadinessDecision status is not legal in Slice 004: active",
+    "PacketReadinessDecision readiness_status is not legal in Slice 004: active"
+  ],
+  "error_code": "ERR_EXECUTION_RECORD_INVALID",
+  "invalid_items": [],
+  "message": "PacketReadinessDecision status rejected",
+  "missing_fields": []
+}

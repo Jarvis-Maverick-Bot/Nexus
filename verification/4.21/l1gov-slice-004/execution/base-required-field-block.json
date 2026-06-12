@@ -1,0 +1,11 @@
+{
+  "accepted": false,
+  "blocked_reasons": [],
+  "error_code": "ERR_EXECUTION_RECORD_INVALID",
+  "invalid_items": [],
+  "message": "execution output base rejected",
+  "missing_fields": [
+    "approved_plan_ref",
+    "workspace_manifest_ref"
+  ]
+}

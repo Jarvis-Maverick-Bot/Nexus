@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "Layer1WorkPacket status is not legal in Slice 004: active"
+  ],
+  "error_code": "ERR_EXECUTION_WORKPACKET_INVALID",
+  "invalid_items": [],
+  "message": "Layer1WorkPacket status rejected",
+  "missing_fields": []
+}
