@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from nexus.governance.dispatch_contract import validate_dispatch_command
 from nexus.governance.errors import ErrorCode
 from nexus.governance.kernel import AggregateState, GovernanceKernel
@@ -67,6 +69,22 @@ def test_handoff_candidate_command_rejects_runtime_dispatch_as_expected_output()
     write_evidence("dispatch/command-expected-output-runtime-block.json", result.to_evidence(), slice_id="l1gov-slice-005")
 
 
+@pytest.mark.parametrize("expected_output", ("dispatch", "controller call", "private-agent invocation"))
+def test_handoff_candidate_command_rejects_execution_intent_expected_outputs(expected_output: str) -> None:
+    command = valid_handoff_candidate_command(expected_outputs=(expected_output,))
+
+    result = validate_dispatch_command(command)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.NO_GO_BOUNDARY
+    assert result.message == "Dispatch Contract command expected_outputs cannot request dispatch/controller/runtime execution"
+    write_evidence(
+        f"dispatch/command-expected-output-{expected_output.replace(' ', '-').replace('/', '-')}-block.json",
+        result.to_evidence(),
+        slice_id="l1gov-slice-005",
+    )
+
+
 def test_normalize_dispatch_return_rejects_ack_as_acceptance() -> None:
     command = valid_normalize_return_command(return_kind="ack", result_refs=(), evidence_refs=())
     command.payload["status"] = "accepted"
@@ -92,6 +110,36 @@ def test_normalize_dispatch_return_rejects_completion_or_acceptance_return_kinds
             result.to_evidence(),
             slice_id="l1gov-slice-005",
         )
+
+
+@pytest.mark.parametrize("return_kind", ("dispatch", "runtime_dispatch", "workpacket_execution", "controller_call", "ship_it"))
+def test_normalize_dispatch_return_rejects_unknown_or_execution_return_kinds(return_kind: str) -> None:
+    command = valid_normalize_return_command(return_kind=return_kind)
+
+    result = validate_dispatch_command(command)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.DISPATCH_COMMAND_INVALID
+    assert result.message == "return_kind is not legal for Dispatch Contract normalization"
+    write_evidence(
+        f"dispatch/return-kind-{return_kind}-block.json",
+        result.to_evidence(),
+        slice_id="l1gov-slice-005",
+    )
+
+
+def test_normalize_dispatch_return_accepts_returned_blocked_reason_kind() -> None:
+    command = valid_normalize_return_command(
+        return_kind="returned_blocked",
+        result_refs=(),
+        evidence_refs=(),
+        blocked_reason="blocked_missing_capability",
+    )
+
+    result = validate_dispatch_command(command)
+
+    assert result.accepted is True
+    write_evidence("dispatch/return-kind-returned-blocked.json", result.to_evidence(), slice_id="l1gov-slice-005")
 
 
 def test_dispatch_command_rejects_boolean_expected_version() -> None:

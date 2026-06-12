@@ -1,0 +1,5 @@
+{
+  "accepted": false,
+  "error_code": "ERR_DISPATCH_COMMAND_INVALID",
+  "message": "return_kind is not legal for Dispatch Contract normalization"
+}

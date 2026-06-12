@@ -92,3 +92,19 @@ def test_handoff_candidate_rejects_runtime_dispatch_as_expected_output() -> None
     assert result.error_code == ErrorCode.NO_GO_BOUNDARY
     assert "handoff candidate expected_outputs cannot request runtime dispatch" in result.blocked_reasons
     write_evidence("dispatch/handoff-expected-output-runtime-block.json", result.to_evidence(), slice_id="l1gov-slice-005")
+
+
+@pytest.mark.parametrize("expected_output", ("dispatch", "controller call", "private-agent invocation"))
+def test_handoff_candidate_rejects_execution_intent_expected_outputs(expected_output: str) -> None:
+    candidate = valid_handoff_candidate(expected_outputs=(expected_output,))
+
+    result = validate_handoff_candidate(candidate)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.NO_GO_BOUNDARY
+    assert "handoff candidate expected_outputs cannot request dispatch/controller/runtime execution" in result.blocked_reasons
+    write_evidence(
+        f"dispatch/handoff-expected-output-{expected_output.replace(' ', '-').replace('/', '-')}-block.json",
+        result.to_evidence(),
+        slice_id="l1gov-slice-005",
+    )

@@ -43,10 +43,23 @@ RUNTIME_OR_ACCEPTANCE_STATUSES: tuple[str, ...] = (
     "executed",
 )
 COMPLETION_OR_ACCEPTANCE_RETURN_KINDS: tuple[str, ...] = ("final_pass", "complete", "accepted", "production_ready")
-RUNTIME_DISPATCH_OUTPUT_VALUES: tuple[str, ...] = (
+LEGAL_RETURN_KINDS: tuple[str, ...] = (
+    "result_candidate",
+    "returned_result_candidate",
+    "blocked_reason",
+    "returned_blocked",
+)
+DISALLOWED_EXPECTED_OUTPUT_TERMS: tuple[str, ...] = (
+    "dispatch",
     "runtime dispatch",
     "actual dispatch",
     "live dispatch",
+    "controller call",
+    "controller invocation",
+    "private-agent invocation",
+    "private agent invocation",
+    "runtime invocation",
+    "transport call",
     "workpacket execution",
 )
 LIVE_INTENT_KEYS: tuple[str, ...] = (
@@ -444,6 +457,13 @@ def validate_handoff_candidate(candidate: DispatchControllerHandoffCandidate) ->
             message="handoff candidate crossed Slice 005 boundary",
             blocked_reasons=("handoff candidate expected_outputs cannot request runtime dispatch",),
         )
+    if _expected_outputs_request_execution(candidate.expected_outputs):
+        return DispatchValidationResult(
+            False,
+            ErrorCode.NO_GO_BOUNDARY,
+            message="handoff candidate crossed Slice 005 boundary",
+            blocked_reasons=("handoff candidate expected_outputs cannot request dispatch/controller/runtime execution",),
+        )
     base = validate_dispatch_output_base(candidate)
     if not base.accepted:
         return base
@@ -692,6 +712,20 @@ def validate_dispatch_command(command: CommandEnvelope) -> ValidationResult:
             ErrorCode.NO_GO_BOUNDARY,
             "Dispatch Contract command expected_outputs cannot request runtime dispatch",
         )
+    if command.command_type == "CreateDispatchControllerHandoffCandidate" and _expected_outputs_request_execution(
+        command.payload.get("expected_outputs", ())
+    ):
+        return ValidationResult(
+            False,
+            ErrorCode.NO_GO_BOUNDARY,
+            "Dispatch Contract command expected_outputs cannot request dispatch/controller/runtime execution",
+        )
+    if _command_treats_ack_as_acceptance(command):
+        return ValidationResult(
+            False,
+            ErrorCode.ACK_NOT_ACCEPTANCE,
+            "ACK/progress/controller output is not Layer 1 acceptance",
+        )
     if command.command_type == "NormalizeDispatchReturn" and _return_kind_claims_completion_or_acceptance(
         command.payload.get("return_kind", "")
     ):
@@ -700,11 +734,11 @@ def validate_dispatch_command(command: CommandEnvelope) -> ValidationResult:
             ErrorCode.ACK_NOT_ACCEPTANCE,
             "Dispatch return kind cannot claim completion or acceptance",
         )
-    if _command_treats_ack_as_acceptance(command):
+    if command.command_type == "NormalizeDispatchReturn" and not _return_kind_is_legal(command.payload.get("return_kind", "")):
         return ValidationResult(
             False,
-            ErrorCode.ACK_NOT_ACCEPTANCE,
-            "ACK/progress/controller output is not Layer 1 acceptance",
+            ErrorCode.DISPATCH_COMMAND_INVALID,
+            "return_kind is not legal for Dispatch Contract normalization",
         )
     for field_name in _required_payload_fields(command.command_type):
         if _payload_field_missing(command.payload, field_name):
@@ -841,14 +875,28 @@ def _return_kind_claims_completion_or_acceptance(return_kind: object) -> bool:
     return str(return_kind).strip().lower() in COMPLETION_OR_ACCEPTANCE_RETURN_KINDS
 
 
+def _return_kind_is_legal(return_kind: object) -> bool:
+    return str(return_kind).strip().lower() in LEGAL_RETURN_KINDS
+
+
 def _expected_outputs_request_runtime_dispatch(expected_outputs: object) -> bool:
+    return any(value == "runtime dispatch" for value in _normalized_expected_output_values(expected_outputs))
+
+
+def _expected_outputs_request_execution(expected_outputs: object) -> bool:
+    return any(value in DISALLOWED_EXPECTED_OUTPUT_TERMS for value in _normalized_expected_output_values(expected_outputs))
+
+
+def _normalized_expected_output_values(expected_outputs: object) -> tuple[str, ...]:
     if isinstance(expected_outputs, str):
-        values = (expected_outputs,)
+        return (_normalize_term(expected_outputs),)
     elif isinstance(expected_outputs, (list, tuple, set)):
-        values = tuple(str(value).strip().lower() for value in expected_outputs)
-    else:
-        return False
-    return any(value in RUNTIME_DISPATCH_OUTPUT_VALUES for value in values)
+        return tuple(_normalize_term(value) for value in expected_outputs)
+    return ()
+
+
+def _normalize_term(value: object) -> str:
+    return str(value).strip().lower().replace("_", " ").replace("-", " ")
 
 
 def _command_has_live_intent(command: CommandEnvelope) -> bool:
