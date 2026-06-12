@@ -58,6 +58,11 @@ class NoGoBoundaryPolicy:
                 "execution_dispatch_contract_implementation": ErrorCode.NO_GO_BOUNDARY,
                 "execution_runtime_live_invocation": ErrorCode.NO_GO_BOUNDARY,
                 "execution_completion_judgement": ErrorCode.NO_GO_BOUNDARY,
+                "dispatch_runtime_live_invocation": ErrorCode.NO_GO_BOUNDARY,
+                "dispatch_actual_execution": ErrorCode.NO_GO_BOUNDARY,
+                "dispatch_direct_419_controller_call": ErrorCode.NO_GO_BOUNDARY,
+                "dispatch_workpacket_execution": ErrorCode.NO_GO_BOUNDARY,
+                "dispatch_completion_judgement": ErrorCode.NO_GO_BOUNDARY,
             }
         )
 

@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "Layer2CapabilityProfileRef must cite 4.19 baseline"
+  ],
+  "error_code": "ERR_DISPATCH_RECORD_INVALID",
+  "invalid_items": [],
+  "message": "layer 2 capability profile rejected",
+  "missing_fields": []
+}

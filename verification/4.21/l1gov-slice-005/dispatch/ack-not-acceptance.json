@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "ACK/progress cannot be treated as Layer 1 progress"
+  ],
+  "error_code": "ERR_ACK_NOT_ACCEPTANCE",
+  "invalid_items": [],
+  "message": "transport constraint rejected",
+  "missing_fields": []
+}

@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "handoff candidate must remain non-live"
+  ],
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "invalid_items": [],
+  "message": "handoff candidate crossed Slice 005 boundary",
+  "missing_fields": []
+}

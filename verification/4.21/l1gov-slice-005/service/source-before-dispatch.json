@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "aggregate_ref": null,
+  "error_code": "ERR_STALE_SOURCE_AUTHORITY",
+  "evidence_refs": [],
+  "message": "WBS version mismatch",
+  "projection_ref": null,
+  "record_ref": null,
+  "retryable": false
+}

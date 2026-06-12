@@ -1,0 +1,7 @@
+{
+    "command":  "python -m pytest nexus/governance/tests/test_dispatch_records.py nexus/governance/tests/test_dispatch_readiness.py nexus/governance/tests/test_dispatch_return_normalization.py nexus/governance/tests/test_dispatch_service_contract.py nexus/governance/tests/test_dispatch_no_go.py -q",
+    "exit_code":  0,
+    "started_utc":  "2026-06-12T15:05:47.2811235Z",
+    "ended_utc":  "2026-06-12T15:05:47.7850153Z",
+    "output":  "............................................................             [100%]\r\n60 passed in 0.11s"
+}

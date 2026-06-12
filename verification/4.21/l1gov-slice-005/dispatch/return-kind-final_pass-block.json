@@ -1,0 +1,5 @@
+{
+  "accepted": false,
+  "error_code": "ERR_ACK_NOT_ACCEPTANCE",
+  "message": "Dispatch return kind cannot claim completion or acceptance"
+}

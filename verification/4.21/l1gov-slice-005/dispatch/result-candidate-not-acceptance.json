@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "returned result candidate cannot accept progress"
+  ],
+  "error_code": "ERR_ACK_NOT_ACCEPTANCE",
+  "invalid_items": [],
+  "message": "returned result candidate is not acceptance",
+  "missing_fields": []
+}

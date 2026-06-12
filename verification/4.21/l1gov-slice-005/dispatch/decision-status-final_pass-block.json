@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "DispatchDecision cannot claim final_pass"
+  ],
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "invalid_items": [],
+  "message": "dispatch decision crossed Slice 005 boundary",
+  "missing_fields": []
+}

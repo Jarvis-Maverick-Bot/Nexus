@@ -1,0 +1,6 @@
+{
+  "blocked": true,
+  "category": "dispatch_workpacket_execution",
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "message": "blocked by Slice 001 no-go boundary: dispatch_workpacket_execution"
+}

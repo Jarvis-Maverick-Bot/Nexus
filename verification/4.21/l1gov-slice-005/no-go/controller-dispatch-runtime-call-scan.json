@@ -1,0 +1,6 @@
+{
+    "command":  "rg -n from\\s+.*controller|import\\s+.*controller|controller\\(|\\.dispatch\\(|\\bdispatch\\(|runtime_invocation\\(|private_agent\\(|transport_call\\( nexus/governance --glob !**/tests/**",
+    "raw_exit_code":  1,
+    "no_matches":  true,
+    "output":  ""
+}
