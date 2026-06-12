@@ -1,0 +1,10 @@
+{
+  "blocked": true,
+  "category": "direct_ui_approval",
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "fixture": {
+    "action": "direct_ui_approval",
+    "expected_error": "ERR_NO_GO_BOUNDARY"
+  },
+  "message": "blocked by Slice 001 no-go boundary: direct_ui_approval"
+}

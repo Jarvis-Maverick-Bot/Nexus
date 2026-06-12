@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "error_code": "ERR_STALE_SOURCE_AUTHORITY",
+  "expected": "7e2774d,1c29365,fce663a,70ba8aa,4dfd3d8,f9eaa5b",
+  "message": "required authority commits missing",
+  "missing_commits": [
+    "1c29365"
+  ],
+  "observed": "7e2774d,fce663a,70ba8aa,4dfd3d8,f9eaa5b"
+}

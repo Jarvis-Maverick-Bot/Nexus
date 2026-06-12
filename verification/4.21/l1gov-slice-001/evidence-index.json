@@ -1,0 +1,96 @@
+﻿{
+    "slice":  "L1GOV-SLICE-001",
+    "final_status":  "READY_FOR_NOVA_REVIEW",
+    "generated_at":  "2026-06-12T14:13:26.4024344+08:00",
+    "evidence_files":  [
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\app\\read-only-view-model.json",
+                               "length":  391
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\evidence-index.json",
+                               "length":  4802
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\kernel\\replay-authority.json",
+                               "length":  191
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\kernel\\version-idempotency.json",
+                               "length":  238
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\no-go\\ack-as-acceptance.json",
+                               "length":  341
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\no-go\\direct-ui-approval.json",
+                               "length":  277
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\no-go\\import-scan.json",
+                               "length":  8326
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\no-go\\lower-layer-runtime-control.json",
+                               "length":  304
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\no-go\\missing-evaluation-profile.json",
+                               "length":  346
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\no-go\\raw-feedback-mutation.json",
+                               "length":  453
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\projection\\projection-snapshot.json",
+                               "length":  389
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\schema\\common-schema.json",
+                               "length":  57
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\service\\command-envelope.json",
+                               "length":  213
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\service\\no-go-before-kernel.json",
+                               "length":  267
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\source\\authority-commit-verification.json",
+                               "length":  2048
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\source\\missing-final-assessment.json",
+                               "length":  295
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\source\\no-go-policy.json",
+                               "length":  184
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\source\\source-authority.json",
+                               "length":  152
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\source\\stale-source-block.json",
+                               "length":  184
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-001\\test-output\\targeted-pytest-output.json",
+                               "length":  2266
+                           }
+                       ],
+    "allowed_scope_status":  [
+                                 "?? nexus/governance/",
+                                 "?? verification/4.21/l1gov-slice-001/"
+                             ],
+    "outside_authorized_scope_tracked_diff":  [
+
+                                              ],
+    "no_shared_docs_writes":  true,
+    "no_package_manager_mutation":  true
+}

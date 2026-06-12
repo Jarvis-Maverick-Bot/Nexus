@@ -1,0 +1,14 @@
+{
+  "blocked": true,
+  "category": "raw_feedback_authority_mutation",
+  "error_code": "ERR_RAW_FEEDBACK_NO_AUTHORITY_MUTATION",
+  "fixture": {
+    "action": "raw_feedback_authority_mutation",
+    "expected_error": "ERR_RAW_FEEDBACK_NO_AUTHORITY_MUTATION",
+    "required_terms": [
+      "FeedbackMetricExtraction",
+      "FeedbackMetricTrend"
+    ]
+  },
+  "message": "blocked by Slice 001 no-go boundary: raw_feedback_authority_mutation"
+}

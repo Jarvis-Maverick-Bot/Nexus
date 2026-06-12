@@ -1,0 +1,8 @@
+{
+  "accepted": false,
+  "error_code": "ERR_STALE_SOURCE_AUTHORITY",
+  "expected": "V0.6",
+  "message": "WBS version mismatch",
+  "missing_commits": [],
+  "observed": "V0.4"
+}
