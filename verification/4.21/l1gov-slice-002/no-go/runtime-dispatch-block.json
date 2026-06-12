@@ -1,0 +1,13 @@
+{
+  "blocked": true,
+  "category": "workspace_init_runtime_dispatch",
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "message": "blocked by Slice 001 no-go boundary: workspace_init_runtime_dispatch",
+  "planning_terms_preserved": [
+    "scope_baseline",
+    "wbs_backlog",
+    "risk_register",
+    "dependency_map",
+    "execution_plan_candidate"
+  ]
+}

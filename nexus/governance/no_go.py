@@ -44,6 +44,10 @@ class NoGoBoundaryPolicy:
                 "ack_as_acceptance": ErrorCode.ACK_NOT_ACCEPTANCE,
                 "raw_feedback_authority_mutation": ErrorCode.RAW_FEEDBACK_NO_AUTHORITY_MUTATION,
                 "accept_without_evaluation_profile": ErrorCode.MISSING_EVALUATION_PROFILE,
+                "workspace_init_planning_content": ErrorCode.NO_GO_BOUNDARY,
+                "workspace_init_approval_bypass": ErrorCode.NO_GO_BOUNDARY,
+                "workspace_init_runtime_dispatch": ErrorCode.NO_GO_BOUNDARY,
+                "shared_docs_mutation": ErrorCode.NO_GO_BOUNDARY,
             }
         )
 

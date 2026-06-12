@@ -1,0 +1,27 @@
+{
+  "base": "origin/master",
+  "branch": "codex/4.21-slice002-workspace-init",
+  "diff_stat": "nexus/governance/__init__.py         |  2 +-\n nexus/governance/errors.py           |  6 ++++\n nexus/governance/kernel.py           |  1 +\n nexus/governance/no_go.py            |  4 +++\n nexus/governance/source_authority.py | 65 ++++++++++++++++++++++++++++++++++++\n nexus/governance/tests/_evidence.py  |  4 +--\n 6 files changed, 79 insertions(+), 3 deletions(-)",
+  "status_short": [
+    " M nexus/governance/__init__.py",
+    " M nexus/governance/errors.py",
+    " M nexus/governance/kernel.py",
+    " M nexus/governance/no_go.py",
+    " M nexus/governance/source_authority.py",
+    " M nexus/governance/tests/_evidence.py",
+    "?? nexus/governance/tests/fixtures/workspace_init.py",
+    "?? nexus/governance/tests/test_workspace_init_kernel_boundary.py",
+    "?? nexus/governance/tests/test_workspace_init_manifest.py",
+    "?? nexus/governance/tests/test_workspace_init_no_go.py",
+    "?? nexus/governance/tests/test_workspace_init_service_contract.py",
+    "?? nexus/governance/tests/test_workspace_init_source_authority.py",
+    "?? nexus/governance/tests/test_workspace_init_templates.py",
+    "?? nexus/governance/workspace_init.py",
+    "?? verification/4.21/l1gov-slice-002/"
+  ],
+  "allowed_boundary": [
+    "nexus/governance/",
+    "nexus/governance/tests/",
+    "verification/4.21/l1gov-slice-002/"
+  ]
+}

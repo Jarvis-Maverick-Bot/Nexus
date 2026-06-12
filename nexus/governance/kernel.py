@@ -12,6 +12,7 @@ ALLOWED_TRANSITIONS: dict[tuple[str, str], str] = {
     ("not_started", "InitializeAuthority"): "authority_initialized",
     ("authority_initialized", "MarkKernelReady"): "kernel_ready",
     ("kernel_ready", "RefreshProjectionCheckpoint"): "projection_contract_ready",
+    ("projection_contract_ready", "SubmitWorkspaceInitRecord"): "initiation_ready",
 }
 
 

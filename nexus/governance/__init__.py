@@ -1,1 +1,1 @@
-"""Layer 1 governance foundation contracts for 4.21 Slice 001."""
+"""Layer 1 governance contracts for 4.21 implementation slices."""

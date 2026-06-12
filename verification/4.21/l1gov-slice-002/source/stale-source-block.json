@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "error_code": "ERR_STALE_SOURCE_AUTHORITY",
+  "expected": "3018953,4dfd3d8,f9eaa5b",
+  "message": "required Slice 002 authority commits missing",
+  "missing_commits": [
+    "3018953"
+  ],
+  "observed": "4dfd3d8,f9eaa5b"
+}

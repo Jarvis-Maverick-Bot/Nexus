@@ -1,0 +1,14 @@
+{
+  "command_type": "CreateWorkspaceCandidate",
+  "payload": {
+    "requested_project_ref": "project-authority:421",
+    "requested_root_path": ".governance/workspaces/ws-421",
+    "template_profile_ref": "workspace-template:standard-init:v1",
+    "workspace_id": "ws-421"
+  },
+  "validation": {
+    "accepted": true,
+    "error_code": null,
+    "message": ""
+  }
+}

@@ -1,0 +1,449 @@
+{
+  "passed": true,
+  "no_nexus_mq_imports": true,
+  "forbidden_imports": [],
+  "forbidden_text_matches": [],
+  "imports": [
+    {
+      "file": "nexus\\governance\\app_contract.py",
+      "module": "__future__"
+    },
+    {
+      "file": "nexus\\governance\\app_contract.py",
+      "module": "dataclasses"
+    },
+    {
+      "file": "nexus\\governance\\app_contract.py",
+      "module": "typing"
+    },
+    {
+      "file": "nexus\\governance\\errors.py",
+      "module": "__future__"
+    },
+    {
+      "file": "nexus\\governance\\errors.py",
+      "module": "enum"
+    },
+    {
+      "file": "nexus\\governance\\kernel.py",
+      "module": "__future__"
+    },
+    {
+      "file": "nexus\\governance\\kernel.py",
+      "module": "json"
+    },
+    {
+      "file": "nexus\\governance\\kernel.py",
+      "module": "dataclasses"
+    },
+    {
+      "file": "nexus\\governance\\kernel.py",
+      "module": "typing"
+    },
+    {
+      "file": "nexus\\governance\\kernel.py",
+      "module": "errors"
+    },
+    {
+      "file": "nexus\\governance\\kernel.py",
+      "module": "schemas"
+    },
+    {
+      "file": "nexus\\governance\\no_go.py",
+      "module": "__future__"
+    },
+    {
+      "file": "nexus\\governance\\no_go.py",
+      "module": "dataclasses"
+    },
+    {
+      "file": "nexus\\governance\\no_go.py",
+      "module": "typing"
+    },
+    {
+      "file": "nexus\\governance\\no_go.py",
+      "module": "errors"
+    },
+    {
+      "file": "nexus\\governance\\projections.py",
+      "module": "__future__"
+    },
+    {
+      "file": "nexus\\governance\\projections.py",
+      "module": "dataclasses"
+    },
+    {
+      "file": "nexus\\governance\\projections.py",
+      "module": "datetime"
+    },
+    {
+      "file": "nexus\\governance\\projections.py",
+      "module": "enum"
+    },
+    {
+      "file": "nexus\\governance\\projections.py",
+      "module": "typing"
+    },
+    {
+      "file": "nexus\\governance\\schemas.py",
+      "module": "__future__"
+    },
+    {
+      "file": "nexus\\governance\\schemas.py",
+      "module": "dataclasses"
+    },
+    {
+      "file": "nexus\\governance\\schemas.py",
+      "module": "datetime"
+    },
+    {
+      "file": "nexus\\governance\\schemas.py",
+      "module": "typing"
+    },
+    {
+      "file": "nexus\\governance\\schemas.py",
+      "module": "errors"
+    },
+    {
+      "file": "nexus\\governance\\service_contract.py",
+      "module": "__future__"
+    },
+    {
+      "file": "nexus\\governance\\service_contract.py",
+      "module": "dataclasses"
+    },
+    {
+      "file": "nexus\\governance\\service_contract.py",
+      "module": "typing"
+    },
+    {
+      "file": "nexus\\governance\\service_contract.py",
+      "module": "errors"
+    },
+    {
+      "file": "nexus\\governance\\service_contract.py",
+      "module": "kernel"
+    },
+    {
+      "file": "nexus\\governance\\service_contract.py",
+      "module": "no_go"
+    },
+    {
+      "file": "nexus\\governance\\service_contract.py",
+      "module": "schemas"
+    },
+    {
+      "file": "nexus\\governance\\service_contract.py",
+      "module": "source_authority"
+    },
+    {
+      "file": "nexus\\governance\\source_authority.py",
+      "module": "__future__"
+    },
+    {
+      "file": "nexus\\governance\\source_authority.py",
+      "module": "dataclasses"
+    },
+    {
+      "file": "nexus\\governance\\source_authority.py",
+      "module": "typing"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "module": "__future__"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "module": "dataclasses"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "module": "datetime"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "module": "typing"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "module": "errors"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "module": "kernel"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "module": "schemas"
+    }
+  ],
+  "production_files_scanned": [
+    "nexus\\governance\\__init__.py",
+    "nexus\\governance\\app_contract.py",
+    "nexus\\governance\\errors.py",
+    "nexus\\governance\\kernel.py",
+    "nexus\\governance\\no_go.py",
+    "nexus\\governance\\projections.py",
+    "nexus\\governance\\schemas.py",
+    "nexus\\governance\\service_contract.py",
+    "nexus\\governance\\source_authority.py",
+    "nexus\\governance\\workspace_init.py"
+  ],
+  "public_defs": [
+    {
+      "file": "nexus\\governance\\app_contract.py",
+      "kind": "ClassDef",
+      "name": "LocalAppViewModel"
+    },
+    {
+      "file": "nexus\\governance\\app_contract.py",
+      "kind": "FunctionDef",
+      "name": "build_read_only_view_model"
+    },
+    {
+      "file": "nexus\\governance\\app_contract.py",
+      "kind": "FunctionDef",
+      "name": "to_evidence"
+    },
+    {
+      "file": "nexus\\governance\\errors.py",
+      "kind": "ClassDef",
+      "name": "ErrorCode"
+    },
+    {
+      "file": "nexus\\governance\\kernel.py",
+      "kind": "ClassDef",
+      "name": "AggregateState"
+    },
+    {
+      "file": "nexus\\governance\\kernel.py",
+      "kind": "ClassDef",
+      "name": "KernelRecord"
+    },
+    {
+      "file": "nexus\\governance\\kernel.py",
+      "kind": "ClassDef",
+      "name": "TransitionResult"
+    },
+    {
+      "file": "nexus\\governance\\kernel.py",
+      "kind": "ClassDef",
+      "name": "GovernanceKernel"
+    },
+    {
+      "file": "nexus\\governance\\kernel.py",
+      "kind": "FunctionDef",
+      "name": "to_evidence"
+    },
+    {
+      "file": "nexus\\governance\\kernel.py",
+      "kind": "FunctionDef",
+      "name": "apply"
+    },
+    {
+      "file": "nexus\\governance\\kernel.py",
+      "kind": "FunctionDef",
+      "name": "replay"
+    },
+    {
+      "file": "nexus\\governance\\no_go.py",
+      "kind": "ClassDef",
+      "name": "NoGoResult"
+    },
+    {
+      "file": "nexus\\governance\\no_go.py",
+      "kind": "ClassDef",
+      "name": "NoGoBoundaryPolicy"
+    },
+    {
+      "file": "nexus\\governance\\no_go.py",
+      "kind": "FunctionDef",
+      "name": "to_evidence"
+    },
+    {
+      "file": "nexus\\governance\\no_go.py",
+      "kind": "FunctionDef",
+      "name": "default"
+    },
+    {
+      "file": "nexus\\governance\\no_go.py",
+      "kind": "FunctionDef",
+      "name": "evaluate"
+    },
+    {
+      "file": "nexus\\governance\\projections.py",
+      "kind": "ClassDef",
+      "name": "FreshnessState"
+    },
+    {
+      "file": "nexus\\governance\\projections.py",
+      "kind": "ClassDef",
+      "name": "ProjectionSnapshot"
+    },
+    {
+      "file": "nexus\\governance\\projections.py",
+      "kind": "FunctionDef",
+      "name": "build_projection"
+    },
+    {
+      "file": "nexus\\governance\\projections.py",
+      "kind": "FunctionDef",
+      "name": "is_stale"
+    },
+    {
+      "file": "nexus\\governance\\projections.py",
+      "kind": "FunctionDef",
+      "name": "is_canonical_state"
+    },
+    {
+      "file": "nexus\\governance\\projections.py",
+      "kind": "FunctionDef",
+      "name": "to_evidence"
+    },
+    {
+      "file": "nexus\\governance\\schemas.py",
+      "kind": "ClassDef",
+      "name": "ActorRef"
+    },
+    {
+      "file": "nexus\\governance\\schemas.py",
+      "kind": "ClassDef",
+      "name": "CommandEnvelope"
+    },
+    {
+      "file": "nexus\\governance\\schemas.py",
+      "kind": "ClassDef",
+      "name": "ValidationResult"
+    },
+    {
+      "file": "nexus\\governance\\schemas.py",
+      "kind": "ClassDef",
+      "name": "CommandResponse"
+    },
+    {
+      "file": "nexus\\governance\\schemas.py",
+      "kind": "FunctionDef",
+      "name": "validate_command_envelope"
+    },
+    {
+      "file": "nexus\\governance\\schemas.py",
+      "kind": "FunctionDef",
+      "name": "to_evidence"
+    },
+    {
+      "file": "nexus\\governance\\schemas.py",
+      "kind": "FunctionDef",
+      "name": "to_evidence"
+    },
+    {
+      "file": "nexus\\governance\\service_contract.py",
+      "kind": "ClassDef",
+      "name": "GovernanceServiceContract"
+    },
+    {
+      "file": "nexus\\governance\\service_contract.py",
+      "kind": "FunctionDef",
+      "name": "handle"
+    },
+    {
+      "file": "nexus\\governance\\source_authority.py",
+      "kind": "ClassDef",
+      "name": "SourceAuthorityManifest"
+    },
+    {
+      "file": "nexus\\governance\\source_authority.py",
+      "kind": "ClassDef",
+      "name": "Slice002AuthorityManifest"
+    },
+    {
+      "file": "nexus\\governance\\source_authority.py",
+      "kind": "ClassDef",
+      "name": "SourceAuthorityResult"
+    },
+    {
+      "file": "nexus\\governance\\source_authority.py",
+      "kind": "FunctionDef",
+      "name": "verify_source_authority"
+    },
+    {
+      "file": "nexus\\governance\\source_authority.py",
+      "kind": "FunctionDef",
+      "name": "verify_slice002_source_authority"
+    },
+    {
+      "file": "nexus\\governance\\source_authority.py",
+      "kind": "FunctionDef",
+      "name": "to_evidence"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "kind": "ClassDef",
+      "name": "WorkspaceValidationResult"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "kind": "ClassDef",
+      "name": "WorkspaceInitOutputBase"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "kind": "ClassDef",
+      "name": "TemplateProfileSelection"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "kind": "ClassDef",
+      "name": "InitiationTemplateSet"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "kind": "ClassDef",
+      "name": "GovernanceSurfaceIndex"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "kind": "ClassDef",
+      "name": "WorkspaceManifest"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "kind": "FunctionDef",
+      "name": "validate_template_profile"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "kind": "FunctionDef",
+      "name": "validate_workspace_manifest"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "kind": "FunctionDef",
+      "name": "create_workspace_candidate_command"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "kind": "FunctionDef",
+      "name": "validate_workspace_init_command"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "kind": "FunctionDef",
+      "name": "submit_workspace_init_record"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "kind": "FunctionDef",
+      "name": "to_evidence"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "kind": "FunctionDef",
+      "name": "required_surface_names"
+    },
+    {
+      "file": "nexus\\governance\\workspace_init.py",
+      "kind": "FunctionDef",
+      "name": "required_paths"
+    }
+  ]
+}
