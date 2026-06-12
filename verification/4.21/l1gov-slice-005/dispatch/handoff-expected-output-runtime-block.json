@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "handoff candidate expected_outputs cannot request runtime dispatch"
+  ],
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "invalid_items": [],
+  "message": "handoff candidate crossed Slice 005 boundary",
+  "missing_fields": []
+}

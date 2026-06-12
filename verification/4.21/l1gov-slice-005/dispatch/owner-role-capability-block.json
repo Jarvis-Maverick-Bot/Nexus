@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "packet owner_role is not eligible for Layer 2 capability profile"
+  ],
+  "error_code": "ERR_DISPATCH_RECORD_INVALID",
+  "invalid_items": [],
+  "message": "dispatch readiness rejected",
+  "missing_fields": []
+}

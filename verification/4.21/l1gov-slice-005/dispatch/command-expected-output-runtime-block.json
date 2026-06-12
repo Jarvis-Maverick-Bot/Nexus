@@ -1,0 +1,5 @@
+{
+  "accepted": false,
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "message": "Dispatch Contract command expected_outputs cannot request runtime dispatch"
+}

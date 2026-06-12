@@ -80,3 +80,20 @@ def test_dispatch_readiness_rejects_missing_no_go_or_stop_rules() -> None:
     assert result.accepted is False
     assert result.error_code == ErrorCode.DISPATCH_RECORD_INVALID
     assert "packet no-go and stop rules must be preserved" in result.blocked_reasons
+
+
+def test_dispatch_readiness_rejects_owner_role_not_in_capability_profile() -> None:
+    packet = kernel_ready_workpacket(owner_role="unlisted-owner")
+
+    result = validate_dispatch_readiness_inputs(
+        packet=packet,
+        capability=valid_capability_profile(eligible_owner_roles=("implementation-agent",)),
+        transport_constraints=(valid_transport_constraint(),),
+        context=valid_dispatch_context(),
+        kernel_packet_record_ref="kernel-record:packet-ready-000001",
+    )
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.DISPATCH_RECORD_INVALID
+    assert "packet owner_role is not eligible for Layer 2 capability profile" in result.blocked_reasons
+    write_evidence("dispatch/owner-role-capability-block.json", result.to_evidence(), slice_id="l1gov-slice-005")

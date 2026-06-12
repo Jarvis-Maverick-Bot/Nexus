@@ -81,3 +81,14 @@ def test_handoff_candidate_rejects_live_controller_payload() -> None:
     assert result.error_code == ErrorCode.NO_GO_BOUNDARY
     assert "handoff candidate must remain non-live" in result.blocked_reasons
     write_evidence("dispatch/direct-controller-block.json", result.to_evidence(), slice_id="l1gov-slice-005")
+
+
+def test_handoff_candidate_rejects_runtime_dispatch_as_expected_output() -> None:
+    candidate = valid_handoff_candidate(expected_outputs=("runtime dispatch",))
+
+    result = validate_handoff_candidate(candidate)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.NO_GO_BOUNDARY
+    assert "handoff candidate expected_outputs cannot request runtime dispatch" in result.blocked_reasons
+    write_evidence("dispatch/handoff-expected-output-runtime-block.json", result.to_evidence(), slice_id="l1gov-slice-005")

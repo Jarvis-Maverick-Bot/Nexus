@@ -42,6 +42,13 @@ RUNTIME_OR_ACCEPTANCE_STATUSES: tuple[str, ...] = (
     "production_ready",
     "executed",
 )
+COMPLETION_OR_ACCEPTANCE_RETURN_KINDS: tuple[str, ...] = ("final_pass", "complete", "accepted", "production_ready")
+RUNTIME_DISPATCH_OUTPUT_VALUES: tuple[str, ...] = (
+    "runtime dispatch",
+    "actual dispatch",
+    "live dispatch",
+    "workpacket execution",
+)
 LIVE_INTENT_KEYS: tuple[str, ...] = (
     "controller_call",
     "controller_request",
@@ -330,6 +337,8 @@ def validate_dispatch_readiness_inputs(
     capability_result = validate_layer2_capability_profile(capability)
     if not capability_result.accepted:
         blocked_reasons.extend(capability_result.blocked_reasons or capability_result.missing_fields)
+    if packet.owner_role and packet.owner_role not in capability.eligible_owner_roles:
+        blocked_reasons.append("packet owner_role is not eligible for Layer 2 capability profile")
     if not transport_constraints:
         blocked_reasons.append("Layer3 transport constraints are required")
     for constraint in transport_constraints:
@@ -427,6 +436,13 @@ def validate_handoff_candidate(candidate: DispatchControllerHandoffCandidate) ->
             ErrorCode.NO_GO_BOUNDARY,
             message="handoff candidate crossed Slice 005 boundary",
             blocked_reasons=("handoff candidate must remain non-live",),
+        )
+    if _expected_outputs_request_runtime_dispatch(candidate.expected_outputs):
+        return DispatchValidationResult(
+            False,
+            ErrorCode.NO_GO_BOUNDARY,
+            message="handoff candidate crossed Slice 005 boundary",
+            blocked_reasons=("handoff candidate expected_outputs cannot request runtime dispatch",),
         )
     base = validate_dispatch_output_base(candidate)
     if not base.accepted:
@@ -668,6 +684,22 @@ def validate_dispatch_command(command: CommandEnvelope) -> ValidationResult:
             ErrorCode.NO_GO_BOUNDARY,
             "Dispatch Contract command cannot execute runtime or controller work",
         )
+    if command.command_type == "CreateDispatchControllerHandoffCandidate" and _expected_outputs_request_runtime_dispatch(
+        command.payload.get("expected_outputs", ())
+    ):
+        return ValidationResult(
+            False,
+            ErrorCode.NO_GO_BOUNDARY,
+            "Dispatch Contract command expected_outputs cannot request runtime dispatch",
+        )
+    if command.command_type == "NormalizeDispatchReturn" and _return_kind_claims_completion_or_acceptance(
+        command.payload.get("return_kind", "")
+    ):
+        return ValidationResult(
+            False,
+            ErrorCode.ACK_NOT_ACCEPTANCE,
+            "Dispatch return kind cannot claim completion or acceptance",
+        )
     if _command_treats_ack_as_acceptance(command):
         return ValidationResult(
             False,
@@ -803,6 +835,20 @@ def _payload_version_matches_envelope(command: CommandEnvelope) -> bool:
 
 def _is_runtime_or_acceptance_status(status: object) -> bool:
     return str(status).strip().lower() in RUNTIME_OR_ACCEPTANCE_STATUSES
+
+
+def _return_kind_claims_completion_or_acceptance(return_kind: object) -> bool:
+    return str(return_kind).strip().lower() in COMPLETION_OR_ACCEPTANCE_RETURN_KINDS
+
+
+def _expected_outputs_request_runtime_dispatch(expected_outputs: object) -> bool:
+    if isinstance(expected_outputs, str):
+        values = (expected_outputs,)
+    elif isinstance(expected_outputs, (list, tuple, set)):
+        values = tuple(str(value).strip().lower() for value in expected_outputs)
+    else:
+        return False
+    return any(value in RUNTIME_DISPATCH_OUTPUT_VALUES for value in values)
 
 
 def _command_has_live_intent(command: CommandEnvelope) -> bool:

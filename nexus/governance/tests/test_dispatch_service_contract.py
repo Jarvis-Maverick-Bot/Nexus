@@ -56,6 +56,17 @@ def test_handoff_candidate_command_rejects_actual_dispatch_action() -> None:
     write_evidence("dispatch/actual-dispatch-block.json", result.to_evidence(), slice_id="l1gov-slice-005")
 
 
+def test_handoff_candidate_command_rejects_runtime_dispatch_as_expected_output() -> None:
+    command = valid_handoff_candidate_command(expected_outputs=("runtime dispatch",))
+
+    result = validate_dispatch_command(command)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.NO_GO_BOUNDARY
+    assert result.message == "Dispatch Contract command expected_outputs cannot request runtime dispatch"
+    write_evidence("dispatch/command-expected-output-runtime-block.json", result.to_evidence(), slice_id="l1gov-slice-005")
+
+
 def test_normalize_dispatch_return_rejects_ack_as_acceptance() -> None:
     command = valid_normalize_return_command(return_kind="ack", result_refs=(), evidence_refs=())
     command.payload["status"] = "accepted"
@@ -65,6 +76,22 @@ def test_normalize_dispatch_return_rejects_ack_as_acceptance() -> None:
     assert result.accepted is False
     assert result.error_code == ErrorCode.ACK_NOT_ACCEPTANCE
     assert result.message == "ACK/progress/controller output is not Layer 1 acceptance"
+
+
+def test_normalize_dispatch_return_rejects_completion_or_acceptance_return_kinds() -> None:
+    for return_kind in ("final_pass", "complete", "accepted", "production_ready"):
+        command = valid_normalize_return_command(return_kind=return_kind)
+
+        result = validate_dispatch_command(command)
+
+        assert result.accepted is False
+        assert result.error_code == ErrorCode.ACK_NOT_ACCEPTANCE
+        assert result.message == "Dispatch return kind cannot claim completion or acceptance"
+        write_evidence(
+            f"dispatch/return-kind-{return_kind}-block.json",
+            result.to_evidence(),
+            slice_id="l1gov-slice-005",
+        )
 
 
 def test_dispatch_command_rejects_boolean_expected_version() -> None:
