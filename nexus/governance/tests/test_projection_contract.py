@@ -12,6 +12,7 @@ def test_projection_snapshot_records_source_checkpoint() -> None:
         source_checkpoint="kernel:2",
         payload={"status": "kernel_ready"},
         authority_refs=("WBS V0.6",),
+        generated_at="2026-06-12T00:00:00+00:00",
     )
 
     assert snapshot.source_checkpoint == "kernel:2"

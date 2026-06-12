@@ -51,6 +51,7 @@ def build_projection(
     source_checkpoint: str,
     payload: dict[str, Any],
     authority_refs: tuple[str, ...],
+    generated_at: str | None = None,
 ) -> ProjectionSnapshot:
     projection_id = f"{workspace_id}:{projection_type}:{source_checkpoint}"
     return ProjectionSnapshot(
@@ -61,4 +62,5 @@ def build_projection(
         freshness=FreshnessState.FRESH,
         payload=dict(payload),
         authority_refs=tuple(authority_refs),
+        generated_at=generated_at or datetime.now(UTC).isoformat(),
     )
