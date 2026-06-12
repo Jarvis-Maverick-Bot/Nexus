@@ -1,39 +1,39 @@
-﻿{
-    "shared_docs_repo":  "D:\\Nova-Jarvis-Shared-Docs",
-    "required_commits":  [
-                             {
-                                 "commit":  "7e2774d",
-                                 "present":  true,
-                                 "subject":  "Normalize 4.21 pre-coding authority status"
-                             },
-                             {
-                                 "commit":  "1c29365",
-                                 "present":  true,
-                                 "subject":  "Add 4.21 final pre-coding assessment"
-                             },
-                             {
-                                 "commit":  "fce663a",
-                                 "present":  true,
-                                 "subject":  "Approve 4.21 first slice task package"
-                             },
-                             {
-                                 "commit":  "70ba8aa",
-                                 "present":  true,
-                                 "subject":  "Clarify 4.21 Shared Docs repo access"
-                             },
-                             {
-                                 "commit":  "4dfd3d8",
-                                 "present":  true,
-                                 "subject":  "Accept 4.21 slice roadmap planning model"
-                             },
-                             {
-                                 "commit":  "f9eaa5b",
-                                 "present":  true,
-                                 "subject":  "Authorize 4.21 slice 001 implementation"
-                             }
-                         ],
-    "authorization_record_path":  "D:\\Nova-Jarvis-Shared-Docs\\working\\00-project-governance\\03-pre-coding\\group-a-priority\\4.21-layer-1-governance-execution\\review-evidence\\2026-06-12_ALEX_AUTHORIZE_SLICE_001_IMPLEMENTATION.md",
-    "authorization_record_present":  true,
-    "authorization_decision_present":  true,
-    "slice001_only_present":  true
+{
+  "shared_docs_repo": "D:\\Nova-Jarvis-Shared-Docs",
+  "required_commits": [
+    {
+      "commit": "7e2774d",
+      "present": true,
+      "subject": "Normalize 4.21 pre-coding authority status"
+    },
+    {
+      "commit": "1c29365",
+      "present": true,
+      "subject": "Add 4.21 final pre-coding assessment"
+    },
+    {
+      "commit": "fce663a",
+      "present": true,
+      "subject": "Approve 4.21 first slice task package"
+    },
+    {
+      "commit": "70ba8aa",
+      "present": true,
+      "subject": "Clarify 4.21 Shared Docs repo access"
+    },
+    {
+      "commit": "4dfd3d8",
+      "present": true,
+      "subject": "Accept 4.21 slice roadmap planning model"
+    },
+    {
+      "commit": "f9eaa5b",
+      "present": true,
+      "subject": "Authorize 4.21 slice 001 implementation"
+    }
+  ],
+  "authorization_record_path": "D:\\Nova-Jarvis-Shared-Docs\\working\\00-project-governance\\03-pre-coding\\group-a-priority\\4.21-layer-1-governance-execution\\review-evidence\\2026-06-12_ALEX_AUTHORIZE_SLICE_001_IMPLEMENTATION.md",
+  "authorization_record_present": true,
+  "authorization_decision_present": true,
+  "slice001_only_present": true
 }

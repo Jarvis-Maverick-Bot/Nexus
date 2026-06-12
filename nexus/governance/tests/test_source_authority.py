@@ -29,13 +29,19 @@ def valid_manifest(**overrides: object) -> SourceAuthorityManifest:
 
 
 def test_accepts_wbs_v0_6_manifest() -> None:
-    result = verify_source_authority(valid_manifest())
+    manifest = valid_manifest()
+    result = verify_source_authority(manifest)
 
     assert result.accepted is True
     assert result.error_code is None
     path = write_evidence(
         "source/source-authority.json",
-        {"accepted": result.accepted, "required_commits": list(REQUIRED_AUTHORITY_COMMITS)},
+        {
+            "accepted": result.accepted,
+            "required_commits": list(REQUIRED_AUTHORITY_COMMITS),
+            "shared_docs_remote": manifest.shared_docs_remote,
+            "source_root": manifest.source_root,
+        },
     )
     assert path.exists()
 
@@ -48,6 +54,28 @@ def test_rejects_wbs_v0_4_manifest() -> None:
     assert result.expected == "V0.6"
     assert result.observed == "V0.4"
     write_evidence("source/stale-source-block.json", result.to_evidence())
+
+
+def test_rejects_non_shared_docs_git_remote() -> None:
+    result = verify_source_authority(valid_manifest(shared_docs_remote="git@github.com:other/repo.git"))
+
+    assert result.accepted is False
+    assert result.error_code == "ERR_STALE_SOURCE_AUTHORITY"
+    assert result.expected == "git@github.com:Nova-Mini/Nova-Jarvis-Shared-Docs.git"
+    assert result.observed == "git@github.com:other/repo.git"
+    write_evidence("source/remote-mismatch-block.json", result.to_evidence())
+
+
+def test_rejects_smb_source_root() -> None:
+    smb_root = "\\\\192.168.31.124\\Nova-Jarvis-Shared"
+
+    result = verify_source_authority(valid_manifest(source_root=smb_root))
+
+    assert result.accepted is False
+    assert result.error_code == "ERR_STALE_SOURCE_AUTHORITY"
+    assert result.expected == "verified Shared Docs Git clone/worktree"
+    assert result.observed == smb_root
+    write_evidence("source/smb-source-root-block.json", result.to_evidence())
 
 
 def test_requires_final_assessment_commit_1c29365() -> None:

@@ -1,0 +1,17 @@
+{
+  "accepted": false,
+  "error_code": "ERR_STALE_SOURCE_AUTHORITY",
+  "expected": "V0.6",
+  "fixture": {
+    "check": "source_authority",
+    "expected": "V0.6",
+    "expected_error": "ERR_STALE_SOURCE_AUTHORITY",
+    "manifest_overrides": {
+      "wbs_version": "V0.5"
+    },
+    "observed": "V0.5"
+  },
+  "message": "WBS version mismatch",
+  "missing_commits": [],
+  "observed": "V0.5"
+}

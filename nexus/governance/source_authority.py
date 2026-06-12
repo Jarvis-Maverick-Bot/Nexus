@@ -14,6 +14,8 @@ REQUIRED_AUTHORITY_COMMITS: tuple[str, ...] = (
 )
 
 REQUIRED_SUBTOPICS: tuple[str, ...] = tuple(f"L1.11.{i}" for i in range(1, 11))
+REQUIRED_SHARED_DOCS_REMOTE = "git@github.com:Nova-Mini/Nova-Jarvis-Shared-Docs.git"
+REQUIRED_SHARED_DOCS_ROOT_MARKER = "nova-jarvis-shared-docs"
 
 
 @dataclass(frozen=True)
@@ -53,6 +55,18 @@ class SourceAuthorityResult:
 
 
 def verify_source_authority(manifest: SourceAuthorityManifest) -> SourceAuthorityResult:
+    if manifest.shared_docs_remote.strip() != REQUIRED_SHARED_DOCS_REMOTE:
+        return _stale(
+            REQUIRED_SHARED_DOCS_REMOTE,
+            manifest.shared_docs_remote,
+            "Shared Docs remote mismatch",
+        )
+    if not _is_verified_shared_docs_source_root(manifest.source_root):
+        return _stale(
+            "verified Shared Docs Git clone/worktree",
+            manifest.source_root,
+            "source root is not a verified Shared Docs Git clone/worktree",
+        )
     if manifest.parent_solution_design_version != "V0.8.5":
         return _stale("V0.8.5", manifest.parent_solution_design_version, "parent solution version mismatch")
     if manifest.wbs_version != "V0.6":
@@ -109,3 +123,13 @@ def _stale(expected: str, observed: str, message: str) -> SourceAuthorityResult:
         observed=observed,
         message=message,
     )
+
+
+def _is_verified_shared_docs_source_root(source_root: str) -> bool:
+    normalized = source_root.strip().replace("/", "\\")
+    lowered = normalized.lower()
+    if not normalized:
+        return False
+    if lowered.startswith("\\\\") or lowered.startswith("smb:\\\\"):
+        return False
+    return REQUIRED_SHARED_DOCS_ROOT_MARKER in lowered

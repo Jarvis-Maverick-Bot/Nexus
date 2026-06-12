@@ -1,6 +1,9 @@
 {
-  "forbidden_defs": [],
+  "passed": true,
+  "no_nexus_mq_imports": true,
   "forbidden_imports": [],
+  "forbidden_text_matches": [],
+  "forbidden_defs": [],
   "imports": [
     {
       "file": "nexus\\governance\\app_contract.py",
@@ -147,7 +150,6 @@
       "module": "typing"
     }
   ],
-  "passed": true,
   "production_files_scanned": [
     "nexus\\governance\\__init__.py",
     "nexus\\governance\\app_contract.py",
