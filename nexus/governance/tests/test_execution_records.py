@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from nexus.governance.errors import ErrorCode
 from nexus.governance.execution import (
     validate_approved_plan_ref,
@@ -74,6 +76,22 @@ def test_packet_readiness_decision_rejects_downstream_dispatch_statuses() -> Non
     assert "Slice 004 readiness cannot claim dispatched" in result.blocked_reasons
     write_evidence(
         "execution/readiness-dispatch-boundary-block.json",
+        result.to_evidence(),
+        slice_id="l1gov-slice-004",
+    )
+
+
+@pytest.mark.parametrize("status", ("submitted", "active", "closed"))
+def test_packet_readiness_decision_rejects_non_slice004_lifecycle_statuses(status: str) -> None:
+    item = valid_readiness_decision(status=status, readiness_status=status)
+
+    result = validate_packet_readiness_decision(item)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.EXECUTION_RECORD_INVALID
+    assert f"PacketReadinessDecision status is not legal in Slice 004: {status}" in result.blocked_reasons
+    write_evidence(
+        f"execution/readiness-status-{status}-block.json",
         result.to_evidence(),
         slice_id="l1gov-slice-004",
     )

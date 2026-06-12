@@ -6,9 +6,11 @@
     "verified_commits":  [
                              "f883880e Approve 4.21 slice 004 task package",
                              "4dfd3d84 Accept 4.21 slice roadmap planning model",
-                             "c9d0b530 Approve 4.21 slice 003 PR11"
+                             "c9d0b530 Approve 4.21 slice 003 PR11",
+                             "4b814a9 Request changes for 4.21 slice 004 PR12"
                          ],
     "slice004_package_path":  "\\\\192.168.31.124\\Nova-Jarvis-Inbox\\Thunder\\_submitted\\2026-06-12_4.21_slice004_task_package_thunder_v0.1\\",
     "pr11_merge_commit":  "0fc70602cc864eb6eb8fe82f7707371f1adbba6e",
+    "pr12_review_head":  "4adaf55d4a6ee0b84743184d2e33c5a3dc44cd91",
     "accepted_slice003_evidence":  "verification/4.21/l1gov-slice-003/evidence-index.json"
 }

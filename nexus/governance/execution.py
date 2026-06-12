@@ -30,6 +30,7 @@ ALLOWED_EXECUTION_STATUSES: tuple[str, ...] = (
     "closed",
 )
 DOWNSTREAM_DISPATCH_STATUSES: tuple[str, ...] = (
+    "dispatch",
     "accepted_for_dispatch",
     "dispatched",
     "returned_result_candidate",
@@ -37,6 +38,44 @@ DOWNSTREAM_DISPATCH_STATUSES: tuple[str, ...] = (
     "accepted",
     "complete",
     "final_pass",
+)
+LAYER1_WORKPACKET_STATUSES: tuple[str, ...] = (
+    "draft",
+    "review",
+    "ready",
+    "blocked",
+    "revise",
+    "deferred",
+    "superseded",
+)
+PACKET_READINESS_DECISION_STATUSES: tuple[str, ...] = (
+    "ready",
+    "blocked",
+    "revise",
+    "deferred",
+    "superseded",
+)
+DISPATCH_BOUNDARY_PAYLOAD_KEYS: tuple[str, ...] = (
+    "controller_ref",
+    "controller_call",
+    "controller_request",
+    "controller_action",
+    "dispatch_ref",
+    "dispatch_contract_ref",
+    "dispatch_contract_request",
+    "dispatch_request",
+    "dispatch_payload",
+    "workpacket_dispatch_ref",
+)
+DISPATCH_BOUNDARY_STATUS_KEYS: tuple[str, ...] = (
+    "status",
+    "readiness_status",
+    "requested_action",
+    "action",
+    "dispatch_status",
+    "completion_status",
+    "acceptance_status",
+    "final_status",
 )
 
 
@@ -284,6 +323,13 @@ def validate_layer1_workpacket(packet: Layer1WorkPacket) -> ExecutionValidationR
             message="Layer1WorkPacket crossed Slice 004 boundary",
             blocked_reasons=tuple(blocked),
         )
+    if packet.status not in LAYER1_WORKPACKET_STATUSES:
+        return ExecutionValidationResult(
+            False,
+            ErrorCode.EXECUTION_WORKPACKET_INVALID,
+            message="Layer1WorkPacket status rejected",
+            blocked_reasons=(f"Layer1WorkPacket status is not legal in Slice 004: {packet.status}",),
+        )
     missing = _missing_fields(
         packet,
         (
@@ -338,6 +384,20 @@ def validate_packet_readiness_decision(item: PacketReadinessDecision) -> Executi
             ErrorCode.NO_GO_BOUNDARY,
             message="packet readiness decision crossed Slice 004 boundary",
             blocked_reasons=(f"Slice 004 readiness cannot claim {downstream_status}",),
+        )
+    invalid_statuses = []
+    if item.status not in PACKET_READINESS_DECISION_STATUSES:
+        invalid_statuses.append(f"PacketReadinessDecision status is not legal in Slice 004: {item.status}")
+    if item.readiness_status not in PACKET_READINESS_DECISION_STATUSES:
+        invalid_statuses.append(
+            f"PacketReadinessDecision readiness_status is not legal in Slice 004: {item.readiness_status}"
+        )
+    if invalid_statuses:
+        return ExecutionValidationResult(
+            False,
+            ErrorCode.EXECUTION_RECORD_INVALID,
+            message="PacketReadinessDecision status rejected",
+            blocked_reasons=tuple(invalid_statuses),
         )
     base = validate_execution_output_base(item)
     if not base.accepted:
@@ -691,34 +751,33 @@ def _first_downstream_status(*statuses: str) -> str:
 
 
 def _command_crosses_dispatch_boundary(command: CommandEnvelope) -> bool:
-    if command.payload.get("controller_ref") or command.payload.get("dispatch_ref"):
-        return True
-    for status_field in (
-        "status",
-        "readiness_status",
-        "dispatch_status",
-        "completion_status",
-        "acceptance_status",
-        "final_status",
-    ):
-        if _first_downstream_status(str(command.payload.get(status_field, ""))):
-            return True
-    if _first_downstream_status(str(command.payload.get("requested_action", ""))):
+    if _payload_crosses_dispatch_boundary(command.payload):
         return True
     new_packet_payload = command.payload.get("new_packet_payload")
-    if isinstance(new_packet_payload, dict):
-        if new_packet_payload.get("controller_ref") or new_packet_payload.get("dispatch_ref"):
+    return isinstance(new_packet_payload, dict) and _payload_crosses_dispatch_boundary(new_packet_payload)
+
+
+def _payload_crosses_dispatch_boundary(payload: dict[str, Any]) -> bool:
+    for key in DISPATCH_BOUNDARY_PAYLOAD_KEYS:
+        if _payload_field_missing(payload, key) is False:
             return True
-        for status_field in (
-            "status",
-            "readiness_status",
-            "dispatch_status",
-            "completion_status",
-            "acceptance_status",
-            "final_status",
-        ):
-            if _first_downstream_status(str(new_packet_payload.get(status_field, ""))):
+    for status_field in DISPATCH_BOUNDARY_STATUS_KEYS:
+        if _first_downstream_status(str(payload.get(status_field, ""))):
+            return True
+    if _nested_dispatch_intent(payload):
+        return True
+    return False
+
+
+def _nested_dispatch_intent(payload: dict[str, Any]) -> bool:
+    for value in payload.values():
+        if isinstance(value, dict):
+            if _payload_crosses_dispatch_boundary(value):
                 return True
+        if isinstance(value, (list, tuple)):
+            for item in value:
+                if isinstance(item, dict) and _payload_crosses_dispatch_boundary(item):
+                    return True
     return False
 
 

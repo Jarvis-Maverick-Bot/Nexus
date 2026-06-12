@@ -130,6 +130,42 @@ def test_mark_packet_ready_rejects_dispatch_or_completion_payloads() -> None:
     assert result.message == "packet readiness command cannot dispatch or complete work"
 
 
+def test_mark_packet_ready_rejects_requested_action_dispatch() -> None:
+    command = valid_mark_packet_ready_command()
+    command.payload["requested_action"] = "dispatch"
+
+    result = validate_execution_command(command)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.NO_GO_BOUNDARY
+    assert result.message == "packet readiness command cannot dispatch or complete work"
+    write_evidence("execution/requested-action-dispatch-block.json", result.to_evidence(), slice_id="l1gov-slice-004")
+
+
+def test_create_workpacket_rejects_alternate_controller_call_shape() -> None:
+    command = valid_create_workpacket_command()
+    command.payload["controller_call"] = {"controller": "4.19", "action": "assign"}
+
+    result = validate_execution_command(command)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.NO_GO_BOUNDARY
+    assert result.message == "packet readiness command cannot dispatch or complete work"
+    write_evidence("execution/controller-call-shape-block.json", result.to_evidence(), slice_id="l1gov-slice-004")
+
+
+def test_create_workpacket_rejects_dispatch_contract_ref_shape() -> None:
+    command = valid_create_workpacket_command()
+    command.payload["dispatch_contract_ref"] = "DispatchContract:ready"
+
+    result = validate_execution_command(command)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.NO_GO_BOUNDARY
+    assert result.message == "packet readiness command cannot dispatch or complete work"
+    write_evidence("execution/dispatch-contract-ref-shape-block.json", result.to_evidence(), slice_id="l1gov-slice-004")
+
+
 def test_supersede_workpacket_rejects_new_payload_controller_ref() -> None:
     command = valid_supersede_command()
     command.payload["new_packet_payload"]["controller_ref"] = "controller:4.19"
@@ -139,6 +175,22 @@ def test_supersede_workpacket_rejects_new_payload_controller_ref() -> None:
     assert result.accepted is False
     assert result.error_code == ErrorCode.NO_GO_BOUNDARY
     assert result.message == "packet readiness command cannot dispatch or complete work"
+
+
+def test_supersede_workpacket_rejects_nested_requested_action_dispatch() -> None:
+    command = valid_supersede_command()
+    command.payload["new_packet_payload"]["requested_action"] = "dispatch"
+
+    result = validate_execution_command(command)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.NO_GO_BOUNDARY
+    assert result.message == "packet readiness command cannot dispatch or complete work"
+    write_evidence(
+        "execution/nested-requested-action-dispatch-block.json",
+        result.to_evidence(),
+        slice_id="l1gov-slice-004",
+    )
 
 
 def test_repair_request_rejects_scope_change_without_human_decision() -> None:

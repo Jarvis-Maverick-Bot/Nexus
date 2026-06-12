@@ -1,19 +1,20 @@
 {
     "slice":  "L1GOV-SLICE-004",
     "final_status":  "PR_READY_FOR_NOVA_REVIEW",
-    "generated_at":  "2026-06-12T20:32:42.5636753+08:00",
+    "generated_at":  "2026-06-12T21:02:58.3587718+08:00",
+    "review_fix":  "PR12 Nova request changes 4b814a9: Slice004 object statuses and alternate dispatch/controller payload no-go shapes",
     "evidence_files":  [
                            {
                                "path":  "verification/4.21/l1gov-slice-004/diff-check.json",
-                               "length":  485
+                               "length":  698
                            },
                            {
                                "path":  "verification/4.21/l1gov-slice-004/diff-summary.json",
-                               "length":  5761
+                               "length":  6630
                            },
                            {
                                "path":  "verification/4.21/l1gov-slice-004/evidence-index.json",
-                               "length":  7693
+                               "length":  7781
                            },
                            {
                                "path":  "verification/4.21/l1gov-slice-004/execution/approved-plan-ref-valid.json",
@@ -22,6 +23,10 @@
                            {
                                "path":  "verification/4.21/l1gov-slice-004/execution/base-required-field-block.json",
                                "length":  259
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/controller-call-shape-block.json",
+                               "length":  141
                            },
                            {
                                "path":  "verification/4.21/l1gov-slice-004/execution/create-workpacket-command.json",
@@ -40,8 +45,16 @@
                                "length":  247
                            },
                            {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/dispatch-contract-ref-shape-block.json",
+                               "length":  141
+                           },
+                           {
                                "path":  "verification/4.21/l1gov-slice-004/execution/expected-version-bool-block.json",
                                "length":  142
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/nested-requested-action-dispatch-block.json",
+                               "length":  141
                            },
                            {
                                "path":  "verification/4.21/l1gov-slice-004/execution/owner-self-approval-block.json",
@@ -60,6 +73,22 @@
                                "length":  266
                            },
                            {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/readiness-status-active-block.json",
+                               "length":  367
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/readiness-status-closed-block.json",
+                               "length":  367
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/readiness-status-submitted-block.json",
+                               "length":  373
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/requested-action-dispatch-block.json",
+                               "length":  141
+                           },
+                           {
                                "path":  "verification/4.21/l1gov-slice-004/execution/unapproved-plan-ref-block.json",
                                "length":  330
                            },
@@ -72,12 +101,24 @@
                                "length":  300
                            },
                            {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/workpacket-status-active-block.json",
+                               "length":  274
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/workpacket-status-closed-block.json",
+                               "length":  274
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/workpacket-status-submitted-block.json",
+                               "length":  277
+                           },
+                           {
                                "path":  "verification/4.21/l1gov-slice-004/execution/workpacket-valid.json",
                                "length":  176
                            },
                            {
                                "path":  "verification/4.21/l1gov-slice-004/file-list.json",
-                               "length":  4154
+                               "length":  2212
                            },
                            {
                                "path":  "verification/4.21/l1gov-slice-004/no-go/completion-judgement-block.json",
@@ -97,7 +138,7 @@
                            },
                            {
                                "path":  "verification/4.21/l1gov-slice-004/no-go/no-go-scan.json",
-                               "length":  13775
+                               "length":  18699
                            },
                            {
                                "path":  "verification/4.21/l1gov-slice-004/no-go/runtime-live-block.json",
@@ -121,11 +162,11 @@
                            },
                            {
                                "path":  "verification/4.21/l1gov-slice-004/source/source-authority.json",
-                               "length":  854
+                               "length":  1005
                            },
                            {
                                "path":  "verification/4.21/l1gov-slice-004/test-output/full-governance-pytest-output.json",
-                               "length":  295
+                               "length":  378
                            },
                            {
                                "path":  "verification/4.21/l1gov-slice-004/test-output/targeted-pytest-output.json",

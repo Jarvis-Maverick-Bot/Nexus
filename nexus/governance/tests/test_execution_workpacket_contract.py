@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from nexus.governance.errors import ErrorCode
 from nexus.governance.execution import validate_layer1_workpacket
 
@@ -45,3 +47,19 @@ def test_layer1_workpacket_rejects_dispatch_or_controller_refs() -> None:
     assert result.error_code == ErrorCode.NO_GO_BOUNDARY
     assert "Layer1WorkPacket cannot include direct 4.19 controller refs" in result.blocked_reasons
     assert "Layer1WorkPacket cannot include dispatch refs in Slice 004" in result.blocked_reasons
+
+
+@pytest.mark.parametrize("status", ("submitted", "active", "closed"))
+def test_layer1_workpacket_rejects_non_slice004_lifecycle_statuses(status: str) -> None:
+    packet = valid_workpacket(status=status)
+
+    result = validate_layer1_workpacket(packet)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.EXECUTION_WORKPACKET_INVALID
+    assert f"Layer1WorkPacket status is not legal in Slice 004: {status}" in result.blocked_reasons
+    write_evidence(
+        f"execution/workpacket-status-{status}-block.json",
+        result.to_evidence(),
+        slice_id="l1gov-slice-004",
+    )
