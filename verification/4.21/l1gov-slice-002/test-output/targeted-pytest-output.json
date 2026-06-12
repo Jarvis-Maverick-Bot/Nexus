@@ -1,77 +1,77 @@
 [
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_source_authority.py -q",
-    "exit_code": 0,
-    "output": "......                                                                   [100%]\n6 passed in 0.02s"
-  },
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_no_go_policy.py -q",
-    "exit_code": 0,
-    "output": "....                                                                     [100%]\n4 passed in 0.01s"
-  },
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_common_schemas.py -q",
-    "exit_code": 0,
-    "output": "....                                                                     [100%]\n4 passed in 0.02s"
-  },
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_kernel_transitions.py -q",
-    "exit_code": 0,
-    "output": "......                                                                   [100%]\n6 passed in 0.02s"
-  },
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_service_contract.py -q",
-    "exit_code": 0,
-    "output": "....                                                                     [100%]\n4 passed in 0.02s"
-  },
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_projection_contract.py -q",
-    "exit_code": 0,
-    "output": "...                                                                      [100%]\n3 passed in 0.01s"
-  },
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_app_contract.py -q",
-    "exit_code": 0,
-    "output": "...                                                                      [100%]\n3 passed in 0.01s"
-  },
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_first_slice_no_go.py -q",
-    "exit_code": 0,
-    "output": "..........                                                               [100%]\n10 passed in 0.02s"
-  },
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_workspace_init_source_authority.py -q",
-    "exit_code": 0,
-    "output": "....                                                                     [100%]\n4 passed in 0.01s"
-  },
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_workspace_init_manifest.py -q",
-    "exit_code": 0,
-    "output": "....                                                                     [100%]\n4 passed in 0.02s"
-  },
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_workspace_init_templates.py -q",
-    "exit_code": 0,
-    "output": "...                                                                      [100%]\n3 passed in 0.02s"
-  },
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_workspace_init_service_contract.py -q",
-    "exit_code": 0,
-    "output": "..                                                                       [100%]\n2 passed in 0.02s"
-  },
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_workspace_init_kernel_boundary.py -q",
-    "exit_code": 0,
-    "output": "...                                                                      [100%]\n3 passed in 0.02s"
-  },
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_workspace_init_no_go.py -q",
-    "exit_code": 0,
-    "output": "....                                                                     [100%]\n4 passed in 0.02s"
-  },
-  {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests -q",
-    "exit_code": 0,
-    "output": "............................................................             [100%]\n60 passed in 0.07s"
-  }
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_source_authority.py -q",
+        "exit_code":  0,
+        "output":  "......                                                                   [100%]\n6 passed in 0.02s"
+    },
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_no_go_policy.py -q",
+        "exit_code":  0,
+        "output":  "....                                                                     [100%]\n4 passed in 0.02s"
+    },
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_common_schemas.py -q",
+        "exit_code":  0,
+        "output":  "....                                                                     [100%]\n4 passed in 0.01s"
+    },
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_kernel_transitions.py -q",
+        "exit_code":  0,
+        "output":  "......                                                                   [100%]\n6 passed in 0.02s"
+    },
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_service_contract.py -q",
+        "exit_code":  0,
+        "output":  "....                                                                     [100%]\n4 passed in 0.03s"
+    },
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_projection_contract.py -q",
+        "exit_code":  0,
+        "output":  "...                                                                      [100%]\n3 passed in 0.01s"
+    },
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_app_contract.py -q",
+        "exit_code":  0,
+        "output":  "...                                                                      [100%]\n3 passed in 0.01s"
+    },
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_first_slice_no_go.py -q",
+        "exit_code":  0,
+        "output":  "..........                                                               [100%]\n10 passed in 0.02s"
+    },
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_workspace_init_source_authority.py -q",
+        "exit_code":  0,
+        "output":  "....                                                                     [100%]\n4 passed in 0.02s"
+    },
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_workspace_init_manifest.py -q",
+        "exit_code":  0,
+        "output":  "...........                                                              [100%]\n11 passed in 0.03s"
+    },
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_workspace_init_templates.py -q",
+        "exit_code":  0,
+        "output":  "...                                                                      [100%]\n3 passed in 0.02s"
+    },
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_workspace_init_service_contract.py -q",
+        "exit_code":  0,
+        "output":  "...........                                                              [100%]\n11 passed in 0.03s"
+    },
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_workspace_init_kernel_boundary.py -q",
+        "exit_code":  0,
+        "output":  "...                                                                      [100%]\n3 passed in 0.02s"
+    },
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests/test_workspace_init_no_go.py -q",
+        "exit_code":  0,
+        "output":  "....                                                                     [100%]\n4 passed in 0.02s"
+    },
+    {
+        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests -q",
+        "exit_code":  0,
+        "output":  "........................................................................ [ 94%]\n....                                                                     [100%]\n76 passed in 0.09s"
+    }
 ]

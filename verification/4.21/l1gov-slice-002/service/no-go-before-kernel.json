@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "aggregate_ref": null,
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "evidence_refs": [],
+  "message": "blocked by Slice 001 no-go boundary: workspace_init_runtime_dispatch",
+  "projection_ref": null,
+  "record_ref": null,
+  "retryable": false
+}

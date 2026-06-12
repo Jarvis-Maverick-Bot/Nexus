@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from nexus.governance.errors import ErrorCode
 from nexus.governance.workspace_init import validate_workspace_manifest
 
@@ -55,3 +57,16 @@ def test_planning_placeholder_rejects_planning_content() -> None:
     assert result.accepted is False
     assert result.error_code == ErrorCode.WORKSPACE_MANIFEST_INVALID
     assert result.blocked_reasons == ("planning content is out of scope for Workspace Init",)
+
+
+@pytest.mark.parametrize(
+    "status",
+    ("approved", "accepted", "plan_approved", "baseline_approved", "complete", "final_pass", "unknown"),
+)
+def test_manifest_rejects_unknown_final_or_acceptance_style_status(status: str) -> None:
+    result = validate_workspace_manifest(valid_manifest(status=status))
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.WORKSPACE_MANIFEST_INVALID
+    assert result.blocked_reasons == (f"invalid workspace manifest status: {status}",)
+    write_evidence("workspace/manifest-status-block.json", result.to_evidence(), slice_id="l1gov-slice-002")

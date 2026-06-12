@@ -1,97 +1,133 @@
 {
-  "slice": "L1GOV-SLICE-002",
-  "final_status": "PR_READY_FOR_NOVA_REVIEW",
-  "generated_at": "2026-06-12T17:14:54.402346+08:00",
-  "evidence_files": [
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\diff-summary.json",
-      "length": 1447
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\evidence-index.json",
-      "length": 3077
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\file-list.json",
-      "length": 5010
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\no-go\\approval-bypass-block.json",
-      "length": 357
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\no-go\\import-scan.json",
-      "length": 11347
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\no-go\\no-go-scan.json",
-      "length": 1269
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\no-go\\planning-content-out-of-scope.json",
-      "length": 359
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\no-go\\runtime-dispatch-block.json",
-      "length": 359
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\no-go\\shared-docs-mutation-block.json",
-      "length": 337
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\source\\source-authority.json",
-      "length": 174
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\source\\stale-source-block.json",
-      "length": 257
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\test-output\\targeted-pytest-output.json",
-      "length": 3851
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\workspace\\create-command-envelope.json",
-      "length": 380
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\workspace\\kernel-submit-init-record.json",
-      "length": 186
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\workspace\\manifest-missing-path.json",
-      "length": 226
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\workspace\\manifest-valid.json",
-      "length": 168
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\workspace\\seed-status-block.json",
-      "length": 234
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\workspace\\stale-version-block.json",
-      "length": 242
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\workspace\\template-trim-block.json",
-      "length": 277
-    },
-    {
-      "path": "verification\\4.21\\l1gov-slice-002\\workspace\\template-valid.json",
-      "length": 176
-    }
-  ],
-  "changed_files_within_allowed_boundary": true,
-  "outside_allowed_boundary_status": [],
-  "no_shared_docs_writes": true,
-  "no_package_manager_mutation": true,
-  "no_nexus_mq_imports": true,
-  "pytest_full": {
-    "command": "C:\\Python314\\python.exe -m pytest nexus/governance/tests -q",
-    "exit_code": 0,
-    "output": "............................................................             [100%]\n60 passed in 0.07s"
-  }
+    "slice":  "L1GOV-SLICE-002",
+    "final_status":  "PR_READY_FOR_NOVA_REVIEW",
+    "generated_at":  "2026-06-12T17:38:54.6163388+08:00",
+    "evidence_files":  [
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\diff-summary.json",
+                               "length":  4603
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\evidence-index.json",
+                               "length":  7425
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\file-list.json",
+                               "length":  6506
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\approval-bypass-block.json",
+                               "length":  357
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\import-scan.json",
+                               "length":  215
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\no-go-scan.json",
+                               "length":  310
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\planning-content-out-of-scope.json",
+                               "length":  359
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\runtime-dispatch-block.json",
+                               "length":  359
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\shared-docs-mutation-block.json",
+                               "length":  337
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\service\\no-go-before-kernel.json",
+                               "length":  275
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\service\\source-before-workspace.json",
+                               "length":  235
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\service\\workspace-submit-response.json",
+                               "length":  213
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\source\\source-authority.json",
+                               "length":  174
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\source\\stale-source-block.json",
+                               "length":  257
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\test-output\\targeted-pytest-output.json",
+                               "length":  4218
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\create-command-envelope.json",
+                               "length":  546
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\kernel-submit-init-record.json",
+                               "length":  186
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\manifest-missing-path.json",
+                               "length":  226
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\manifest-status-block.json",
+                               "length":  251
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\manifest-valid.json",
+                               "length":  168
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\seed-status-block.json",
+                               "length":  234
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\stale-version-block.json",
+                               "length":  242
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\submit-command-envelope.json",
+                               "length":  411
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\template-trim-block.json",
+                               "length":  277
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\template-valid.json",
+                               "length":  176
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\validate-command-envelope.json",
+                               "length":  439
+                           }
+                       ],
+    "changed_files_within_allowed_boundary":  true,
+    "outside_allowed_boundary_status":  [
+
+                                        ],
+    "no_shared_docs_writes":  true,
+    "no_package_manager_mutation":  true,
+    "no_nexus_mq_imports":  true,
+    "no_go_boundary_clear":  true,
+    "pytest_full":  {
+                        "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests -q",
+                        "exit_code":  0,
+                        "output":  "........................................................................ [ 94%]\n....                                                                     [100%]\n76 passed in 0.09s"
+                    },
+    "review_response":  {
+                            "pr":  "https://github.com/Jarvis-Maverick-Bot/Nexus/pull/10",
+                            "review_artifact_commit":  "4993768",
+                            "addressed_blockers":  [
+                                                       "WorkspaceManifest.status legal-state validation",
+                                                       "Workspace Init payload enforcement for source_refs, expected_version, expected_kernel_version",
+                                                       "Service-contract coverage for payloads, source/no-go ordering, normalized response envelope"
+                                                   ]
+                        }
 }

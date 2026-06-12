@@ -1,0 +1,22 @@
+{
+  "command_type": "ValidateWorkspaceManifest",
+  "payload": {
+    "expected_version": 1,
+    "manifest_id": "manifest-ws-421",
+    "manifest_version": 1,
+    "required_surfaces": [
+      "evidence_path"
+    ],
+    "source_refs": [
+      "WBS V0.6",
+      "L1.11.2",
+      "PR9:7007b4a"
+    ],
+    "workspace_id": "ws-421"
+  },
+  "validation": {
+    "accepted": true,
+    "error_code": null,
+    "message": ""
+  }
+}

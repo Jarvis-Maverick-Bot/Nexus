@@ -1,27 +1,29 @@
 {
-  "base": "origin/master",
-  "branch": "codex/4.21-slice002-workspace-init",
-  "diff_stat": "nexus/governance/__init__.py         |  2 +-\n nexus/governance/errors.py           |  6 ++++\n nexus/governance/kernel.py           |  1 +\n nexus/governance/no_go.py            |  4 +++\n nexus/governance/source_authority.py | 65 ++++++++++++++++++++++++++++++++++++\n nexus/governance/tests/_evidence.py  |  4 +--\n 6 files changed, 79 insertions(+), 3 deletions(-)",
-  "status_short": [
-    " M nexus/governance/__init__.py",
-    " M nexus/governance/errors.py",
-    " M nexus/governance/kernel.py",
-    " M nexus/governance/no_go.py",
-    " M nexus/governance/source_authority.py",
-    " M nexus/governance/tests/_evidence.py",
-    "?? nexus/governance/tests/fixtures/workspace_init.py",
-    "?? nexus/governance/tests/test_workspace_init_kernel_boundary.py",
-    "?? nexus/governance/tests/test_workspace_init_manifest.py",
-    "?? nexus/governance/tests/test_workspace_init_no_go.py",
-    "?? nexus/governance/tests/test_workspace_init_service_contract.py",
-    "?? nexus/governance/tests/test_workspace_init_source_authority.py",
-    "?? nexus/governance/tests/test_workspace_init_templates.py",
-    "?? nexus/governance/workspace_init.py",
-    "?? verification/4.21/l1gov-slice-002/"
-  ],
-  "allowed_boundary": [
-    "nexus/governance/",
-    "nexus/governance/tests/",
-    "verification/4.21/l1gov-slice-002/"
-  ]
+    "base":  "origin/master",
+    "branch":  "codex/4.21-slice002-workspace-init",
+    "diff_stat":  " nexus/governance/__init__.py                       |   2 +-\n nexus/governance/errors.py                         |   6 +\n nexus/governance/kernel.py                         |   1 +\n nexus/governance/no_go.py                          |   4 +\n nexus/governance/service_contract.py               |  17 +-\n nexus/governance/source_authority.py               |  65 ++++\n nexus/governance/tests/_evidence.py                |   4 +-\n nexus/governance/tests/fixtures/workspace_init.py  | 116 ++++++\n .../tests/test_workspace_init_kernel_boundary.py   |  81 +++++\n .../tests/test_workspace_init_manifest.py          |  72 ++++\n .../governance/tests/test_workspace_init_no_go.py  |  32 ++\n .../tests/test_workspace_init_service_contract.py  | 275 ++++++++++++++\n .../tests/test_workspace_init_source_authority.py  |  62 ++++\n .../tests/test_workspace_init_templates.py         |  37 ++\n nexus/governance/workspace_init.py                 | 404 +++++++++++++++++++++\n .../4.21/l1gov-slice-002/diff-summary.json         |  27 ++\n .../4.21/l1gov-slice-002/evidence-index.json       | 133 +++++++\n verification/4.21/l1gov-slice-002/file-list.json   | 222 +++++++++++\n .../no-go/approval-bypass-block.json               |  13 +\n .../4.21/l1gov-slice-002/no-go/import-scan.json    |   8 +\n .../4.21/l1gov-slice-002/no-go/no-go-scan.json     |   8 +\n .../no-go/planning-content-out-of-scope.json       |  13 +\n .../no-go/runtime-dispatch-block.json              |  13 +\n .../no-go/shared-docs-mutation-block.json          |  13 +\n .../service/no-go-before-kernel.json               |  10 +\n .../service/source-before-workspace.json           |  10 +\n .../service/workspace-submit-response.json         |  10 +\n .../l1gov-slice-002/source/source-authority.json   |   8 +\n .../l1gov-slice-002/source/stale-source-block.json |  10 +\n .../test-output/targeted-pytest-output.json        |  77 ++++\n .../workspace/create-command-envelope.json         |  21 ++\n .../workspace/kernel-submit-init-record.json       |   9 +\n .../workspace/manifest-missing-path.json           |  10 +\n .../workspace/manifest-status-block.json           |  10 +\n .../l1gov-slice-002/workspace/manifest-valid.json  |   8 +\n .../workspace/seed-status-block.json               |  10 +\n .../workspace/stale-version-block.json             |   9 +\n .../workspace/submit-command-envelope.json         |  19 +\n .../workspace/template-trim-block.json             |  10 +\n .../l1gov-slice-002/workspace/template-valid.json  |   8 +\n .../workspace/validate-command-envelope.json       |  22 ++\n 41 files changed, 1883 insertions(+), 6 deletions(-)",
+    "status_short":  [
+                         "M  nexus/governance/service_contract.py",
+                         "MM nexus/governance/tests/test_workspace_init_manifest.py",
+                         "M  nexus/governance/tests/test_workspace_init_service_contract.py",
+                         "M  nexus/governance/workspace_init.py",
+                         "M  verification/4.21/l1gov-slice-002/diff-summary.json",
+                         "M  verification/4.21/l1gov-slice-002/evidence-index.json",
+                         "MM verification/4.21/l1gov-slice-002/file-list.json",
+                         "M  verification/4.21/l1gov-slice-002/no-go/import-scan.json",
+                         "M  verification/4.21/l1gov-slice-002/no-go/no-go-scan.json",
+                         "A  verification/4.21/l1gov-slice-002/service/no-go-before-kernel.json",
+                         "A  verification/4.21/l1gov-slice-002/service/source-before-workspace.json",
+                         "A  verification/4.21/l1gov-slice-002/service/workspace-submit-response.json",
+                         "MM verification/4.21/l1gov-slice-002/test-output/targeted-pytest-output.json",
+                         "M  verification/4.21/l1gov-slice-002/workspace/create-command-envelope.json",
+                         "A  verification/4.21/l1gov-slice-002/workspace/manifest-status-block.json",
+                         "A  verification/4.21/l1gov-slice-002/workspace/submit-command-envelope.json",
+                         "A  verification/4.21/l1gov-slice-002/workspace/validate-command-envelope.json"
+                     ],
+    "allowed_boundary":  [
+                             "nexus/governance/",
+                             "nexus/governance/tests/",
+                             "verification/4.21/l1gov-slice-002/"
+                         ]
 }

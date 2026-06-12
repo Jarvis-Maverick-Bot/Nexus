@@ -44,6 +44,15 @@ DISALLOWED_SELF_AUTHORIZING_STATUSES: tuple[str, ...] = (
     "final_pass",
 )
 
+ALLOWED_MANIFEST_STATUSES: tuple[str, ...] = (
+    "draft",
+    "validated",
+    "kernel_submitted",
+    "initiation_ready",
+    "blocked",
+    "superseded",
+)
+
 PLANNING_CONTENT_KEYS: tuple[str, ...] = (
     "scope_baseline",
     "wbs_backlog",
@@ -194,6 +203,8 @@ def validate_workspace_manifest(manifest: WorkspaceManifest) -> WorkspaceValidat
         blocked_reasons.append("manifest_version must be positive")
     if not manifest.source_refs:
         blocked_reasons.append("source refs are required")
+    if manifest.status not in ALLOWED_MANIFEST_STATUSES:
+        blocked_reasons.append(f"invalid workspace manifest status: {manifest.status}")
     if manifest.surface_index.workspace_root != manifest.workspace_root:
         blocked_reasons.append("surface index workspace_root mismatch")
 
@@ -248,8 +259,11 @@ def create_workspace_candidate_command(
         expected_version=expected_version,
         idempotency_key=idempotency_key,
         payload={
+            "expected_version": expected_version,
+            "idempotency_key": idempotency_key,
             "requested_project_ref": requested_project_ref,
             "requested_root_path": requested_root_path,
+            "source_refs": authority_refs,
             "template_profile_ref": template_profile_ref,
             "workspace_id": workspace_id,
         },
@@ -262,9 +276,32 @@ def validate_workspace_init_command(command: CommandEnvelope) -> ValidationResul
         return validation
     if command.command_type not in WORKSPACE_INIT_COMMAND_TYPES:
         return ValidationResult(False, ErrorCode.WORKSPACE_COMMAND_INVALID, "unknown Workspace Init command")
-    for field_name in _required_payload_fields(command.command_type):
-        if not command.payload.get(field_name):
+    required_fields = _required_payload_fields(command.command_type)
+    for field_name in required_fields:
+        if _payload_field_missing(command.payload, field_name):
             return ValidationResult(False, ErrorCode.WORKSPACE_COMMAND_INVALID, f"{field_name} is required")
+    if "source_refs" in required_fields:
+        source_refs = command.payload["source_refs"]
+        if not isinstance(source_refs, (list, tuple)) or tuple(source_refs) != tuple(command.authority_refs):
+            return ValidationResult(
+                False,
+                ErrorCode.WORKSPACE_COMMAND_INVALID,
+                "source_refs must match authority_refs",
+            )
+    if "expected_version" in required_fields and not _is_non_negative_int(command.payload["expected_version"]):
+        return ValidationResult(
+            False,
+            ErrorCode.WORKSPACE_COMMAND_INVALID,
+            "expected_version must be a non-negative integer",
+        )
+    if "expected_kernel_version" in required_fields and not _is_non_negative_int(
+        command.payload["expected_kernel_version"]
+    ):
+        return ValidationResult(
+            False,
+            ErrorCode.WORKSPACE_COMMAND_INVALID,
+            "expected_kernel_version must be a non-negative integer",
+        )
     return ValidationResult(True)
 
 
@@ -291,7 +328,9 @@ def submit_workspace_init_record(
         expected_version=expected_version,
         idempotency_key=idempotency_key,
         payload={
+            "expected_kernel_version": expected_version,
             "manifest_ref": manifest.manifest_id,
+            "source_refs": authority_refs,
             "validation_report_ref": manifest.validation_report_ref,
             "workspace_id": manifest.workspace_id,
         },
@@ -301,12 +340,44 @@ def submit_workspace_init_record(
 
 def _required_payload_fields(command_type: str) -> tuple[str, ...]:
     if command_type == "CreateWorkspaceCandidate":
-        return ("workspace_id", "requested_project_ref", "requested_root_path", "template_profile_ref")
+        return (
+            "workspace_id",
+            "requested_project_ref",
+            "requested_root_path",
+            "template_profile_ref",
+            "source_refs",
+            "expected_version",
+            "idempotency_key",
+        )
     if command_type == "ValidateWorkspaceManifest":
-        return ("workspace_id", "manifest_id", "manifest_version", "required_surfaces")
+        return (
+            "workspace_id",
+            "manifest_id",
+            "manifest_version",
+            "required_surfaces",
+            "source_refs",
+            "expected_version",
+        )
     if command_type == "SubmitWorkspaceInitRecord":
-        return ("workspace_id", "manifest_ref", "validation_report_ref")
+        return ("workspace_id", "manifest_ref", "validation_report_ref", "source_refs", "expected_kernel_version")
     return ()
+
+
+def _payload_field_missing(payload: dict[str, Any], field_name: str) -> bool:
+    if field_name not in payload:
+        return True
+    value = payload[field_name]
+    if value is None:
+        return True
+    if isinstance(value, str):
+        return value == ""
+    if isinstance(value, (dict, list, set, tuple)):
+        return len(value) == 0
+    return False
+
+
+def _is_non_negative_int(value: Any) -> bool:
+    return isinstance(value, int) and value >= 0
 
 
 def _has_required_base_fields(item: WorkspaceInitOutputBase) -> bool:

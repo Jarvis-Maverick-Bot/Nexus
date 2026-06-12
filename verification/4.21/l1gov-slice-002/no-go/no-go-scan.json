@@ -1,29 +1,8 @@
 {
-  "passed": true,
-  "changed_files_within_allowed_boundary": true,
-  "outside_allowed_boundary_status": [],
-  "no_nexus_mq_imports": true,
-  "no_runtime_live_invocation": true,
-  "no_dispatch_resident_controller_transport_adapter_work": true,
-  "no_deploy_config_credential_mutation": true,
-  "no_package_manager_dependency_change": true,
-  "no_shared_docs_writes": true,
-  "no_planning_baseline_content": true,
-  "status_all": [
-    " M nexus/governance/__init__.py",
-    " M nexus/governance/errors.py",
-    " M nexus/governance/kernel.py",
-    " M nexus/governance/no_go.py",
-    " M nexus/governance/source_authority.py",
-    " M nexus/governance/tests/_evidence.py",
-    "?? nexus/governance/tests/fixtures/workspace_init.py",
-    "?? nexus/governance/tests/test_workspace_init_kernel_boundary.py",
-    "?? nexus/governance/tests/test_workspace_init_manifest.py",
-    "?? nexus/governance/tests/test_workspace_init_no_go.py",
-    "?? nexus/governance/tests/test_workspace_init_service_contract.py",
-    "?? nexus/governance/tests/test_workspace_init_source_authority.py",
-    "?? nexus/governance/tests/test_workspace_init_templates.py",
-    "?? nexus/governance/workspace_init.py",
-    "?? verification/4.21/l1gov-slice-002/"
-  ]
+    "command":  "rg -n \"runtime/live/private-agent invocation|resident controller|transport/adapter|final PASS|production readiness|Shared Docs write|package-manager/dependency change\" nexus/governance",
+    "exit_code":  1,
+    "no_go_boundary_clear":  true,
+    "matches":  [
+
+                ]
 }

@@ -1,198 +1,222 @@
 [
-  {
-    "path": "nexus\\governance\\__init__.py",
-    "length": 67
-  },
-  {
-    "path": "nexus\\governance\\app_contract.py",
-    "length": 1306
-  },
-  {
-    "path": "nexus\\governance\\errors.py",
-    "length": 1346
-  },
-  {
-    "path": "nexus\\governance\\kernel.py",
-    "length": 5614
-  },
-  {
-    "path": "nexus\\governance\\no_go.py",
-    "length": 2545
-  },
-  {
-    "path": "nexus\\governance\\projections.py",
-    "length": 1958
-  },
-  {
-    "path": "nexus\\governance\\schemas.py",
-    "length": 2592
-  },
-  {
-    "path": "nexus\\governance\\service_contract.py",
-    "length": 1929
-  },
-  {
-    "path": "nexus\\governance\\source_authority.py",
-    "length": 8100
-  },
-  {
-    "path": "nexus\\governance\\tests\\__init__.py",
-    "length": 58
-  },
-  {
-    "path": "nexus\\governance\\tests\\_evidence.py",
-    "length": 569
-  },
-  {
-    "path": "nexus\\governance\\tests\\fixtures\\__init__.py",
-    "length": 31
-  },
-  {
-    "path": "nexus\\governance\\tests\\fixtures\\first_slice_no_go.py",
-    "length": 1113
-  },
-  {
-    "path": "nexus\\governance\\tests\\fixtures\\workspace_init.py",
-    "length": 4483
-  },
-  {
-    "path": "nexus\\governance\\tests\\test_app_contract.py",
-    "length": 1033
-  },
-  {
-    "path": "nexus\\governance\\tests\\test_common_schemas.py",
-    "length": 2403
-  },
-  {
-    "path": "nexus\\governance\\tests\\test_first_slice_no_go.py",
-    "length": 3489
-  },
-  {
-    "path": "nexus\\governance\\tests\\test_kernel_transitions.py",
-    "length": 3049
-  },
-  {
-    "path": "nexus\\governance\\tests\\test_no_go_policy.py",
-    "length": 1289
-  },
-  {
-    "path": "nexus\\governance\\tests\\test_projection_contract.py",
-    "length": 1453
-  },
-  {
-    "path": "nexus\\governance\\tests\\test_service_contract.py",
-    "length": 2234
-  },
-  {
-    "path": "nexus\\governance\\tests\\test_source_authority.py",
-    "length": 3817
-  },
-  {
-    "path": "nexus\\governance\\tests\\test_workspace_init_kernel_boundary.py",
-    "length": 2941
-  },
-  {
-    "path": "nexus\\governance\\tests\\test_workspace_init_manifest.py",
-    "length": 2240
-  },
-  {
-    "path": "nexus\\governance\\tests\\test_workspace_init_no_go.py",
-    "length": 1049
-  },
-  {
-    "path": "nexus\\governance\\tests\\test_workspace_init_service_contract.py",
-    "length": 1885
-  },
-  {
-    "path": "nexus\\governance\\tests\\test_workspace_init_source_authority.py",
-    "length": 2466
-  },
-  {
-    "path": "nexus\\governance\\tests\\test_workspace_init_templates.py",
-    "length": 1507
-  },
-  {
-    "path": "nexus\\governance\\workspace_init.py",
-    "length": 11537
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\diff-summary.json",
-    "length": 1447
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\evidence-index.json",
-    "length": 3078
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\file-list.json",
-    "length": 4705
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\no-go\\approval-bypass-block.json",
-    "length": 357
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\no-go\\import-scan.json",
-    "length": 11347
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\no-go\\no-go-scan.json",
-    "length": 1269
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\no-go\\planning-content-out-of-scope.json",
-    "length": 359
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\no-go\\runtime-dispatch-block.json",
-    "length": 359
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\no-go\\shared-docs-mutation-block.json",
-    "length": 337
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\source\\source-authority.json",
-    "length": 174
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\source\\stale-source-block.json",
-    "length": 257
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\test-output\\targeted-pytest-output.json",
-    "length": 3851
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\workspace\\create-command-envelope.json",
-    "length": 380
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\workspace\\kernel-submit-init-record.json",
-    "length": 186
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\workspace\\manifest-missing-path.json",
-    "length": 226
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\workspace\\manifest-valid.json",
-    "length": 168
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\workspace\\seed-status-block.json",
-    "length": 234
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\workspace\\stale-version-block.json",
-    "length": 242
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\workspace\\template-trim-block.json",
-    "length": 277
-  },
-  {
-    "path": "verification\\4.21\\l1gov-slice-002\\workspace\\template-valid.json",
-    "length": 176
-  }
+    {
+        "path":  "nexus\\governance\\__init__.py",
+        "length":  67
+    },
+    {
+        "path":  "nexus\\governance\\app_contract.py",
+        "length":  1306
+    },
+    {
+        "path":  "nexus\\governance\\errors.py",
+        "length":  1346
+    },
+    {
+        "path":  "nexus\\governance\\kernel.py",
+        "length":  5614
+    },
+    {
+        "path":  "nexus\\governance\\no_go.py",
+        "length":  2545
+    },
+    {
+        "path":  "nexus\\governance\\projections.py",
+        "length":  1958
+    },
+    {
+        "path":  "nexus\\governance\\schemas.py",
+        "length":  2592
+    },
+    {
+        "path":  "nexus\\governance\\service_contract.py",
+        "length":  2435
+    },
+    {
+        "path":  "nexus\\governance\\source_authority.py",
+        "length":  8100
+    },
+    {
+        "path":  "nexus\\governance\\tests\\__init__.py",
+        "length":  58
+    },
+    {
+        "path":  "nexus\\governance\\tests\\_evidence.py",
+        "length":  569
+    },
+    {
+        "path":  "nexus\\governance\\tests\\fixtures\\__init__.py",
+        "length":  31
+    },
+    {
+        "path":  "nexus\\governance\\tests\\fixtures\\first_slice_no_go.py",
+        "length":  1113
+    },
+    {
+        "path":  "nexus\\governance\\tests\\fixtures\\workspace_init.py",
+        "length":  4483
+    },
+    {
+        "path":  "nexus\\governance\\tests\\test_app_contract.py",
+        "length":  1033
+    },
+    {
+        "path":  "nexus\\governance\\tests\\test_common_schemas.py",
+        "length":  2403
+    },
+    {
+        "path":  "nexus\\governance\\tests\\test_first_slice_no_go.py",
+        "length":  3489
+    },
+    {
+        "path":  "nexus\\governance\\tests\\test_kernel_transitions.py",
+        "length":  3049
+    },
+    {
+        "path":  "nexus\\governance\\tests\\test_no_go_policy.py",
+        "length":  1289
+    },
+    {
+        "path":  "nexus\\governance\\tests\\test_projection_contract.py",
+        "length":  1453
+    },
+    {
+        "path":  "nexus\\governance\\tests\\test_service_contract.py",
+        "length":  2234
+    },
+    {
+        "path":  "nexus\\governance\\tests\\test_source_authority.py",
+        "length":  3817
+    },
+    {
+        "path":  "nexus\\governance\\tests\\test_workspace_init_kernel_boundary.py",
+        "length":  2941
+    },
+    {
+        "path":  "nexus\\governance\\tests\\test_workspace_init_manifest.py",
+        "length":  2867
+    },
+    {
+        "path":  "nexus\\governance\\tests\\test_workspace_init_no_go.py",
+        "length":  1049
+    },
+    {
+        "path":  "nexus\\governance\\tests\\test_workspace_init_service_contract.py",
+        "length":  9688
+    },
+    {
+        "path":  "nexus\\governance\\tests\\test_workspace_init_source_authority.py",
+        "length":  2466
+    },
+    {
+        "path":  "nexus\\governance\\tests\\test_workspace_init_templates.py",
+        "length":  1507
+    },
+    {
+        "path":  "nexus\\governance\\workspace_init.py",
+        "length":  13905
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\diff-summary.json",
+        "length":  4004
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\evidence-index.json",
+        "length":  7425
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\file-list.json",
+        "length":  6507
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\approval-bypass-block.json",
+        "length":  357
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\import-scan.json",
+        "length":  215
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\no-go-scan.json",
+        "length":  310
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\planning-content-out-of-scope.json",
+        "length":  359
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\runtime-dispatch-block.json",
+        "length":  359
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\shared-docs-mutation-block.json",
+        "length":  337
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\service\\no-go-before-kernel.json",
+        "length":  275
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\service\\source-before-workspace.json",
+        "length":  235
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\service\\workspace-submit-response.json",
+        "length":  213
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\source\\source-authority.json",
+        "length":  174
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\source\\stale-source-block.json",
+        "length":  257
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\test-output\\targeted-pytest-output.json",
+        "length":  4218
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\create-command-envelope.json",
+        "length":  546
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\kernel-submit-init-record.json",
+        "length":  186
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\manifest-missing-path.json",
+        "length":  226
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\manifest-status-block.json",
+        "length":  251
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\manifest-valid.json",
+        "length":  168
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\seed-status-block.json",
+        "length":  234
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\stale-version-block.json",
+        "length":  242
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\submit-command-envelope.json",
+        "length":  411
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\template-trim-block.json",
+        "length":  277
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\template-valid.json",
+        "length":  176
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\validate-command-envelope.json",
+        "length":  439
+    }
 ]
