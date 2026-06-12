@@ -1,0 +1,33 @@
+{
+    "branch":  "codex/4.21-slice003-standardization",
+    "base":  "origin/master",
+    "prior_reviewed_head":  "85f65e2c8676744a0e7f8e63e25b8c4bf45367f2",
+    "review_artifact_commit":  "635427d",
+    "tracked_diff_name_status":  [
+                                     "M\tnexus/governance/standardization.py",
+                                     "M\tnexus/governance/tests/test_standardization_profile_policy.py",
+                                     "M\tnexus/governance/tests/test_standardization_records.py",
+                                     "M\tverification/4.21/l1gov-slice-003/diff-check.json",
+                                     "M\tverification/4.21/l1gov-slice-003/test-output/full-governance-pytest-output.json",
+                                     "M\tverification/4.21/l1gov-slice-003/test-output/targeted-pytest-output.json"
+                                 ],
+    "tracked_diff_stat":  [
+                              " nexus/governance/standardization.py                  | 12 +++++++++++-",
+                              " .../tests/test_standardization_profile_policy.py     | 20 ++++++++++++++++++++",
+                              " .../governance/tests/test_standardization_records.py | 18 ++++++++++++++++++",
+                              " verification/4.21/l1gov-slice-003/diff-check.json    |  2 +-",
+                              " .../test-output/full-governance-pytest-output.json   |  2 +-",
+                              " .../test-output/targeted-pytest-output.json          |  2 +-",
+                              " 6 files changed, 52 insertions(+), 4 deletions(-)"
+                          ],
+    "working_tree_status":  [
+                                " M nexus/governance/standardization.py",
+                                " M nexus/governance/tests/test_standardization_profile_policy.py",
+                                " M nexus/governance/tests/test_standardization_records.py",
+                                " M verification/4.21/l1gov-slice-003/diff-check.json",
+                                " M verification/4.21/l1gov-slice-003/test-output/full-governance-pytest-output.json",
+                                " M verification/4.21/l1gov-slice-003/test-output/targeted-pytest-output.json",
+                                "?? verification/4.21/l1gov-slice-003/standardization/approved-plan-bundle-block.json",
+                                "?? verification/4.21/l1gov-slice-003/standardization/approved-plan-candidate-block.json"
+                            ]
+}

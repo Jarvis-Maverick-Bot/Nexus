@@ -1,0 +1,6 @@
+{
+  "blocked": true,
+  "category": "standardization_project_execution_packet_generation",
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "message": "blocked by Slice 001 no-go boundary: standardization_project_execution_packet_generation"
+}

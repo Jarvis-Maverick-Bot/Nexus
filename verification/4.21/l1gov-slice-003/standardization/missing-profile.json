@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "material deliverable lacks evaluation profile: implementation-design-package"
+  ],
+  "error_code": "ERR_MISSING_EVALUATION_PROFILE",
+  "invalid_items": [],
+  "message": "standardization bundle rejected",
+  "missing_fields": []
+}

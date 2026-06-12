@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "approved plan candidates require HumanDecision and Kernel baseline-entry evidence"
+  ],
+  "error_code": "ERR_MISSING_HUMAN_DECISION",
+  "invalid_items": [],
+  "message": "execution plan candidate cannot approve itself",
+  "missing_fields": []
+}

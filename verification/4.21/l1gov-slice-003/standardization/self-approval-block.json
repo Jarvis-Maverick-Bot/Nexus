@@ -1,0 +1,5 @@
+{
+  "accepted": false,
+  "error_code": "ERR_MISSING_HUMAN_DECISION",
+  "message": "approval packet cannot approve itself"
+}

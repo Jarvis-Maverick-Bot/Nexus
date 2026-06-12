@@ -1,0 +1,12 @@
+{
+    "changed_files_within_allowed_boundary":  true,
+    "no_disallowed_path_changes":  true,
+    "disallowed_path_changes":  [
+
+                                ],
+    "no_nexus_mq_imports":  true,
+    "production_source_forbidden_matches":  [
+
+                                            ],
+    "approved_plan_candidate_gate":  "ExecutionPlanCandidate(status=\"approved\") rejects without HumanDecision and Kernel baseline-entry evidence"
+}

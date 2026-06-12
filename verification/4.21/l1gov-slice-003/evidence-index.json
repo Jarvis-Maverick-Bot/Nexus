@@ -1,0 +1,140 @@
+{
+    "slice":  "L1GOV-SLICE-003",
+    "final_status":  "PR_READY_FOR_NOVA_REVIEW",
+    "generated_at":  "2026-06-12T19:26:46.0279201+08:00",
+    "review_response":  {
+                            "pr":  "https://github.com/Jarvis-Maverick-Bot/Nexus/pull/11",
+                            "review_artifact_commit":  "635427d",
+                            "reviewed_head":  "85f65e2c8676744a0e7f8e63e25b8c4bf45367f2",
+                            "addressed_blocker":  "ExecutionPlanCandidate approved status is rejected without HumanDecision and Kernel baseline-entry evidence"
+                        },
+    "evidence_files":  [
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\diff-check.json",
+                               "length":  544
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\diff-summary.json",
+                               "length":  2563
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\evidence-index.json",
+                               "length":  6982
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\file-list.json",
+                               "length":  2783
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\approval-bypass-block.json",
+                               "length":  200
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\execution-packet-generation-block.json",
+                               "length":  240
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\feedback-policy-bypass-block.json",
+                               "length":  234
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\import-scan.json",
+                               "length":  190
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\monitor-criteria-invention-block.json",
+                               "length":  222
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\no-go-scan.json",
+                               "length":  455
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\runtime-dispatch-block.json",
+                               "length":  202
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\service\\approval-packet-response.json",
+                               "length":  230
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\service\\no-go-before-standardization.json",
+                               "length":  276
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\service\\source-before-standardization.json",
+                               "length":  235
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\source\\source-authority.json",
+                               "length":  963
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\approved-plan-bundle-block.json",
+                               "length":  306
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\approved-plan-candidate-block.json",
+                               "length":  306
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\common-base-field-block.json",
+                               "length":  265
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\critical-ambiguity-block.json",
+                               "length":  263
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\evaluation-profile-field-block.json",
+                               "length":  267
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\evaluation-profile-policy.json",
+                               "length":  181
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\execution-plan-review-ref-block.json",
+                               "length":  234
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\expected-version-bool-block.json",
+                               "length":  148
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\feedback-policy.json",
+                               "length":  283
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\missing-profile.json",
+                               "length":  290
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\scope-no-go-pairing-block.json",
+                               "length":  265
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\self-approval-block.json",
+                               "length":  129
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\submit-draft-command-envelope.json",
+                               "length":  1277
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\test-output\\full-governance-pytest-output.json",
+                               "length":  291
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\test-output\\targeted-pytest-output.json",
+                               "length":  420
+                           }
+                       ],
+    "changed_files_within_allowed_boundary":  true,
+    "no_shared_docs_writes":  true,
+    "no_package_manager_mutation":  true,
+    "no_nexus_mq_imports":  true,
+    "diff_check_exit_code":  0,
+    "pytest_full":  "verification/4.21/l1gov-slice-003/test-output/full-governance-pytest-output.json",
+    "pytest_targeted":  "verification/4.21/l1gov-slice-003/test-output/targeted-pytest-output.json"
+}

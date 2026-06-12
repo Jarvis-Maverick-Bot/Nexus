@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "feedback-driven planning change requires FeedbackMetricPolicy"
+  ],
+  "error_code": "ERR_RAW_FEEDBACK_NO_AUTHORITY_MUTATION",
+  "invalid_items": [],
+  "message": "standardization bundle rejected",
+  "missing_fields": []
+}

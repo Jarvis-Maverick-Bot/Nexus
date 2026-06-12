@@ -8,6 +8,7 @@ from .kernel import GovernanceKernel
 from .no_go import NoGoBoundaryPolicy
 from .schemas import CommandEnvelope, CommandResponse, validate_command_envelope
 from .source_authority import SourceAuthorityManifest, verify_source_authority
+from .standardization import STANDARDIZATION_COMMAND_TYPES, validate_standardization_command
 from .workspace_init import WORKSPACE_INIT_COMMAND_TYPES, validate_workspace_init_command
 
 
@@ -32,11 +33,12 @@ class GovernanceServiceContract:
         if no_go.blocked:
             return CommandResponse(False, error_code=no_go.error_code, message=no_go.message)
 
-        validation = (
-            validate_workspace_init_command(command)
-            if command.command_type in WORKSPACE_INIT_COMMAND_TYPES
-            else validate_command_envelope(command)
-        )
+        if command.command_type in WORKSPACE_INIT_COMMAND_TYPES:
+            validation = validate_workspace_init_command(command)
+        elif command.command_type in STANDARDIZATION_COMMAND_TYPES:
+            validation = validate_standardization_command(command)
+        else:
+            validation = validate_command_envelope(command)
         if not validation.accepted:
             return CommandResponse(False, error_code=validation.error_code, message=validation.message)
 
