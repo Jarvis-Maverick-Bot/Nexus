@@ -1,0 +1,6 @@
+{
+  "blocked": true,
+  "category": "dispatch_completion_judgement",
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "message": "blocked by Slice 001 no-go boundary: dispatch_completion_judgement"
+}

@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import Any
 
+from .dispatch_contract import DISPATCH_COMMAND_TYPES, validate_dispatch_command
 from .errors import ErrorCode
 from .execution import EXECUTION_COMMAND_TYPES, validate_execution_command
 from .kernel import GovernanceKernel
@@ -40,6 +41,8 @@ class GovernanceServiceContract:
             validation = validate_standardization_command(command)
         elif command.command_type in EXECUTION_COMMAND_TYPES:
             validation = validate_execution_command(command)
+        elif command.command_type in DISPATCH_COMMAND_TYPES:
+            validation = validate_dispatch_command(command)
         else:
             validation = validate_command_envelope(command)
         if not validation.accepted:

@@ -1,0 +1,7 @@
+{
+    "command":  "git diff --check",
+    "exit_code":  0,
+    "started_utc":  "2026-06-12T14:15:33.5786209Z",
+    "ended_utc":  "2026-06-12T14:15:33.7174180Z",
+    "output":  "git.exe : warning: in the working copy of \u0027nexus/governance/errors.py\u0027, LF will be replaced by CRLF the next time Git t\r\nouches it\r\nAt line:16 char:15\r\n+     $output = \u0026 $Exe @Arguments 2\u003e\u00261\r\n+               ~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : NotSpecified: (warning: in the... Git touches it:String) [], RemoteException\r\n    + FullyQualifiedErrorId : NativeCommandError\r\n \r\nwarning: in the working copy of \u0027nexus/governance/no_go.py\u0027, LF will be replaced by CRLF the next time Git touches it\r\nwarning: in the working copy of \u0027nexus/governance/service_contract.py\u0027, LF will be replaced by CRLF the next time Git t\r\nouches it"
+}

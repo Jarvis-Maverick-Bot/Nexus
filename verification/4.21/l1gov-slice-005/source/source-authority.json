@@ -1,0 +1,14 @@
+{
+    "shared_docs_root":  "D:\\Nova-Jarvis-Shared-Docs",
+    "shared_docs_remote":  "git@github-thunder:Nova-Mini/Nova-Jarvis-Shared-Docs.git",
+    "shared_docs_head":  "1cabbc6599c87462b226b54fe6e2b767bb70485f",
+    "shared_docs_status_short":  "?? working/00-project-governance/03-pre-coding/group-a-priority/3.5-workflow-runtime-mq-architecture/review-evidence/thunder/\r\n?? working/05-presentations/NEXUS_THE_ONE_PROJECT_INTRO_DECK_2026-06-09_THUNDER_V0_1.pptx\r\n?? working/05-presentations/NEXUS_THE_ONE_PROJECT_INTRO_DECK_CN_2026-06-09_THUNDER_V0_2.pptx\r\n?? working/05-presentations/artifact-build-manifest.json",
+    "required_authority":  {
+                               "slice005_package_review_commit":  "48b3cba",
+                               "slice_roadmap_commit":  "4dfd3d8",
+                               "slice004_pr_review_commit":  "06040a0",
+                               "pr12_merge_commit":  "2cd4a1e06dc93908d2e9bac2f493a17489344e0d",
+                               "slice005_package_path":  "\\\\192.168.31.124\\Nova-Jarvis-Inbox\\Thunder\\_submitted\\2026-06-12_4.21_slice005_task_package_thunder_v0.1\\"
+                           },
+    "source_authority_mode":  "Shared Docs Git repo / verified clone for authority; SMB package used only as approved task package input."
+}

@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "Kernel-ready packet record ref is required"
+  ],
+  "error_code": "ERR_DISPATCH_RECORD_INVALID",
+  "invalid_items": [],
+  "message": "dispatch readiness rejected",
+  "missing_fields": []
+}

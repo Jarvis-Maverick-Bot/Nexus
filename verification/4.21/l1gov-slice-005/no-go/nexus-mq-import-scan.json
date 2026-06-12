@@ -1,0 +1,6 @@
+{
+    "command":  "rg -n (^|\\s)(from|import)\\s+nexus\\.mq|nexus\\.mq nexus/governance",
+    "raw_exit_code":  1,
+    "no_matches":  true,
+    "output":  ""
+}

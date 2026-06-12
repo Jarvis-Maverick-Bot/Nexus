@@ -1,0 +1,13 @@
+{
+  "accepted": false,
+  "blocked_reasons": [],
+  "error_code": "ERR_DISPATCH_RECORD_INVALID",
+  "invalid_items": [],
+  "message": "dispatch output base rejected",
+  "missing_fields": [
+    "packet_id",
+    "kernel_packet_record_ref",
+    "correlation_id",
+    "idempotency_key"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+    "no_slice006_to_012_work":  true,
+    "no_runtime_live_private_agent_invocation":  true,
+    "no_actual_dispatch_execution":  true,
+    "no_direct_419_controller_call":  true,
+    "no_workpacket_execution":  true,
+    "no_monitor_hitl_acceptance_or_final_completion_judgement":  true,
+    "no_deploy_config_credential_mutation":  true,
+    "no_package_manager_dependency_change":  true,
+    "no_shared_docs_write":  true,
+    "no_production_readiness_or_final_pass_claim":  true,
+    "no_nexus_mq_imports":  true,
+    "changed_files_within_allowed_boundary":  true,
+    "nexus_mq_import_scan":  "no-go/nexus-mq-import-scan.json",
+    "controller_dispatch_runtime_call_scan":  "no-go/controller-dispatch-runtime-call-scan.json"
+}

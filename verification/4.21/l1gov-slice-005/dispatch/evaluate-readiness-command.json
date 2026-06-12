@@ -1,0 +1,35 @@
+{
+  "command_type": "EvaluateDispatchReadiness",
+  "payload": {
+    "capability_ref": "capability:local-schema-test",
+    "dispatch_context": {
+      "causation_id": "cause-packet-ready-421-001",
+      "command_id": "cmd-dispatch-421-001",
+      "correlation_id": "corr-dispatch-421-001",
+      "expected_version": 7,
+      "idempotency_key": "slice005-dispatch-421-001",
+      "request_timestamp": "2026-06-12T13:48:03Z",
+      "requester_role": "Project Execution"
+    },
+    "expected_version": 7,
+    "idempotency_key": "slice005-dispatch-421-001",
+    "kernel_packet_record_ref": "kernel-record:packet-ready-000001",
+    "packet_ref": "Layer1WorkPacket:wp-421-001:v1",
+    "packet_version": 1,
+    "projection_type": "dispatch-readiness",
+    "readiness_review_id": "readiness-review-421-001",
+    "source_refs": [
+      "solution-design/subtopics/4_21_LAYER1_LAYER2_DISPATCH_CONTRACT_DETAILED_DESIGN.md",
+      "implementation-design/subtopics/L1_11_5_LAYER1_LAYER2_DISPATCH_CONTRACT_IMPLEMENTATION_DESIGN.md",
+      "PR12:2cd4a1e06dc93908d2e9bac2f493a17489344e0d"
+    ],
+    "transport_constraint_refs": [
+      "transport:3.5-durable-boundary"
+    ]
+  },
+  "validation": {
+    "accepted": true,
+    "error_code": null,
+    "message": ""
+  }
+}
