@@ -1,0 +1,26 @@
+{
+  "command_type": "ValidatePacketMap",
+  "payload": {
+    "approved_plan_ref": "ExecutionPlanCandidate:plan-421-s003:v1",
+    "dependency_graph_ref": "PacketDependencyGraph:dependency-graph-421",
+    "expected_version": 5,
+    "packet_ids": [
+      "wp-421-001",
+      "wp-421-002"
+    ],
+    "packet_map_ref": "PacketMap:packet-map-421",
+    "project_id": "project-421",
+    "projection_type": "execution-packet-map",
+    "source_refs": [
+      "solution-design/subtopics/4_21_PROJECT_EXECUTION_DETAILED_DESIGN.md",
+      "implementation-design/subtopics/L1_11_4_PROJECT_EXECUTION_IMPLEMENTATION_DESIGN.md",
+      "PR11:0fc70602cc864eb6eb8fe82f7707371f1adbba6e"
+    ],
+    "workspace_id": "ws-421"
+  },
+  "validation": {
+    "accepted": true,
+    "error_code": null,
+    "message": ""
+  }
+}

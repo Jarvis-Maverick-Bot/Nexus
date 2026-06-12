@@ -1,0 +1,144 @@
+{
+    "slice":  "L1GOV-SLICE-004",
+    "final_status":  "PR_READY_FOR_NOVA_REVIEW",
+    "generated_at":  "2026-06-12T20:32:42.5636753+08:00",
+    "evidence_files":  [
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/diff-check.json",
+                               "length":  485
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/diff-summary.json",
+                               "length":  5761
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/evidence-index.json",
+                               "length":  7693
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/approved-plan-ref-valid.json",
+                               "length":  167
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/base-required-field-block.json",
+                               "length":  259
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/create-workpacket-command.json",
+                               "length":  1840
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/dependency-graph-block.json",
+                               "length":  239
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/dependency-graph-valid.json",
+                               "length":  167
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/dependency-missing-node-block.json",
+                               "length":  247
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/expected-version-bool-block.json",
+                               "length":  142
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/owner-self-approval-block.json",
+                               "length":  265
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/packet-map-field-block.json",
+                               "length":  245
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/packet-map-valid.json",
+                               "length":  167
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/readiness-dispatch-boundary-block.json",
+                               "length":  266
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/unapproved-plan-ref-block.json",
+                               "length":  330
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/validate-packet-map-command.json",
+                               "length":  820
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/workpacket-incomplete.json",
+                               "length":  300
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/execution/workpacket-valid.json",
+                               "length":  176
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/file-list.json",
+                               "length":  4154
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/no-go/completion-judgement-block.json",
+                               "length":  198
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/no-go/direct-419-controller-block.json",
+                               "length":  210
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/no-go/dispatch-contract-implementation-block.json",
+                               "length":  222
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/no-go/import-scan.json",
+                               "length":  190
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/no-go/no-go-scan.json",
+                               "length":  13775
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/no-go/runtime-live-block.json",
+                               "length":  204
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/no-go/workpacket-dispatch-block.json",
+                               "length":  196
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/service/no-go-before-execution.json",
+                               "length":  280
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/service/source-before-execution.json",
+                               "length":  235
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/service/workpacket-response.json",
+                               "length":  219
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/source/source-authority.json",
+                               "length":  854
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/test-output/full-governance-pytest-output.json",
+                               "length":  295
+                           },
+                           {
+                               "path":  "verification/4.21/l1gov-slice-004/test-output/targeted-pytest-output.json",
+                               "length":  461
+                           }
+                       ],
+    "changed_files_within_allowed_boundary":  true,
+    "no_shared_docs_writes":  true,
+    "no_package_manager_mutation":  true,
+    "no_nexus_mq_imports":  true,
+    "no_direct_419_controller_call":  true,
+    "no_disallowed_path_changes":  true,
+    "diff_check_exit_code":  0,
+    "pytest_full":  "verification/4.21/l1gov-slice-004/test-output/full-governance-pytest-output.json",
+    "pytest_targeted":  "verification/4.21/l1gov-slice-004/test-output/targeted-pytest-output.json"
+}

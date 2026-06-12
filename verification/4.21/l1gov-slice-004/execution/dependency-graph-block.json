@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "dependency graph contains a cycle"
+  ],
+  "error_code": "ERR_EXECUTION_RECORD_INVALID",
+  "invalid_items": [],
+  "message": "execution record rejected",
+  "missing_fields": []
+}

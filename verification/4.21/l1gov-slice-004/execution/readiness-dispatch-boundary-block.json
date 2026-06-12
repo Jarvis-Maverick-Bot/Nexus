@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "Slice 004 readiness cannot claim dispatched"
+  ],
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "invalid_items": [],
+  "message": "packet readiness decision crossed Slice 004 boundary",
+  "missing_fields": []
+}

@@ -53,6 +53,11 @@ class NoGoBoundaryPolicy:
                 "standardization_project_execution_packet_generation": ErrorCode.NO_GO_BOUNDARY,
                 "standardization_monitor_criteria_invention": ErrorCode.NO_GO_BOUNDARY,
                 "standardization_feedback_policy_bypass": ErrorCode.RAW_FEEDBACK_NO_AUTHORITY_MUTATION,
+                "execution_direct_419_controller_call": ErrorCode.NO_GO_BOUNDARY,
+                "execution_workpacket_dispatch": ErrorCode.NO_GO_BOUNDARY,
+                "execution_dispatch_contract_implementation": ErrorCode.NO_GO_BOUNDARY,
+                "execution_runtime_live_invocation": ErrorCode.NO_GO_BOUNDARY,
+                "execution_completion_judgement": ErrorCode.NO_GO_BOUNDARY,
             }
         )
 

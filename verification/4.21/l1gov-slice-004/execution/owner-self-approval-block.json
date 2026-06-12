@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "owner role cannot self-review packet readiness"
+  ],
+  "error_code": "ERR_MISSING_HUMAN_DECISION",
+  "invalid_items": [],
+  "message": "Layer1WorkPacket owner/reviewer conflict",
+  "missing_fields": []
+}

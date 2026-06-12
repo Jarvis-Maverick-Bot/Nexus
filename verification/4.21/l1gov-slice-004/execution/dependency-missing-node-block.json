@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "missing prerequisite node: wp-421-missing"
+  ],
+  "error_code": "ERR_EXECUTION_RECORD_INVALID",
+  "invalid_items": [],
+  "message": "execution record rejected",
+  "missing_fields": []
+}
