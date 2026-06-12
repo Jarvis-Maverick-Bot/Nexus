@@ -355,6 +355,14 @@ def submit_workspace_init_record(
             "workspace_id": manifest.workspace_id,
         },
     )
+    command_validation = validate_workspace_init_command(command)
+    if not command_validation.accepted:
+        return TransitionResult(
+            False,
+            kernel.state,
+            error_code=command_validation.error_code or ErrorCode.WORKSPACE_COMMAND_INVALID,
+            message=command_validation.message,
+        )
     return kernel.apply(command)
 
 

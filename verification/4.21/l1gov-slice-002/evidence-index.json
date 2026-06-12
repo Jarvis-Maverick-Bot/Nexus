@@ -1,19 +1,19 @@
 {
     "slice":  "L1GOV-SLICE-002",
     "final_status":  "PR_READY_FOR_NOVA_REVIEW",
-    "generated_at":  "2026-06-12T17:55:10.5886051+08:00",
+    "generated_at":  "2026-06-12T18:08:21.4303876+08:00",
     "evidence_files":  [
                            {
                                "path":  "verification\\4.21\\l1gov-slice-002\\diff-summary.json",
-                               "length":  3946
+                               "length":  3965
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-002\\evidence-index.json",
-                               "length":  7425
+                               "length":  8954
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-002\\file-list.json",
-                               "length":  7237
+                               "length":  7383
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\approval-bypass-block.json",
@@ -62,6 +62,10 @@
                            {
                                "path":  "verification\\4.21\\l1gov-slice-002\\test-output\\targeted-pytest-output.json",
                                "length":  4218
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\bool-version-kernel-submit-block.json",
+                               "length":  269
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\create-command-envelope.json",
@@ -139,17 +143,16 @@
     "pytest_full":  {
                         "command":  "C:\\Python314\\python.exe -m pytest nexus/governance/tests -q",
                         "exit_code":  0,
-                        "output":  "........................................................................ [ 88%]\n.........                                                                [100%]\n81 passed in 0.09s"
+                        "output":  "........................................................................ [ 87%]\n..........                                                               [100%]\n82 passed in 0.08s"
                     },
     "review_response":  {
                             "pr":  "https://github.com/Jarvis-Maverick-Bot/Nexus/pull/10",
-                            "review_artifact_commit":  "5bc8c7d",
-                            "reviewed_head":  "1131d2fd67cde80e8e906845b88d042d000af697",
+                            "review_artifact_commit":  "e58b9b7",
+                            "reviewed_head":  "0b955cf890786ddf850b175469c20936cff19ddd",
                             "addressed_blockers":  [
-                                                       "Boolean expected_version and expected_kernel_version values rejected",
-                                                       "Payload expected_version must match CommandEnvelope.expected_version",
-                                                       "Payload expected_kernel_version must match CommandEnvelope.expected_version",
-                                                       "CreateWorkspaceCandidate payload idempotency_key must match CommandEnvelope.idempotency_key"
+                                                       "submit_workspace_init_record validates constructed SubmitWorkspaceInitRecord before Kernel append",
+                                                       "expected_version=True rejects before Kernel append when Kernel version is 1",
+                                                       "Kernel records remain unchanged on boolean expected-version rejection"
                                                    ]
                         }
 }

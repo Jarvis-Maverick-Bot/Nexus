@@ -89,7 +89,7 @@
     },
     {
         "path":  "nexus\\governance\\tests\\test_workspace_init_kernel_boundary.py",
-        "length":  2941
+        "length":  4116
     },
     {
         "path":  "nexus\\governance\\tests\\test_workspace_init_manifest.py",
@@ -113,19 +113,19 @@
     },
     {
         "path":  "nexus\\governance\\workspace_init.py",
-        "length":  15095
+        "length":  15430
     },
     {
         "path":  "verification\\4.21\\l1gov-slice-002\\diff-summary.json",
-        "length":  4603
+        "length":  3946
     },
     {
         "path":  "verification\\4.21\\l1gov-slice-002\\evidence-index.json",
-        "length":  7425
+        "length":  8837
     },
     {
         "path":  "verification\\4.21\\l1gov-slice-002\\file-list.json",
-        "length":  6506
+        "length":  7237
     },
     {
         "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\approval-bypass-block.json",
@@ -137,7 +137,7 @@
     },
     {
         "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\no-go-scan.json",
-        "length":  310
+        "length":  299
     },
     {
         "path":  "verification\\4.21\\l1gov-slice-002\\no-go\\planning-content-out-of-scope.json",
@@ -174,6 +174,10 @@
     {
         "path":  "verification\\4.21\\l1gov-slice-002\\test-output\\targeted-pytest-output.json",
         "length":  4218
+    },
+    {
+        "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\bool-version-kernel-submit-block.json",
+        "length":  269
     },
     {
         "path":  "verification\\4.21\\l1gov-slice-002\\workspace\\create-command-envelope.json",

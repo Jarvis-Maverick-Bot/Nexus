@@ -66,6 +66,37 @@ def test_stale_expected_version_blocks_workspace_init_without_append() -> None:
     write_evidence("workspace/stale-version-block.json", result.to_evidence(), slice_id="l1gov-slice-002")
 
 
+def test_boolean_expected_version_blocks_workspace_init_without_append() -> None:
+    kernel = GovernanceKernel(
+        state=AggregateState(
+            aggregate_id="layer1-governance",
+            state="projection_contract_ready",
+            version=1,
+            authority_refs=SOURCE_REFS,
+        )
+    )
+    manifest = valid_manifest()
+    validation = validate_workspace_manifest(manifest)
+
+    result = submit_workspace_init_record(
+        kernel=kernel,
+        manifest=manifest,
+        validation=validation,
+        actor=ActorRef("agent:thunder", "implementation"),
+        expected_version=True,
+        authority_refs=SOURCE_REFS,
+        idempotency_key="submit-workspace-init-bool-ws-421",
+    )
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.WORKSPACE_COMMAND_INVALID
+    assert result.message == "expected_kernel_version must be a non-negative integer"
+    assert result.new_state.state == "projection_contract_ready"
+    assert result.new_state.version == 1
+    assert len(kernel.records) == 0
+    write_evidence("workspace/bool-version-kernel-submit-block.json", result.to_evidence(), slice_id="l1gov-slice-002")
+
+
 def test_idempotent_workspace_init_submit_returns_prior_record() -> None:
     kernel = kernel_ready_for_workspace_init()
     manifest = valid_manifest()
