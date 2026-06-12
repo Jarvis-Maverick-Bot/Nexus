@@ -94,7 +94,19 @@ def test_handoff_candidate_rejects_runtime_dispatch_as_expected_output() -> None
     write_evidence("dispatch/handoff-expected-output-runtime-block.json", result.to_evidence(), slice_id="l1gov-slice-005")
 
 
-@pytest.mark.parametrize("expected_output", ("dispatch", "controller call", "private-agent invocation"))
+@pytest.mark.parametrize(
+    "expected_output",
+    (
+        "dispatch",
+        "controller call",
+        "private-agent invocation",
+        "controller execution",
+        "controller request",
+        "controller action",
+        "adapter call",
+        "route activation",
+    ),
+)
 def test_handoff_candidate_rejects_execution_intent_expected_outputs(expected_output: str) -> None:
     candidate = valid_handoff_candidate(expected_outputs=(expected_output,))
 

@@ -1,11 +1,11 @@
 {
     "shared_docs_root":  "D:\\Nova-Jarvis-Shared-Docs",
     "shared_docs_remote":  "git@github-thunder:Nova-Mini/Nova-Jarvis-Shared-Docs.git",
-    "shared_docs_head":  "bbcb3cb56e7d422e22f5a053f53ba7e18e8027ea",
+    "shared_docs_head":  "9e02bcb058ebe190643294d5da2a57f6dcc72def",
     "shared_docs_status_short":  "?? working/00-project-governance/03-pre-coding/group-a-priority/3.5-workflow-runtime-mq-architecture/review-evidence/thunder/\r\n?? working/05-presentations/NEXUS_THE_ONE_PROJECT_INTRO_DECK_2026-06-09_THUNDER_V0_1.pptx\r\n?? working/05-presentations/NEXUS_THE_ONE_PROJECT_INTRO_DECK_CN_2026-06-09_THUNDER_V0_2.pptx\r\n?? working/05-presentations/artifact-build-manifest.json",
-    "review_request_changes_commit":  "85c139f",
-    "prior_review_request_changes_commit":  "d893d1b",
-    "pr13_prior_head_reviewed":  "bc959f8d4333af5226bccbaf4563eed6408cac65",
+    "review_request_changes_commit":  "fce6909",
+    "prior_review_request_changes_commit":  "85c139f",
+    "pr13_prior_head_reviewed":  "670999fd037bf7de1f73e4e83347e4135c53559a",
     "pr13_original_head_reviewed":  "0435c9b3ec096855cf07c7333538e8edfeda8f5c",
     "required_authority":  {
                                "slice005_package_review_commit":  "48b3cba",

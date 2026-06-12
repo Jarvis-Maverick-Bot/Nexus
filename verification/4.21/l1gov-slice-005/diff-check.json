@@ -1,7 +1,7 @@
 {
     "command":  "git diff --check",
     "exit_code":  0,
-    "started_utc":  "2026-06-12T14:56:30.9645188Z",
-    "ended_utc":  "2026-06-12T14:56:31.1120450Z",
+    "started_utc":  "2026-06-12T15:05:48.4140009Z",
+    "ended_utc":  "2026-06-12T15:05:48.5788409Z",
     "output":  "git.exe : warning: in the working copy of \u0027nexus/governance/dispatch_contract.py\u0027, LF will be replaced by CRLF the next\r\n time Git touches it\r\nAt line:16 char:15\r\n+     $output = \u0026 $Exe @Arguments 2\u003e\u00261\r\n+               ~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : NotSpecified: (warning: in the... Git touches it:String) [], RemoteException\r\n    + FullyQualifiedErrorId : NativeCommandError\r\n \r\nwarning: in the working copy of \u0027nexus/governance/tests/test_dispatch_records.py\u0027, LF will be replaced by CRLF the next\r\n time Git touches it\r\nwarning: in the working copy of \u0027nexus/governance/tests/test_dispatch_service_contract.py\u0027, LF will be replaced by CRLF\r\n the next time Git touches it\r\nwarning: in the working copy of \u0027verification/4.21/l1gov-slice-005/test-output/full-governance-pytest-output.json\u0027, LF \r\nwill be replaced by CRLF the next time Git touches it\r\nwarning: in the working copy of \u0027verification/4.21/l1gov-slice-005/test-output/targeted-pytest-output.json\u0027, LF will be\r\n replaced by CRLF the next time Git touches it"
 }
