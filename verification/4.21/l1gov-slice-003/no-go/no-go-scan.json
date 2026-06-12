@@ -8,11 +8,5 @@
     "production_source_forbidden_matches":  [
 
                                             ],
-    "blocked_standardization_no_go_actions":  [
-                                                  "standardization_approval_bypass",
-                                                  "standardization_runtime_dispatch",
-                                                  "standardization_project_execution_packet_generation",
-                                                  "standardization_monitor_criteria_invention",
-                                                  "standardization_feedback_policy_bypass"
-                                              ]
+    "approved_plan_candidate_gate":  "ExecutionPlanCandidate(status=\"approved\") rejects without HumanDecision and Kernel baseline-entry evidence"
 }

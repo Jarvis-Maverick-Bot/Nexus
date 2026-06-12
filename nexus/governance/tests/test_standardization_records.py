@@ -78,3 +78,21 @@ def test_execution_plan_candidate_requires_all_review_refs() -> None:
         result.to_evidence(),
         slice_id="l1gov-slice-003",
     )
+
+
+def test_execution_plan_candidate_rejects_approved_status_without_human_decision() -> None:
+    item = valid_execution_plan(status="approved")
+
+    result = validate_execution_plan_candidate(item)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.MISSING_HUMAN_DECISION
+    assert (
+        "approved plan candidates require HumanDecision and Kernel baseline-entry evidence"
+        in result.blocked_reasons
+    )
+    write_evidence(
+        "standardization/approved-plan-candidate-block.json",
+        result.to_evidence(),
+        slice_id="l1gov-slice-003",
+    )

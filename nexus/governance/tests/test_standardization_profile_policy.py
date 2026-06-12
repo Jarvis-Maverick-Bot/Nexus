@@ -48,6 +48,26 @@ def test_material_deliverable_without_profile_is_rejected() -> None:
     write_evidence("standardization/missing-profile.json", result.to_evidence(), slice_id="l1gov-slice-003")
 
 
+def test_standardization_bundle_rejects_approved_plan_candidate_without_kernel_baseline() -> None:
+    result = validate_standardization_bundle(
+        plan=valid_execution_plan(status="approved"),
+        profiles=(valid_profile(),),
+        feedback_policy=valid_feedback_policy(),
+    )
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.MISSING_HUMAN_DECISION
+    assert (
+        "approved plan candidates require HumanDecision and Kernel baseline-entry evidence"
+        in result.blocked_reasons
+    )
+    write_evidence(
+        "standardization/approved-plan-bundle-block.json",
+        result.to_evidence(),
+        slice_id="l1gov-slice-003",
+    )
+
+
 def test_feedback_driven_plan_requires_metric_policy() -> None:
     result = validate_standardization_bundle(
         plan=valid_execution_plan(feedback_metric_policy_ref=""),

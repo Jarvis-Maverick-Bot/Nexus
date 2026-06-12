@@ -1,23 +1,29 @@
 {
     "slice":  "L1GOV-SLICE-003",
     "final_status":  "PR_READY_FOR_NOVA_REVIEW",
-    "generated_at":  "2026-06-12T18:45:49.0683899+08:00",
+    "generated_at":  "2026-06-12T19:26:46.0279201+08:00",
+    "review_response":  {
+                            "pr":  "https://github.com/Jarvis-Maverick-Bot/Nexus/pull/11",
+                            "review_artifact_commit":  "635427d",
+                            "reviewed_head":  "85f65e2c8676744a0e7f8e63e25b8c4bf45367f2",
+                            "addressed_blocker":  "ExecutionPlanCandidate approved status is rejected without HumanDecision and Kernel baseline-entry evidence"
+                        },
     "evidence_files":  [
                            {
                                "path":  "verification\\4.21\\l1gov-slice-003\\diff-check.json",
-                               "length":  481
+                               "length":  544
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-003\\diff-summary.json",
-                               "length":  2389
+                               "length":  2563
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-003\\evidence-index.json",
-                               "length":  6770
+                               "length":  6982
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-003\\file-list.json",
-                               "length":  2999
+                               "length":  2783
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\approval-bypass-block.json",
@@ -41,7 +47,7 @@
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\no-go-scan.json",
-                               "length":  872
+                               "length":  455
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-003\\no-go\\runtime-dispatch-block.json",
@@ -61,7 +67,15 @@
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-003\\source\\source-authority.json",
-                               "length":  761
+                               "length":  963
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\approved-plan-bundle-block.json",
+                               "length":  306
+                           },
+                           {
+                               "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\approved-plan-candidate-block.json",
+                               "length":  306
                            },
                            {
                                "path":  "verification\\4.21\\l1gov-slice-003\\standardization\\common-base-field-block.json",

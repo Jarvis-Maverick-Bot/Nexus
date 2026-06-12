@@ -352,7 +352,17 @@ def validate_execution_plan_candidate(item: ExecutionPlanCandidate) -> Standardi
             "ambiguity_register_ref",
         ),
     )
-    return _record_result(missing, [])
+    blocked_reasons: list[str] = []
+    if item.status == "approved":
+        blocked_reasons.append("approved plan candidates require HumanDecision and Kernel baseline-entry evidence")
+        return StandardizationValidationResult(
+            False,
+            ErrorCode.MISSING_HUMAN_DECISION,
+            message="execution plan candidate cannot approve itself",
+            missing_fields=missing,
+            blocked_reasons=tuple(blocked_reasons),
+        )
+    return _record_result(missing, blocked_reasons)
 
 
 def validate_standardization_bundle(
