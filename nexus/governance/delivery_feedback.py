@@ -119,14 +119,19 @@ RAW_MUTATION_TERMS = (
 )
 
 COMPLETION_DECISION_TERMS = (
+    "complete",
     "approve completion",
     "approve_completion",
+    "approved complete",
     "activate continuity",
     "activate_continuity",
+    "continuity activation",
     "completion claim",
     "completion_claim",
     "complete project",
     "complete_project",
+    "close project",
+    "closed complete",
     "delivery complete",
     "delivery_complete",
     "delivery completed",
@@ -695,9 +700,13 @@ def validate_completion_continuity_packet(packet: CompletionContinuityPacket) ->
     if not packet.impact_assessment_ref:
         blocked.append("impact_assessment_ref is required before completion/continuity review propagation")
         error = ErrorCode.IMPACT_CONTROL_RECORD_INVALID
-    if _has_completion_decision(packet.requested_decision) and not _has_human_decision_ref((packet.human_decision_ref,)):
-        blocked.append("completion/continuity outcome requires HumanDecision")
-        error = ErrorCode.MISSING_HUMAN_DECISION
+    if _has_completion_decision(packet.requested_decision):
+        if not _has_human_decision_ref((packet.human_decision_ref,)):
+            blocked.append("completion/continuity outcome requires HumanDecision")
+            error = ErrorCode.MISSING_HUMAN_DECISION
+        else:
+            blocked.append("Slice 008 cannot accept completion decisions or continuity activation outcomes")
+            error = ErrorCode.NO_GO_BOUNDARY
     if _has_forbidden_effect(packet.requested_decision):
         blocked.append("completion packet cannot claim deploy, production readiness, or final PASS")
         error = ErrorCode.NO_GO_BOUNDARY
@@ -1126,7 +1135,7 @@ def _text_has_terms(value: Any, terms: tuple[str, ...]) -> bool:
     normalized_terms = {_normalized(term) for term in terms}
     for text in _iter_normalized_text(value):
         for term in normalized_terms:
-            if term in text and not _is_negated_limit(text, term):
+            if _term_in_text(text, term) and not _is_negated_limit(text, term):
                 return True
     return False
 
@@ -1150,6 +1159,10 @@ def _iter_normalized_text(value: Any) -> tuple[str, ...]:
 def _normalized(value: object) -> str:
     text = str(value).strip().lower().replace("_", " ").replace("-", " ")
     return " ".join(text.split())
+
+
+def _term_in_text(text: str, term: str) -> bool:
+    return f" {term} " in f" {text} "
 
 
 def _is_negated_limit(text: str, term: str) -> bool:

@@ -31,6 +31,38 @@ def test_completion_packet_rejects_requested_completion_without_human_decision()
 
 
 @pytest.mark.parametrize(
+    "requested_decision",
+    (
+        "complete",
+        "complete project",
+        "activate continuity",
+        "continuity active",
+        "continuity activation",
+        "approved complete",
+        "close project",
+        "closed complete",
+    ),
+)
+def test_completion_packet_rejects_completion_or_continuity_outcome_with_human_decision(
+    requested_decision: str,
+) -> None:
+    result = validate_completion_continuity_packet(
+        valid_completion_packet(
+            human_decision_ref="HumanDecision:completion-review-421",
+            requested_decision=requested_decision,
+        )
+    )
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.NO_GO_BOUNDARY
+    write_evidence(
+        f"delivery-feedback/completion-outcome-{requested_decision.replace(' ', '-')}-block.json",
+        result.to_evidence(),
+        slice_id="l1gov-slice-008",
+    )
+
+
+@pytest.mark.parametrize(
     "field_name",
     ("open_risks", "remaining_scope", "continuity_rule_candidate", "owner_ref", "cadence", "review_criteria", "stop_conditions"),
 )
