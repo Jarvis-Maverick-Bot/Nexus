@@ -88,3 +88,18 @@ def test_component_return_action_rejects_controller_execution_action() -> None:
     assert result.accepted is False
     assert result.error_code == ErrorCode.NO_GO_BOUNDARY
     write_evidence("monitor-hitl/return-action-controller-execution-block.json", result.to_evidence(), slice_id="l1gov-slice-006")
+
+
+@pytest.mark.parametrize(
+    ("field_name", "text"),
+    (
+        ("reason", "please perform controller execution now"),
+        ("required_correction", "perform actual dispatch"),
+        ("resume_condition", "route activation is complete"),
+    ),
+)
+def test_component_return_action_rejects_sentence_shaped_forbidden_intent(field_name: str, text: str) -> None:
+    result = validate_component_return_action(valid_return_action(**{field_name: text}))
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.NO_GO_BOUNDARY

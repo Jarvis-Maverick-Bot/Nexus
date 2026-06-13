@@ -81,3 +81,38 @@ def test_create_review_task_command_rejects_forbidden_output_terms(forbidden_out
         result.to_evidence(),
         slice_id="l1gov-slice-006",
     )
+
+
+@pytest.mark.parametrize(
+    ("field_name", "text"),
+    (
+        ("expected_outputs", "please perform controller execution now"),
+        ("expected_outputs", "perform actual dispatch"),
+        ("notes", "this would require runtime invocation by a private agent"),
+    ),
+)
+def test_create_review_task_command_rejects_sentence_shaped_forbidden_intent(
+    field_name: str,
+    text: str,
+) -> None:
+    command = valid_create_review_task_command()
+    command.payload[field_name] = (text,) if field_name == "expected_outputs" else text
+
+    result = validate_monitor_hitl_command(command)
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.NO_GO_BOUNDARY
+
+
+@pytest.mark.parametrize(
+    ("field_name", "text"),
+    (
+        ("decision_question", "Can the reviewer approve production readiness after this check?"),
+        ("recommended_next_action", "please perform controller execution now"),
+    ),
+)
+def test_review_task_rejects_sentence_shaped_forbidden_intent(field_name: str, text: str) -> None:
+    result = validate_human_review_task(valid_review_task(**{field_name: text}))
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.NO_GO_BOUNDARY

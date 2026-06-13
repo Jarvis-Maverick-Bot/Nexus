@@ -64,6 +64,7 @@ FORBIDDEN_EFFECT_TERMS: tuple[str, ...] = (
     "delivery complete",
     "production_ready",
     "production ready",
+    "production readiness",
     "dispatch",
     "runtime dispatch",
     "runtime_dispatch",
@@ -354,7 +355,19 @@ def validate_deliverable_evaluation_profile_ref(profile: DeliverableEvaluationPr
 
 
 def validate_deliverable_evaluation_result(result: DeliverableEvaluationResult) -> MonitorHitlValidationResult:
-    if _has_forbidden_intent(result.__dict__):
+    if _has_forbidden_intent(
+        {
+            "checklist_result": result.checklist_result,
+            "constraint_result": result.constraint_result,
+            "evidence_mapping_result": result.evidence_mapping_result,
+            "score_or_threshold_result": result.score_or_threshold_result,
+            "verdict": result.verdict,
+            "confidence": result.confidence,
+            "gaps": result.gaps,
+            "required_correction": result.required_correction,
+            "notes": result.notes,
+        }
+    ):
         return _no_go("deliverable evaluation cannot claim completion, production readiness, dispatch, or execution")
     base = validate_monitor_hitl_output_base(result)
     if not base.accepted:
@@ -630,7 +643,7 @@ def validate_monitor_hitl_command(command: CommandEnvelope) -> ValidationResult:
         return validation
     if command.command_type not in MONITOR_HITL_COMMAND_TYPES:
         return ValidationResult(False, ErrorCode.MONITOR_HITL_COMMAND_INVALID, "unknown Monitor/HITL command")
-    if _has_forbidden_intent(command.payload):
+    if _command_payload_has_forbidden_intent(command):
         return ValidationResult(False, ErrorCode.NO_GO_BOUNDARY, "Monitor/HITL command crossed Slice 006 boundary")
     for field_name in _required_payload_fields(command.command_type):
         if _payload_field_missing(command.payload, field_name):
@@ -725,6 +738,28 @@ def _validate_command_specific_contract(command: CommandEnvelope) -> MonitorHitl
     return MonitorHitlValidationResult(True)
 
 
+def _command_payload_has_forbidden_intent(command: CommandEnvelope) -> bool:
+    safe_payload_keys = {
+        "review_task",
+        "review_task_ref",
+        "human_decision",
+        "deliverable_ref",
+        "evaluation_profile_ref",
+        "evidence_refs",
+        "evaluation_result",
+        "escalation_record",
+        "review_disposition",
+        "component_return_action",
+        "source_refs",
+        "expected_version",
+        "expected_kernel_version",
+        "idempotency_key",
+        "projection_type",
+    }
+    extra_payload = {key: value for key, value in command.payload.items() if key not in safe_payload_keys}
+    return _has_forbidden_intent(extra_payload)
+
+
 def _record_result(
     missing: tuple[str, ...],
     blocked_reasons: list[str],
@@ -789,7 +824,16 @@ def _coerce_dataclass(value: Any, cls: type[T]) -> T:
 
 def _has_forbidden_intent(payload: Any) -> bool:
     normalized_terms = _normalized_terms(FORBIDDEN_EFFECT_TERMS + DIRECT_APPROVAL_TRIGGERS)
-    return any(text in normalized_terms for text in _iter_normalized_text(payload))
+    for text in _iter_normalized_text(payload):
+        if text in normalized_terms:
+            return True
+        padded_text = f"_{text}_"
+        for term in normalized_terms:
+            if "_" not in term:
+                continue
+            if f"_{term}_" in padded_text:
+                return True
+    return False
 
 
 def _iter_normalized_text(value: Any) -> tuple[str, ...]:
