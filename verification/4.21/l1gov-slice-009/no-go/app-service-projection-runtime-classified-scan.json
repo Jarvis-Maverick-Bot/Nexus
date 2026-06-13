@@ -448,13 +448,13 @@
                                    },
                                    {
                                        "file":  "nexus/governance/service_facade.py",
-                                       "line":  335,
+                                       "line":  339,
                                        "term":  "app cache",
                                        "text":  "return ValidationResult(False, ErrorCode.NO_GO_BOUNDARY, \"app cache or projection cannot be source authority\")"
                                    },
                                    {
                                        "file":  "nexus/governance/service_facade.py",
-                                       "line":  521,
+                                       "line":  525,
                                        "term":  "source of truth",
                                        "text":  "if any(term in text for term in (\"projection\", \"cache\", \"source of truth\")):"
                                    },

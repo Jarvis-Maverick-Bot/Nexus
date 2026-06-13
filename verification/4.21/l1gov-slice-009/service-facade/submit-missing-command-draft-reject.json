@@ -1,0 +1,13 @@
+{
+  "blocked_reason": "SubmitCommandDraft requires command_draft payload",
+  "command_id": "svc-cmd-001",
+  "error_code": "ERR_INVALID_TRANSITION",
+  "errors": [
+    "SubmitCommandDraft requires command_draft payload"
+  ],
+  "evidence_refs": [],
+  "kernel_record_ref": null,
+  "projection_ref": null,
+  "projection_refresh": "none",
+  "status": "rejected"
+}
