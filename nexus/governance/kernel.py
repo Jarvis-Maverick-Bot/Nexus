@@ -40,6 +40,8 @@ ALLOWED_TRANSITIONS: dict[tuple[str, str], str] = {
     ("feedback_triage_requested", "RecordFeedbackTriageDecision"): "feedback_triage_recorded",
     ("feedback_triage_recorded", "CreateCompletionContinuityPacket"): "completion_continuity_review_requested",
     ("completion_continuity_review_requested", "CreateCompletionContinuityPacket"): "completion_continuity_review_requested",
+    ("completion_continuity_review_requested", "MediateBaselineEntry"): "baseline_entry_recorded",
+    ("baseline_entry_recorded", "MediateBaselineEntry"): "baseline_entry_recorded",
 }
 
 
@@ -96,6 +98,9 @@ class GovernanceKernel:
         validation = validate_command_envelope(command)
         if not validation.accepted:
             return self._reject(validation.error_code or ErrorCode.INVALID_TRANSITION, validation.message)
+
+        if command.command_type == "MediateBaselineEntry" and command.payload.get("mediated_by_service") is not True:
+            return self._reject(ErrorCode.NO_GO_BOUNDARY, "baseline entries must be mediated by Governance Service")
 
         fingerprint = _fingerprint(command)
         if command.idempotency_key in self._idempotency:
