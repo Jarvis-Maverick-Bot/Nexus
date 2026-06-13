@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
@@ -1162,7 +1163,8 @@ def _normalized(value: object) -> str:
 
 
 def _term_in_text(text: str, term: str) -> bool:
-    return f" {term} " in f" {text} "
+    pattern = rf"(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])"
+    return re.search(pattern, text) is not None
 
 
 def _is_negated_limit(text: str, term: str) -> bool:
