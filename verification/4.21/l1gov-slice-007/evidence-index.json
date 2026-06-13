@@ -1,13 +1,13 @@
 {
     "slice":  "L1GOV-SLICE-007",
     "status":  "PR_READY_FOR_NOVA_REVIEW",
-    "generated_utc":  "2026-06-13T06:22:28.0793395Z",
+    "generated_utc":  "2026-06-13T06:44:19.0162618Z",
     "nexus_branch":  "codex/4.21-slice007-impact-control",
-    "nexus_head":  "6760e6d60f893976a07b1c450f2d9906397d1164",
+    "nexus_head":  "25eb25a8d1a1ecf9b625674183ce2143e7a833c0",
     "nexus_base":  "1d2401dcddcf22ed5d426f4dd3b41659ef10c4f5",
     "authority_commits_or_refs":  [
                                       "565ce91d3d00f380d3e22ab2f89b52074b9e1f6c",
-                                      "f59590b",
+                                      "d551a68830183d678fa9baa64e50519a3c9c18e3",
                                       "1d2401dcddcf22ed5d426f4dd3b41659ef10c4f5"
                                   ],
     "changed_files":  [
@@ -37,6 +37,8 @@
                           "verification/4.21/l1gov-slice-007/impact-control/lower-layer-candidate-no-go-owner-path-call.json",
                           "verification/4.21/l1gov-slice-007/impact-control/lower-layer-candidate-no-go-route-activation.json",
                           "verification/4.21/l1gov-slice-007/impact-control/lower-layer-candidate-no-go-runtime-invocation.json",
+                          "verification/4.21/l1gov-slice-007/impact-control/lower-layer-candidate-no-go-send-lower-layer-request.json",
+                          "verification/4.21/l1gov-slice-007/impact-control/lower-layer-candidate-no-go-send-request-to-lower-layer-owner.json",
                           "verification/4.21/l1gov-slice-007/impact-control/lower-layer-candidate-no-go-submit-lower-layer-request-now.json",
                           "verification/4.21/l1gov-slice-007/impact-control/lower-layer-candidate-no-go-workpacket-execution.json",
                           "verification/4.21/l1gov-slice-007/impact-control/lower-layer-outcome.json",
@@ -53,6 +55,8 @@
                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-please-execute-workpacket-now.json",
                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-private-agent-invocation.json",
                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-runtime-invocation.json",
+                          "verification/4.21/l1gov-slice-007/impact-control/request-no-go-send-lower-layer-request.json",
+                          "verification/4.21/l1gov-slice-007/impact-control/request-no-go-send-request-to-lower-layer-owner.json",
                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-submit-lower-layer-request.json",
                           "verification/4.21/l1gov-slice-007/impact-control/trace-required-proceed-with-trace.json",
                           "verification/4.21/l1gov-slice-007/impact-control/unclear-surface-fail-closed.json",
@@ -84,8 +88,8 @@
                           "verification/4.21/l1gov-slice-007/test-output/targeted-pytest-output.json"
                       ],
     "verification_summary":  {
-                                 "targeted_pytest":  "80 passed",
-                                 "full_governance_pytest":  "379 passed",
+                                 "targeted_pytest":  "88 passed",
+                                 "full_governance_pytest":  "387 passed",
                                  "git_diff_check_exit_code":  0,
                                  "nexus_mq_import_scan_no_matches":  true,
                                  "controller_dispatch_runtime_call_scan_result":  "PASS_CLASSIFIED_GUARD_OR_TEST_ONLY",
@@ -108,6 +112,8 @@
                            "verification/4.21/l1gov-slice-007/impact-control/lower-layer-candidate-no-go-owner-path-call.json",
                            "verification/4.21/l1gov-slice-007/impact-control/lower-layer-candidate-no-go-route-activation.json",
                            "verification/4.21/l1gov-slice-007/impact-control/lower-layer-candidate-no-go-runtime-invocation.json",
+                           "verification/4.21/l1gov-slice-007/impact-control/lower-layer-candidate-no-go-send-lower-layer-request.json",
+                           "verification/4.21/l1gov-slice-007/impact-control/lower-layer-candidate-no-go-send-request-to-lower-layer-owner.json",
                            "verification/4.21/l1gov-slice-007/impact-control/lower-layer-candidate-no-go-submit-lower-layer-request-now.json",
                            "verification/4.21/l1gov-slice-007/impact-control/lower-layer-candidate-no-go-workpacket-execution.json",
                            "verification/4.21/l1gov-slice-007/impact-control/lower-layer-outcome.json",
@@ -124,6 +130,8 @@
                            "verification/4.21/l1gov-slice-007/impact-control/request-no-go-please-execute-workpacket-now.json",
                            "verification/4.21/l1gov-slice-007/impact-control/request-no-go-private-agent-invocation.json",
                            "verification/4.21/l1gov-slice-007/impact-control/request-no-go-runtime-invocation.json",
+                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-send-lower-layer-request.json",
+                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-send-request-to-lower-layer-owner.json",
                            "verification/4.21/l1gov-slice-007/impact-control/request-no-go-submit-lower-layer-request.json",
                            "verification/4.21/l1gov-slice-007/impact-control/trace-required-proceed-with-trace.json",
                            "verification/4.21/l1gov-slice-007/impact-control/unclear-surface-fail-closed.json",

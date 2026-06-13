@@ -1,14 +1,9 @@
 {
-    "command":  "rg \u0027lower-layer submission|lower_layer_submission|submit lower layer|submit_lower_layer_request|owner path call|owner_path_call|call owner path|direct 4\\.19|direct 3\\.5|direct_419_controller_call|direct_35_controller_call\u0027 nexus/governance -g \u0027*.py\u0027 --json",
+    "command":  "rg \u0027lower-layer submission|lower_layer_submission|submit lower layer|submit_lower_layer_request|send lower layer request|send request to lower layer owner|owner path call|owner_path_call|call owner path|direct 4\\.19|direct 3\\.5|direct_419_controller_call|direct_35_controller_call\u0027 nexus/governance -g \u0027*.py\u0027 --json",
     "unauthorized_lower_layer_submission_paths":  [
 
                                                   ],
     "allowed_guard_literals":  [
-                                   {
-                                       "file":  "nexus/governance\\execution.py",
-                                       "line":  317,
-                                       "text":  "            blocked.append(\"Layer1WorkPacket cannot include direct 4.19 controller refs\")"
-                                   },
                                    {
                                        "file":  "nexus/governance\\no_go.py",
                                        "line":  56,
@@ -106,21 +101,61 @@
                                    },
                                    {
                                        "file":  "nexus/governance\\impact_control.py",
-                                       "line":  187,
+                                       "line":  162,
+                                       "text":  "    \"send lower layer request\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  163,
+                                       "text":  "    \"send request to lower layer owner\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  191,
                                        "text":  "    \"owner_path_call\","
                                    },
                                    {
                                        "file":  "nexus/governance\\impact_control.py",
-                                       "line":  196,
+                                       "line":  200,
                                        "text":  "    \"lower_layer_submission\","
                                    },
                                    {
                                        "file":  "nexus/governance\\impact_control.py",
-                                       "line":  197,
+                                       "line":  201,
                                        "text":  "    \"submit_lower_layer_request\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\execution.py",
+                                       "line":  317,
+                                       "text":  "            blocked.append(\"Layer1WorkPacket cannot include direct 4.19 controller refs\")"
                                    }
                                ],
     "allowed_negative_test_fixtures":  [
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_dispatch_no_go.py",
+                                               "line":  15,
+                                               "text":  "        (\"dispatch_direct_419_controller_call\", \"direct-419-controller-block\"),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_monitor_hitl_no_go.py",
+                                               "line":  24,
+                                               "text":  "        \"monitor_direct_419_controller_call\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_execution_workpacket_contract.py",
+                                               "line":  48,
+                                               "text":  "    assert \"Layer1WorkPacket cannot include direct 4.19 controller refs\" in result.blocked_reasons"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\fixtures\\dispatch_contract.py",
+                                               "line":  163,
+                                               "text":  "        \"no_go_refs\": (\"no runtime invocation\", \"no direct 4.19 controller call\"),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_execution_service_contract.py",
+                                               "line":  232,
+                                               "text":  "        intent={\"action\": \"execution_direct_419_controller_call\"},"
+                                           },
                                            {
                                                "file":  "nexus/governance\\tests\\fixtures\\execution.py",
                                                "line":  108,
@@ -130,51 +165,6 @@
                                                "file":  "nexus/governance\\tests\\fixtures\\execution.py",
                                                "line":  183,
                                                "text":  "        \"no_go\": (\"no direct 4.19 controller call\",),"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\fixtures\\dispatch_contract.py",
-                                               "line":  163,
-                                               "text":  "        \"no_go_refs\": (\"no runtime invocation\", \"no direct 4.19 controller call\"),"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_service_contract.py",
-                                               "line":  56,
-                                               "text":  "        intent={\"action\": \"impact_direct_419_controller_call\"},"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
-                                               "line":  33,
-                                               "text":  "        \"submit lower layer request now\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
-                                               "line":  35,
-                                               "text":  "        \"owner_path_call\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
-                                               "line":  40,
-                                               "text":  "        \"direct 4.19 controller call\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
-                                               "line":  41,
-                                               "text":  "        \"direct_35_controller_call\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
-                                               "line":  42,
-                                               "text":  "        \"please call owner path now\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
-                                               "line":  49,
-                                               "text":  "        \"submit_lower_layer_request\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_execution_workpacket_contract.py",
-                                               "line":  48,
-                                               "text":  "    assert \"Layer1WorkPacket cannot include direct 4.19 controller refs\" in result.blocked_reasons"
                                            },
                                            {
                                                "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
@@ -197,9 +187,29 @@
                                                "text":  "        (\"impact_lower_layer_submission\", ErrorCode.NO_GO_BOUNDARY),"
                                            },
                                            {
-                                               "file":  "nexus/governance\\tests\\test_execution_service_contract.py",
-                                               "line":  232,
-                                               "text":  "        intent={\"action\": \"execution_direct_419_controller_call\"},"
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  33,
+                                               "text":  "        \"submit lower layer request now\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  34,
+                                               "text":  "        \"send request to lower layer owner\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  35,
+                                               "text":  "        \"send lower layer request\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  37,
+                                               "text":  "        \"owner_path_call\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_service_contract.py",
+                                               "line":  56,
+                                               "text":  "        intent={\"action\": \"impact_direct_419_controller_call\"},"
                                            },
                                            {
                                                "file":  "nexus/governance\\tests\\test_execution_no_go.py",
@@ -207,14 +217,34 @@
                                                "text":  "        (\"execution_direct_419_controller_call\", \"direct-419-controller-block\"),"
                                            },
                                            {
-                                               "file":  "nexus/governance\\tests\\test_monitor_hitl_no_go.py",
-                                               "line":  24,
-                                               "text":  "        \"monitor_direct_419_controller_call\","
+                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
+                                               "line":  40,
+                                               "text":  "        \"direct 4.19 controller call\","
                                            },
                                            {
-                                               "file":  "nexus/governance\\tests\\test_dispatch_no_go.py",
-                                               "line":  15,
-                                               "text":  "        (\"dispatch_direct_419_controller_call\", \"direct-419-controller-block\"),"
+                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
+                                               "line":  41,
+                                               "text":  "        \"direct_35_controller_call\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
+                                               "line":  42,
+                                               "text":  "        \"please call owner path now\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
+                                               "line":  49,
+                                               "text":  "        \"send request to lower layer owner\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
+                                               "line":  50,
+                                               "text":  "        \"send lower layer request\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
+                                               "line":  51,
+                                               "text":  "        \"submit_lower_layer_request\","
                                            }
                                        ],
     "unclassified_matches":  [

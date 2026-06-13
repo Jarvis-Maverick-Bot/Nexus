@@ -1,5 +1,5 @@
 {
-    "command":  "rg \u0027controller_call|controller execution|owner path call|owner_path_call|call owner path|adapter call|route activation|runtime invocation|private-agent invocation|actual dispatch|workpacket execution|lower-layer submission|submit lower layer|production_ready|production readiness|final_pass|delivery_complete|delivery completed|project accepted|direct_419_controller_call|direct_35_controller_call|activate route|execute workpacket|dispatch_execution|runtime_invocation|private_agent_invocation|lower_layer_submission|submit_lower_layer_request|config_mutation|credential_mutation\u0027 nexus/governance -g \u0027*.py\u0027 --json",
+    "command":  "rg \u0027controller_call|controller execution|owner path call|owner_path_call|call owner path|adapter call|route activation|runtime invocation|private-agent invocation|actual dispatch|workpacket execution|lower-layer submission|submit lower layer|send lower layer request|send request to lower layer owner|production_ready|production readiness|final_pass|delivery_complete|delivery completed|completes delivery|project accepted|accepted project|lower layer owner accepted project|owner path result completes delivery|direct_419_controller_call|direct_35_controller_call|activate route|execute workpacket|dispatch_execution|runtime_invocation|private_agent_invocation|lower_layer_submission|submit_lower_layer_request|config_mutation|credential_mutation\u0027 nexus/governance -g \u0027*.py\u0027 --json",
     "active_call_surfaces":  [
 
                              ],
@@ -16,6 +16,11 @@
                                    {
                                        "file":  "nexus/governance\\workspace_init.py",
                                        "line":  44,
+                                       "text":  "    \"final_pass\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\standardization.py",
+                                       "line":  32,
                                        "text":  "    \"final_pass\","
                                    },
                                    {
@@ -87,6 +92,116 @@
                                        "file":  "nexus/governance\\no_go.py",
                                        "line":  96,
                                        "text":  "                \"impact_final_pass\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  61,
+                                       "text":  "    \"final_pass\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  63,
+                                       "text":  "    \"delivery_complete\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  65,
+                                       "text":  "    \"production_ready\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  67,
+                                       "text":  "    \"production readiness\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  76,
+                                       "text":  "    \"actual dispatch\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  79,
+                                       "text":  "    \"controller_call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  80,
+                                       "text":  "    \"controller execution\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  87,
+                                       "text":  "    \"private-agent invocation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  89,
+                                       "text":  "    \"runtime invocation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  90,
+                                       "text":  "    \"runtime_invocation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  91,
+                                       "text":  "    \"adapter call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  95,
+                                       "text":  "    \"route activation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  97,
+                                       "text":  "    \"activate route\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  98,
+                                       "text":  "    \"workpacket execution\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  100,
+                                       "text":  "    \"execute workpacket\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  303,
+                                       "text":  "        return _no_go(\"human decision cannot claim completion, production readiness, dispatch, or execution\")"
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  377,
+                                       "text":  "        return _no_go(\"deliverable evaluation cannot claim completion, production readiness, dispatch, or execution\")"
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  459,
+                                       "text":  "        return _no_go(\"review disposition cannot claim completion, production readiness, dispatch, or execution\")"
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  875,
+                                       "text":  "            \"final_pass\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  876,
+                                       "text":  "            \"production_ready\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\monitor_hitl.py",
+                                       "line":  877,
+                                       "text":  "            \"delivery_complete\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\app_contract.py",
+                                       "line":  35,
+                                       "text":  "        disabled_commands=(\"approve\", \"complete\", \"archive\", \"baseline\", \"no_go\", \"final_pass\"),"
                                    },
                                    {
                                        "file":  "nexus/governance\\impact_control.py",
@@ -205,87 +320,107 @@
                                    },
                                    {
                                        "file":  "nexus/governance\\impact_control.py",
+                                       "line":  162,
+                                       "text":  "    \"send lower layer request\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
                                        "line":  163,
-                                       "text":  "    \"config_mutation\","
+                                       "text":  "    \"send request to lower layer owner\","
                                    },
                                    {
                                        "file":  "nexus/governance\\impact_control.py",
                                        "line":  165,
-                                       "text":  "    \"credential_mutation\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\impact_control.py",
-                                       "line":  169,
-                                       "text":  "    \"final_pass\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\impact_control.py",
-                                       "line":  171,
-                                       "text":  "    \"delivery_complete\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\impact_control.py",
-                                       "line":  173,
-                                       "text":  "    \"delivery completed\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\impact_control.py",
-                                       "line":  174,
-                                       "text":  "    \"production_ready\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\impact_control.py",
-                                       "line":  176,
-                                       "text":  "    \"production readiness\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\impact_control.py",
-                                       "line":  178,
-                                       "text":  "    \"project accepted\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\impact_control.py",
-                                       "line":  184,
-                                       "text":  "    \"controller_call\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\impact_control.py",
-                                       "line":  187,
-                                       "text":  "    \"owner_path_call\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\impact_control.py",
-                                       "line":  191,
-                                       "text":  "    \"runtime_invocation\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\impact_control.py",
-                                       "line":  192,
-                                       "text":  "    \"private_agent_invocation\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\impact_control.py",
-                                       "line":  194,
-                                       "text":  "    \"dispatch_execution\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\impact_control.py",
-                                       "line":  196,
-                                       "text":  "    \"lower_layer_submission\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\impact_control.py",
-                                       "line":  197,
-                                       "text":  "    \"submit_lower_layer_request\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\impact_control.py",
-                                       "line":  198,
                                        "text":  "    \"config_mutation\","
                                    },
                                    {
                                        "file":  "nexus/governance\\impact_control.py",
-                                       "line":  199,
+                                       "line":  167,
+                                       "text":  "    \"credential_mutation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  171,
+                                       "text":  "    \"final_pass\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  173,
+                                       "text":  "    \"delivery_complete\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  175,
+                                       "text":  "    \"delivery completed\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  176,
+                                       "text":  "    \"production_ready\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  178,
+                                       "text":  "    \"production readiness\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  180,
+                                       "text":  "    \"project accepted\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  181,
+                                       "text":  "    \"lower layer owner accepted project\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  182,
+                                       "text":  "    \"owner path result completes delivery\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  188,
+                                       "text":  "    \"controller_call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  191,
+                                       "text":  "    \"owner_path_call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  195,
+                                       "text":  "    \"runtime_invocation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  196,
+                                       "text":  "    \"private_agent_invocation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  198,
+                                       "text":  "    \"dispatch_execution\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  200,
+                                       "text":  "    \"lower_layer_submission\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  201,
+                                       "text":  "    \"submit_lower_layer_request\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  202,
+                                       "text":  "    \"config_mutation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  203,
                                        "text":  "    \"credential_mutation\","
                                    },
                                    {
@@ -297,121 +432,6 @@
                                        "file":  "nexus/governance\\execution.py",
                                        "line":  60,
                                        "text":  "    \"controller_call\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  61,
-                                       "text":  "    \"final_pass\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  63,
-                                       "text":  "    \"delivery_complete\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  65,
-                                       "text":  "    \"production_ready\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  67,
-                                       "text":  "    \"production readiness\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  76,
-                                       "text":  "    \"actual dispatch\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  79,
-                                       "text":  "    \"controller_call\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  80,
-                                       "text":  "    \"controller execution\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  87,
-                                       "text":  "    \"private-agent invocation\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  89,
-                                       "text":  "    \"runtime invocation\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  90,
-                                       "text":  "    \"runtime_invocation\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  91,
-                                       "text":  "    \"adapter call\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  95,
-                                       "text":  "    \"route activation\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  97,
-                                       "text":  "    \"activate route\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  98,
-                                       "text":  "    \"workpacket execution\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  100,
-                                       "text":  "    \"execute workpacket\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  303,
-                                       "text":  "        return _no_go(\"human decision cannot claim completion, production readiness, dispatch, or execution\")"
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  377,
-                                       "text":  "        return _no_go(\"deliverable evaluation cannot claim completion, production readiness, dispatch, or execution\")"
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  459,
-                                       "text":  "        return _no_go(\"review disposition cannot claim completion, production readiness, dispatch, or execution\")"
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  875,
-                                       "text":  "            \"final_pass\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  876,
-                                       "text":  "            \"production_ready\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\monitor_hitl.py",
-                                       "line":  877,
-                                       "text":  "            \"delivery_complete\","
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\app_contract.py",
-                                       "line":  35,
-                                       "text":  "        disabled_commands=(\"approve\", \"complete\", \"archive\", \"baseline\", \"no_go\", \"final_pass\"),"
-                                   },
-                                   {
-                                       "file":  "nexus/governance\\standardization.py",
-                                       "line":  32,
-                                       "text":  "    \"final_pass\","
                                    },
                                    {
                                        "file":  "nexus/governance\\dispatch_contract.py",
@@ -496,6 +516,11 @@
                                ],
     "allowed_negative_test_fixtures":  [
                                            {
+                                               "file":  "nexus/governance\\tests\\test_workspace_init_manifest.py",
+                                               "line":  64,
+                                               "text":  "    (\"approved\", \"accepted\", \"plan_approved\", \"baseline_approved\", \"complete\", \"final_pass\", \"unknown\"),"
+                                           },
+                                           {
                                                "file":  "nexus/governance\\tests\\test_execution_service_contract.py",
                                                "line":  145,
                                                "text":  "def test_create_workpacket_rejects_alternate_controller_call_shape() -\u003e None:"
@@ -511,129 +536,19 @@
                                                "text":  "        intent={\"action\": \"execution_direct_419_controller_call\"},"
                                            },
                                            {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
-                                               "line":  14,
-                                               "text":  "        (\"impact_direct_419_controller_call\", ErrorCode.NO_GO_BOUNDARY),"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
-                                               "line":  15,
-                                               "text":  "        (\"impact_direct_35_controller_call\", ErrorCode.NO_GO_BOUNDARY),"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
-                                               "line":  16,
-                                               "text":  "        (\"impact_owner_path_call\", ErrorCode.NO_GO_BOUNDARY),"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
-                                               "line":  19,
-                                               "text":  "        (\"impact_dispatch_execution\", ErrorCode.NO_GO_BOUNDARY),"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
-                                               "line":  21,
-                                               "text":  "        (\"impact_lower_layer_submission\", ErrorCode.NO_GO_BOUNDARY),"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
-                                               "line":  25,
-                                               "text":  "        (\"impact_final_pass\", ErrorCode.NO_GO_BOUNDARY),"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_dispatch_records.py",
-                                               "line":  56,
-                                               "text":  "@pytest.mark.parametrize(\"status\", (\"dispatched\", \"accepted\", \"complete\", \"final_pass\"))"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_dispatch_records.py",
-                                               "line":  76,
-                                               "text":  "    candidate = valid_handoff_candidate(controller_call={\"controller\": \"4.19\", \"action\": \"dispatch\"})"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_dispatch_records.py",
-                                               "line":  102,
-                                               "text":  "        \"private-agent invocation\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_dispatch_records.py",
-                                               "line":  103,
-                                               "text":  "        \"controller execution\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_dispatch_records.py",
-                                               "line":  106,
-                                               "text":  "        \"adapter call\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_dispatch_records.py",
-                                               "line":  107,
-                                               "text":  "        \"route activation\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_execution_no_go.py",
-                                               "line":  13,
-                                               "text":  "        (\"execution_direct_419_controller_call\", \"direct-419-controller-block\"),"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\fixtures\\dispatch_contract.py",
-                                               "line":  56,
-                                               "text":  "        \"readiness_constraints\": (\"no runtime invocation\",),"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\fixtures\\dispatch_contract.py",
-                                               "line":  163,
-                                               "text":  "        \"no_go_refs\": (\"no runtime invocation\", \"no direct 4.19 controller call\"),"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\fixtures\\dispatch_contract.py",
-                                               "line":  240,
-                                               "text":  "        \"no_go_refs\": (\"no runtime invocation\",),"
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
-                                               "line":  33,
-                                               "text":  "        \"submit lower layer request now\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
-                                               "line":  34,
-                                               "text":  "        \"controller_call\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
-                                               "line":  35,
-                                               "text":  "        \"owner_path_call\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
-                                               "line":  38,
-                                               "text":  "        \"runtime invocation\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
-                                               "line":  39,
-                                               "text":  "        \"dispatch_execution\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
-                                               "line":  74,
-                                               "text":  "        \"project accepted\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
-                                               "line":  75,
-                                               "text":  "        \"delivery completed\","
-                                           },
-                                           {
-                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
-                                               "line":  76,
-                                               "text":  "        \"production readiness\","
-                                           },
-                                           {
                                                "file":  "nexus/governance\\tests\\test_dispatch_no_go.py",
                                                "line":  15,
                                                "text":  "        (\"dispatch_direct_419_controller_call\", \"direct-419-controller-block\"),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_no_go_policy.py",
+                                               "line":  17,
+                                               "text":  "def test_blocks_deploy_config_credential_mutation_intent() -\u003e None:"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_no_go_policy.py",
+                                               "line":  20,
+                                               "text":  "    for action in (\"deploy\", \"config_mutation\", \"credential_mutation\"):"
                                            },
                                            {
                                                "file":  "nexus/governance\\tests\\test_dispatch_service_contract.py",
@@ -681,6 +596,126 @@
                                                "text":  "        intent={\"action\": \"impact_direct_419_controller_call\"},"
                                            },
                                            {
+                                               "file":  "nexus/governance\\tests\\test_monitor_hitl_records.py",
+                                               "line":  39,
+                                               "text":  "@pytest.mark.parametrize(\"status\", (\"approved\", \"accepted\", \"complete\", \"final_pass\", \"production_ready\"))"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_monitor_hitl_records.py",
+                                               "line":  86,
+                                               "text":  "    result = validate_component_return_action(valid_return_action(action_type=\"controller execution\"))"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_monitor_hitl_records.py",
+                                               "line":  96,
+                                               "text":  "        (\"reason\", \"please perform controller execution now\"),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_monitor_hitl_records.py",
+                                               "line":  97,
+                                               "text":  "        (\"required_correction\", \"perform actual dispatch\"),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_monitor_hitl_records.py",
+                                               "line":  98,
+                                               "text":  "        (\"resume_condition\", \"route activation is complete\"),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_execution_no_go.py",
+                                               "line":  13,
+                                               "text":  "        (\"execution_direct_419_controller_call\", \"direct-419-controller-block\"),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  33,
+                                               "text":  "        \"submit lower layer request now\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  34,
+                                               "text":  "        \"send request to lower layer owner\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  35,
+                                               "text":  "        \"send lower layer request\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  36,
+                                               "text":  "        \"controller_call\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  37,
+                                               "text":  "        \"owner_path_call\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  40,
+                                               "text":  "        \"runtime invocation\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  41,
+                                               "text":  "        \"dispatch_execution\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  76,
+                                               "text":  "        \"project accepted\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  77,
+                                               "text":  "        \"delivery completed\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  78,
+                                               "text":  "        \"production readiness\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  79,
+                                               "text":  "        \"lower layer owner accepted project\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  80,
+                                               "text":  "        \"owner path result completes delivery\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
+                                               "line":  14,
+                                               "text":  "        (\"impact_direct_419_controller_call\", ErrorCode.NO_GO_BOUNDARY),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
+                                               "line":  15,
+                                               "text":  "        (\"impact_direct_35_controller_call\", ErrorCode.NO_GO_BOUNDARY),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
+                                               "line":  16,
+                                               "text":  "        (\"impact_owner_path_call\", ErrorCode.NO_GO_BOUNDARY),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
+                                               "line":  19,
+                                               "text":  "        (\"impact_dispatch_execution\", ErrorCode.NO_GO_BOUNDARY),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
+                                               "line":  21,
+                                               "text":  "        (\"impact_lower_layer_submission\", ErrorCode.NO_GO_BOUNDARY),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
+                                               "line":  25,
+                                               "text":  "        (\"impact_final_pass\", ErrorCode.NO_GO_BOUNDARY),"
+                                           },
+                                           {
                                                "file":  "nexus/governance\\tests\\test_impact_control_records.py",
                                                "line":  41,
                                                "text":  "        \"direct_35_controller_call\","
@@ -723,52 +758,62 @@
                                            {
                                                "file":  "nexus/governance\\tests\\test_impact_control_records.py",
                                                "line":  49,
-                                               "text":  "        \"submit_lower_layer_request\","
+                                               "text":  "        \"send request to lower layer owner\","
                                            },
                                            {
                                                "file":  "nexus/governance\\tests\\test_impact_control_records.py",
                                                "line":  50,
-                                               "text":  "        \"runtime invocation\","
+                                               "text":  "        \"send lower layer request\","
                                            },
                                            {
                                                "file":  "nexus/governance\\tests\\test_impact_control_records.py",
                                                "line":  51,
-                                               "text":  "        \"private_agent_invocation\","
+                                               "text":  "        \"submit_lower_layer_request\","
                                            },
                                            {
                                                "file":  "nexus/governance\\tests\\test_impact_control_records.py",
                                                "line":  52,
-                                               "text":  "        \"config_mutation\","
+                                               "text":  "        \"runtime invocation\","
                                            },
                                            {
                                                "file":  "nexus/governance\\tests\\test_impact_control_records.py",
                                                "line":  53,
+                                               "text":  "        \"private_agent_invocation\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
+                                               "line":  54,
+                                               "text":  "        \"config_mutation\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
+                                               "line":  55,
                                                "text":  "        \"credential_mutation\","
                                            },
                                            {
-                                               "file":  "nexus/governance\\tests\\test_monitor_hitl_records.py",
-                                               "line":  39,
-                                               "text":  "@pytest.mark.parametrize(\"status\", (\"approved\", \"accepted\", \"complete\", \"final_pass\", \"production_ready\"))"
+                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
+                                               "line":  118,
+                                               "text":  "        \"lower layer owner accepted project\","
                                            },
                                            {
-                                               "file":  "nexus/governance\\tests\\test_monitor_hitl_records.py",
-                                               "line":  86,
-                                               "text":  "    result = validate_component_return_action(valid_return_action(action_type=\"controller execution\"))"
+                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
+                                               "line":  119,
+                                               "text":  "        \"owner path result completes delivery\","
                                            },
                                            {
-                                               "file":  "nexus/governance\\tests\\test_monitor_hitl_records.py",
-                                               "line":  96,
-                                               "text":  "        (\"reason\", \"please perform controller execution now\"),"
+                                               "file":  "nexus/governance\\tests\\fixtures\\dispatch_contract.py",
+                                               "line":  56,
+                                               "text":  "        \"readiness_constraints\": (\"no runtime invocation\",),"
                                            },
                                            {
-                                               "file":  "nexus/governance\\tests\\test_monitor_hitl_records.py",
-                                               "line":  97,
-                                               "text":  "        (\"required_correction\", \"perform actual dispatch\"),"
+                                               "file":  "nexus/governance\\tests\\fixtures\\dispatch_contract.py",
+                                               "line":  163,
+                                               "text":  "        \"no_go_refs\": (\"no runtime invocation\", \"no direct 4.19 controller call\"),"
                                            },
                                            {
-                                               "file":  "nexus/governance\\tests\\test_monitor_hitl_records.py",
-                                               "line":  98,
-                                               "text":  "        (\"resume_condition\", \"route activation is complete\"),"
+                                               "file":  "nexus/governance\\tests\\fixtures\\dispatch_contract.py",
+                                               "line":  240,
+                                               "text":  "        \"no_go_refs\": (\"no runtime invocation\",),"
                                            },
                                            {
                                                "file":  "nexus/governance\\tests\\test_monitor_hitl_no_go.py",
@@ -866,19 +911,34 @@
                                                "text":  "        (\"recommended_next_action\", \"please perform controller execution now\"),"
                                            },
                                            {
-                                               "file":  "nexus/governance\\tests\\test_no_go_policy.py",
-                                               "line":  17,
-                                               "text":  "def test_blocks_deploy_config_credential_mutation_intent() -\u003e None:"
+                                               "file":  "nexus/governance\\tests\\test_dispatch_records.py",
+                                               "line":  56,
+                                               "text":  "@pytest.mark.parametrize(\"status\", (\"dispatched\", \"accepted\", \"complete\", \"final_pass\"))"
                                            },
                                            {
-                                               "file":  "nexus/governance\\tests\\test_no_go_policy.py",
-                                               "line":  20,
-                                               "text":  "    for action in (\"deploy\", \"config_mutation\", \"credential_mutation\"):"
+                                               "file":  "nexus/governance\\tests\\test_dispatch_records.py",
+                                               "line":  76,
+                                               "text":  "    candidate = valid_handoff_candidate(controller_call={\"controller\": \"4.19\", \"action\": \"dispatch\"})"
                                            },
                                            {
-                                               "file":  "nexus/governance\\tests\\test_workspace_init_manifest.py",
-                                               "line":  64,
-                                               "text":  "    (\"approved\", \"accepted\", \"plan_approved\", \"baseline_approved\", \"complete\", \"final_pass\", \"unknown\"),"
+                                               "file":  "nexus/governance\\tests\\test_dispatch_records.py",
+                                               "line":  102,
+                                               "text":  "        \"private-agent invocation\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_dispatch_records.py",
+                                               "line":  103,
+                                               "text":  "        \"controller execution\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_dispatch_records.py",
+                                               "line":  106,
+                                               "text":  "        \"adapter call\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_dispatch_records.py",
+                                               "line":  107,
+                                               "text":  "        \"route activation\","
                                            }
                                        ],
     "unclassified_matches":  [
