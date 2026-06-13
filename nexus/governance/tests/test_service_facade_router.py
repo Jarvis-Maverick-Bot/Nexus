@@ -5,11 +5,11 @@ from dataclasses import replace
 from nexus.governance.errors import ErrorCode
 from nexus.governance.kernel import GovernanceKernel
 from nexus.governance.no_go import NoGoBoundaryPolicy
-from nexus.governance.service_facade import GovernanceServiceFacade, ServiceOutcomeStatus
+from nexus.governance.service_facade import CommandDraft, GovernanceServiceFacade, ServiceOutcomeStatus
 from nexus.governance.tests.test_source_authority import valid_manifest
 
 from ._evidence import write_evidence
-from .fixtures.service_facade import service_command
+from .fixtures.service_facade import SERVICE_SOURCE_REFS, service_command
 
 
 def service(source_wbs_version: str = "V0.6", kernel: GovernanceKernel | None = None) -> GovernanceServiceFacade:
@@ -52,6 +52,28 @@ def test_unknown_service_command_type_rejects_without_kernel_append() -> None:
     assert response.error_code == ErrorCode.INVALID_TRANSITION
     assert len(kernel.records) == 0
     write_evidence("service-facade/unknown-command-type-reject.json", response.to_evidence(), slice_id="l1gov-slice-009")
+
+
+def test_submit_command_draft_route_blocks_read_only_draft_without_kernel_append() -> None:
+    kernel = GovernanceKernel()
+    draft = CommandDraft(
+        draft_id="draft-readonly-001",
+        command_type="SubmitCommandDraft",
+        target_ref="layer1-governance",
+        payload={"requested_action": "prepare_command_draft"},
+        read_only_blocked=True,
+        source_refs=SERVICE_SOURCE_REFS,
+        draft_status="draft",
+        created_by="agent:thunder",
+    )
+    command = service_command(payload={"command_draft": draft.__dict__})
+
+    response = service(kernel=kernel).handle(command)
+
+    assert response.status == ServiceOutcomeStatus.BLOCKED
+    assert response.error_code == ErrorCode.NO_GO_BOUNDARY
+    assert len(kernel.records) == 0
+    write_evidence("service-facade/submit-read-only-draft-route-block.json", response.to_evidence(), slice_id="l1gov-slice-009")
 
 
 def test_read_projection_refresh_returns_projection_outcome_without_kernel_append() -> None:

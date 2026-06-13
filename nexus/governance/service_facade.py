@@ -248,6 +248,10 @@ class GovernanceServiceFacade:
             )
 
         if command.command_type == "SubmitCommandDraft":
+            if "command_draft" in command.payload:
+                draft_result = validate_command_draft(_coerce_command_draft(command.payload.get("command_draft")))
+                if not draft_result.accepted:
+                    return _validation_outcome(command_id, draft_result)
             return ServiceCommandOutcome(
                 command_id=command_id,
                 status=ServiceOutcomeStatus.ACCEPTED,
@@ -483,6 +487,23 @@ def _coerce_baseline(value: Any) -> BaselineEntryCommand:
     if isinstance(value, dict):
         return BaselineEntryCommand(**value)
     return BaselineEntryCommand("", "", "", (), "", "", -1, "", ())
+
+
+def _coerce_command_draft(value: Any) -> CommandDraft:
+    if isinstance(value, CommandDraft):
+        return value
+    if isinstance(value, dict):
+        return CommandDraft(
+            draft_id=str(value.get("draft_id", "")),
+            command_type=str(value.get("command_type", "")),
+            target_ref=str(value.get("target_ref", "")),
+            payload=dict(value.get("payload", {})) if isinstance(value.get("payload"), dict) else {},
+            read_only_blocked=bool(value.get("read_only_blocked", False)),
+            source_refs=tuple(value.get("source_refs") or ()),
+            draft_status=str(value.get("draft_status", "")),
+            created_by=str(value.get("created_by", "")),
+        )
+    return CommandDraft("", "", "", {}, False, (), "", "")
 
 
 def _authority_payload(command: CommandEnvelope) -> dict[str, Any]:
