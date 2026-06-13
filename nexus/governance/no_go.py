@@ -94,6 +94,22 @@ class NoGoBoundaryPolicy:
                 "impact_delivery_completion": ErrorCode.NO_GO_BOUNDARY,
                 "impact_production_readiness": ErrorCode.NO_GO_BOUNDARY,
                 "impact_final_pass": ErrorCode.NO_GO_BOUNDARY,
+                "delivery_raw_feedback_authority_mutation": ErrorCode.RAW_FEEDBACK_NO_AUTHORITY_MUTATION,
+                "delivery_direct_backlog_mutation": ErrorCode.RAW_FEEDBACK_NO_AUTHORITY_MUTATION,
+                "delivery_direct_scope_mutation": ErrorCode.RAW_FEEDBACK_NO_AUTHORITY_MUTATION,
+                "delivery_direct_success_criteria_mutation": ErrorCode.RAW_FEEDBACK_NO_AUTHORITY_MUTATION,
+                "delivery_direct_requirement_mutation": ErrorCode.RAW_FEEDBACK_NO_AUTHORITY_MUTATION,
+                "delivery_runtime_live_invocation": ErrorCode.NO_GO_BOUNDARY,
+                "delivery_dispatch_execution": ErrorCode.NO_GO_BOUNDARY,
+                "delivery_direct_controller_call": ErrorCode.NO_GO_BOUNDARY,
+                "delivery_owner_path_call": ErrorCode.NO_GO_BOUNDARY,
+                "delivery_adapter_transport_route_activation": ErrorCode.NO_GO_BOUNDARY,
+                "delivery_workpacket_execution": ErrorCode.NO_GO_BOUNDARY,
+                "delivery_completion_decision": ErrorCode.NO_GO_BOUNDARY,
+                "delivery_continuity_activation": ErrorCode.NO_GO_BOUNDARY,
+                "delivery_production_readiness": ErrorCode.NO_GO_BOUNDARY,
+                "delivery_deploy": ErrorCode.NO_GO_BOUNDARY,
+                "delivery_final_pass": ErrorCode.NO_GO_BOUNDARY,
             }
         )
 

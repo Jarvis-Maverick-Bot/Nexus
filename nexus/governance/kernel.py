@@ -31,6 +31,15 @@ ALLOWED_TRANSITIONS: dict[tuple[str, str], str] = {
     ("impact_assessment_recorded", "CreateMonitorTaskForImpact"): "impact_monitor_review_requested",
     ("impact_monitor_review_requested", "CreateMonitorTaskForImpact"): "impact_monitor_review_requested",
     ("impact_monitor_review_requested", "SubmitHumanDecision"): "monitor_decision_recorded",
+    ("monitor_decision_recorded", "RecordDelivery"): "delivery_recorded",
+    ("delivery_recorded", "RecordDelivery"): "delivery_recorded",
+    ("delivery_recorded", "RecordFeedback"): "feedback_recorded",
+    ("feedback_recorded", "RecordFeedback"): "feedback_recorded",
+    ("feedback_recorded", "RequestFeedbackTriageDecision"): "feedback_triage_requested",
+    ("feedback_triage_requested", "RequestFeedbackTriageDecision"): "feedback_triage_requested",
+    ("feedback_triage_requested", "RecordFeedbackTriageDecision"): "feedback_triage_recorded",
+    ("feedback_triage_recorded", "CreateCompletionContinuityPacket"): "completion_continuity_review_requested",
+    ("completion_continuity_review_requested", "CreateCompletionContinuityPacket"): "completion_continuity_review_requested",
 }
 
 
