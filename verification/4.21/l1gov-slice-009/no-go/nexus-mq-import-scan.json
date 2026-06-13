@@ -1,8 +1,10 @@
 {
     "command":  "rg \"from nexus\\.mq|import nexus\\.mq\" nexus/governance",
     "exit_code":  1,
-    "no_matches":  true,
+    "started_utc":  "2026-06-13T13:56:57.1728674Z",
+    "finished_utc":  "2026-06-13T13:56:57.1915198Z",
     "output":  [
 
-               ]
+               ],
+    "no_matches":  true
 }

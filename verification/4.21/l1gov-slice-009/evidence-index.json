@@ -1,9 +1,9 @@
 {
     "slice":  "L1GOV-SLICE-009",
     "status":  "PR_READY_FOR_NOVA_REVIEW",
-    "generated_utc":  "2026-06-13T13:00:31.6725991Z",
+    "generated_utc":  "2026-06-13T13:56:57.2488292Z",
     "nexus_branch":  "codex/4.21-slice009-governance-service",
-    "nexus_head":  "60211b93eb1ff7baee2353f12a2b7984e0439d3b",
+    "nexus_head":  "7f0182a6816a8b8c78d10839d28b9e986d0b13e9",
     "nexus_base":  "030918301bfb3912281f38ac3d9088a07612a664",
     "authority_commits_or_refs":  [
                                       "a8aae37032502800778f02c7defc0dce5d1231fd",
@@ -47,6 +47,7 @@
                           "verification/4.21/l1gov-slice-009/service-facade/no-go-before-kernel.json",
                           "verification/4.21/l1gov-slice-009/service-facade/read-only-mutation-block.json",
                           "verification/4.21/l1gov-slice-009/service-facade/source-guard-before-router.json",
+                          "verification/4.21/l1gov-slice-009/service-facade/submit-read-only-draft-route-block.json",
                           "verification/4.21/l1gov-slice-009/service-facade/unknown-command-type-reject.json",
                           "verification/4.21/l1gov-slice-009/source/source-authority.json",
                           "verification/4.21/l1gov-slice-009/test-output/full-governance-pytest-output.json",
@@ -54,7 +55,9 @@
                       ],
     "verification_summary":  {
                                  "targeted_pytest_exit_code":  0,
+                                 "targeted_pytest_passed":  30,
                                  "full_governance_pytest_exit_code":  0,
+                                 "full_governance_pytest_passed":  546,
                                  "git_diff_check_exit_code":  0,
                                  "nexus_mq_import_scan_no_matches":  true,
                                  "app_service_projection_runtime_scan_passed":  true,
@@ -64,7 +67,8 @@
                                  "no_ui_framework_or_database_selection":  true,
                                  "no_runtime_dispatch_controller_or_adapter_surface":  true,
                                  "no_projection_or_cache_authority":  true,
-                                 "no_completion_production_or_final_pass_claim":  true
+                                 "no_completion_production_or_final_pass_claim":  true,
+                                 "service_route_read_only_draft_blocked":  true
                              },
     "evidence_files":  [
                            "verification\\4.21\\l1gov-slice-009\\baseline-mediation\\baseline-entry-valid.json",
@@ -90,6 +94,7 @@
                            "verification\\4.21\\l1gov-slice-009\\service-facade\\no-go-before-kernel.json",
                            "verification\\4.21\\l1gov-slice-009\\service-facade\\read-only-mutation-block.json",
                            "verification\\4.21\\l1gov-slice-009\\service-facade\\source-guard-before-router.json",
+                           "verification\\4.21\\l1gov-slice-009\\service-facade\\submit-read-only-draft-route-block.json",
                            "verification\\4.21\\l1gov-slice-009\\service-facade\\unknown-command-type-reject.json",
                            "verification\\4.21\\l1gov-slice-009\\source\\source-authority.json",
                            "verification\\4.21\\l1gov-slice-009\\test-output\\full-governance-pytest-output.json",

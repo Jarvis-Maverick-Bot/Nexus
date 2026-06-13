@@ -1,5 +1,5 @@
 {
-    "generated_utc":  "2026-06-13T13:00:31.4301467Z",
+    "generated_utc":  "2026-06-13T13:56:14.1735080Z",
     "name_only":  [
                       "nexus/governance/kernel.py",
                       "nexus/governance/no_go.py",
@@ -35,6 +35,7 @@
                       "verification/4.21/l1gov-slice-009/service-facade/no-go-before-kernel.json",
                       "verification/4.21/l1gov-slice-009/service-facade/read-only-mutation-block.json",
                       "verification/4.21/l1gov-slice-009/service-facade/source-guard-before-router.json",
+                      "verification/4.21/l1gov-slice-009/service-facade/submit-read-only-draft-route-block.json",
                       "verification/4.21/l1gov-slice-009/service-facade/unknown-command-type-reject.json",
                       "verification/4.21/l1gov-slice-009/source/source-authority.json",
                       "verification/4.21/l1gov-slice-009/test-output/full-governance-pytest-output.json",
@@ -45,23 +46,23 @@
                  " nexus/governance/no_go.py                          |  13 +",
                  " nexus/governance/projections.py                    |  82 +++",
                  " nexus/governance/schemas.py                        |   5 +",
-                 " nexus/governance/service_facade.py                 | 591 +++++++++++++++++++++",
+                 " nexus/governance/service_facade.py                 | 612 +++++++++++++++++++++",
                  " nexus/governance/tests/fixtures/service_facade.py  |  46 ++",
-                 " .../test_service_facade_baseline_mediation.py      | 119 +++++",
+                 " .../test_service_facade_baseline_mediation.py      | 119 ++++",
                  " .../tests/test_service_facade_command_draft.py     | 101 ++++",
                  " .../tests/test_service_facade_impact_hitl_no_go.py |  76 +++",
                  " .../test_service_facade_projection_rebuild.py      |  81 +++",
-                 " .../governance/tests/test_service_facade_router.py |  80 +++",
+                 " .../governance/tests/test_service_facade_router.py | 102 ++++",
                  " .../baseline-mediation/baseline-entry-valid.json   |   5 +",
                  " .../component-bypass-reject.json                   |   5 +",
                  " .../missing-human-decision-reject.json             |   5 +",
                  " .../baseline-mediation/unknown-subtype-reject.json |   5 +",
-                 " verification/4.21/l1gov-slice-009/diff-check.json  |   9 +",
-                 " .../4.21/l1gov-slice-009/diff-summary.json         |  33 ++",
-                 " .../4.21/l1gov-slice-009/evidence-index.json       |  72 +++",
-                 " verification/4.21/l1gov-slice-009/file-list.json   |  17 +",
-                 " ...service-projection-runtime-classified-scan.json | 336 ++++++++++++",
-                 " .../no-go/nexus-mq-import-scan.json                |   8 +",
+                 " verification/4.21/l1gov-slice-009/diff-check.json  |  13 +",
+                 " .../4.21/l1gov-slice-009/diff-summary.json         |  91 +++",
+                 " .../4.21/l1gov-slice-009/evidence-index.json       |  98 ++++",
+                 " verification/4.21/l1gov-slice-009/file-list.json   |  44 ++",
+                 " ...service-projection-runtime-classified-scan.json | 598 ++++++++++++++++++++",
+                 " .../no-go/nexus-mq-import-scan.json                |  17 +",
                  " .../projection/projection-current-read-only.json   |  17 +",
                  " .../projection/projection-not-authority.json       |   5 +",
                  " .../projection/rebuild-timeout-failed.json         |  15 +",
@@ -79,13 +80,6 @@
                  " .../l1gov-slice-009/source/source-authority.json   |  10 +",
                  " .../test-output/full-governance-pytest-output.json |  17 +",
                  " .../test-output/targeted-pytest-output.json        |  10 +",
-                 " 38 files changed, 1867 insertions(+)"
-             ],
-    "worktree_status_files":  [
-                                  "verification/4.21/l1gov-slice-009/diff-check.json",
-                                  "verification/4.21/l1gov-slice-009/projection/rebuild-timeout-failed.json",
-                                  "verification/4.21/l1gov-slice-009/projection/stale-projection-rebuild.json",
-                                  "verification/4.21/l1gov-slice-009/test-output/full-governance-pytest-output.json",
-                                  "verification/4.21/l1gov-slice-009/test-output/targeted-pytest-output.json"
-                              ]
+                 " 38 files changed, 2296 insertions(+)"
+             ]
 }
