@@ -1,0 +1,8 @@
+{
+    "command":  "rg -n \u0027from nexus\\.mq|import nexus\\.mq\u0027 nexus/governance",
+    "exit_code":  1,
+    "no_matches":  true,
+    "matches":  [
+
+                ]
+}

@@ -1,0 +1,8 @@
+{
+  "accepted": false,
+  "blocked_reasons": [],
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "invalid_items": [],
+  "message": "human review task cannot approve, complete, dispatch, or execute work",
+  "missing_fields": []
+}

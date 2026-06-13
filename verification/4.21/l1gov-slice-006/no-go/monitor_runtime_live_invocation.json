@@ -1,0 +1,6 @@
+{
+  "blocked": true,
+  "category": "monitor_runtime_live_invocation",
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "message": "blocked by Slice 001 no-go boundary: monitor_runtime_live_invocation"
+}

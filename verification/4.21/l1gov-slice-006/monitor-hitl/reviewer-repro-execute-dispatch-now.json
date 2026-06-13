@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "expected_acceptance": false,
+  "field_name": "notes",
+  "message": "Monitor/HITL command crossed Slice 006 boundary",
+  "review_commit": "6f48eea54fb320a33084537b38fed3b0e9e9e096",
+  "reviewer_repro_text": "please execute dispatch now"
+}

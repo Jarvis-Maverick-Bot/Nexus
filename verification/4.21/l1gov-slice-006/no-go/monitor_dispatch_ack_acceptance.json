@@ -1,0 +1,6 @@
+{
+  "blocked": true,
+  "category": "monitor_dispatch_ack_acceptance",
+  "error_code": "ERR_ACK_NOT_ACCEPTANCE",
+  "message": "blocked by Slice 001 no-go boundary: monitor_dispatch_ack_acceptance"
+}
