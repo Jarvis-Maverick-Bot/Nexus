@@ -1,0 +1,15 @@
+{
+  "disabled_commands": [
+    "approve",
+    "complete",
+    "archive",
+    "baseline",
+    "no_go",
+    "deploy",
+    "production_readiness",
+    "continuity_activation",
+    "final_pass",
+    "direct_mutation",
+    "canonical_write"
+  ]
+}

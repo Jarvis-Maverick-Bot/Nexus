@@ -1,0 +1,11 @@
+{
+  "projection_payload": {},
+  "projection_type": "mission_control",
+  "source_checkpoint": "kernel:9a3144b",
+  "source_refs": [
+    "WBS V0.6",
+    "L1GOV-SLICE-010",
+    "eef9c05"
+  ],
+  "workspace_id": "workspace-001"
+}

@@ -1,0 +1,3062 @@
+{
+  "allowed_classifications": [
+    "guard",
+    "negative_fixture",
+    "test_assertion",
+    "evidence_record"
+  ],
+  "matches": [
+    {
+      "classification": "guard",
+      "line": 65,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "electron"
+      ],
+      "text": "\"electron selected\","
+    },
+    {
+      "classification": "guard",
+      "line": 66,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "tauri"
+      ],
+      "text": "\"tauri selected\","
+    },
+    {
+      "classification": "guard",
+      "line": 67,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "\"framework selected\","
+    },
+    {
+      "classification": "guard",
+      "line": 68,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "browser route"
+      ],
+      "text": "\"browser route\","
+    },
+    {
+      "classification": "guard",
+      "line": 69,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "server_url"
+      ],
+      "text": "\"server url\","
+    },
+    {
+      "classification": "guard",
+      "line": 70,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "server_url"
+      ],
+      "text": "\"server_url\","
+    },
+    {
+      "classification": "guard",
+      "line": 72,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "database"
+      ],
+      "text": "\"database\","
+    },
+    {
+      "classification": "guard",
+      "line": 73,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "database"
+      ],
+      "text": "\"local database\","
+    },
+    {
+      "classification": "guard",
+      "line": 74,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "database"
+      ],
+      "text": "\"database selection\","
+    },
+    {
+      "classification": "guard",
+      "line": 75,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "api schema"
+      ],
+      "text": "\"api schema\","
+    },
+    {
+      "classification": "guard",
+      "line": 76,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "api schema"
+      ],
+      "text": "\"api schema selected\","
+    },
+    {
+      "classification": "guard",
+      "line": 77,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "api schema"
+      ],
+      "text": "\"api schema selection\","
+    },
+    {
+      "classification": "guard",
+      "line": 82,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "desktop app project"
+      ],
+      "text": "\"desktop app project\","
+    },
+    {
+      "classification": "guard",
+      "line": 83,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "web frontend"
+      ],
+      "text": "\"web frontend\","
+    },
+    {
+      "classification": "guard",
+      "line": 84,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "native shell"
+      ],
+      "text": "\"native shell\","
+    },
+    {
+      "classification": "guard",
+      "line": 85,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "view model authority"
+      ],
+      "text": "\"view model authority\","
+    },
+    {
+      "classification": "guard",
+      "line": 86,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "projection authority"
+      ],
+      "text": "\"projection authority\","
+    },
+    {
+      "classification": "guard",
+      "line": 88,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "cache authority"
+      ],
+      "text": "\"cache authority\","
+    },
+    {
+      "classification": "guard",
+      "line": 89,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "source of truth"
+      ],
+      "text": "\"source of truth\","
+    },
+    {
+      "classification": "guard",
+      "line": 90,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "direct canonical mutation"
+      ],
+      "text": "\"direct canonical mutation\","
+    },
+    {
+      "classification": "guard",
+      "line": 93,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "approve now"
+      ],
+      "text": "\"approve now\","
+    },
+    {
+      "classification": "guard",
+      "line": 95,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "complete project"
+      ],
+      "text": "\"complete project\","
+    },
+    {
+      "classification": "guard",
+      "line": 97,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "archive workspace"
+      ],
+      "text": "\"archive workspace\","
+    },
+    {
+      "classification": "guard",
+      "line": 98,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "mark baseline"
+      ],
+      "text": "\"mark baseline\","
+    },
+    {
+      "classification": "guard",
+      "line": 101,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"production readiness\","
+    },
+    {
+      "classification": "guard",
+      "line": 104,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"deploy\","
+    },
+    {
+      "classification": "guard",
+      "line": 105,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"deploy now\","
+    },
+    {
+      "classification": "guard",
+      "line": 106,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "continuity activation"
+      ],
+      "text": "\"continuity activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 108,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final pass\","
+    },
+    {
+      "classification": "guard",
+      "line": 109,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime invocation\","
+    },
+    {
+      "classification": "guard",
+      "line": 112,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"dispatch execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 114,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 115,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter call\","
+    },
+    {
+      "classification": "guard",
+      "line": 116,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "transport call"
+      ],
+      "text": "\"transport call\","
+    },
+    {
+      "classification": "guard",
+      "line": 117,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 132,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "framework: str | None = None"
+    },
+    {
+      "classification": "guard",
+      "line": 137,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "\"framework\": self.framework,"
+    },
+    {
+      "classification": "guard",
+      "line": 193,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "framework: str | None = None"
+    },
+    {
+      "classification": "guard",
+      "line": 202,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "\"framework\": self.framework,"
+    },
+    {
+      "classification": "guard",
+      "line": 346,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "disabled_commands=(\"approve\", \"complete\", \"archive\", \"baseline\", \"no_go\", \"final_pass\"),"
+    },
+    {
+      "classification": "guard",
+      "line": 348,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "framework=None,"
+    },
+    {
+      "classification": "guard",
+      "line": 392,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "framework=None,"
+    },
+    {
+      "classification": "guard",
+      "line": 405,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"deploy\","
+    },
+    {
+      "classification": "guard",
+      "line": 406,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"production_readiness\","
+    },
+    {
+      "classification": "guard",
+      "line": 407,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "continuity activation"
+      ],
+      "text": "\"continuity_activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 408,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final_pass\","
+    },
+    {
+      "classification": "guard",
+      "line": 431,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "if view_model.framework not in (None, \"not_selected\"):"
+    },
+    {
+      "classification": "guard",
+      "line": 432,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "return ValidationResult(False, ErrorCode.NO_GO_BOUNDARY, \"final UI framework selection is out of Slice 010 scope\")"
+    },
+    {
+      "classification": "guard",
+      "line": 435,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "\"framework\": view_model.framework,"
+    },
+    {
+      "classification": "guard",
+      "line": 715,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "projection authority"
+      ],
+      "text": "\"projection authority\","
+    },
+    {
+      "classification": "guard",
+      "line": 717,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "cache authority"
+      ],
+      "text": "\"cache authority\","
+    },
+    {
+      "classification": "guard",
+      "line": 718,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "view model authority"
+      ],
+      "text": "\"view model authority\","
+    },
+    {
+      "classification": "guard",
+      "line": 719,
+      "path": "nexus/governance/app_contract.py",
+      "terms": [
+        "source of truth"
+      ],
+      "text": "\"source of truth\","
+    },
+    {
+      "classification": "guard",
+      "line": 119,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"production readiness\","
+    },
+    {
+      "classification": "guard",
+      "line": 129,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "continuity activation"
+      ],
+      "text": "\"continuity activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 132,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "complete project"
+      ],
+      "text": "\"complete project\","
+    },
+    {
+      "classification": "guard",
+      "line": 133,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "complete project"
+      ],
+      "text": "\"complete_project\","
+    },
+    {
+      "classification": "guard",
+      "line": 146,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"production readiness\","
+    },
+    {
+      "classification": "guard",
+      "line": 150,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"deploy to production\","
+    },
+    {
+      "classification": "guard",
+      "line": 151,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"deploy_to_production\","
+    },
+    {
+      "classification": "guard",
+      "line": 153,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"deploy\","
+    },
+    {
+      "classification": "guard",
+      "line": 154,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final pass\","
+    },
+    {
+      "classification": "guard",
+      "line": 155,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final_pass\","
+    },
+    {
+      "classification": "guard",
+      "line": 164,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"dispatch execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 165,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"dispatch_execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 184,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter call\","
+    },
+    {
+      "classification": "guard",
+      "line": 185,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter_call\","
+    },
+    {
+      "classification": "guard",
+      "line": 187,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "transport call"
+      ],
+      "text": "\"transport call\","
+    },
+    {
+      "classification": "guard",
+      "line": 188,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "transport call"
+      ],
+      "text": "\"transport_call\","
+    },
+    {
+      "classification": "guard",
+      "line": 189,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 190,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route_activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 194,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 195,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket_execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 200,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime invocation\","
+    },
+    {
+      "classification": "guard",
+      "line": 201,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime_invocation\","
+    },
+    {
+      "classification": "guard",
+      "line": 476,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "production readiness",
+        "deploy",
+        "final pass"
+      ],
+      "text": "blocked.append(\"DeliveryRecord cannot imply deploy, production readiness, completion, or final PASS\")"
+    },
+    {
+      "classification": "guard",
+      "line": 510,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "blocked.append(\"FeedbackRecord crossed runtime, dispatch, controller, production, or final-pass boundary\")"
+    },
+    {
+      "classification": "guard",
+      "line": 628,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "deploy",
+        "final pass"
+      ],
+      "text": "blocked.append(\"triage options cannot dispatch, deploy, execute, complete, or claim final PASS\")"
+    },
+    {
+      "classification": "guard",
+      "line": 709,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "continuity activation"
+      ],
+      "text": "blocked.append(\"Slice 008 cannot accept completion decisions or continuity activation outcomes\")"
+    },
+    {
+      "classification": "guard",
+      "line": 712,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "production readiness",
+        "deploy",
+        "final pass"
+      ],
+      "text": "blocked.append(\"completion packet cannot claim deploy, production readiness, or final PASS\")"
+    },
+    {
+      "classification": "guard",
+      "line": 1171,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "production readiness",
+        "deploy"
+      ],
+      "text": "if term in {\"deploy\", \"deploy to production\", \"production readiness\", \"production ready\", \"production\"}:"
+    },
+    {
+      "classification": "guard",
+      "line": 1172,
+      "path": "nexus/governance/delivery_feedback.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "return any(phrase in text for phrase in (\"not production\", \"no production\", \"not deploy\", \"no deploy\", \"not a deploy\"))"
+    },
+    {
+      "classification": "guard",
+      "line": 41,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final_pass\","
+    },
+    {
+      "classification": "guard",
+      "line": 45,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "COMPLETION_OR_ACCEPTANCE_RETURN_KINDS: tuple[str, ...] = (\"final_pass\", \"complete\", \"accepted\", \"production_ready\")"
+    },
+    {
+      "classification": "guard",
+      "line": 62,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter call\","
+    },
+    {
+      "classification": "guard",
+      "line": 63,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 66,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime invocation\","
+    },
+    {
+      "classification": "guard",
+      "line": 67,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "transport call"
+      ],
+      "text": "\"transport call\","
+    },
+    {
+      "classification": "guard",
+      "line": 68,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 74,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime_invocation\","
+    },
+    {
+      "classification": "guard",
+      "line": 77,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "transport call"
+      ],
+      "text": "\"transport_call\","
+    },
+    {
+      "classification": "guard",
+      "line": 78,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route_activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 79,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter_call\","
+    },
+    {
+      "classification": "guard",
+      "line": 80,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket_execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 217,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "runtime_invocation: dict[str, Any] = field(default_factory=dict)"
+    },
+    {
+      "classification": "guard",
+      "line": 218,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "transport call"
+      ],
+      "text": "transport_call: dict[str, Any] = field(default_factory=dict)"
+    },
+    {
+      "classification": "guard",
+      "line": 944,
+      "path": "nexus/governance/dispatch_contract.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "return status in (\"accepted\", \"complete\", \"final_pass\", \"production_ready\")"
+    },
+    {
+      "classification": "guard",
+      "line": 40,
+      "path": "nexus/governance/execution.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final_pass\","
+    },
+    {
+      "classification": "guard",
+      "line": 136,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter_call\","
+    },
+    {
+      "classification": "guard",
+      "line": 137,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter call\","
+    },
+    {
+      "classification": "guard",
+      "line": 138,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "transport call"
+      ],
+      "text": "\"transport_call\","
+    },
+    {
+      "classification": "guard",
+      "line": 139,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "transport call"
+      ],
+      "text": "\"transport call\","
+    },
+    {
+      "classification": "guard",
+      "line": 140,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route_activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 141,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 143,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket_execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 144,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 146,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"dispatch_execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 147,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"dispatch execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 150,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime_invocation\","
+    },
+    {
+      "classification": "guard",
+      "line": 151,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime invocation\","
+    },
+    {
+      "classification": "guard",
+      "line": 171,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final_pass\","
+    },
+    {
+      "classification": "guard",
+      "line": 172,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final pass\","
+    },
+    {
+      "classification": "guard",
+      "line": 178,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"production readiness\","
+    },
+    {
+      "classification": "guard",
+      "line": 192,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter_call\","
+    },
+    {
+      "classification": "guard",
+      "line": 193,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "transport call"
+      ],
+      "text": "\"transport_call\","
+    },
+    {
+      "classification": "guard",
+      "line": 194,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route_activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 195,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime_invocation\","
+    },
+    {
+      "classification": "guard",
+      "line": 197,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket_execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 198,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"dispatch_execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 555,
+      "path": "nexus/governance/impact_control.py",
+      "terms": [
+        "complete project"
+      ],
+      "text": "return _no_go(\"LowerLayerRequestOutcome cannot complete project progress or authorize dispatch\")"
+    },
+    {
+      "classification": "guard",
+      "line": 61,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final_pass\","
+    },
+    {
+      "classification": "guard",
+      "line": 62,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final pass\","
+    },
+    {
+      "classification": "guard",
+      "line": 67,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"production readiness\","
+    },
+    {
+      "classification": "guard",
+      "line": 70,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"dispatch execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 89,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime invocation\","
+    },
+    {
+      "classification": "guard",
+      "line": 90,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime_invocation\","
+    },
+    {
+      "classification": "guard",
+      "line": 91,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter call\","
+    },
+    {
+      "classification": "guard",
+      "line": 92,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter_call\","
+    },
+    {
+      "classification": "guard",
+      "line": 93,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "transport call"
+      ],
+      "text": "\"transport call\","
+    },
+    {
+      "classification": "guard",
+      "line": 94,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "transport call"
+      ],
+      "text": "\"transport_call\","
+    },
+    {
+      "classification": "guard",
+      "line": 95,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 96,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route_activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 98,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 99,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket_execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 303,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "return _no_go(\"human decision cannot claim completion, production readiness, dispatch, or execution\")"
+    },
+    {
+      "classification": "guard",
+      "line": 377,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "return _no_go(\"deliverable evaluation cannot claim completion, production readiness, dispatch, or execution\")"
+    },
+    {
+      "classification": "guard",
+      "line": 459,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "return _no_go(\"review disposition cannot claim completion, production readiness, dispatch, or execution\")"
+    },
+    {
+      "classification": "guard",
+      "line": 875,
+      "path": "nexus/governance/monitor_hitl.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final_pass\","
+    },
+    {
+      "classification": "guard",
+      "line": 36,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"deploy\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 42,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"production_readiness\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 43,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final_pass\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 64,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"dispatch_workpacket_execution\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 76,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"monitor_dispatch_execution\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 78,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"monitor_adapter_transport_route_activation\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 79,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"monitor_workpacket_execution\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 83,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"monitor_production_readiness\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 84,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"monitor_final_pass\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 88,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"impact_adapter_transport_route_activation\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 89,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"impact_workpacket_execution\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 90,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"impact_dispatch_execution\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 95,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"impact_production_readiness\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 96,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"impact_final_pass\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 103,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"delivery_dispatch_execution\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 106,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"delivery_adapter_transport_route_activation\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 107,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"delivery_workpacket_execution\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 109,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "continuity activation"
+      ],
+      "text": "\"delivery_continuity_activation\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 110,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"delivery_production_readiness\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 111,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"delivery_deploy\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 112,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"delivery_final_pass\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 116,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "direct canonical mutation"
+      ],
+      "text": "\"service_direct_canonical_mutation\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 120,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"service_dispatch_execution\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 121,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"service_route_activation\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 122,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"service_workpacket_execution\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 124,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"service_production_readiness\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 125,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"service_final_pass\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 126,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "\"local_app_framework_selection\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 127,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "database"
+      ],
+      "text": "\"local_app_database_selection\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 128,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "api schema"
+      ],
+      "text": "\"local_app_api_schema_selection\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 131,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"local_app_runtime_invocation\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 132,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"local_app_dispatch_execution\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 133,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"local_app_route_activation\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 134,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "view model authority"
+      ],
+      "text": "\"local_app_view_model_authority\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 135,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "direct canonical mutation"
+      ],
+      "text": "\"local_app_direct_canonical_mutation\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 141,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"local_app_production_readiness\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 142,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"local_app_deploy\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 143,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "continuity activation"
+      ],
+      "text": "\"local_app_continuity_activation\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 144,
+      "path": "nexus/governance/no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"local_app_final_pass\": ErrorCode.NO_GO_BOUNDARY,"
+    },
+    {
+      "classification": "guard",
+      "line": 77,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "complete project"
+      ],
+      "text": "\"complete project\","
+    },
+    {
+      "classification": "guard",
+      "line": 79,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "continuity activation"
+      ],
+      "text": "\"continuity activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 81,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final pass\","
+    },
+    {
+      "classification": "guard",
+      "line": 82,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final_pass\","
+    },
+    {
+      "classification": "guard",
+      "line": 85,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"production readiness\","
+    },
+    {
+      "classification": "guard",
+      "line": 86,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"deploy\","
+    },
+    {
+      "classification": "guard",
+      "line": 87,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"deploy to production\","
+    },
+    {
+      "classification": "guard",
+      "line": 89,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime invocation\","
+    },
+    {
+      "classification": "guard",
+      "line": 94,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"dispatch execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 102,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter call\","
+    },
+    {
+      "classification": "guard",
+      "line": 103,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "transport call"
+      ],
+      "text": "\"transport call\","
+    },
+    {
+      "classification": "guard",
+      "line": 104,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route activation\","
+    },
+    {
+      "classification": "guard",
+      "line": 106,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket execution\","
+    },
+    {
+      "classification": "guard",
+      "line": 115,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "projection authority"
+      ],
+      "text": "\"projection authority\","
+    },
+    {
+      "classification": "guard",
+      "line": 118,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "source of truth"
+      ],
+      "text": "\"source of truth\","
+    },
+    {
+      "classification": "guard",
+      "line": 119,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "direct canonical mutation"
+      ],
+      "text": "\"direct canonical mutation\","
+    },
+    {
+      "classification": "guard",
+      "line": 122,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "\"ui framework selection\","
+    },
+    {
+      "classification": "guard",
+      "line": 123,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "database"
+      ],
+      "text": "\"database selection\","
+    },
+    {
+      "classification": "guard",
+      "line": 361,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "projection authority"
+      ],
+      "text": "return ValidationResult(False, ErrorCode.NO_GO_BOUNDARY, \"authorization source cannot be cache/projection authority\")"
+    },
+    {
+      "classification": "guard",
+      "line": 525,
+      "path": "nexus/governance/service_facade.py",
+      "terms": [
+        "source of truth"
+      ],
+      "text": "if any(term in text for term in (\"projection\", \"cache\", \"source of truth\")):"
+    },
+    {
+      "classification": "guard",
+      "line": 32,
+      "path": "nexus/governance/standardization.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final_pass\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 90,
+      "path": "nexus/governance/tests/fixtures/delivery_feedback.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"limits\": \"not production deploy\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 91,
+      "path": "nexus/governance/tests/fixtures/delivery_feedback.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"known_limits\": (\"review-only\", \"no production readiness\"),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 56,
+      "path": "nexus/governance/tests/fixtures/dispatch_contract.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"readiness_constraints\": (\"no runtime invocation\",),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 163,
+      "path": "nexus/governance/tests/fixtures/dispatch_contract.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"no_go_refs\": (\"no runtime invocation\", \"no direct 4.19 controller call\"),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 166,
+      "path": "nexus/governance/tests/fixtures/dispatch_contract.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"forbidden_outputs\": (\"runtime dispatch\", \"final PASS\"),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 240,
+      "path": "nexus/governance/tests/fixtures/dispatch_contract.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"no_go_refs\": (\"no runtime invocation\",),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 103,
+      "path": "nexus/governance/tests/fixtures/monitor_hitl.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"constraint_refs\": (\"constraint:no-final-pass\",),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 92,
+      "path": "nexus/governance/tests/fixtures/standardization.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"no_go\": (\"no final PASS\", \"no Shared Docs writes\"),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 25,
+      "path": "nexus/governance/tests/test_app_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "def test_app_contract_does_not_include_runtime_framework_choice() -> None:"
+    },
+    {
+      "classification": "test_assertion",
+      "line": 28,
+      "path": "nexus/governance/tests/test_app_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "assert view_model.framework is None"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 12,
+      "path": "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "@pytest.mark.parametrize(\"status\", (\"complete\", \"continuity_active\", \"production_ready\", \"deployed\", \"final_pass\"))"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 37,
+      "path": "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
+      "terms": [
+        "complete project"
+      ],
+      "text": "\"complete project\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 40,
+      "path": "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
+      "terms": [
+        "continuity activation"
+      ],
+      "text": "\"continuity activation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 71,
+      "path": "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
+      "terms": [
+        "continuity activation"
+      ],
+      "text": "\"continuity activation.\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 24,
+      "path": "nexus/governance/tests/test_delivery_feedback_impact_preflight.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "def test_next_cycle_proposal_rejects_dispatch_or_workpacket_execution_route() -> None:"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 27,
+      "path": "nexus/governance/tests/test_delivery_feedback_no_go.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"mark production readiness\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 29,
+      "path": "nexus/governance/tests/test_delivery_feedback_no_go.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"deploy to production\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 30,
+      "path": "nexus/governance/tests/test_delivery_feedback_no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final pass\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 42,
+      "path": "nexus/governance/tests/test_delivery_feedback_no_go.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime invocation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 60,
+      "path": "nexus/governance/tests/test_delivery_feedback_no_go.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"dispatch_execution\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 64,
+      "path": "nexus/governance/tests/test_delivery_feedback_no_go.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter call\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 65,
+      "path": "nexus/governance/tests/test_delivery_feedback_no_go.py",
+      "terms": [
+        "transport call"
+      ],
+      "text": "\"transport call\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 66,
+      "path": "nexus/governance/tests/test_delivery_feedback_no_go.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route activation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 67,
+      "path": "nexus/governance/tests/test_delivery_feedback_no_go.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket execution\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 68,
+      "path": "nexus/governance/tests/test_delivery_feedback_no_go.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime invocation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 70,
+      "path": "nexus/governance/tests/test_delivery_feedback_no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final_pass\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 82,
+      "path": "nexus/governance/tests/test_delivery_feedback_no_go.py",
+      "terms": [
+        "complete project",
+        "production readiness",
+        "deploy",
+        "final pass"
+      ],
+      "text": "(\"complete project\", \"activate continuity\", \"production readiness\", \"deploy\", \"final pass\"),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 41,
+      "path": "nexus/governance/tests/test_delivery_feedback_records.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "@pytest.mark.parametrize(\"status\", (\"submitted\", \"active\", \"complete\", \"final_pass\", \"production_ready\"))"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 56,
+      "path": "nexus/governance/tests/test_delivery_feedback_records.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "def test_delivery_record_rejects_production_deploy_implication() -> None:"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 58,
+      "path": "nexus/governance/tests/test_delivery_feedback_records.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "valid_delivery_record(preview_or_release_scope=\"deploy to production\", status=\"production_ready\"),"
+    },
+    {
+      "classification": "test_assertion",
+      "line": 64,
+      "path": "nexus/governance/tests/test_delivery_feedback_records.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "write_evidence(\"delivery-feedback/delivery-record-production-deploy-no-go.json\", result.to_evidence(), slice_id=\"l1gov-slice-008\")"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 28,
+      "path": "nexus/governance/tests/test_delivery_feedback_triage_decision.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "def test_triage_request_rejects_direct_deploy_or_dispatch_option() -> None:"
+    },
+    {
+      "classification": "test_assertion",
+      "line": 29,
+      "path": "nexus/governance/tests/test_delivery_feedback_triage_decision.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "result = validate_feedback_triage_decision_request(valid_triage_request(options=(\"deploy_to_production\", \"actual_dispatch\")))"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 16,
+      "path": "nexus/governance/tests/test_dispatch_no_go.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "(\"dispatch_workpacket_execution\", \"workpacket-execution-block\"),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 56,
+      "path": "nexus/governance/tests/test_dispatch_records.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "@pytest.mark.parametrize(\"status\", (\"dispatched\", \"accepted\", \"complete\", \"final_pass\"))"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 106,
+      "path": "nexus/governance/tests/test_dispatch_records.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter call\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 107,
+      "path": "nexus/governance/tests/test_dispatch_records.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route activation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 39,
+      "path": "nexus/governance/tests/test_dispatch_service_contract.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "def test_handoff_candidate_command_rejects_runtime_invocation_payload() -> None:"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 41,
+      "path": "nexus/governance/tests/test_dispatch_service_contract.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "command.payload[\"runtime_invocation\"] = {\"agent\": \"private-agent\", \"route\": \"live\"}"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 81,
+      "path": "nexus/governance/tests/test_dispatch_service_contract.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter call\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 82,
+      "path": "nexus/governance/tests/test_dispatch_service_contract.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route activation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 112,
+      "path": "nexus/governance/tests/test_dispatch_service_contract.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "for return_kind in (\"final_pass\", \"complete\", \"accepted\", \"production_ready\"):"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 127,
+      "path": "nexus/governance/tests/test_dispatch_service_contract.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "@pytest.mark.parametrize(\"return_kind\", (\"dispatch\", \"runtime_dispatch\", \"workpacket_execution\", \"controller_call\", \"ship_it\"))"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 38,
+      "path": "nexus/governance/tests/test_impact_control_lower_layer_candidate.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route_activation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 39,
+      "path": "nexus/governance/tests/test_impact_control_lower_layer_candidate.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket_execution\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 40,
+      "path": "nexus/governance/tests/test_impact_control_lower_layer_candidate.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime invocation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 41,
+      "path": "nexus/governance/tests/test_impact_control_lower_layer_candidate.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"dispatch_execution\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 78,
+      "path": "nexus/governance/tests/test_impact_control_lower_layer_candidate.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"production readiness\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 17,
+      "path": "nexus/governance/tests/test_impact_control_no_go.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "(\"impact_adapter_transport_route_activation\", ErrorCode.NO_GO_BOUNDARY),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 18,
+      "path": "nexus/governance/tests/test_impact_control_no_go.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "(\"impact_workpacket_execution\", ErrorCode.NO_GO_BOUNDARY),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 19,
+      "path": "nexus/governance/tests/test_impact_control_no_go.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "(\"impact_dispatch_execution\", ErrorCode.NO_GO_BOUNDARY),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 24,
+      "path": "nexus/governance/tests/test_impact_control_no_go.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "(\"impact_production_readiness\", ErrorCode.NO_GO_BOUNDARY),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 25,
+      "path": "nexus/governance/tests/test_impact_control_no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "(\"impact_final_pass\", ErrorCode.NO_GO_BOUNDARY),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 46,
+      "path": "nexus/governance/tests/test_impact_control_records.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"mark production readiness\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 52,
+      "path": "nexus/governance/tests/test_impact_control_records.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime invocation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 20,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "\"local_app_framework_selection\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 21,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "database"
+      ],
+      "text": "\"local_app_database_selection\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 22,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "api schema"
+      ],
+      "text": "\"local_app_api_schema_selection\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 25,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"local_app_runtime_invocation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 26,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"local_app_dispatch_execution\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 27,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"local_app_route_activation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 28,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "view model authority"
+      ],
+      "text": "\"local_app_view_model_authority\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 29,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "direct canonical mutation"
+      ],
+      "text": "\"local_app_direct_canonical_mutation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 35,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"local_app_production_readiness\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 36,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"local_app_deploy\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 37,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "continuity activation"
+      ],
+      "text": "\"local_app_continuity_activation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 38,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"local_app_final_pass\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 52,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "electron"
+      ],
+      "text": "\"electron selected\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 53,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "database"
+      ],
+      "text": "\"local database\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 54,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "api schema"
+      ],
+      "text": "\"api schema selected\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 55,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "server_url"
+      ],
+      "text": "\"server_url\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 57,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "desktop app project"
+      ],
+      "text": "\"desktop app project\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 58,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "web frontend"
+      ],
+      "text": "\"web frontend\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 59,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "native shell"
+      ],
+      "text": "\"native shell\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 60,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "view model authority"
+      ],
+      "text": "\"view model authority\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 61,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "projection authority"
+      ],
+      "text": "\"projection authority\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 62,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "cache authority"
+      ],
+      "text": "\"cache authority\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 63,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "approve now"
+      ],
+      "text": "\"approve now\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 64,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "complete project"
+      ],
+      "text": "\"complete project\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 65,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "archive workspace"
+      ],
+      "text": "\"archive workspace\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 66,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "mark baseline"
+      ],
+      "text": "\"mark baseline\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 68,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"production readiness\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 69,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"deploy now\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 70,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "continuity activation"
+      ],
+      "text": "\"continuity activation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 71,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final pass\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 72,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime invocation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 73,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"dispatch execution\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 74,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route activation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 75,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter call\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 76,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "transport call"
+      ],
+      "text": "\"transport call\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 77,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket execution\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 92,
+      "path": "nexus/governance/tests/test_local_app_no_go.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "open_questions=(\"final framework deferred\",),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 103,
+      "path": "nexus/governance/tests/test_local_app_projection_surfaces.py",
+      "terms": [
+        "complete project"
+      ],
+      "text": "command_id=\"cmd-complete-project\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 54,
+      "path": "nexus/governance/tests/test_local_app_read_only_mode.py",
+      "terms": [
+        "approve now"
+      ],
+      "text": "\"approve now\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 55,
+      "path": "nexus/governance/tests/test_local_app_read_only_mode.py",
+      "terms": [
+        "complete project"
+      ],
+      "text": "\"complete project\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 56,
+      "path": "nexus/governance/tests/test_local_app_read_only_mode.py",
+      "terms": [
+        "archive workspace"
+      ],
+      "text": "\"archive workspace\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 57,
+      "path": "nexus/governance/tests/test_local_app_read_only_mode.py",
+      "terms": [
+        "mark baseline"
+      ],
+      "text": "\"mark baseline\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 60,
+      "path": "nexus/governance/tests/test_local_app_read_only_mode.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"claim final PASS\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 80,
+      "path": "nexus/governance/tests/test_local_app_read_only_mode.py",
+      "terms": [
+        "complete project"
+      ],
+      "text": "command_id=\"cmd-complete-project\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 81,
+      "path": "nexus/governance/tests/test_local_app_read_only_mode.py",
+      "terms": [
+        "complete project"
+      ],
+      "text": "label=\"Complete project\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 55,
+      "path": "nexus/governance/tests/test_local_app_shell_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "\"framework\": None,"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 70,
+      "path": "nexus/governance/tests/test_local_app_shell_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "def test_shell_rejects_final_framework_selection() -> None:"
+    },
+    {
+      "classification": "test_assertion",
+      "line": 71,
+      "path": "nexus/governance/tests/test_local_app_shell_contract.py",
+      "terms": [
+        "framework",
+        "electron"
+      ],
+      "text": "result = validate_local_desktop_shell(valid_shell(framework=\"electron\"))"
+    },
+    {
+      "classification": "test_assertion",
+      "line": 75,
+      "path": "nexus/governance/tests/test_local_app_shell_contract.py",
+      "terms": [
+        "framework"
+      ],
+      "text": "write_evidence(\"app-shell/no-framework-selection.json\", result.to_evidence(), slice_id=\"l1gov-slice-010\")"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 85,
+      "path": "nexus/governance/tests/test_local_app_shell_contract.py",
+      "terms": [
+        "database"
+      ],
+      "text": "def test_shell_rejects_runtime_server_database_or_api_fields() -> None:"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 87,
+      "path": "nexus/governance/tests/test_local_app_shell_contract.py",
+      "terms": [
+        "server_url"
+      ],
+      "text": "{\"server_url\": \"http://localhost:8080\"},"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 88,
+      "path": "nexus/governance/tests/test_local_app_shell_contract.py",
+      "terms": [
+        "database"
+      ],
+      "text": "{\"database\": \"local.sqlite\"},"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 89,
+      "path": "nexus/governance/tests/test_local_app_shell_contract.py",
+      "terms": [
+        "api schema"
+      ],
+      "text": "{\"api_schema\": \"selected\"},"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 23,
+      "path": "nexus/governance/tests/test_monitor_hitl_no_go.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "\"monitor_dispatch_execution\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 25,
+      "path": "nexus/governance/tests/test_monitor_hitl_no_go.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"monitor_adapter_transport_route_activation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 26,
+      "path": "nexus/governance/tests/test_monitor_hitl_no_go.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"monitor_workpacket_execution\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 30,
+      "path": "nexus/governance/tests/test_monitor_hitl_no_go.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"monitor_production_readiness\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 31,
+      "path": "nexus/governance/tests/test_monitor_hitl_no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"monitor_final_pass\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 53,
+      "path": "nexus/governance/tests/test_monitor_hitl_no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final_pass\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 64,
+      "path": "nexus/governance/tests/test_monitor_hitl_no_go.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "\"runtime invocation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 65,
+      "path": "nexus/governance/tests/test_monitor_hitl_no_go.py",
+      "terms": [
+        "adapter call"
+      ],
+      "text": "\"adapter call\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 66,
+      "path": "nexus/governance/tests/test_monitor_hitl_no_go.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "\"route activation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 67,
+      "path": "nexus/governance/tests/test_monitor_hitl_no_go.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket execution\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 68,
+      "path": "nexus/governance/tests/test_monitor_hitl_no_go.py",
+      "terms": [
+        "workpacket execution"
+      ],
+      "text": "\"workpacket_execution\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 91,
+      "path": "nexus/governance/tests/test_monitor_hitl_no_go.py",
+      "terms": [
+        "runtime invocation"
+      ],
+      "text": "(\"notes\", \"this would require runtime invocation by a private agent\"),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 93,
+      "path": "nexus/governance/tests/test_monitor_hitl_no_go.py",
+      "terms": [
+        "dispatch execution"
+      ],
+      "text": "(\"notes\", \"please perform dispatch execution now\"),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 115,
+      "path": "nexus/governance/tests/test_monitor_hitl_no_go.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "(\"decision_question\", \"Can the reviewer approve production readiness after this check?\"),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 39,
+      "path": "nexus/governance/tests/test_monitor_hitl_records.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "@pytest.mark.parametrize(\"status\", (\"approved\", \"accepted\", \"complete\", \"final_pass\", \"production_ready\"))"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 98,
+      "path": "nexus/governance/tests/test_monitor_hitl_records.py",
+      "terms": [
+        "route activation"
+      ],
+      "text": "(\"resume_condition\", \"route activation is complete\"),"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 17,
+      "path": "nexus/governance/tests/test_no_go_policy.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "def test_blocks_deploy_config_credential_mutation_intent() -> None:"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 20,
+      "path": "nexus/governance/tests/test_no_go_policy.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "for action in (\"deploy\", \"config_mutation\", \"credential_mutation\"):"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 43,
+      "path": "nexus/governance/tests/test_service_facade_command_draft.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "for status in (\"approved\", \"accepted\", \"complete\", \"final_pass\", \"production_ready\", \"deployed\", \"active\", \"closed\"):"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 55,
+      "path": "nexus/governance/tests/test_service_facade_command_draft.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"mark production readiness\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 56,
+      "path": "nexus/governance/tests/test_service_facade_command_draft.py",
+      "terms": [
+        "complete project"
+      ],
+      "text": "\"complete project\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 53,
+      "path": "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "def test_completion_production_final_pass_terms_reject() -> None:"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 55,
+      "path": "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+      "terms": [
+        "complete project"
+      ],
+      "text": "\"complete project\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 56,
+      "path": "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+      "terms": [
+        "continuity activation"
+      ],
+      "text": "\"continuity activation\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 57,
+      "path": "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+      "terms": [
+        "production readiness"
+      ],
+      "text": "\"production readiness\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 58,
+      "path": "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+      "terms": [
+        "deploy"
+      ],
+      "text": "\"deploy to production\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 59,
+      "path": "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final pass\","
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 67,
+      "path": "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+      "terms": [
+        "direct canonical mutation",
+        "cache authority"
+      ],
+      "text": "def test_cache_authority_and_direct_canonical_mutation_reject() -> None:"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 70,
+      "path": "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+      "terms": [
+        "direct canonical mutation"
+      ],
+      "text": "{\"requested_action\": \"direct canonical mutation outside kernel\"},"
+    },
+    {
+      "classification": "negative_fixture",
+      "line": 64,
+      "path": "nexus/governance/tests/test_workspace_init_manifest.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "(\"approved\", \"accepted\", \"plan_approved\", \"baseline_approved\", \"complete\", \"final_pass\", \"unknown\"),"
+    },
+    {
+      "classification": "guard",
+      "line": 44,
+      "path": "nexus/governance/workspace_init.py",
+      "terms": [
+        "final pass"
+      ],
+      "text": "\"final_pass\","
+    }
+  ],
+  "scan_scope": "nexus/governance/**/*.py",
+  "slice_id": "l1gov-slice-010",
+  "summary": {
+    "guard": 199,
+    "negative_fixture": 133,
+    "test_assertion": 5
+  },
+  "unclassified_count": 0
+}

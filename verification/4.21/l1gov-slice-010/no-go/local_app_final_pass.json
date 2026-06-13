@@ -1,0 +1,6 @@
+{
+  "blocked": true,
+  "category": "local_app_final_pass",
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "message": "blocked by Slice 001 no-go boundary: local_app_final_pass"
+}

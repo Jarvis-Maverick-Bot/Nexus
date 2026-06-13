@@ -1,0 +1,24 @@
+{
+  "records": {
+    "read-only/disabled-mutation-affordances.json": {
+      "disabled_commands": [
+        "approve",
+        "complete",
+        "archive",
+        "baseline",
+        "no_go",
+        "deploy",
+        "production_readiness",
+        "continuity_activation",
+        "final_pass",
+        "direct_mutation",
+        "canonical_write"
+      ]
+    }
+  },
+  "slice_id": "l1gov-slice-010",
+  "source_evidence": [
+    "read-only/disabled-mutation-affordances.json"
+  ],
+  "status": "evidence_recorded"
+}

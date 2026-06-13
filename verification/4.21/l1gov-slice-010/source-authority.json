@@ -1,0 +1,15 @@
+{
+  "no_shared_docs_writes": true,
+  "slice_id": "l1gov-slice-010",
+  "smb_handoff_only": true,
+  "source_authority": {
+    "approved_task_package_path": "\\\\192.168.31.124\\Nova-Jarvis-Inbox\\Thunder\\_submitted\\2026-06-13_4.21_slice010_task_package_thunder_v0.1",
+    "approved_task_package_review_commit": "eef9c051",
+    "current_branch": "codex/4.21-slice010-local-app-contracts",
+    "nexus_base_commit": "9a3144b7955da90bf5080eda250120967b5021cb",
+    "nexus_head": "PENDING_COMMIT",
+    "parent_solution_design": "V0.8.5",
+    "shared_docs_clone": "D:/Nova-Jarvis-Shared-Docs",
+    "wbs": "V0.6"
+  }
+}
