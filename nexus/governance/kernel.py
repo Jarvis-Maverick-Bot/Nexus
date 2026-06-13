@@ -20,6 +20,17 @@ ALLOWED_TRANSITIONS: dict[tuple[str, str], str] = {
     ("monitor_decision_recorded", "RecordEscalation"): "monitor_escalation_open",
     ("monitor_escalation_open", "RecordEscalation"): "monitor_escalation_open",
     ("monitor_escalation_open", "SubmitHumanDecision"): "monitor_decision_recorded",
+    ("initiation_ready", "SubmitImpactControlRequest"): "impact_request_recorded",
+    ("monitor_decision_recorded", "SubmitImpactControlRequest"): "impact_request_recorded",
+    ("impact_request_recorded", "SubmitImpactControlRequest"): "impact_request_recorded",
+    ("impact_assessment_recorded", "SubmitImpactControlRequest"): "impact_request_recorded",
+    ("impact_monitor_review_requested", "SubmitImpactControlRequest"): "impact_request_recorded",
+    ("impact_request_recorded", "RecordImpactAssessment"): "impact_assessment_recorded",
+    ("impact_assessment_recorded", "RecordImpactAssessment"): "impact_assessment_recorded",
+    ("impact_monitor_review_requested", "RecordImpactAssessment"): "impact_assessment_recorded",
+    ("impact_assessment_recorded", "CreateMonitorTaskForImpact"): "impact_monitor_review_requested",
+    ("impact_monitor_review_requested", "CreateMonitorTaskForImpact"): "impact_monitor_review_requested",
+    ("impact_monitor_review_requested", "SubmitHumanDecision"): "monitor_decision_recorded",
 }
 
 

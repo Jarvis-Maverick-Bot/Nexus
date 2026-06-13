@@ -82,6 +82,18 @@ class NoGoBoundaryPolicy:
                 "monitor_delivery_completion": ErrorCode.NO_GO_BOUNDARY,
                 "monitor_production_readiness": ErrorCode.NO_GO_BOUNDARY,
                 "monitor_final_pass": ErrorCode.NO_GO_BOUNDARY,
+                "impact_direct_419_controller_call": ErrorCode.NO_GO_BOUNDARY,
+                "impact_direct_35_controller_call": ErrorCode.NO_GO_BOUNDARY,
+                "impact_owner_path_call": ErrorCode.NO_GO_BOUNDARY,
+                "impact_adapter_transport_route_activation": ErrorCode.NO_GO_BOUNDARY,
+                "impact_workpacket_execution": ErrorCode.NO_GO_BOUNDARY,
+                "impact_dispatch_execution": ErrorCode.NO_GO_BOUNDARY,
+                "impact_runtime_live_invocation": ErrorCode.NO_GO_BOUNDARY,
+                "impact_lower_layer_submission": ErrorCode.NO_GO_BOUNDARY,
+                "impact_workaround_without_decision": ErrorCode.MISSING_HUMAN_DECISION,
+                "impact_delivery_completion": ErrorCode.NO_GO_BOUNDARY,
+                "impact_production_readiness": ErrorCode.NO_GO_BOUNDARY,
+                "impact_final_pass": ErrorCode.NO_GO_BOUNDARY,
             }
         )
 
