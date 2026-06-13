@@ -1,0 +1,5 @@
+{
+  "accepted": false,
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "message": "Monitor/HITL command crossed Slice 006 boundary"
+}

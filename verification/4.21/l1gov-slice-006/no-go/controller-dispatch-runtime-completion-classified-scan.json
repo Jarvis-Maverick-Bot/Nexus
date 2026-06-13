@@ -1,0 +1,536 @@
+{
+    "command":  "rg -n --json \u0027controller_call|controller execution|controller request|controller action|adapter call|route activation|runtime invocation|private-agent invocation|actual dispatch|runtime_dispatch|workpacket execution|workpacket_execution|production_ready|final_pass|delivery_complete\u0027 nexus/governance -g \u0027*.py\u0027",
+    "exit_code":  0,
+    "no_active_call_surfaces":  true,
+    "no_forbidden_effect_surfaces":  true,
+    "no_unauthorized_runtime_controller_dispatch_paths":  true,
+    "active_call_surfaces":  [
+
+                             ],
+    "forbidden_effect_surfaces":  [
+
+                                  ],
+    "unauthorized_runtime_controller_dispatch_paths":  [
+
+                                                       ],
+    "allowed_guard_literals_count":  51,
+    "allowed_guard_literals":  [
+                                   {
+                                       "path":  "nexus/governance/workspace_init.py",
+                                       "line_number":  44,
+                                       "line":  "    \"final_pass\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/standardization.py",
+                                       "line_number":  32,
+                                       "line":  "    \"final_pass\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/no_go.py",
+                                       "line_number":  43,
+                                       "line":  "                \"final_pass\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "path":  "nexus/governance/no_go.py",
+                                       "line_number":  49,
+                                       "line":  "                \"workspace_init_runtime_dispatch\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "path":  "nexus/governance/no_go.py",
+                                       "line_number":  52,
+                                       "line":  "                \"standardization_runtime_dispatch\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "path":  "nexus/governance/no_go.py",
+                                       "line_number":  56,
+                                       "line":  "                \"execution_direct_419_controller_call\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "path":  "nexus/governance/no_go.py",
+                                       "line_number":  63,
+                                       "line":  "                \"dispatch_direct_419_controller_call\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "path":  "nexus/governance/no_go.py",
+                                       "line_number":  64,
+                                       "line":  "                \"dispatch_workpacket_execution\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "path":  "nexus/governance/no_go.py",
+                                       "line_number":  77,
+                                       "line":  "                \"monitor_direct_419_controller_call\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "path":  "nexus/governance/no_go.py",
+                                       "line_number":  79,
+                                       "line":  "                \"monitor_workpacket_execution\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "path":  "nexus/governance/no_go.py",
+                                       "line_number":  84,
+                                       "line":  "                \"monitor_final_pass\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  61,
+                                       "line":  "    \"final_pass\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  63,
+                                       "line":  "    \"delivery_complete\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  65,
+                                       "line":  "    \"production_ready\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  69,
+                                       "line":  "    \"runtime_dispatch\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  71,
+                                       "line":  "    \"actual dispatch\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  74,
+                                       "line":  "    \"controller_call\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  75,
+                                       "line":  "    \"controller execution\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  76,
+                                       "line":  "    \"controller request\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  78,
+                                       "line":  "    \"controller action\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  82,
+                                       "line":  "    \"private-agent invocation\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  84,
+                                       "line":  "    \"runtime invocation\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  86,
+                                       "line":  "    \"adapter call\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  90,
+                                       "line":  "    \"route activation\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  92,
+                                       "line":  "    \"workpacket execution\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  93,
+                                       "line":  "    \"workpacket_execution\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  825,
+                                       "line":  "            \"final_pass\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  826,
+                                       "line":  "            \"production_ready\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/monitor_hitl.py",
+                                       "line_number":  827,
+                                       "line":  "            \"delivery_complete\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/execution.py",
+                                       "line_number":  40,
+                                       "line":  "    \"final_pass\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/execution.py",
+                                       "line_number":  60,
+                                       "line":  "    \"controller_call\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  41,
+                                       "line":  "    \"final_pass\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  42,
+                                       "line":  "    \"production_ready\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  45,
+                                       "line":  "COMPLETION_OR_ACCEPTANCE_RETURN_KINDS: tuple[str, ...] = (\"final_pass\", \"complete\", \"accepted\", \"production_ready\")"
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  55,
+                                       "line":  "    \"actual dispatch\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  58,
+                                       "line":  "    \"controller execution\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  59,
+                                       "line":  "    \"controller request\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  60,
+                                       "line":  "    \"controller action\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  62,
+                                       "line":  "    \"adapter call\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  63,
+                                       "line":  "    \"route activation\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  64,
+                                       "line":  "    \"private-agent invocation\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  66,
+                                       "line":  "    \"runtime invocation\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  68,
+                                       "line":  "    \"workpacket execution\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  71,
+                                       "line":  "    \"controller_call\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  80,
+                                       "line":  "    \"workpacket_execution\","
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  216,
+                                       "line":  "    controller_call: dict[str, Any] = field(default_factory=dict)"
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  458,
+                                       "line":  "    if _expected_outputs_request_runtime_dispatch(candidate.expected_outputs):"
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  712,
+                                       "line":  "    if command.command_type == \"CreateDispatchControllerHandoffCandidate\" and _expected_outputs_request_runtime_dispatch("
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  887,
+                                       "line":  "def _expected_outputs_request_runtime_dispatch(expected_outputs: object) -\u003e bool:"
+                                   },
+                                   {
+                                       "path":  "nexus/governance/dispatch_contract.py",
+                                       "line_number":  944,
+                                       "line":  "    return status in (\"accepted\", \"complete\", \"final_pass\", \"production_ready\")"
+                                   },
+                                   {
+                                       "path":  "nexus/governance/app_contract.py",
+                                       "line_number":  35,
+                                       "line":  "        disabled_commands=(\"approve\", \"complete\", \"archive\", \"baseline\", \"no_go\", \"final_pass\"),"
+                                   }
+                               ],
+    "allowed_negative_test_fixtures_count":  51,
+    "allowed_negative_test_fixtures":  [
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_records.py",
+                                               "line_number":  39,
+                                               "line":  "@pytest.mark.parametrize(\"status\", (\"approved\", \"accepted\", \"complete\", \"final_pass\", \"production_ready\"))"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_records.py",
+                                               "line_number":  86,
+                                               "line":  "    result = validate_component_return_action(valid_return_action(action_type=\"controller execution\"))"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_records.py",
+                                               "line_number":  56,
+                                               "line":  "@pytest.mark.parametrize(\"status\", (\"dispatched\", \"accepted\", \"complete\", \"final_pass\"))"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_records.py",
+                                               "line_number":  76,
+                                               "line":  "    candidate = valid_handoff_candidate(controller_call={\"controller\": \"4.19\", \"action\": \"dispatch\"})"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_records.py",
+                                               "line_number":  86,
+                                               "line":  "def test_handoff_candidate_rejects_runtime_dispatch_as_expected_output() -\u003e None:"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_records.py",
+                                               "line_number":  102,
+                                               "line":  "        \"private-agent invocation\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_records.py",
+                                               "line_number":  103,
+                                               "line":  "        \"controller execution\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_records.py",
+                                               "line_number":  104,
+                                               "line":  "        \"controller request\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_records.py",
+                                               "line_number":  105,
+                                               "line":  "        \"controller action\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_records.py",
+                                               "line_number":  106,
+                                               "line":  "        \"adapter call\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_records.py",
+                                               "line_number":  107,
+                                               "line":  "        \"route activation\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_no_go.py",
+                                               "line_number":  15,
+                                               "line":  "        (\"dispatch_direct_419_controller_call\", \"direct-419-controller-block\"),"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_no_go.py",
+                                               "line_number":  16,
+                                               "line":  "        (\"dispatch_workpacket_execution\", \"workpacket-execution-block\"),"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  24,
+                                               "line":  "        \"monitor_direct_419_controller_call\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  26,
+                                               "line":  "        \"monitor_workpacket_execution\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  31,
+                                               "line":  "        \"monitor_final_pass\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  53,
+                                               "line":  "        \"final_pass\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  54,
+                                               "line":  "        \"delivery_complete\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  55,
+                                               "line":  "        \"production_ready\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  57,
+                                               "line":  "        \"runtime_dispatch\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  60,
+                                               "line":  "        \"controller_call\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  61,
+                                               "line":  "        \"controller request\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  62,
+                                               "line":  "        \"controller action\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  63,
+                                               "line":  "        \"private-agent invocation\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  64,
+                                               "line":  "        \"runtime invocation\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  65,
+                                               "line":  "        \"adapter call\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  66,
+                                               "line":  "        \"route activation\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  67,
+                                               "line":  "        \"workpacket execution\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
+                                               "line_number":  68,
+                                               "line":  "        \"workpacket_execution\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_service_contract.py",
+                                               "line_number":  61,
+                                               "line":  "def test_handoff_candidate_command_rejects_runtime_dispatch_as_expected_output() -\u003e None:"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_service_contract.py",
+                                               "line_number":  77,
+                                               "line":  "        \"private-agent invocation\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_service_contract.py",
+                                               "line_number":  78,
+                                               "line":  "        \"controller execution\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_service_contract.py",
+                                               "line_number":  79,
+                                               "line":  "        \"controller request\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_service_contract.py",
+                                               "line_number":  80,
+                                               "line":  "        \"controller action\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_service_contract.py",
+                                               "line_number":  81,
+                                               "line":  "        \"adapter call\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_service_contract.py",
+                                               "line_number":  82,
+                                               "line":  "        \"route activation\","
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_service_contract.py",
+                                               "line_number":  112,
+                                               "line":  "    for return_kind in (\"final_pass\", \"complete\", \"accepted\", \"production_ready\"):"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_dispatch_service_contract.py",
+                                               "line_number":  127,
+                                               "line":  "@pytest.mark.parametrize(\"return_kind\", (\"dispatch\", \"runtime_dispatch\", \"workpacket_execution\", \"controller_call\", \"ship_it\"))"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_standardization_no_go.py",
+                                               "line_number":  14,
+                                               "line":  "        (\"standardization_runtime_dispatch\", \"runtime-dispatch-block\"),"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_execution_service_contract.py",
+                                               "line_number":  145,
+                                               "line":  "def test_create_workpacket_rejects_alternate_controller_call_shape() -\u003e None:"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_execution_service_contract.py",
+                                               "line_number":  147,
+                                               "line":  "    command.payload[\"controller_call\"] = {\"controller\": \"4.19\", \"action\": \"assign\"}"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_execution_service_contract.py",
+                                               "line_number":  232,
+                                               "line":  "        intent={\"action\": \"execution_direct_419_controller_call\"},"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_service_contract.py",
+                                               "line_number":  57,
+                                               "line":  "def test_service_exposes_no_runtime_dispatch_surface() -\u003e None:"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_workspace_init_manifest.py",
+                                               "line_number":  64,
+                                               "line":  "    (\"approved\", \"accepted\", \"plan_approved\", \"baseline_approved\", \"complete\", \"final_pass\", \"unknown\"),"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_workspace_init_service_contract.py",
+                                               "line_number":  357,
+                                               "line":  "    response = workspace_service(kernel=kernel).handle(command, intent={\"action\": \"workspace_init_runtime_dispatch\"})"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_execution_no_go.py",
+                                               "line_number":  13,
+                                               "line":  "        (\"execution_direct_419_controller_call\", \"direct-419-controller-block\"),"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_workspace_init_no_go.py",
+                                               "line_number":  15,
+                                               "line":  "        (\"workspace_init_runtime_dispatch\", \"runtime-dispatch-block\"),"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/test_standardization_service_contract.py",
+                                               "line_number":  115,
+                                               "line":  "        intent={\"action\": \"standardization_runtime_dispatch\"},"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/fixtures/dispatch_contract.py",
+                                               "line_number":  56,
+                                               "line":  "        \"readiness_constraints\": (\"no runtime invocation\",),"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/fixtures/dispatch_contract.py",
+                                               "line_number":  163,
+                                               "line":  "        \"no_go_refs\": (\"no runtime invocation\", \"no direct 4.19 controller call\"),"
+                                           },
+                                           {
+                                               "path":  "nexus/governance/tests/fixtures/dispatch_contract.py",
+                                               "line_number":  240,
+                                               "line":  "        \"no_go_refs\": (\"no runtime invocation\",),"
+                                           }
+                                       ],
+    "unclassified_matches_count":  0,
+    "unclassified_matches":  [
+
+                             ]
+}

@@ -13,6 +13,13 @@ ALLOWED_TRANSITIONS: dict[tuple[str, str], str] = {
     ("authority_initialized", "MarkKernelReady"): "kernel_ready",
     ("kernel_ready", "RefreshProjectionCheckpoint"): "projection_contract_ready",
     ("projection_contract_ready", "SubmitWorkspaceInitRecord"): "initiation_ready",
+    ("initiation_ready", "CreateHumanReviewTask"): "monitor_review_open",
+    ("monitor_review_open", "CreateHumanReviewTask"): "monitor_review_open",
+    ("monitor_review_open", "SubmitHumanDecision"): "monitor_decision_recorded",
+    ("monitor_decision_recorded", "CreateHumanReviewTask"): "monitor_review_open",
+    ("monitor_decision_recorded", "RecordEscalation"): "monitor_escalation_open",
+    ("monitor_escalation_open", "RecordEscalation"): "monitor_escalation_open",
+    ("monitor_escalation_open", "SubmitHumanDecision"): "monitor_decision_recorded",
 }
 
 

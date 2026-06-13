@@ -1,0 +1,13 @@
+{
+    "shared_docs_remote":  "git@github-thunder:Nova-Mini/Nova-Jarvis-Shared-Docs.git",
+    "approved_package_review_commit":  "b3d3f67e6e36768732f76ed7215288e4f4e182c6",
+    "nexus_required_base_commit":  "b8f1e54d62ee1c8c65924035b93e2e11bbe41f1e",
+    "source_authority":  [
+                             "parent V0.8.5",
+                             "WBS V0.6",
+                             "Monitor/HITL detailed design V0.3",
+                             "L1_11_6 implementation design",
+                             "accepted Slice 005 merge evidence"
+                         ],
+    "smb_is_handoff_only":  true
+}

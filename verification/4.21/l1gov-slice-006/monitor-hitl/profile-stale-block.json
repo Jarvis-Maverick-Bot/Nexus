@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "DeliverableEvaluationProfileRef status rejected: stale"
+  ],
+  "error_code": "ERR_MISSING_EVALUATION_PROFILE",
+  "invalid_items": [],
+  "message": "DeliverableEvaluationProfileRef rejected",
+  "missing_fields": []
+}

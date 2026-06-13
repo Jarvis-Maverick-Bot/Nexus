@@ -1,0 +1,6 @@
+{
+  "blocked": true,
+  "category": "monitor_notification_as_decision",
+  "error_code": "ERR_MISSING_HUMAN_DECISION",
+  "message": "blocked by Slice 001 no-go boundary: monitor_notification_as_decision"
+}
