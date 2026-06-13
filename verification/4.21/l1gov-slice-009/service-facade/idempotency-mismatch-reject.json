@@ -1,0 +1,5 @@
+{
+  "accepted": false,
+  "error_code": "ERR_IDEMPOTENCY_KEY_REUSE",
+  "message": "payload idempotency_key must match envelope idempotency_key"
+}

@@ -1,0 +1,598 @@
+{
+    "command":  "structured classified scan over changed Slice 009 Python files",
+    "scan_scope":  [
+                       "nexus/governance/kernel.py",
+                       "nexus/governance/no_go.py",
+                       "nexus/governance/projections.py",
+                       "nexus/governance/schemas.py",
+                       "nexus/governance/service_facade.py",
+                       "nexus/governance/tests/fixtures/service_facade.py",
+                       "nexus/governance/tests/test_service_facade_baseline_mediation.py",
+                       "nexus/governance/tests/test_service_facade_command_draft.py",
+                       "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+                       "nexus/governance/tests/test_service_facade_projection_rebuild.py",
+                       "nexus/governance/tests/test_service_facade_router.py"
+                   ],
+    "active_runtime_dispatch_controller_surfaces":  [
+
+                                                    ],
+    "canonical_mutation_outside_kernel":  [
+
+                                          ],
+    "projection_or_cache_authority_surfaces":  [
+
+                                               ],
+    "baseline_bypass_surfaces":  [
+
+                                 ],
+    "completion_production_final_pass_surfaces":  [
+
+                                                  ],
+    "deploy_config_credential_package_surfaces":  [
+
+                                                  ],
+    "allowed_guard_literals":  [
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  36,
+                                       "term":  "deploy",
+                                       "text":  "\"deploy\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  40,
+                                       "term":  "direct_ui_approval",
+                                       "text":  "\"direct_ui_approval\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  43,
+                                       "term":  "final_pass",
+                                       "text":  "\"final_pass\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  66,
+                                       "term":  "direct_ui_approval",
+                                       "text":  "\"monitor_direct_ui_approval\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  67,
+                                       "term":  "notification_as_decision",
+                                       "text":  "\"monitor_notification_as_decision\": ErrorCode.MISSING_HUMAN_DECISION,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  68,
+                                       "term":  "status_card_approval",
+                                       "text":  "\"monitor_status_card_approval\": ErrorCode.MISSING_HUMAN_DECISION,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  69,
+                                       "term":  "chat_approval",
+                                       "text":  "\"monitor_chat_approval\": ErrorCode.MISSING_HUMAN_DECISION,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  70,
+                                       "term":  "controller_approval",
+                                       "text":  "\"monitor_controller_approval\": ErrorCode.MISSING_HUMAN_DECISION,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  84,
+                                       "term":  "final_pass",
+                                       "text":  "\"monitor_final_pass\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  96,
+                                       "term":  "final_pass",
+                                       "text":  "\"impact_final_pass\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  111,
+                                       "term":  "deploy",
+                                       "text":  "\"delivery_deploy\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  112,
+                                       "term":  "final_pass",
+                                       "text":  "\"delivery_final_pass\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  113,
+                                       "term":  "projection_as_authority",
+                                       "text":  "\"service_projection_as_authority\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  114,
+                                       "term":  "cache_as_authority",
+                                       "text":  "\"service_cache_as_authority\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  125,
+                                       "term":  "final_pass",
+                                       "text":  "\"service_final_pass\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  77,
+                                       "term":  "complete project",
+                                       "text":  "\"complete project\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  78,
+                                       "term":  "completion claim",
+                                       "text":  "\"completion claim\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  79,
+                                       "term":  "continuity activation",
+                                       "text":  "\"continuity activation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  80,
+                                       "term":  "continuity active",
+                                       "text":  "\"continuity active\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  81,
+                                       "term":  "final pass",
+                                       "text":  "\"final pass\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  82,
+                                       "term":  "final_pass",
+                                       "text":  "\"final_pass\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  83,
+                                       "term":  "production ready",
+                                       "text":  "\"production ready\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  84,
+                                       "term":  "production_ready",
+                                       "text":  "\"production_ready\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  85,
+                                       "term":  "production readiness",
+                                       "text":  "\"production readiness\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  86,
+                                       "term":  "deploy",
+                                       "text":  "\"deploy\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  87,
+                                       "term":  "deploy",
+                                       "text":  "\"deploy to production\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  87,
+                                       "term":  "deploy to production",
+                                       "text":  "\"deploy to production\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  88,
+                                       "term":  "release to production",
+                                       "text":  "\"release to production\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  89,
+                                       "term":  "runtime invocation",
+                                       "text":  "\"runtime invocation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  90,
+                                       "term":  "runtime live invocation",
+                                       "text":  "\"runtime live invocation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  91,
+                                       "term":  "private agent invocation",
+                                       "text":  "\"private agent invocation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  92,
+                                       "term":  "private-agent invocation",
+                                       "text":  "\"private-agent invocation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  93,
+                                       "term":  "dispatch now",
+                                       "text":  "\"dispatch now\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  94,
+                                       "term":  "dispatch execution",
+                                       "text":  "\"dispatch execution\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  95,
+                                       "term":  "actual dispatch",
+                                       "text":  "\"actual dispatch\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  96,
+                                       "term":  "execute dispatch",
+                                       "text":  "\"execute dispatch\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  97,
+                                       "term":  "perform dispatch",
+                                       "text":  "\"perform dispatch\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  98,
+                                       "term":  "controller call",
+                                       "text":  "\"controller call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  99,
+                                       "term":  "controller call",
+                                       "text":  "\"direct controller call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  99,
+                                       "term":  "direct controller call",
+                                       "text":  "\"direct controller call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  100,
+                                       "term":  "controller execution",
+                                       "text":  "\"controller execution\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  101,
+                                       "term":  "owner path call",
+                                       "text":  "\"owner path call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  102,
+                                       "term":  "adapter call",
+                                       "text":  "\"adapter call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  103,
+                                       "term":  "transport call",
+                                       "text":  "\"transport call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  104,
+                                       "term":  "route activation",
+                                       "text":  "\"route activation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  105,
+                                       "term":  "activate route",
+                                       "text":  "\"activate route\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  106,
+                                       "term":  "workpacket execution",
+                                       "text":  "\"workpacket execution\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  107,
+                                       "term":  "execute workpacket",
+                                       "text":  "\"execute workpacket\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  108,
+                                       "term":  "lower layer submission",
+                                       "text":  "\"lower layer submission\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  109,
+                                       "term":  "config mutation",
+                                       "text":  "\"config mutation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  110,
+                                       "term":  "mutate config",
+                                       "text":  "\"mutate config\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  111,
+                                       "term":  "credential mutation",
+                                       "text":  "\"credential mutation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  112,
+                                       "term":  "package manager",
+                                       "text":  "\"package manager\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  113,
+                                       "term":  "package-manager",
+                                       "text":  "\"package-manager\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  114,
+                                       "term":  "projection as authority",
+                                       "text":  "\"projection as authority\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  116,
+                                       "term":  "cache as authority",
+                                       "text":  "\"cache as authority\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  117,
+                                       "term":  "app cache",
+                                       "text":  "\"app cache\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  118,
+                                       "term":  "source of truth",
+                                       "text":  "\"source of truth\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  119,
+                                       "term":  "direct canonical mutation",
+                                       "text":  "\"direct canonical mutation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  120,
+                                       "term":  "kernel bypass",
+                                       "text":  "\"kernel bypass\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  121,
+                                       "term":  "direct state mutation",
+                                       "text":  "\"direct state mutation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  122,
+                                       "term":  "ui framework selection",
+                                       "text":  "\"ui framework selection\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  123,
+                                       "term":  "database selection",
+                                       "text":  "\"database selection\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  124,
+                                       "term":  "api runtime selection",
+                                       "text":  "\"api runtime selection\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  125,
+                                       "term":  "direct_ui_approval",
+                                       "text":  "\"direct_ui_approval\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  126,
+                                       "term":  "notification_as_decision",
+                                       "text":  "\"notification_as_decision\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  127,
+                                       "term":  "status_card_approval",
+                                       "text":  "\"status_card_approval\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  128,
+                                       "term":  "chat_approval",
+                                       "text":  "\"chat_approval\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  129,
+                                       "term":  "controller_approval",
+                                       "text":  "\"controller_approval\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  339,
+                                       "term":  "app cache",
+                                       "text":  "return ValidationResult(False, ErrorCode.NO_GO_BOUNDARY, \"app cache or projection cannot be source authority\")"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/service_facade.py",
+                                       "line":  525,
+                                       "term":  "source of truth",
+                                       "text":  "if any(term in text for term in (\"projection\", \"cache\", \"source of truth\")):"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_command_draft.py",
+                                       "line":  43,
+                                       "term":  "final_pass",
+                                       "text":  "for status in (\"approved\", \"accepted\", \"complete\", \"final_pass\", \"production_ready\", \"deployed\", \"active\", \"closed\"):"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_command_draft.py",
+                                       "line":  43,
+                                       "term":  "production_ready",
+                                       "text":  "for status in (\"approved\", \"accepted\", \"complete\", \"final_pass\", \"production_ready\", \"deployed\", \"active\", \"closed\"):"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_command_draft.py",
+                                       "line":  43,
+                                       "term":  "deploy",
+                                       "text":  "for status in (\"approved\", \"accepted\", \"complete\", \"final_pass\", \"production_ready\", \"deployed\", \"active\", \"closed\"):"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_command_draft.py",
+                                       "line":  52,
+                                       "term":  "dispatch now",
+                                       "text":  "\"please dispatch now\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_command_draft.py",
+                                       "line":  53,
+                                       "term":  "activate route",
+                                       "text":  "\"please activate route now\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_command_draft.py",
+                                       "line":  54,
+                                       "term":  "execute workpacket",
+                                       "text":  "\"please execute workpacket now\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_command_draft.py",
+                                       "line":  55,
+                                       "term":  "production readiness",
+                                       "text":  "\"mark production readiness\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_command_draft.py",
+                                       "line":  56,
+                                       "term":  "complete project",
+                                       "text":  "\"complete project\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_command_draft.py",
+                                       "line":  57,
+                                       "term":  "mutate config",
+                                       "text":  "\"mutate config now\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+                                       "line":  44,
+                                       "term":  "direct_ui_approval",
+                                       "text":  "def test_direct_ui_approval_rejects_as_no_go() -\u003e None:"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+                                       "line":  45,
+                                       "term":  "direct_ui_approval",
+                                       "text":  "command = service_command(payload={\"requested_action\": \"direct_ui_approval\"})"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+                                       "line":  53,
+                                       "term":  "final_pass",
+                                       "text":  "def test_completion_production_final_pass_terms_reject() -\u003e None:"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+                                       "line":  55,
+                                       "term":  "complete project",
+                                       "text":  "\"complete project\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+                                       "line":  56,
+                                       "term":  "continuity activation",
+                                       "text":  "\"continuity activation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+                                       "line":  57,
+                                       "term":  "production readiness",
+                                       "text":  "\"production readiness\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+                                       "line":  58,
+                                       "term":  "deploy",
+                                       "text":  "\"deploy to production\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+                                       "line":  58,
+                                       "term":  "deploy to production",
+                                       "text":  "\"deploy to production\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+                                       "line":  59,
+                                       "term":  "final pass",
+                                       "text":  "\"final pass\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+                                       "line":  69,
+                                       "term":  "app cache",
+                                       "text":  "{\"authorization_source\": \"app cache\", \"authority_source\": \"cache\"},"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+                                       "line":  70,
+                                       "term":  "direct canonical mutation",
+                                       "text":  "{\"requested_action\": \"direct canonical mutation outside kernel\"},"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+                                       "line":  71,
+                                       "term":  "kernel bypass",
+                                       "text":  "{\"requested_action\": \"kernel bypass\"},"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/tests/test_service_facade_router.py",
+                                       "line":  36,
+                                       "term":  "projection_as_authority",
+                                       "text":  "intent={\"action\": \"service_projection_as_authority\"},"
+                                   }
+                               ],
+    "unclassified_matches":  [
+
+                             ],
+    "passed":  true
+}

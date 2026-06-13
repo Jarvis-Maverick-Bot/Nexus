@@ -1,0 +1,10 @@
+{
+    "command":  "git diff --check",
+    "exit_code":  0,
+    "started_utc":  "2026-06-13T14:15:14.4722517Z",
+    "finished_utc":  "2026-06-13T14:15:14.7558096Z",
+    "output":  [
+                   "warning: in the working copy of \u0027verification/4.21/l1gov-slice-009/test-output/full-governance-pytest-output.json\u0027, LF will be replaced by CRLF the next time Git touches it",
+                   "warning: in the working copy of \u0027verification/4.21/l1gov-slice-009/test-output/targeted-pytest-output.json\u0027, LF will be replaced by CRLF the next time Git touches it"
+               ]
+}

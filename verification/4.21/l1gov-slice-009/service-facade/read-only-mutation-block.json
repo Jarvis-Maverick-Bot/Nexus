@@ -1,0 +1,5 @@
+{
+  "accepted": false,
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "message": "read-only draft cannot submit state mutation"
+}

@@ -23,6 +23,11 @@ class CommandEnvelope:
     payload: dict[str, Any] = field(default_factory=dict)
     affects_state: bool = True
     created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    command_id: str | None = None
+    target_ref: str | None = None
+    expected_state: str | None = None
+    source_refs: tuple[str, ...] | None = None
+    authorization_source: str | None = None
 
 
 @dataclass(frozen=True)

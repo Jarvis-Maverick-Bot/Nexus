@@ -1,0 +1,13 @@
+{
+  "blocked_reason": "unknown service command type: InventLocalAuthority",
+  "command_id": "svc-cmd-001",
+  "error_code": "ERR_INVALID_TRANSITION",
+  "errors": [
+    "unknown service command type: InventLocalAuthority"
+  ],
+  "evidence_refs": [],
+  "kernel_record_ref": null,
+  "projection_ref": null,
+  "projection_refresh": "none",
+  "status": "rejected"
+}

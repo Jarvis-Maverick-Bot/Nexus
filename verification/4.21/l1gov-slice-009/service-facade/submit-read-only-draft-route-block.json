@@ -1,0 +1,13 @@
+{
+  "blocked_reason": "read-only draft cannot submit state mutation",
+  "command_id": "svc-cmd-001",
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "errors": [
+    "read-only draft cannot submit state mutation"
+  ],
+  "evidence_refs": [],
+  "kernel_record_ref": null,
+  "projection_ref": null,
+  "projection_refresh": "none",
+  "status": "blocked"
+}

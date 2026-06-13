@@ -1,0 +1,10 @@
+{
+    "shared_docs_review_commit":  "a8aae37032502800778f02c7defc0dce5d1231fd",
+    "shared_docs_review_subject":  "Approve 4.21 slice 009 task package",
+    "shared_docs_origin_main":  "a8aae37032502800778f02c7defc0dce5d1231fd",
+    "nexus_base":  "030918301bfb3912281f38ac3d9088a07612a664",
+    "nexus_origin_master":  "030918301bfb3912281f38ac3d9088a07612a664",
+    "nexus_head":  "7427484ef0120c52360bca5b4a66e44475066a04",
+    "task_package":  "\\\\192.168.31.124\\Nova-Jarvis-Inbox\\Thunder\\_submitted\\2026-06-13_4.21_slice009_task_package_thunder_v0.1\\",
+    "source_authority_mode":  "Shared Docs Git clone / verified origin/main; SMB handoff only"
+}

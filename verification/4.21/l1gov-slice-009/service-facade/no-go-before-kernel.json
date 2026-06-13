@@ -1,0 +1,13 @@
+{
+  "blocked_reason": "blocked by Slice 001 no-go boundary: service_projection_as_authority",
+  "command_id": "svc-cmd-001",
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "errors": [
+    "blocked by Slice 001 no-go boundary: service_projection_as_authority"
+  ],
+  "evidence_refs": [],
+  "kernel_record_ref": null,
+  "projection_ref": null,
+  "projection_refresh": "none",
+  "status": "blocked"
+}

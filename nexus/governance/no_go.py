@@ -110,6 +110,19 @@ class NoGoBoundaryPolicy:
                 "delivery_production_readiness": ErrorCode.NO_GO_BOUNDARY,
                 "delivery_deploy": ErrorCode.NO_GO_BOUNDARY,
                 "delivery_final_pass": ErrorCode.NO_GO_BOUNDARY,
+                "service_projection_as_authority": ErrorCode.NO_GO_BOUNDARY,
+                "service_cache_as_authority": ErrorCode.NO_GO_BOUNDARY,
+                "service_read_only_mutation": ErrorCode.NO_GO_BOUNDARY,
+                "service_direct_canonical_mutation": ErrorCode.NO_GO_BOUNDARY,
+                "service_baseline_bypass": ErrorCode.NO_GO_BOUNDARY,
+                "service_unknown_baseline_type": ErrorCode.NO_GO_BOUNDARY,
+                "service_runtime_live_invocation": ErrorCode.NO_GO_BOUNDARY,
+                "service_dispatch_execution": ErrorCode.NO_GO_BOUNDARY,
+                "service_route_activation": ErrorCode.NO_GO_BOUNDARY,
+                "service_workpacket_execution": ErrorCode.NO_GO_BOUNDARY,
+                "service_completion_claim": ErrorCode.NO_GO_BOUNDARY,
+                "service_production_readiness": ErrorCode.NO_GO_BOUNDARY,
+                "service_final_pass": ErrorCode.NO_GO_BOUNDARY,
             }
         )
 

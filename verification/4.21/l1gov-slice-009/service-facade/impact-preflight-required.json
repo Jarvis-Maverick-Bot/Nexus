@@ -1,0 +1,5 @@
+{
+  "accepted": false,
+  "error_code": "ERR_IMPACT_CONTROL_RECORD_INVALID",
+  "message": "ImpactAssessment is required before propagation"
+}
