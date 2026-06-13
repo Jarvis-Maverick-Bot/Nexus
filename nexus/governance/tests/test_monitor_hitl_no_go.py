@@ -92,6 +92,8 @@ def test_create_review_task_command_rejects_forbidden_output_terms(forbidden_out
         ("notes", "please dispatch now"),
         ("notes", "please perform dispatch execution now"),
         ("notes", "please execute dispatch now"),
+        ("notes", "please activate route now"),
+        ("notes", "please execute workpacket now"),
     ),
 )
 def test_create_review_task_command_rejects_sentence_shaped_forbidden_intent(

@@ -94,8 +94,10 @@ FORBIDDEN_EFFECT_TERMS: tuple[str, ...] = (
     "transport_call",
     "route activation",
     "route_activation",
+    "activate route",
     "workpacket execution",
     "workpacket_execution",
+    "execute workpacket",
 )
 
 
