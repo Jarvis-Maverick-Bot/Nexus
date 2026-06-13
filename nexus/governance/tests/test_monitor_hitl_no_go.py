@@ -89,6 +89,9 @@ def test_create_review_task_command_rejects_forbidden_output_terms(forbidden_out
         ("expected_outputs", "please perform controller execution now"),
         ("expected_outputs", "perform actual dispatch"),
         ("notes", "this would require runtime invocation by a private agent"),
+        ("notes", "please dispatch now"),
+        ("notes", "please perform dispatch execution now"),
+        ("notes", "please execute dispatch now"),
     ),
 )
 def test_create_review_task_command_rejects_sentence_shaped_forbidden_intent(
