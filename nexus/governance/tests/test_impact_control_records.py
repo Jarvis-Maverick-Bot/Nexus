@@ -46,6 +46,8 @@ def test_impact_control_request_rejects_missing_required_fields(field_name: str)
         "mark production readiness",
         "mark project accepted",
         "mark delivery completed",
+        "send request to lower layer owner",
+        "send lower layer request",
         "submit_lower_layer_request",
         "runtime invocation",
         "private_agent_invocation",
@@ -105,6 +107,20 @@ def test_blocked_assessment_requires_blocked_reason() -> None:
 
 def test_unknown_allowed_next_action_rejects() -> None:
     result = validate_impact_assessment(valid_assessment(allowed_next_action="dispatch_execute"))
+
+    assert result.accepted is False
+    assert result.error_code == ErrorCode.NO_GO_BOUNDARY
+
+
+@pytest.mark.parametrize(
+    "owner_path_outcome",
+    (
+        "lower layer owner accepted project",
+        "owner path result completes delivery",
+    ),
+)
+def test_impact_assessment_owner_path_outcome_cannot_claim_completion(owner_path_outcome: str) -> None:
+    result = validate_impact_assessment(valid_assessment(owner_path_outcome=owner_path_outcome))
 
     assert result.accepted is False
     assert result.error_code == ErrorCode.NO_GO_BOUNDARY

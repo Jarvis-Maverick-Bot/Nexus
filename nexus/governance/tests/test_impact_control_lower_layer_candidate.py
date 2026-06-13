@@ -31,6 +31,8 @@ def test_lower_layer_request_candidate_without_monitor_decision_rejects() -> Non
     "requested_capability",
     (
         "submit lower layer request now",
+        "send request to lower layer owner",
+        "send lower layer request",
         "controller_call",
         "owner_path_call",
         "route_activation",
@@ -74,6 +76,8 @@ def test_lower_layer_request_outcome_normalizes_owner_path_result() -> None:
         "project accepted",
         "delivery completed",
         "production readiness",
+        "lower layer owner accepted project",
+        "owner path result completes delivery",
     ),
 )
 def test_lower_layer_request_outcome_cannot_mark_project_complete(expected_follow_up: str) -> None:
