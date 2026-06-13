@@ -1,12 +1,13 @@
 {
     "slice":  "L1GOV-SLICE-007",
     "status":  "PR_READY_FOR_NOVA_REVIEW",
-    "generated_utc":  "2026-06-13T05:49:49.7311554Z",
+    "generated_utc":  "2026-06-13T06:22:28.0793395Z",
     "nexus_branch":  "codex/4.21-slice007-impact-control",
-    "nexus_head":  "a10cb795a7006692f903ae9658004c2e5b5591e0",
+    "nexus_head":  "6760e6d60f893976a07b1c450f2d9906397d1164",
     "nexus_base":  "1d2401dcddcf22ed5d426f4dd3b41659ef10c4f5",
     "authority_commits_or_refs":  [
                                       "565ce91d3d00f380d3e22ab2f89b52074b9e1f6c",
+                                      "f59590b",
                                       "1d2401dcddcf22ed5d426f4dd3b41659ef10c4f5"
                                   ],
     "changed_files":  [
@@ -43,8 +44,12 @@
                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-credential-mutation.json",
                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-direct-35-controller-call.json",
                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-direct-4.19-controller-call.json",
+                          "verification/4.21/l1gov-slice-007/impact-control/request-no-go-mark-delivery-completed.json",
+                          "verification/4.21/l1gov-slice-007/impact-control/request-no-go-mark-production-readiness.json",
+                          "verification/4.21/l1gov-slice-007/impact-control/request-no-go-mark-project-accepted.json",
                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-perform-actual-dispatch.json",
                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-please-activate-route-now.json",
+                          "verification/4.21/l1gov-slice-007/impact-control/request-no-go-please-call-owner-path-now.json",
                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-please-execute-workpacket-now.json",
                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-private-agent-invocation.json",
                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-runtime-invocation.json",
@@ -79,8 +84,8 @@
                           "verification/4.21/l1gov-slice-007/test-output/targeted-pytest-output.json"
                       ],
     "verification_summary":  {
-                                 "targeted_pytest":  "74 passed",
-                                 "full_governance_pytest":  "373 passed",
+                                 "targeted_pytest":  "80 passed",
+                                 "full_governance_pytest":  "379 passed",
                                  "git_diff_check_exit_code":  0,
                                  "nexus_mq_import_scan_no_matches":  true,
                                  "controller_dispatch_runtime_call_scan_result":  "PASS_CLASSIFIED_GUARD_OR_TEST_ONLY",
@@ -110,8 +115,12 @@
                            "verification/4.21/l1gov-slice-007/impact-control/request-no-go-credential-mutation.json",
                            "verification/4.21/l1gov-slice-007/impact-control/request-no-go-direct-35-controller-call.json",
                            "verification/4.21/l1gov-slice-007/impact-control/request-no-go-direct-4.19-controller-call.json",
+                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-mark-delivery-completed.json",
+                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-mark-production-readiness.json",
+                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-mark-project-accepted.json",
                            "verification/4.21/l1gov-slice-007/impact-control/request-no-go-perform-actual-dispatch.json",
                            "verification/4.21/l1gov-slice-007/impact-control/request-no-go-please-activate-route-now.json",
+                           "verification/4.21/l1gov-slice-007/impact-control/request-no-go-please-call-owner-path-now.json",
                            "verification/4.21/l1gov-slice-007/impact-control/request-no-go-please-execute-workpacket-now.json",
                            "verification/4.21/l1gov-slice-007/impact-control/request-no-go-private-agent-invocation.json",
                            "verification/4.21/l1gov-slice-007/impact-control/request-no-go-runtime-invocation.json",
