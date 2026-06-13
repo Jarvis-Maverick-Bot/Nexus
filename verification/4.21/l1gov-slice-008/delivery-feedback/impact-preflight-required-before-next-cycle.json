@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "impact_assessment_ref is required before material feedback propagation"
+  ],
+  "error_code": "ERR_IMPACT_CONTROL_RECORD_INVALID",
+  "message": "FeedbackTriageDecisionRequest rejected",
+  "missing_fields": []
+}

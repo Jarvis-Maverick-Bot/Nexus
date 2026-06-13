@@ -1,0 +1,484 @@
+{
+    "slice":  "l1gov-slice-008",
+    "scan_name":  "raw_feedback_direct_mutation_scan",
+    "command":  "structured classified scan over nexus/governance/**/*.py for raw-feedback direct mutation terms",
+    "active_call_surfaces":  [
+
+                             ],
+    "forbidden_effect_surfaces":  [
+
+                                  ],
+    "unauthorized_runtime_controller_dispatch_paths":  [
+
+                                                       ],
+    "unauthorized_raw_feedback_mutation_paths":  [
+
+                                                 ],
+    "unauthorized_completion_or_production_paths":  [
+
+                                                    ],
+    "allowed_guard_literals":  [
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  81,
+                                       "matched_terms":  [
+                                                             "raw feedback direct mutation"
+                                                         ],
+                                       "text":  "\"raw_feedback_direct_mutation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  82,
+                                       "matched_terms":  [
+                                                             "mutate backlog"
+                                                         ],
+                                       "text":  "\"mutate backlog\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  83,
+                                       "matched_terms":  [
+                                                             "mutate backlog"
+                                                         ],
+                                       "text":  "\"mutate_backlog\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  84,
+                                       "matched_terms":  [
+                                                             "update backlog"
+                                                         ],
+                                       "text":  "\"update backlog\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  85,
+                                       "matched_terms":  [
+                                                             "update backlog"
+                                                         ],
+                                       "text":  "\"update_backlog\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  86,
+                                       "matched_terms":  [
+                                                             "update scope"
+                                                         ],
+                                       "text":  "\"update scope\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  87,
+                                       "matched_terms":  [
+                                                             "update scope"
+                                                         ],
+                                       "text":  "\"update_scope\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  88,
+                                       "matched_terms":  [
+                                                             "update success criteria"
+                                                         ],
+                                       "text":  "\"update success criteria\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  89,
+                                       "matched_terms":  [
+                                                             "update success criteria"
+                                                         ],
+                                       "text":  "\"update_success_criteria\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  90,
+                                       "matched_terms":  [
+                                                             "direct backlog mutation"
+                                                         ],
+                                       "text":  "\"direct backlog mutation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  91,
+                                       "matched_terms":  [
+                                                             "direct scope mutation"
+                                                         ],
+                                       "text":  "\"direct scope mutation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  92,
+                                       "matched_terms":  [
+                                                             "direct success criteria mutation"
+                                                         ],
+                                       "text":  "\"direct success criteria mutation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  93,
+                                       "matched_terms":  [
+                                                             "direct no go mutation"
+                                                         ],
+                                       "text":  "\"direct no go mutation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  94,
+                                       "matched_terms":  [
+                                                             "direct no go mutation"
+                                                         ],
+                                       "text":  "\"direct no-go mutation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  95,
+                                       "matched_terms":  [
+                                                             "direct priority mutation"
+                                                         ],
+                                       "text":  "\"direct priority mutation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  96,
+                                       "matched_terms":  [
+                                                             "direct packet mutation"
+                                                         ],
+                                       "text":  "\"direct packet mutation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  97,
+                                       "matched_terms":  [
+                                                             "update no go"
+                                                         ],
+                                       "text":  "\"update no go\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  98,
+                                       "matched_terms":  [
+                                                             "update no go"
+                                                         ],
+                                       "text":  "\"update no-go\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  99,
+                                       "matched_terms":  [
+                                                             "mutate no go"
+                                                         ],
+                                       "text":  "\"mutate no go\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  100,
+                                       "matched_terms":  [
+                                                             "mutate no go"
+                                                         ],
+                                       "text":  "\"mutate no-go\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  103,
+                                       "matched_terms":  [
+                                                             "update priority"
+                                                         ],
+                                       "text":  "\"update priority\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  104,
+                                       "matched_terms":  [
+                                                             "mutate priority"
+                                                         ],
+                                       "text":  "\"mutate priority\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  105,
+                                       "matched_terms":  [
+                                                             "set priority"
+                                                         ],
+                                       "text":  "\"set priority\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  106,
+                                       "matched_terms":  [
+                                                             "update packet"
+                                                         ],
+                                       "text":  "\"update packet\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  107,
+                                       "matched_terms":  [
+                                                             "mutate packet"
+                                                         ],
+                                       "text":  "\"mutate packet\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  108,
+                                       "matched_terms":  [
+                                                             "create packet"
+                                                         ],
+                                       "text":  "\"create packet\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  109,
+                                       "matched_terms":  [
+                                                             "approve packet"
+                                                         ],
+                                       "text":  "\"approve packet\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  110,
+                                       "matched_terms":  [
+                                                             "create requirement"
+                                                         ],
+                                       "text":  "\"create requirement\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  111,
+                                       "matched_terms":  [
+                                                             "create requirement"
+                                                         ],
+                                       "text":  "\"create_requirement\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  112,
+                                       "matched_terms":  [
+                                                             "approve requirement"
+                                                         ],
+                                       "text":  "\"approve requirement\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  113,
+                                       "matched_terms":  [
+                                                             "approve requirement"
+                                                         ],
+                                       "text":  "\"approve_requirement\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  501,
+                                       "matched_terms":  [
+                                                             "mutate backlog"
+                                                         ],
+                                       "text":  "blocked.append(\"raw feedback cannot mutate backlog, scope, success criteria, requirements, or completion\")"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  742,
+                                       "matched_terms":  [
+                                                             "mutate backlog"
+                                                         ],
+                                       "text":  "blocked.append(\"NextCycleProposal cannot directly mutate backlog, scope, requirements, or criteria\")"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/execution.py",
+                                       "line":  543,
+                                       "matched_terms":  [
+                                                             "create packet"
+                                                         ],
+                                       "text":  "def create_packet_repair_request_command("
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  98,
+                                       "matched_terms":  [
+                                                             "direct backlog mutation"
+                                                         ],
+                                       "text":  "\"delivery_direct_backlog_mutation\": ErrorCode.RAW_FEEDBACK_NO_AUTHORITY_MUTATION,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  99,
+                                       "matched_terms":  [
+                                                             "direct scope mutation"
+                                                         ],
+                                       "text":  "\"delivery_direct_scope_mutation\": ErrorCode.RAW_FEEDBACK_NO_AUTHORITY_MUTATION,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
+                                       "line":  100,
+                                       "matched_terms":  [
+                                                             "direct success criteria mutation"
+                                                         ],
+                                       "text":  "\"delivery_direct_success_criteria_mutation\": ErrorCode.RAW_FEEDBACK_NO_AUTHORITY_MUTATION,"
+                                   }
+                               ],
+    "allowed_negative_test_fixtures":  [
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_metric_policy.py",
+                                               "line":  58,
+                                               "matched_terms":  [
+                                                                     "update backlog"
+                                                                 ],
+                                               "text":  "result = validate_feedback_metric_extraction(valid_extraction(proposed_promotion_route=\"update backlog now\"), valid_policy())"
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_no_go.py",
+                                               "line":  19,
+                                               "matched_terms":  [
+                                                                     "mutate backlog"
+                                                                 ],
+                                               "text":  "\"please mutate backlog now\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_no_go.py",
+                                               "line":  20,
+                                               "matched_terms":  [
+                                                                     "update scope"
+                                                                 ],
+                                               "text":  "\"please update scope now\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_no_go.py",
+                                               "line":  21,
+                                               "matched_terms":  [
+                                                                     "update success criteria"
+                                                                 ],
+                                               "text":  "\"please update success criteria now\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_no_go.py",
+                                               "line":  22,
+                                               "matched_terms":  [
+                                                                     "create requirement"
+                                                                 ],
+                                               "text":  "\"please create requirement now\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_records.py",
+                                               "line":  84,
+                                               "matched_terms":  [
+                                                                     "mutate backlog"
+                                                                 ],
+                                               "text":  "\"mutate backlog from this raw feedback\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_records.py",
+                                               "line":  85,
+                                               "matched_terms":  [
+                                                                     "update scope"
+                                                                 ],
+                                               "text":  "\"update scope directly\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_records.py",
+                                               "line":  86,
+                                               "matched_terms":  [
+                                                                     "update success criteria"
+                                                                 ],
+                                               "text":  "\"update success criteria now\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_records.py",
+                                               "line":  87,
+                                               "matched_terms":  [
+                                                                     "update no go"
+                                                                 ],
+                                               "text":  "\"update no-go now\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_records.py",
+                                               "line":  88,
+                                               "matched_terms":  [
+                                                                     "update priority"
+                                                                 ],
+                                               "text":  "\"update priority now\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_records.py",
+                                               "line":  89,
+                                               "matched_terms":  [
+                                                                     "mutate packet"
+                                                                 ],
+                                               "text":  "\"mutate packet now\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_records.py",
+                                               "line":  90,
+                                               "matched_terms":  [
+                                                                     "create requirement"
+                                                                 ],
+                                               "text":  "\"create requirement from one comment\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_records.py",
+                                               "line":  95,
+                                               "matched_terms":  [
+                                                                     "raw feedback direct mutation"
+                                                                 ],
+                                               "text":  "def test_feedback_record_rejects_raw_feedback_direct_mutation(raw_summary: str) -\u003e None:"
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_trend.py",
+                                               "line":  50,
+                                               "matched_terms":  [
+                                                                     "update success criteria"
+                                                                 ],
+                                               "text":  "result = validate_feedback_metric_trend(valid_trend(recommended_next_action=\"update success criteria directly\"), valid_policy())"
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_triage_decision.py",
+                                               "line":  50,
+                                               "matched_terms":  [
+                                                                     "direct backlog mutation"
+                                                                 ],
+                                               "text":  "def test_triage_decision_rejects_direct_backlog_mutation_route() -\u003e None:"
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_triage_decision.py",
+                                               "line":  51,
+                                               "matched_terms":  [
+                                                                     "update backlog"
+                                                                 ],
+                                               "text":  "result = validate_feedback_triage_decision(valid_triage_decision(approved_route=\"update backlog now\"))"
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/fixtures/execution.py",
+                                               "line":  12,
+                                               "matched_terms":  [
+                                                                     "create packet"
+                                                                 ],
+                                               "text":  "create_packet_repair_request_command,"
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/fixtures/execution.py",
+                                               "line":  105,
+                                               "matched_terms":  [
+                                                                     "create packet"
+                                                                 ],
+                                               "text":  "\"objective\": \"create packet contract foundation\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/fixtures/execution.py",
+                                               "line":  180,
+                                               "matched_terms":  [
+                                                                     "create packet"
+                                                                 ],
+                                               "text":  "\"objective\": \"create packet contract foundation\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/fixtures/execution.py",
+                                               "line":  244,
+                                               "matched_terms":  [
+                                                                     "create packet"
+                                                                 ],
+                                               "text":  "return create_packet_repair_request_command(**values)"
+                                           }
+                                       ],
+    "unclassified_matches":  [
+
+                             ],
+    "result":  "PASS_CLASSIFIED_GUARD_OR_TEST_ONLY"
+}

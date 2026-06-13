@@ -1,0 +1,23 @@
+{
+    "slice":  "l1gov-slice-008",
+    "base":  "eb34d9d389d30c8f8e20df4031544679cf8af1ff",
+    "implementation_head":  "56c84f7a2b11762d0973554ddb09ffcb815a8e27",
+    "changed_files":  [
+                          "nexus/governance/delivery_feedback.py",
+                          "nexus/governance/errors.py",
+                          "nexus/governance/kernel.py",
+                          "nexus/governance/no_go.py",
+                          "nexus/governance/service_contract.py",
+                          "nexus/governance/tests/fixtures/delivery_feedback.py",
+                          "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
+                          "nexus/governance/tests/test_delivery_feedback_impact_preflight.py",
+                          "nexus/governance/tests/test_delivery_feedback_kernel_boundary.py",
+                          "nexus/governance/tests/test_delivery_feedback_metric_policy.py",
+                          "nexus/governance/tests/test_delivery_feedback_no_go.py",
+                          "nexus/governance/tests/test_delivery_feedback_records.py",
+                          "nexus/governance/tests/test_delivery_feedback_service_contract.py",
+                          "nexus/governance/tests/test_delivery_feedback_trend.py",
+                          "nexus/governance/tests/test_delivery_feedback_triage_decision.py"
+                      ],
+    "diff_stat":  " nexus/governance/delivery_feedback.py              | 1168 ++++++++++++++++++++\r\n nexus/governance/errors.py                         |    4 +\r\n nexus/governance/kernel.py                         |    9 +\r\n nexus/governance/no_go.py                          |   16 +\r\n nexus/governance/service_contract.py               |    9 +\r\n .../governance/tests/fixtures/delivery_feedback.py |  341 ++++++\r\n ...test_delivery_feedback_completion_continuity.py |   50 +\r\n .../test_delivery_feedback_impact_preflight.py     |   42 +\r\n .../test_delivery_feedback_kernel_boundary.py      |   61 +\r\n .../tests/test_delivery_feedback_metric_policy.py  |   61 +\r\n .../tests/test_delivery_feedback_no_go.py          |   88 ++\r\n .../tests/test_delivery_feedback_records.py        |  111 ++\r\n .../test_delivery_feedback_service_contract.py     |  155 +++\r\n .../tests/test_delivery_feedback_trend.py          |   53 +\r\n .../test_delivery_feedback_triage_decision.py      |   54 +\r\n 15 files changed, 2222 insertions(+)"
+}

@@ -1,0 +1,7 @@
+{
+    "slice":  "l1gov-slice-008",
+    "result":  "PASS",
+    "command":  "git diff --check origin/master..HEAD",
+    "exit_code":  0,
+    "output":  ""
+}

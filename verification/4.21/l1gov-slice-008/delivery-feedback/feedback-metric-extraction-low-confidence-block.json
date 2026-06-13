@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "approved_signal requires confidence >= 0.60"
+  ],
+  "error_code": "ERR_DELIVERY_FEEDBACK_RECORD_INVALID",
+  "message": "FeedbackMetricExtraction rejected",
+  "missing_fields": []
+}

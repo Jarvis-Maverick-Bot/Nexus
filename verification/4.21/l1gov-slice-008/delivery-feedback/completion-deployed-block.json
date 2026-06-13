@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "CompletionContinuityPacket status rejected: deployed"
+  ],
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "message": "CompletionContinuityPacket rejected",
+  "missing_fields": []
+}

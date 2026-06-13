@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "FeedbackRecord crossed runtime, dispatch, controller, production, or final-pass boundary"
+  ],
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "message": "FeedbackRecord rejected",
+  "missing_fields": []
+}
