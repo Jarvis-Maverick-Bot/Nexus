@@ -1,0 +1,17 @@
+{
+  "authority_refs": [
+    "WBS V0.6",
+    "L1.11.9",
+    "a8aae37032502800778f02c7defc0dce5d1231fd"
+  ],
+  "freshness": "current",
+  "generated_at": "2026-06-13T12:58:12.191353+00:00",
+  "is_canonical_state": false,
+  "payload": {
+    "state": "completion_continuity_review_requested"
+  },
+  "projection_id": "workspace-001:mission_control:kernel:12",
+  "projection_type": "mission_control",
+  "source_checkpoint": "kernel:12",
+  "workspace_id": "workspace-001"
+}

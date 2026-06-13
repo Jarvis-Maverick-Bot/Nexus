@@ -1,0 +1,17 @@
+{
+    "generated_utc":  "2026-06-13T12:58:12.7414896Z",
+    "files":  [
+                  "nexus/governance/kernel.py",
+                  "nexus/governance/no_go.py",
+                  "nexus/governance/projections.py",
+                  "nexus/governance/schemas.py",
+                  "nexus/governance/service_facade.py",
+                  "nexus/governance/tests/fixtures/service_facade.py",
+                  "nexus/governance/tests/test_service_facade_baseline_mediation.py",
+                  "nexus/governance/tests/test_service_facade_command_draft.py",
+                  "nexus/governance/tests/test_service_facade_impact_hitl_no_go.py",
+                  "nexus/governance/tests/test_service_facade_projection_rebuild.py",
+                  "nexus/governance/tests/test_service_facade_router.py",
+                  "verification/4.21/l1gov-slice-009/"
+              ]
+}

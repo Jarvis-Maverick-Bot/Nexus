@@ -1,0 +1,9 @@
+{
+    "command":  "git diff --check",
+    "exit_code":  0,
+    "started_utc":  "2026-06-13T12:58:12.3219675Z",
+    "finished_utc":  "2026-06-13T12:58:12.6584802Z",
+    "output":  [
+
+               ]
+}

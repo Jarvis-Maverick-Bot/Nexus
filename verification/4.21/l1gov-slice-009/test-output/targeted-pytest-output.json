@@ -1,0 +1,10 @@
+{
+    "command":  "python -m pytest nexus/governance/tests/test_service_facade_command_draft.py nexus/governance/tests/test_service_facade_projection_rebuild.py nexus/governance/tests/test_service_facade_router.py nexus/governance/tests/test_service_facade_baseline_mediation.py nexus/governance/tests/test_service_facade_impact_hitl_no_go.py -q",
+    "exit_code":  0,
+    "started_utc":  "2026-06-13T12:58:10.6283514Z",
+    "finished_utc":  "2026-06-13T12:58:11.2267962Z",
+    "output":  [
+                   ".............................                                            [100%]",
+                   "29 passed in 0.14s"
+               ]
+}

@@ -1,0 +1,13 @@
+{
+  "blocked_reason": "expected version 11, observed 12",
+  "command_id": "baseline:baseline-entry-001",
+  "error_code": "ERR_STALE_EXPECTED_VERSION",
+  "errors": [
+    "expected version 11, observed 12"
+  ],
+  "evidence_refs": [],
+  "kernel_record_ref": null,
+  "projection_ref": null,
+  "projection_refresh": "none",
+  "status": "stale"
+}

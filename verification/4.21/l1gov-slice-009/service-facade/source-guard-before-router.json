@@ -1,0 +1,13 @@
+{
+  "blocked_reason": "WBS version mismatch",
+  "command_id": "svc-cmd-001",
+  "error_code": "ERR_STALE_SOURCE_AUTHORITY",
+  "errors": [
+    "WBS version mismatch"
+  ],
+  "evidence_refs": [],
+  "kernel_record_ref": null,
+  "projection_ref": null,
+  "projection_refresh": "none",
+  "status": "rejected"
+}
