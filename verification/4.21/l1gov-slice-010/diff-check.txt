@@ -1,3 +1,2 @@
-warning: in the working copy of 'nexus/governance/app_contract.py', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'nexus/governance/no_go.py', LF will be replaced by CRLF the next time Git touches it
+NO_DIFF_CHECK_FINDINGS
 exit_code=0

@@ -55,6 +55,7 @@
     "verification/4.21/l1gov-slice-010/projection-surfaces/stale-refresh-request.json",
     "verification/4.21/l1gov-slice-010/read-only-disabled-mutations.json",
     "verification/4.21/l1gov-slice-010/read-only/disabled-mutation-affordances.json",
+    "verification/4.21/l1gov-slice-010/scope-check.json",
     "verification/4.21/l1gov-slice-010/service-outcome-surfacing.json",
     "verification/4.21/l1gov-slice-010/service-outcomes/rejection-surfaced.json",
     "verification/4.21/l1gov-slice-010/source-authority.json",
