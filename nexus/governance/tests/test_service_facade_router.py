@@ -76,6 +76,18 @@ def test_submit_command_draft_route_blocks_read_only_draft_without_kernel_append
     write_evidence("service-facade/submit-read-only-draft-route-block.json", response.to_evidence(), slice_id="l1gov-slice-009")
 
 
+def test_submit_command_draft_route_requires_embedded_command_draft_without_kernel_append() -> None:
+    kernel = GovernanceKernel()
+    command = service_command(payload={"request_ref": "missing-command-draft"})
+
+    response = service(kernel=kernel).handle(command)
+
+    assert response.status == ServiceOutcomeStatus.REJECTED
+    assert response.error_code == ErrorCode.INVALID_TRANSITION
+    assert len(kernel.records) == 0
+    write_evidence("service-facade/submit-missing-command-draft-reject.json", response.to_evidence(), slice_id="l1gov-slice-009")
+
+
 def test_read_projection_refresh_returns_projection_outcome_without_kernel_append() -> None:
     kernel = GovernanceKernel()
     command = service_command(

@@ -248,10 +248,14 @@ class GovernanceServiceFacade:
             )
 
         if command.command_type == "SubmitCommandDraft":
-            if "command_draft" in command.payload:
-                draft_result = validate_command_draft(_coerce_command_draft(command.payload.get("command_draft")))
-                if not draft_result.accepted:
-                    return _validation_outcome(command_id, draft_result)
+            if "command_draft" not in command.payload:
+                return _validation_outcome(
+                    command_id,
+                    ValidationResult(False, ErrorCode.INVALID_TRANSITION, "SubmitCommandDraft requires command_draft payload"),
+                )
+            draft_result = validate_command_draft(_coerce_command_draft(command.payload.get("command_draft")))
+            if not draft_result.accepted:
+                return _validation_outcome(command_id, draft_result)
             return ServiceCommandOutcome(
                 command_id=command_id,
                 status=ServiceOutcomeStatus.ACCEPTED,
