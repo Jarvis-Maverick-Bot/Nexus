@@ -1,21 +1,24 @@
 {
     "slice":  "L1GOV-SLICE-006",
     "status":  "patch evidence generated for Nova review",
-    "generated_local":  "2026-06-13T09:46:00.5408551+08:00",
+    "generated_local":  "2026-06-13T10:05:58.8633468+08:00",
     "nexus_branch":  "codex/4.21-slice006-monitor-hitl",
-    "nexus_head":  "23e7fe56d623ebed37c3146ec7423d4d9b449e15",
+    "nexus_head":  "1fc8b1005204798d166441446a79c7a6eb2dfe1b",
     "nexus_head_semantics":  "verified implementation commit used for this evidence; the following evidence-only commit may become the PR branch tip",
     "nexus_base":  "b8f1e54d62ee1c8c65924035b93e2e11bbe41f1e",
     "authority_refs":  [
                            "SharedDocs:b3d3f67e6e36768732f76ed7215288e4f4e182c6",
                            "SharedDocsReview:e1bb7bc752262a6ad1de22c993f73650dd801f46",
                            "SharedDocsReview:6f48eea54fb320a33084537b38fed3b0e9e9e096",
+                           "SharedDocsReview:fd3fc9d24e58e695fe63c43aabb67345d52014f7",
                            "NexusBase:b8f1e54d62ee1c8c65924035b93e2e11bbe41f1e"
                        ],
     "reviewer_repro_cases":  [
                                  "please dispatch now",
                                  "please perform dispatch execution now",
-                                 "please execute dispatch now"
+                                 "please execute dispatch now",
+                                 "please activate route now",
+                                 "please execute workpacket now"
                              ],
     "changed_files":  [
                           "nexus/governance/errors.py",
@@ -63,7 +66,9 @@
                           "verification/4.21/l1gov-slice-006/monitor-hitl/review-disposition-revise.json",
                           "verification/4.21/l1gov-slice-006/monitor-hitl/reviewer-repro-execute-dispatch-now.json",
                           "verification/4.21/l1gov-slice-006/monitor-hitl/reviewer-repro-perform-dispatch-execution-now.json",
+                          "verification/4.21/l1gov-slice-006/monitor-hitl/reviewer-repro-please-activate-route-now.json",
                           "verification/4.21/l1gov-slice-006/monitor-hitl/reviewer-repro-please-dispatch-now.json",
+                          "verification/4.21/l1gov-slice-006/monitor-hitl/reviewer-repro-please-execute-workpacket-now.json",
                           "verification/4.21/l1gov-slice-006/monitor-hitl/review-task-status-accepted-block.json",
                           "verification/4.21/l1gov-slice-006/monitor-hitl/review-task-status-approved-block.json",
                           "verification/4.21/l1gov-slice-006/monitor-hitl/review-task-status-complete-block.json",
@@ -131,7 +136,9 @@
                            "monitor-hitl/review-disposition-revise.json",
                            "monitor-hitl/reviewer-repro-execute-dispatch-now.json",
                            "monitor-hitl/reviewer-repro-perform-dispatch-execution-now.json",
+                           "monitor-hitl/reviewer-repro-please-activate-route-now.json",
                            "monitor-hitl/reviewer-repro-please-dispatch-now.json",
+                           "monitor-hitl/reviewer-repro-please-execute-workpacket-now.json",
                            "monitor-hitl/review-task-status-accepted-block.json",
                            "monitor-hitl/review-task-status-approved-block.json",
                            "monitor-hitl/review-task-status-complete-block.json",
@@ -166,16 +173,16 @@
                            "test-output/targeted-pytest-output.json"
                        ],
     "verification_summary":  {
-                                 "targeted_pytest":  "........................................................................ [ 81%]\n................                                                         [100%]\n88 passed in 0.14s",
-                                 "full_governance_pytest":  "........................................................................ [ 24%]\n........................................................................ [ 48%]\n........................................................................ [ 72%]\n........................................................................ [ 96%]\n.........                                                                [100%]\n297 passed in 0.28s",
+                                 "targeted_pytest":  "........................................................................ [ 80%]\n..................                                                       [100%]\n90 passed in 0.14s",
+                                 "full_governance_pytest":  "........................................................................ [ 24%]\n........................................................................ [ 48%]\n........................................................................ [ 72%]\n........................................................................ [ 96%]\n...........                                                              [100%]\n299 passed in 0.29s",
                                  "git_diff_check_exit_code":  0,
                                  "nexus_mq_import_scan_no_matches":  true,
                                  "controller_dispatch_runtime_call_scan_result":  {
                                                                                       "no_active_call_surfaces":  true,
                                                                                       "no_forbidden_effect_surfaces":  true,
                                                                                       "no_unauthorized_runtime_controller_dispatch_paths":  true,
-                                                                                      "allowed_guard_literals_count":  65,
-                                                                                      "allowed_negative_test_fixtures_count":  72,
+                                                                                      "allowed_guard_literals_count":  70,
+                                                                                      "allowed_negative_test_fixtures_count":  75,
                                                                                       "unclassified_matches_count":  0
                                                                                   },
                                  "changed_files_within_allowed_boundary":  true,
@@ -184,7 +191,9 @@
                                  "reviewer_repro_evidence_files":  [
                                                                        "monitor-hitl/reviewer-repro-please-dispatch-now.json",
                                                                        "monitor-hitl/reviewer-repro-perform-dispatch-execution-now.json",
-                                                                       "monitor-hitl/reviewer-repro-execute-dispatch-now.json"
+                                                                       "monitor-hitl/reviewer-repro-execute-dispatch-now.json",
+                                                                       "monitor-hitl/reviewer-repro-please-activate-route-now.json",
+                                                                       "monitor-hitl/reviewer-repro-please-execute-workpacket-now.json"
                                                                    ]
                              }
 }

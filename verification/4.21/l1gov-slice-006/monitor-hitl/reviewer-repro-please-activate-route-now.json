@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "expected_acceptance": false,
+  "field_name": "notes",
+  "message": "Monitor/HITL command crossed Slice 006 boundary",
+  "review_commit": "fd3fc9d24e58e695fe63c43aabb67345d52014f7",
+  "reviewer_repro_text": "please activate route now"
+}

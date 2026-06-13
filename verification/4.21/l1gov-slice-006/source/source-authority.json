@@ -2,9 +2,10 @@
     "shared_docs_remote":  "git@github-thunder:Nova-Mini/Nova-Jarvis-Shared-Docs.git",
     "approved_package_review_commit":  "b3d3f67e6e36768732f76ed7215288e4f4e182c6",
     "prior_request_changes_review_commit":  "e1bb7bc752262a6ad1de22c993f73650dd801f46",
-    "request_changes_review_commit":  "6f48eea54fb320a33084537b38fed3b0e9e9e096",
+    "prior_patch_request_changes_review_commit":  "6f48eea54fb320a33084537b38fed3b0e9e9e096",
+    "request_changes_review_commit":  "fd3fc9d24e58e695fe63c43aabb67345d52014f7",
     "nexus_required_base_commit":  "b8f1e54d62ee1c8c65924035b93e2e11bbe41f1e",
-    "verified_implementation_head":  "23e7fe56d623ebed37c3146ec7423d4d9b449e15",
+    "verified_implementation_head":  "1fc8b1005204798d166441446a79c7a6eb2dfe1b",
     "source_authority":  [
                              "parent V0.8.5",
                              "WBS V0.6",

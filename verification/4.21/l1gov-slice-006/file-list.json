@@ -1,7 +1,7 @@
 {
     "command":  "Get-ChildItem -Recurse -File verification\\4.21\\l1gov-slice-006",
     "evidence_root":  "verification/4.21/l1gov-slice-006",
-    "evidence_file_count":  66,
+    "evidence_file_count":  68,
     "evidence_files":  [
                            "diff-check.json",
                            "diff-summary.json",
@@ -36,7 +36,9 @@
                            "monitor-hitl/review-disposition-revise.json",
                            "monitor-hitl/reviewer-repro-execute-dispatch-now.json",
                            "monitor-hitl/reviewer-repro-perform-dispatch-execution-now.json",
+                           "monitor-hitl/reviewer-repro-please-activate-route-now.json",
                            "monitor-hitl/reviewer-repro-please-dispatch-now.json",
+                           "monitor-hitl/reviewer-repro-please-execute-workpacket-now.json",
                            "monitor-hitl/review-task-status-accepted-block.json",
                            "monitor-hitl/review-task-status-approved-block.json",
                            "monitor-hitl/review-task-status-complete-block.json",
