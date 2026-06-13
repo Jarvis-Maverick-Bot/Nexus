@@ -1,0 +1,10 @@
+{
+  "accepted": true,
+  "aggregate_ref": null,
+  "error_code": null,
+  "evidence_refs": [],
+  "message": "",
+  "projection_ref": "projection:impact-lower-layer-outcome",
+  "record_ref": null,
+  "retryable": false
+}

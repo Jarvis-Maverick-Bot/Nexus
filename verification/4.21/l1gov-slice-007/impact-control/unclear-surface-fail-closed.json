@@ -1,0 +1,8 @@
+{
+  "accepted": false,
+  "blocked_reasons": [],
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "invalid_items": [],
+  "message": "unclear affected surfaces must fail closed as blocked",
+  "missing_fields": []
+}

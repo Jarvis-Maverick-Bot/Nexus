@@ -1,0 +1,11 @@
+{
+    "slice":  "L1GOV-SLICE-007",
+    "shared_docs_remote":  "git@github-thunder:Nova-Mini/Nova-Jarvis-Shared-Docs.git",
+    "shared_docs_authority_commit":  "565ce91d3d00f380d3e22ab2f89b52074b9e1f6c",
+    "approved_package_review_commit":  "565ce91d3d00f380d3e22ab2f89b52074b9e1f6c",
+    "patch_review_commit":  "d551a68830183d678fa9baa64e50519a3c9c18e3",
+    "source_authority":  "Shared Docs Git clone/worktree, not SMB",
+    "nexus_base":  "1d2401dcddcf22ed5d426f4dd3b41659ef10c4f5",
+    "nexus_implementation_head":  "25eb25a8d1a1ecf9b625674183ce2143e7a833c0",
+    "package_path":  "\\\\192.168.31.124\\Nova-Jarvis-Inbox\\Thunder\\_submitted\\2026-06-13_4.21_slice007_task_package_thunder_v0.1\\"
+}

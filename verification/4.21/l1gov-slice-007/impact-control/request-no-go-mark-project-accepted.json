@@ -1,0 +1,8 @@
+{
+  "accepted": false,
+  "blocked_reasons": [],
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "invalid_items": [],
+  "message": "ImpactControlRequest crossed Slice 007 no-go boundary",
+  "missing_fields": []
+}
