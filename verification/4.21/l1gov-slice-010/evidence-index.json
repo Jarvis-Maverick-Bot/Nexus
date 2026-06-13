@@ -131,9 +131,9 @@
     "no_slice_011_012_work": true,
     "no_ui_framework_runtime_server_database_api_package_selection": true
   },
-  "pr_url": "PENDING_PR",
+  "pr_url": "https://github.com/Jarvis-Maverick-Bot/Nexus/pull/18",
   "slice_id": "l1gov-slice-010",
-  "status": "READY_FOR_NOVA_REVIEW_PENDING_PR_URL",
+  "status": "PR_READY_FOR_NOVA_REVIEW",
   "task_package_review_commit": "eef9c051",
   "verification": {
     "diff_check": "diff-check.txt",
