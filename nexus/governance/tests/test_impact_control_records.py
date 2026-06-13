@@ -39,9 +39,13 @@ def test_impact_control_request_rejects_missing_required_fields(field_name: str)
     (
         "direct 4.19 controller call",
         "direct_35_controller_call",
+        "please call owner path now",
         "please activate route now",
         "please execute workpacket now",
         "perform actual dispatch",
+        "mark production readiness",
+        "mark project accepted",
+        "mark delivery completed",
         "submit_lower_layer_request",
         "runtime invocation",
         "private_agent_invocation",

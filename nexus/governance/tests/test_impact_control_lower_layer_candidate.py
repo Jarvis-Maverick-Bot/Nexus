@@ -68,8 +68,16 @@ def test_lower_layer_request_outcome_normalizes_owner_path_result() -> None:
     write_evidence("impact-control/lower-layer-outcome.json", result.to_evidence(), slice_id="l1gov-slice-007")
 
 
-def test_lower_layer_request_outcome_cannot_mark_project_complete() -> None:
-    result = validate_lower_layer_request_outcome(valid_lower_layer_outcome(expected_follow_up="production_ready"))
+@pytest.mark.parametrize(
+    "expected_follow_up",
+    (
+        "project accepted",
+        "delivery completed",
+        "production readiness",
+    ),
+)
+def test_lower_layer_request_outcome_cannot_mark_project_complete(expected_follow_up: str) -> None:
+    result = validate_lower_layer_request_outcome(valid_lower_layer_outcome(expected_follow_up=expected_follow_up))
 
     assert result.accepted is False
     assert result.error_code == ErrorCode.NO_GO_BOUNDARY
