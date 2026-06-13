@@ -20,7 +20,7 @@
     "allowed_guard_literals":  [
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  81,
+                                       "line":  82,
                                        "matched_terms":  [
                                                              "raw feedback direct mutation"
                                                          ],
@@ -28,7 +28,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  82,
+                                       "line":  83,
                                        "matched_terms":  [
                                                              "mutate backlog"
                                                          ],
@@ -36,7 +36,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  83,
+                                       "line":  84,
                                        "matched_terms":  [
                                                              "mutate backlog"
                                                          ],
@@ -44,7 +44,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  84,
+                                       "line":  85,
                                        "matched_terms":  [
                                                              "update backlog"
                                                          ],
@@ -52,7 +52,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  85,
+                                       "line":  86,
                                        "matched_terms":  [
                                                              "update backlog"
                                                          ],
@@ -60,7 +60,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  86,
+                                       "line":  87,
                                        "matched_terms":  [
                                                              "update scope"
                                                          ],
@@ -68,7 +68,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  87,
+                                       "line":  88,
                                        "matched_terms":  [
                                                              "update scope"
                                                          ],
@@ -76,7 +76,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  88,
+                                       "line":  89,
                                        "matched_terms":  [
                                                              "update success criteria"
                                                          ],
@@ -84,7 +84,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  89,
+                                       "line":  90,
                                        "matched_terms":  [
                                                              "update success criteria"
                                                          ],
@@ -92,7 +92,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  90,
+                                       "line":  91,
                                        "matched_terms":  [
                                                              "direct backlog mutation"
                                                          ],
@@ -100,7 +100,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  91,
+                                       "line":  92,
                                        "matched_terms":  [
                                                              "direct scope mutation"
                                                          ],
@@ -108,7 +108,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  92,
+                                       "line":  93,
                                        "matched_terms":  [
                                                              "direct success criteria mutation"
                                                          ],
@@ -116,7 +116,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  93,
+                                       "line":  94,
                                        "matched_terms":  [
                                                              "direct no go mutation"
                                                          ],
@@ -124,7 +124,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  94,
+                                       "line":  95,
                                        "matched_terms":  [
                                                              "direct no go mutation"
                                                          ],
@@ -132,7 +132,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  95,
+                                       "line":  96,
                                        "matched_terms":  [
                                                              "direct priority mutation"
                                                          ],
@@ -140,7 +140,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  96,
+                                       "line":  97,
                                        "matched_terms":  [
                                                              "direct packet mutation"
                                                          ],
@@ -148,7 +148,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  97,
+                                       "line":  98,
                                        "matched_terms":  [
                                                              "update no go"
                                                          ],
@@ -156,7 +156,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  98,
+                                       "line":  99,
                                        "matched_terms":  [
                                                              "update no go"
                                                          ],
@@ -164,7 +164,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  99,
+                                       "line":  100,
                                        "matched_terms":  [
                                                              "mutate no go"
                                                          ],
@@ -172,7 +172,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  100,
+                                       "line":  101,
                                        "matched_terms":  [
                                                              "mutate no go"
                                                          ],
@@ -180,7 +180,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  103,
+                                       "line":  104,
                                        "matched_terms":  [
                                                              "update priority"
                                                          ],
@@ -188,7 +188,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  104,
+                                       "line":  105,
                                        "matched_terms":  [
                                                              "mutate priority"
                                                          ],
@@ -196,7 +196,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  105,
+                                       "line":  106,
                                        "matched_terms":  [
                                                              "set priority"
                                                          ],
@@ -204,7 +204,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  106,
+                                       "line":  107,
                                        "matched_terms":  [
                                                              "update packet"
                                                          ],
@@ -212,7 +212,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  107,
+                                       "line":  108,
                                        "matched_terms":  [
                                                              "mutate packet"
                                                          ],
@@ -220,7 +220,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  108,
+                                       "line":  109,
                                        "matched_terms":  [
                                                              "create packet"
                                                          ],
@@ -228,7 +228,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  109,
+                                       "line":  110,
                                        "matched_terms":  [
                                                              "approve packet"
                                                          ],
@@ -236,7 +236,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  110,
+                                       "line":  111,
                                        "matched_terms":  [
                                                              "create requirement"
                                                          ],
@@ -244,7 +244,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  111,
+                                       "line":  112,
                                        "matched_terms":  [
                                                              "create requirement"
                                                          ],
@@ -252,7 +252,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  112,
+                                       "line":  113,
                                        "matched_terms":  [
                                                              "approve requirement"
                                                          ],
@@ -260,7 +260,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  113,
+                                       "line":  114,
                                        "matched_terms":  [
                                                              "approve requirement"
                                                          ],
@@ -268,7 +268,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  506,
+                                       "line":  507,
                                        "matched_terms":  [
                                                              "mutate backlog"
                                                          ],
@@ -276,7 +276,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  751,
+                                       "line":  752,
                                        "matched_terms":  [
                                                              "mutate backlog"
                                                          ],
