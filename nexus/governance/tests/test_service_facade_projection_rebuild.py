@@ -35,16 +35,18 @@ def test_stale_projection_rebuilds_from_kernel_checkpoint() -> None:
         build_projection_snapshot(
             projection_type="mission_control",
             workspace_id="workspace-001",
-            source_checkpoint="kernel:11",
-            payload={"state": "feedback_triage_recorded"},
-            authority_refs=SERVICE_SOURCE_REFS,
-        )
+        source_checkpoint="kernel:11",
+        payload={"state": "feedback_triage_recorded"},
+        authority_refs=SERVICE_SOURCE_REFS,
+        generated_at="2026-06-13T00:00:00+00:00",
+    )
     )
 
     rebuilt = rebuild_projection_snapshot(
         stale,
         latest_source_checkpoint="kernel:12",
         payload={"state": "completion_continuity_review_requested"},
+        generated_at="2026-06-13T00:01:00+00:00",
     )
 
     assert stale.freshness == FreshnessState.STALE
@@ -60,6 +62,7 @@ def test_projection_rebuild_failure_remains_read_only() -> None:
         source_checkpoint="kernel:11",
         authority_refs=SERVICE_SOURCE_REFS,
         reason="workspace source mismatch",
+        generated_at="2026-06-13T00:02:00+00:00",
     )
 
     assert failed.freshness == FreshnessState.FAILED
