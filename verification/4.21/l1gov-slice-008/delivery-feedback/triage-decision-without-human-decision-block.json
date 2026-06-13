@@ -1,0 +1,11 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "FeedbackTriageDecision requires HumanDecision-backed decision"
+  ],
+  "error_code": "ERR_MISSING_HUMAN_DECISION",
+  "message": "FeedbackTriageDecision rejected",
+  "missing_fields": [
+    "human_decision_ref"
+  ]
+}

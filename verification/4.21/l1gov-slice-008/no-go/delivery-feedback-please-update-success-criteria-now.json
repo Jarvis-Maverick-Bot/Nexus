@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "raw feedback cannot mutate backlog, scope, success criteria, requirements, or completion"
+  ],
+  "error_code": "ERR_RAW_FEEDBACK_NO_AUTHORITY_MUTATION",
+  "message": "FeedbackRecord rejected",
+  "missing_fields": []
+}

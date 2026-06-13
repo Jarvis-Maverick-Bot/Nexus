@@ -3,6 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import Any
 
+from .delivery_feedback import (
+    DELIVERY_FEEDBACK_COMMAND_TYPES,
+    DELIVERY_FEEDBACK_KERNEL_RECORDED_COMMANDS,
+    validate_delivery_feedback_command,
+)
 from .dispatch_contract import DISPATCH_COMMAND_TYPES, validate_dispatch_command
 from .errors import ErrorCode
 from .execution import EXECUTION_COMMAND_TYPES, validate_execution_command
@@ -49,6 +54,8 @@ class GovernanceServiceContract:
             validation = validate_monitor_hitl_command(command)
         elif command.command_type in IMPACT_CONTROL_COMMAND_TYPES:
             validation = validate_impact_control_command(command)
+        elif command.command_type in DELIVERY_FEEDBACK_COMMAND_TYPES:
+            validation = validate_delivery_feedback_command(command)
         else:
             validation = validate_command_envelope(command)
         if not validation.accepted:
@@ -73,5 +80,7 @@ def _kernel_command(command: CommandEnvelope) -> CommandEnvelope:
     if command.command_type in ("CreateHumanReviewTask", "SubmitHumanDecision", "RecordEscalation"):
         return replace(command, expected_version=command.payload["expected_kernel_version"])
     if command.command_type in ("SubmitImpactControlRequest", "RecordImpactAssessment", "CreateMonitorTaskForImpact"):
+        return replace(command, expected_version=command.payload["expected_kernel_version"])
+    if command.command_type in DELIVERY_FEEDBACK_KERNEL_RECORDED_COMMANDS:
         return replace(command, expected_version=command.payload["expected_kernel_version"])
     return command

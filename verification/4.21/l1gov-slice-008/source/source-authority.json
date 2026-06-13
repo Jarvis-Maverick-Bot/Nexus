@@ -1,0 +1,15 @@
+{
+    "slice":  "l1gov-slice-008",
+    "nexus_branch":  "codex/4.21-slice008-delivery-feedback",
+    "nexus_base_required":  "eb34d9d389d30c8f8e20df4031544679cf8af1ff",
+    "nexus_implementation_head":  "3d8bde58545e27e7890919e6fae63f98c2c21dc3",
+    "package_path":  "\\\\192.168.31.124\\Nova-Jarvis-Inbox\\Thunder\\_submitted\\2026-06-13_4.21_slice008_task_package_thunder_v0.1\\",
+    "approved_package_review_commit":  "eddbe4f",
+    "approved_package_review_commit_full":  "eddbe4fa27d0b8c0d2933156989567b665037693",
+    "nova_request_changes_commit":  "9f7a50775a0cad6ab0b745f7baf85c23cefb5b4f",
+    "shared_docs_authority":  "verified git clone/worktree D:\\Nova-Jarvis-Shared-Docs; SMB used for handoff/package intake only",
+    "source_design_refs":  [
+                               "solution-design/subtopics/4_21_DELIVERY_FEEDBACK_LOOP_DETAILED_DESIGN.md",
+                               "implementation-design/subtopics/L1_11_8_DELIVERY_FEEDBACK_LOOP_IMPLEMENTATION_DESIGN.md"
+                           ]
+}

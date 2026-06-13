@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "DeliveryRecord status rejected: production_ready",
+    "DeliveryRecord cannot imply deploy, production readiness, completion, or final PASS"
+  ],
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "message": "DeliveryRecord rejected",
+  "missing_fields": []
+}

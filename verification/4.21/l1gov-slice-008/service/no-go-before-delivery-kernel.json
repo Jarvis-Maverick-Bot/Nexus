@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "aggregate_ref": null,
+  "error_code": "ERR_RAW_FEEDBACK_NO_AUTHORITY_MUTATION",
+  "evidence_refs": [],
+  "message": "blocked by Slice 001 no-go boundary: delivery_raw_feedback_authority_mutation",
+  "projection_ref": null,
+  "record_ref": null,
+  "retryable": false
+}

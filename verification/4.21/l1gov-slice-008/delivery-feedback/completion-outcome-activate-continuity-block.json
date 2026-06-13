@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "Slice 008 cannot accept completion decisions or continuity activation outcomes"
+  ],
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "message": "CompletionContinuityPacket rejected",
+  "missing_fields": []
+}

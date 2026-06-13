@@ -1,0 +1,9 @@
+{
+  "accepted": false,
+  "blocked_reasons": [
+    "FeedbackMetricPolicyRef status rejected: stale"
+  ],
+  "error_code": "ERR_DELIVERY_FEEDBACK_RECORD_INVALID",
+  "message": "FeedbackMetricPolicyRef rejected",
+  "missing_fields": []
+}
