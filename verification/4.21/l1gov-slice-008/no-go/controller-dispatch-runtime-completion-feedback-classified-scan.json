@@ -22,6 +22,7 @@
                                        "file":  "nexus/governance/app_contract.py",
                                        "line":  35,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "final pass"
                                                          ],
                                        "text":  "disabled_commands=(\"approve\", \"complete\", \"archive\", \"baseline\", \"no_go\", \"final_pass\"),"
@@ -254,9 +255,9 @@
                                        "file":  "nexus/governance/delivery_feedback.py",
                                        "line":  122,
                                        "matched_terms":  [
-                                                             "approve completion"
+                                                             "complete"
                                                          ],
-                                       "text":  "\"approve completion\","
+                                       "text":  "\"complete\","
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
@@ -264,11 +265,28 @@
                                        "matched_terms":  [
                                                              "approve completion"
                                                          ],
-                                       "text":  "\"approve_completion\","
+                                       "text":  "\"approve completion\","
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
                                        "line":  124,
+                                       "matched_terms":  [
+                                                             "approve completion"
+                                                         ],
+                                       "text":  "\"approve_completion\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  125,
+                                       "matched_terms":  [
+                                                             "complete",
+                                                             "approved complete"
+                                                         ],
+                                       "text":  "\"approved complete\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  126,
                                        "matched_terms":  [
                                                              "activate continuity"
                                                          ],
@@ -276,7 +294,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  125,
+                                       "line":  127,
                                        "matched_terms":  [
                                                              "activate continuity"
                                                          ],
@@ -284,7 +302,15 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  126,
+                                       "line":  128,
+                                       "matched_terms":  [
+                                                             "continuity activation"
+                                                         ],
+                                       "text":  "\"continuity activation\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  129,
                                        "matched_terms":  [
                                                              "completion claim"
                                                          ],
@@ -292,7 +318,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  127,
+                                       "line":  130,
                                        "matched_terms":  [
                                                              "completion claim"
                                                          ],
@@ -300,40 +326,62 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  128,
+                                       "line":  131,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "complete project"
                                                          ],
                                        "text":  "\"complete project\","
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  129,
+                                       "line":  132,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "complete project"
                                                          ],
                                        "text":  "\"complete_project\","
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  130,
+                                       "line":  133,
                                        "matched_terms":  [
+                                                             "close project"
+                                                         ],
+                                       "text":  "\"close project\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  134,
+                                       "matched_terms":  [
+                                                             "complete",
+                                                             "closed complete"
+                                                         ],
+                                       "text":  "\"closed complete\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  135,
+                                       "matched_terms":  [
+                                                             "complete",
                                                              "delivery complete"
                                                          ],
                                        "text":  "\"delivery complete\","
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  131,
+                                       "line":  136,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "delivery complete"
                                                          ],
                                        "text":  "\"delivery_complete\","
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  132,
+                                       "line":  137,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "delivery complete",
                                                              "delivery completed"
                                                          ],
@@ -341,7 +389,23 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  135,
+                                       "line":  138,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "\"mark complete\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  139,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "\"mark completed\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  140,
                                        "matched_terms":  [
                                                              "continuity active"
                                                          ],
@@ -349,7 +413,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  136,
+                                       "line":  141,
                                        "matched_terms":  [
                                                              "continuity active"
                                                          ],
@@ -357,7 +421,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  140,
+                                       "line":  145,
                                        "matched_terms":  [
                                                              "production readiness"
                                                          ],
@@ -365,7 +429,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  141,
+                                       "line":  146,
                                        "matched_terms":  [
                                                              "production ready"
                                                          ],
@@ -373,7 +437,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  142,
+                                       "line":  147,
                                        "matched_terms":  [
                                                              "release to production"
                                                          ],
@@ -381,7 +445,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  143,
+                                       "line":  148,
                                        "matched_terms":  [
                                                              "release to production"
                                                          ],
@@ -389,7 +453,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  144,
+                                       "line":  149,
                                        "matched_terms":  [
                                                              "deploy to production"
                                                          ],
@@ -397,7 +461,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  145,
+                                       "line":  150,
                                        "matched_terms":  [
                                                              "deploy to production"
                                                          ],
@@ -405,7 +469,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  146,
+                                       "line":  151,
                                        "matched_terms":  [
                                                              "deployed"
                                                          ],
@@ -413,7 +477,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  148,
+                                       "line":  153,
                                        "matched_terms":  [
                                                              "final pass"
                                                          ],
@@ -421,7 +485,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  149,
+                                       "line":  154,
                                        "matched_terms":  [
                                                              "final pass"
                                                          ],
@@ -429,7 +493,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  150,
+                                       "line":  155,
                                        "matched_terms":  [
                                                              "accepted project"
                                                          ],
@@ -437,7 +501,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  151,
+                                       "line":  156,
                                        "matched_terms":  [
                                                              "project accepted"
                                                          ],
@@ -445,8 +509,25 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  154,
+                                       "line":  157,
                                        "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "\"mark complete\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  158,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "\"mark completed\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  159,
+                                       "matched_terms":  [
+                                                             "complete",
                                                              "delivery complete",
                                                              "delivery completed"
                                                          ],
@@ -454,7 +535,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  155,
+                                       "line":  160,
                                        "matched_terms":  [
                                                              "dispatch now"
                                                          ],
@@ -462,7 +543,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  156,
+                                       "line":  161,
                                        "matched_terms":  [
                                                              "execute dispatch"
                                                          ],
@@ -470,7 +551,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  157,
+                                       "line":  162,
                                        "matched_terms":  [
                                                              "perform dispatch"
                                                          ],
@@ -478,7 +559,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  158,
+                                       "line":  163,
                                        "matched_terms":  [
                                                              "dispatch execution"
                                                          ],
@@ -486,7 +567,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  159,
+                                       "line":  164,
                                        "matched_terms":  [
                                                              "dispatch execution"
                                                          ],
@@ -494,7 +575,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  160,
+                                       "line":  165,
                                        "matched_terms":  [
                                                              "actual dispatch"
                                                          ],
@@ -502,7 +583,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  161,
+                                       "line":  166,
                                        "matched_terms":  [
                                                              "actual dispatch"
                                                          ],
@@ -510,7 +591,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  162,
+                                       "line":  167,
                                        "matched_terms":  [
                                                              "controller call"
                                                          ],
@@ -518,7 +599,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  163,
+                                       "line":  168,
                                        "matched_terms":  [
                                                              "controller call"
                                                          ],
@@ -526,7 +607,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  164,
+                                       "line":  169,
                                        "matched_terms":  [
                                                              "call controller"
                                                          ],
@@ -534,7 +615,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  165,
+                                       "line":  170,
                                        "matched_terms":  [
                                                              "controller execution"
                                                          ],
@@ -542,7 +623,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  166,
+                                       "line":  171,
                                        "matched_terms":  [
                                                              "controller request"
                                                          ],
@@ -550,7 +631,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  167,
+                                       "line":  172,
                                        "matched_terms":  [
                                                              "controller action"
                                                          ],
@@ -558,7 +639,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  168,
+                                       "line":  173,
                                        "matched_terms":  [
                                                              "execute controller"
                                                          ],
@@ -566,7 +647,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  169,
+                                       "line":  174,
                                        "matched_terms":  [
                                                              "controller call",
                                                              "direct controller call"
@@ -575,7 +656,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  170,
+                                       "line":  175,
                                        "matched_terms":  [
                                                              "controller call",
                                                              "direct controller call"
@@ -584,7 +665,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  171,
+                                       "line":  176,
                                        "matched_terms":  [
                                                              "owner path call"
                                                          ],
@@ -592,7 +673,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  172,
+                                       "line":  177,
                                        "matched_terms":  [
                                                              "owner path call"
                                                          ],
@@ -600,7 +681,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  173,
+                                       "line":  178,
                                        "matched_terms":  [
                                                              "call owner path"
                                                          ],
@@ -608,7 +689,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  174,
+                                       "line":  179,
                                        "matched_terms":  [
                                                              "owner path request"
                                                          ],
@@ -616,7 +697,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  175,
+                                       "line":  180,
                                        "matched_terms":  [
                                                              "request owner path"
                                                          ],
@@ -624,7 +705,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  176,
+                                       "line":  181,
                                        "matched_terms":  [
                                                              "owner path execution"
                                                          ],
@@ -632,7 +713,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  178,
+                                       "line":  183,
                                        "matched_terms":  [
                                                              "adapter call"
                                                          ],
@@ -640,7 +721,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  179,
+                                       "line":  184,
                                        "matched_terms":  [
                                                              "adapter call"
                                                          ],
@@ -648,7 +729,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  180,
+                                       "line":  185,
                                        "matched_terms":  [
                                                              "adapter execution"
                                                          ],
@@ -656,7 +737,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  181,
+                                       "line":  186,
                                        "matched_terms":  [
                                                              "transport call"
                                                          ],
@@ -664,7 +745,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  182,
+                                       "line":  187,
                                        "matched_terms":  [
                                                              "transport call"
                                                          ],
@@ -672,7 +753,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  183,
+                                       "line":  188,
                                        "matched_terms":  [
                                                              "route activation"
                                                          ],
@@ -680,7 +761,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  184,
+                                       "line":  189,
                                        "matched_terms":  [
                                                              "route activation"
                                                          ],
@@ -688,7 +769,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  185,
+                                       "line":  190,
                                        "matched_terms":  [
                                                              "route request"
                                                          ],
@@ -696,7 +777,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  186,
+                                       "line":  191,
                                        "matched_terms":  [
                                                              "activate route"
                                                          ],
@@ -704,7 +785,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  187,
+                                       "line":  192,
                                        "matched_terms":  [
                                                              "activate route"
                                                          ],
@@ -712,7 +793,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  188,
+                                       "line":  193,
                                        "matched_terms":  [
                                                              "workpacket execution"
                                                          ],
@@ -720,7 +801,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  189,
+                                       "line":  194,
                                        "matched_terms":  [
                                                              "workpacket execution"
                                                          ],
@@ -728,7 +809,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  190,
+                                       "line":  195,
                                        "matched_terms":  [
                                                              "work packet execution"
                                                          ],
@@ -736,7 +817,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  191,
+                                       "line":  196,
                                        "matched_terms":  [
                                                              "execute workpacket"
                                                          ],
@@ -744,7 +825,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  192,
+                                       "line":  197,
                                        "matched_terms":  [
                                                              "execute workpacket"
                                                          ],
@@ -752,7 +833,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  193,
+                                       "line":  198,
                                        "matched_terms":  [
                                                              "execute work packet"
                                                          ],
@@ -760,7 +841,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  194,
+                                       "line":  199,
                                        "matched_terms":  [
                                                              "runtime invocation"
                                                          ],
@@ -768,7 +849,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  195,
+                                       "line":  200,
                                        "matched_terms":  [
                                                              "runtime invocation"
                                                          ],
@@ -776,7 +857,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  196,
+                                       "line":  201,
                                        "matched_terms":  [
                                                              "runtime live invocation",
                                                              "live invocation"
@@ -785,7 +866,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  197,
+                                       "line":  202,
                                        "matched_terms":  [
                                                              "live invocation"
                                                          ],
@@ -793,7 +874,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  198,
+                                       "line":  203,
                                        "matched_terms":  [
                                                              "private agent invocation"
                                                          ],
@@ -801,7 +882,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  199,
+                                       "line":  204,
                                        "matched_terms":  [
                                                              "private agent invocation"
                                                          ],
@@ -809,7 +890,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  200,
+                                       "line":  205,
                                        "matched_terms":  [
                                                              "private agent invocation"
                                                          ],
@@ -817,7 +898,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  470,
+                                       "line":  475,
                                        "matched_terms":  [
                                                              "production readiness",
                                                              "final pass"
@@ -826,7 +907,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  501,
+                                       "line":  506,
                                        "matched_terms":  [
                                                              "mutate backlog"
                                                          ],
@@ -834,7 +915,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  504,
+                                       "line":  509,
                                        "matched_terms":  [
                                                              "final pass"
                                                          ],
@@ -842,15 +923,24 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  622,
+                                       "line":  627,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "final pass"
                                                          ],
                                        "text":  "blocked.append(\"triage options cannot dispatch, deploy, execute, complete, or claim final PASS\")"
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  702,
+                                       "line":  708,
+                                       "matched_terms":  [
+                                                             "continuity activation"
+                                                         ],
+                                       "text":  "blocked.append(\"Slice 008 cannot accept completion decisions or continuity activation outcomes\")"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/delivery_feedback.py",
+                                       "line":  711,
                                        "matched_terms":  [
                                                              "production readiness",
                                                              "final pass"
@@ -859,7 +949,7 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  742,
+                                       "line":  751,
                                        "matched_terms":  [
                                                              "mutate backlog"
                                                          ],
@@ -867,13 +957,21 @@
                                    },
                                    {
                                        "file":  "nexus/governance/delivery_feedback.py",
-                                       "line":  1156,
+                                       "line":  1169,
                                        "matched_terms":  [
                                                              "production readiness",
                                                              "production ready",
                                                              "deploy to production"
                                                          ],
                                        "text":  "if term in {\"deploy\", \"deploy to production\", \"production readiness\", \"production ready\", \"production\"}:"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/dispatch_contract.py",
+                                       "line":  40,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "\"complete\","
                                    },
                                    {
                                        "file":  "nexus/governance/dispatch_contract.py",
@@ -895,6 +993,7 @@
                                        "file":  "nexus/governance/dispatch_contract.py",
                                        "line":  45,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "production ready",
                                                              "final pass"
                                                          ],
@@ -1086,6 +1185,14 @@
                                    },
                                    {
                                        "file":  "nexus/governance/dispatch_contract.py",
+                                       "line":  176,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "completeness_check: str = \"\""
+                                   },
+                                   {
+                                       "file":  "nexus/governance/dispatch_contract.py",
                                        "line":  216,
                                        "matched_terms":  [
                                                              "controller call"
@@ -1110,12 +1217,29 @@
                                    },
                                    {
                                        "file":  "nexus/governance/dispatch_contract.py",
+                                       "line":  401,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "\"completeness_check\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/dispatch_contract.py",
                                        "line":  944,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "production ready",
                                                              "final pass"
                                                          ],
                                        "text":  "return status in (\"accepted\", \"complete\", \"final_pass\", \"production_ready\")"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/execution.py",
+                                       "line":  39,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "\"complete\","
                                    },
                                    {
                                        "file":  "nexus/governance/execution.py",
@@ -1151,11 +1275,27 @@
                                    },
                                    {
                                        "file":  "nexus/governance/execution.py",
+                                       "line":  359,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "message=\"Layer1WorkPacket contract incomplete\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/execution.py",
                                        "line":  543,
                                        "matched_terms":  [
                                                              "create packet"
                                                          ],
                                        "text":  "def create_packet_repair_request_command("
+                                   },
+                                   {
+                                       "file":  "nexus/governance/execution.py",
+                                       "line":  635,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "\"packet readiness command cannot dispatch or complete work\","
                                    },
                                    {
                                        "file":  "nexus/governance/impact_control.py",
@@ -1450,6 +1590,7 @@
                                        "file":  "nexus/governance/impact_control.py",
                                        "line":  173,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "delivery complete"
                                                          ],
                                        "text":  "\"delivery_complete\","
@@ -1458,6 +1599,7 @@
                                        "file":  "nexus/governance/impact_control.py",
                                        "line":  174,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "delivery complete"
                                                          ],
                                        "text":  "\"delivery complete\","
@@ -1466,6 +1608,7 @@
                                        "file":  "nexus/governance/impact_control.py",
                                        "line":  175,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "delivery complete",
                                                              "delivery completed"
                                                          ],
@@ -1510,6 +1653,14 @@
                                                              "accepted project"
                                                          ],
                                        "text":  "\"lower layer owner accepted project\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/impact_control.py",
+                                       "line":  182,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "\"owner path result completes delivery\","
                                    },
                                    {
                                        "file":  "nexus/governance/impact_control.py",
@@ -1609,8 +1760,25 @@
                                    },
                                    {
                                        "file":  "nexus/governance/impact_control.py",
+                                       "line":  386,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "return _no_go(\"ImpactAssessment cannot execute, submit, complete, or bypass review\")"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/impact_control.py",
+                                       "line":  446,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "return _no_go(\"LayerImpactDetected cannot execute, submit, or complete lower-layer work\")"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/impact_control.py",
                                        "line":  555,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "complete project"
                                                          ],
                                        "text":  "return _no_go(\"LowerLayerRequestOutcome cannot complete project progress or authorize dispatch\")"
@@ -1635,6 +1803,7 @@
                                        "file":  "nexus/governance/monitor_hitl.py",
                                        "line":  63,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "delivery complete"
                                                          ],
                                        "text":  "\"delivery_complete\","
@@ -1643,6 +1812,7 @@
                                        "file":  "nexus/governance/monitor_hitl.py",
                                        "line":  64,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "delivery complete"
                                                          ],
                                        "text":  "\"delivery complete\","
@@ -1873,6 +2043,14 @@
                                    },
                                    {
                                        "file":  "nexus/governance/monitor_hitl.py",
+                                       "line":  271,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "return _no_go(\"human review task cannot approve, complete, dispatch, or execute work\")"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/monitor_hitl.py",
                                        "line":  303,
                                        "matched_terms":  [
                                                              "production readiness"
@@ -1905,6 +2083,14 @@
                                    },
                                    {
                                        "file":  "nexus/governance/monitor_hitl.py",
+                                       "line":  874,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "\"complete\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/monitor_hitl.py",
                                        "line":  875,
                                        "matched_terms":  [
                                                              "final pass"
@@ -1923,6 +2109,7 @@
                                        "file":  "nexus/governance/monitor_hitl.py",
                                        "line":  877,
                                        "matched_terms":  [
+                                                             "complete",
                                                              "delivery complete"
                                                          ],
                                        "text":  "\"delivery_complete\","
@@ -2176,6 +2363,14 @@
                                    },
                                    {
                                        "file":  "nexus/governance/no_go.py",
+                                       "line":  109,
+                                       "matched_terms":  [
+                                                             "continuity activation"
+                                                         ],
+                                       "text":  "\"delivery_continuity_activation\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance/no_go.py",
                                        "line":  110,
                                        "matched_terms":  [
                                                              "production readiness"
@@ -2199,6 +2394,22 @@
                                        "text":  "\"final_pass\","
                                    },
                                    {
+                                       "file":  "nexus/governance/standardization.py",
+                                       "line":  33,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "\"complete\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance/workspace_init.py",
+                                       "line":  43,
+                                       "matched_terms":  [
+                                                             "complete"
+                                                         ],
+                                       "text":  "\"complete\","
+                                   },
+                                   {
                                        "file":  "nexus/governance/workspace_init.py",
                                        "line":  44,
                                        "matched_terms":  [
@@ -2209,9 +2420,18 @@
                                ],
     "allowed_negative_test_fixtures":  [
                                            {
+                                               "file":  "nexus/governance/tests/test_app_contract.py",
+                                               "line":  13,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "assert \"complete\" in view_model.disabled_commands"
+                                           },
+                                           {
                                                "file":  "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
                                                "line":  12,
                                                "matched_terms":  [
+                                                                     "complete",
                                                                      "continuity active",
                                                                      "production ready",
                                                                      "deployed",
@@ -2226,6 +2446,81 @@
                                                                      "approve completion"
                                                                  ],
                                                "text":  "result = validate_completion_continuity_packet(valid_completion_packet(requested_decision=\"approve completion\"))"
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
+                                               "line":  36,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "\"complete\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
+                                               "line":  37,
+                                               "matched_terms":  [
+                                                                     "complete",
+                                                                     "complete project"
+                                                                 ],
+                                               "text":  "\"complete project\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
+                                               "line":  38,
+                                               "matched_terms":  [
+                                                                     "activate continuity"
+                                                                 ],
+                                               "text":  "\"activate continuity\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
+                                               "line":  39,
+                                               "matched_terms":  [
+                                                                     "continuity active"
+                                                                 ],
+                                               "text":  "\"continuity active\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
+                                               "line":  40,
+                                               "matched_terms":  [
+                                                                     "continuity activation"
+                                                                 ],
+                                               "text":  "\"continuity activation\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
+                                               "line":  41,
+                                               "matched_terms":  [
+                                                                     "complete",
+                                                                     "approved complete"
+                                                                 ],
+                                               "text":  "\"approved complete\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
+                                               "line":  42,
+                                               "matched_terms":  [
+                                                                     "close project"
+                                                                 ],
+                                               "text":  "\"close project\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
+                                               "line":  43,
+                                               "matched_terms":  [
+                                                                     "complete",
+                                                                     "closed complete"
+                                                                 ],
+                                               "text":  "\"closed complete\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_completion_continuity.py",
+                                               "line":  69,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "def test_completion_packet_rejects_incomplete_continuity_rules(field_name: str) -\u003e None:"
                                            },
                                            {
                                                "file":  "nexus/governance/tests/test_delivery_feedback_impact_preflight.py",
@@ -2293,6 +2588,14 @@
                                            },
                                            {
                                                "file":  "nexus/governance/tests/test_delivery_feedback_no_go.py",
+                                               "line":  24,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "\"please mark complete now\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_delivery_feedback_no_go.py",
                                                "line":  25,
                                                "matched_terms":  [
                                                                      "project accepted"
@@ -2303,6 +2606,7 @@
                                                "file":  "nexus/governance/tests/test_delivery_feedback_no_go.py",
                                                "line":  26,
                                                "matched_terms":  [
+                                                                     "complete",
                                                                      "delivery complete",
                                                                      "delivery completed"
                                                                  ],
@@ -2529,6 +2833,7 @@
                                                "file":  "nexus/governance/tests/test_delivery_feedback_no_go.py",
                                                "line":  82,
                                                "matched_terms":  [
+                                                                     "complete",
                                                                      "complete project",
                                                                      "activate continuity",
                                                                      "production readiness",
@@ -2540,6 +2845,7 @@
                                                "file":  "nexus/governance/tests/test_delivery_feedback_records.py",
                                                "line":  41,
                                                "matched_terms":  [
+                                                                     "complete",
                                                                      "production ready",
                                                                      "final pass"
                                                                  ],
@@ -2696,6 +3002,7 @@
                                                "file":  "nexus/governance/tests/test_dispatch_records.py",
                                                "line":  56,
                                                "matched_terms":  [
+                                                                     "complete",
                                                                      "final pass"
                                                                  ],
                                                "text":  "@pytest.mark.parametrize(\"status\", (\"dispatched\", \"accepted\", \"complete\", \"final_pass\"))"
@@ -2856,6 +3163,7 @@
                                                "file":  "nexus/governance/tests/test_dispatch_service_contract.py",
                                                "line":  112,
                                                "matched_terms":  [
+                                                                     "complete",
                                                                      "production ready",
                                                                      "final pass"
                                                                  ],
@@ -2888,6 +3196,38 @@
                                                "text":  "(\"execution_runtime_live_invocation\", \"runtime-live-block\"),"
                                            },
                                            {
+                                               "file":  "nexus/governance/tests/test_execution_records.py",
+                                               "line":  51,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "def test_packet_map_accepts_complete_packet_index() -\u003e None:"
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_execution_service_contract.py",
+                                               "line":  118,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "assert result.message == \"packet readiness command cannot dispatch or complete work\""
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_execution_service_contract.py",
+                                               "line":  130,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "assert result.message == \"packet readiness command cannot dispatch or complete work\""
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_execution_service_contract.py",
+                                               "line":  141,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "assert result.message == \"packet readiness command cannot dispatch or complete work\""
+                                           },
+                                           {
                                                "file":  "nexus/governance/tests/test_execution_service_contract.py",
                                                "line":  145,
                                                "matched_terms":  [
@@ -2905,6 +3245,14 @@
                                            },
                                            {
                                                "file":  "nexus/governance/tests/test_execution_service_contract.py",
+                                               "line":  153,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "assert result.message == \"packet readiness command cannot dispatch or complete work\""
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_execution_service_contract.py",
                                                "line":  154,
                                                "matched_terms":  [
                                                                      "controller call"
@@ -2913,11 +3261,51 @@
                                            },
                                            {
                                                "file":  "nexus/governance/tests/test_execution_service_contract.py",
+                                               "line":  165,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "assert result.message == \"packet readiness command cannot dispatch or complete work\""
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_execution_service_contract.py",
+                                               "line":  177,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "assert result.message == \"packet readiness command cannot dispatch or complete work\""
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_execution_service_contract.py",
+                                               "line":  188,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "assert result.message == \"packet readiness command cannot dispatch or complete work\""
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_execution_service_contract.py",
                                                "line":  232,
                                                "matched_terms":  [
                                                                      "controller call"
                                                                  ],
                                                "text":  "intent={\"action\": \"execution_direct_419_controller_call\"},"
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_execution_workpacket_contract.py",
+                                               "line":  12,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "def test_layer1_workpacket_accepts_complete_review_contract() -\u003e None:"
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_execution_workpacket_contract.py",
+                                               "line":  27,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "write_evidence(\"execution/workpacket-incomplete.json\", result.to_evidence(), slice_id=\"l1gov-slice-004\")"
                                            },
                                            {
                                                "file":  "nexus/governance/tests/test_impact_control_lower_layer_candidate.py",
@@ -2979,6 +3367,7 @@
                                                "file":  "nexus/governance/tests/test_impact_control_lower_layer_candidate.py",
                                                "line":  77,
                                                "matched_terms":  [
+                                                                     "complete",
                                                                      "delivery complete",
                                                                      "delivery completed"
                                                                  ],
@@ -2999,6 +3388,22 @@
                                                                      "accepted project"
                                                                  ],
                                                "text":  "\"lower layer owner accepted project\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_impact_control_lower_layer_candidate.py",
+                                               "line":  80,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "\"owner path result completes delivery\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_impact_control_lower_layer_candidate.py",
+                                               "line":  83,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "def test_lower_layer_request_outcome_cannot_mark_project_complete(expected_follow_up: str) -\u003e None:"
                                            },
                                            {
                                                "file":  "nexus/governance/tests/test_impact_control_no_go.py",
@@ -3141,6 +3546,7 @@
                                                "file":  "nexus/governance/tests/test_impact_control_records.py",
                                                "line":  48,
                                                "matched_terms":  [
+                                                                     "complete",
                                                                      "delivery complete",
                                                                      "delivery completed"
                                                                  ],
@@ -3169,6 +3575,14 @@
                                                                      "accepted project"
                                                                  ],
                                                "text":  "\"lower layer owner accepted project\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_impact_control_records.py",
+                                               "line":  119,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "\"owner path result completes delivery\","
                                            },
                                            {
                                                "file":  "nexus/governance/tests/test_impact_control_service_contract.py",
@@ -3247,6 +3661,7 @@
                                                "file":  "nexus/governance/tests/test_monitor_hitl_no_go.py",
                                                "line":  54,
                                                "matched_terms":  [
+                                                                     "complete",
                                                                      "delivery complete"
                                                                  ],
                                                "text":  "\"delivery_complete\","
@@ -3423,8 +3838,17 @@
                                            },
                                            {
                                                "file":  "nexus/governance/tests/test_monitor_hitl_records.py",
+                                               "line":  24,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "def test_human_review_task_accepts_complete_decision_task() -\u003e None:"
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/test_monitor_hitl_records.py",
                                                "line":  39,
                                                "matched_terms":  [
+                                                                     "complete",
                                                                      "production ready",
                                                                      "final pass"
                                                                  ],
@@ -3474,6 +3898,7 @@
                                                "file":  "nexus/governance/tests/test_monitor_hitl_records.py",
                                                "line":  98,
                                                "matched_terms":  [
+                                                                     "complete",
                                                                      "route activation"
                                                                  ],
                                                "text":  "(\"resume_condition\", \"route activation is complete\"),"
@@ -3506,9 +3931,18 @@
                                                "text":  "response = service().handle(state_command(), intent={\"action\": \"runtime_live_invocation\"})"
                                            },
                                            {
+                                               "file":  "nexus/governance/tests/test_standardization_profile_policy.py",
+                                               "line":  14,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "def test_deliverable_evaluation_profile_accepts_complete_review_policy() -\u003e None:"
+                                           },
+                                           {
                                                "file":  "nexus/governance/tests/test_workspace_init_manifest.py",
                                                "line":  64,
                                                "matched_terms":  [
+                                                                     "complete",
                                                                      "final pass"
                                                                  ],
                                                "text":  "(\"approved\", \"accepted\", \"plan_approved\", \"baseline_approved\", \"complete\", \"final_pass\", \"unknown\"),"
@@ -3528,6 +3962,14 @@
                                                                      "runtime invocation"
                                                                  ],
                                                "text":  "\"readiness_constraints\": (\"no runtime invocation\",),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/fixtures/dispatch_contract.py",
+                                               "line":  122,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "\"completeness_check\": \"passed\","
                                            },
                                            {
                                                "file":  "nexus/governance/tests/fixtures/dispatch_contract.py",
@@ -3605,6 +4047,22 @@
                                            },
                                            {
                                                "file":  "nexus/governance/tests/fixtures/execution.py",
+                                               "line":  131,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "\"readiness_check_result\": \"packet contract complete\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/fixtures/execution.py",
+                                               "line":  146,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "\"reason\": \"stop rules are incomplete\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/fixtures/execution.py",
                                                "line":  180,
                                                "matched_terms":  [
                                                                      "create packet"
@@ -3645,12 +4103,28 @@
                                                "text":  "\"constraint_refs\": (\"constraint:no-final-pass\",),"
                                            },
                                            {
+                                               "file":  "nexus/governance/tests/fixtures/monitor_hitl.py",
+                                               "line":  159,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "\"resume_condition\": \"evidence package complete\","
+                                           },
+                                           {
                                                "file":  "nexus/governance/tests/fixtures/standardization.py",
                                                "line":  92,
                                                "matched_terms":  [
                                                                      "final pass"
                                                                  ],
                                                "text":  "\"no_go\": (\"no final PASS\", \"no Shared Docs writes\"),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance/tests/fixtures/standardization.py",
+                                               "line":  104,
+                                               "matched_terms":  [
+                                                                     "complete"
+                                                                 ],
+                                               "text":  "\"requirements\": (\"planning candidates are field-complete\",),"
                                            }
                                        ],
     "unclassified_matches":  [
