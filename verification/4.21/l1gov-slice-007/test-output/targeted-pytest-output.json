@@ -1,0 +1,9 @@
+{
+    "command":  "python -m pytest nexus/governance/tests/test_impact_control_records.py nexus/governance/tests/test_impact_control_decision_gate.py nexus/governance/tests/test_impact_control_service_contract.py nexus/governance/tests/test_impact_control_no_go.py nexus/governance/tests/test_impact_control_workaround_gate.py nexus/governance/tests/test_impact_control_lower_layer_candidate.py nexus/governance/tests/test_impact_control_kernel_boundary.py -q",
+    "exit_code":  0,
+    "output":  [
+                   "........................................................................ [ 97%]",
+                   "..                                                                       [100%]",
+                   "74 passed in 0.17s"
+               ]
+}

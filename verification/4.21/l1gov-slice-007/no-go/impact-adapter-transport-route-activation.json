@@ -1,0 +1,6 @@
+{
+  "blocked": true,
+  "category": "impact_adapter_transport_route_activation",
+  "error_code": "ERR_NO_GO_BOUNDARY",
+  "message": "blocked by Slice 001 no-go boundary: impact_adapter_transport_route_activation"
+}

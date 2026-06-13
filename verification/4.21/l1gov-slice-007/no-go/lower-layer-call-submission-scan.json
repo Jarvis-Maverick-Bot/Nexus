@@ -1,0 +1,214 @@
+{
+    "command":  "rg \u0027lower-layer submission|lower_layer_submission|submit lower layer|submit_lower_layer_request|owner path call|owner_path_call|direct 4\\.19|direct 3\\.5|direct_419_controller_call|direct_35_controller_call\u0027 nexus/governance -g \u0027*.py\u0027 --json",
+    "unauthorized_lower_layer_submission_paths":  [
+
+                                                  ],
+    "allowed_guard_literals":  [
+                                   {
+                                       "file":  "nexus/governance\\no_go.py",
+                                       "line":  56,
+                                       "text":  "                \"execution_direct_419_controller_call\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\no_go.py",
+                                       "line":  63,
+                                       "text":  "                \"dispatch_direct_419_controller_call\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\no_go.py",
+                                       "line":  77,
+                                       "text":  "                \"monitor_direct_419_controller_call\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\no_go.py",
+                                       "line":  85,
+                                       "text":  "                \"impact_direct_419_controller_call\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\no_go.py",
+                                       "line":  86,
+                                       "text":  "                \"impact_direct_35_controller_call\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\no_go.py",
+                                       "line":  87,
+                                       "text":  "                \"impact_owner_path_call\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\no_go.py",
+                                       "line":  92,
+                                       "text":  "                \"impact_lower_layer_submission\": ErrorCode.NO_GO_BOUNDARY,"
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  122,
+                                       "text":  "    \"direct_419_controller_call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  123,
+                                       "text":  "    \"direct 4.19 controller call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  125,
+                                       "text":  "    \"direct_35_controller_call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  126,
+                                       "text":  "    \"direct 3.5 controller call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  133,
+                                       "text":  "    \"owner_path_call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  134,
+                                       "text":  "    \"owner path call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  155,
+                                       "text":  "    \"lower_layer_submission\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  156,
+                                       "text":  "    \"lower-layer submission\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  158,
+                                       "text":  "    \"submit_lower_layer_request\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  159,
+                                       "text":  "    \"submit lower layer request\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  160,
+                                       "text":  "    \"submit lower layer\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  183,
+                                       "text":  "    \"owner_path_call\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  192,
+                                       "text":  "    \"lower_layer_submission\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\impact_control.py",
+                                       "line":  193,
+                                       "text":  "    \"submit_lower_layer_request\","
+                                   },
+                                   {
+                                       "file":  "nexus/governance\\execution.py",
+                                       "line":  317,
+                                       "text":  "            blocked.append(\"Layer1WorkPacket cannot include direct 4.19 controller refs\")"
+                                   }
+                               ],
+    "allowed_negative_test_fixtures":  [
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_monitor_hitl_no_go.py",
+                                               "line":  24,
+                                               "text":  "        \"monitor_direct_419_controller_call\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
+                                               "line":  40,
+                                               "text":  "        \"direct 4.19 controller call\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
+                                               "line":  41,
+                                               "text":  "        \"direct_35_controller_call\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_records.py",
+                                               "line":  45,
+                                               "text":  "        \"submit_lower_layer_request\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_dispatch_no_go.py",
+                                               "line":  15,
+                                               "text":  "        (\"dispatch_direct_419_controller_call\", \"direct-419-controller-block\"),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
+                                               "line":  14,
+                                               "text":  "        (\"impact_direct_419_controller_call\", ErrorCode.NO_GO_BOUNDARY),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
+                                               "line":  15,
+                                               "text":  "        (\"impact_direct_35_controller_call\", ErrorCode.NO_GO_BOUNDARY),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
+                                               "line":  16,
+                                               "text":  "        (\"impact_owner_path_call\", ErrorCode.NO_GO_BOUNDARY),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_no_go.py",
+                                               "line":  21,
+                                               "text":  "        (\"impact_lower_layer_submission\", ErrorCode.NO_GO_BOUNDARY),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_service_contract.py",
+                                               "line":  56,
+                                               "text":  "        intent={\"action\": \"impact_direct_419_controller_call\"},"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  33,
+                                               "text":  "        \"submit lower layer request now\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                                               "line":  35,
+                                               "text":  "        \"owner_path_call\","
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_execution_workpacket_contract.py",
+                                               "line":  48,
+                                               "text":  "    assert \"Layer1WorkPacket cannot include direct 4.19 controller refs\" in result.blocked_reasons"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_execution_service_contract.py",
+                                               "line":  232,
+                                               "text":  "        intent={\"action\": \"execution_direct_419_controller_call\"},"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\test_execution_no_go.py",
+                                               "line":  13,
+                                               "text":  "        (\"execution_direct_419_controller_call\", \"direct-419-controller-block\"),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\fixtures\\execution.py",
+                                               "line":  108,
+                                               "text":  "        \"no_go\": (\"no direct 4.19 controller call\", \"no work-packet dispatch\"),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\fixtures\\execution.py",
+                                               "line":  183,
+                                               "text":  "        \"no_go\": (\"no direct 4.19 controller call\",),"
+                                           },
+                                           {
+                                               "file":  "nexus/governance\\tests\\fixtures\\dispatch_contract.py",
+                                               "line":  163,
+                                               "text":  "        \"no_go_refs\": (\"no runtime invocation\", \"no direct 4.19 controller call\"),"
+                                           }
+                                       ],
+    "unclassified_matches":  [
+
+                             ],
+    "result":  "PASS_CLASSIFIED_GUARD_OR_TEST_ONLY"
+}
