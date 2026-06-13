@@ -1,5 +1,5 @@
 {
     "command":  "python -m pytest nexus/governance/tests/test_monitor_hitl_records.py nexus/governance/tests/test_monitor_hitl_profile_policy.py nexus/governance/tests/test_monitor_hitl_service_contract.py nexus/governance/tests/test_monitor_hitl_kernel_boundary.py nexus/governance/tests/test_monitor_hitl_no_go.py nexus/governance/tests/test_monitor_hitl_escalation.py -q",
     "exit_code":  0,
-    "output":  "........................................................................ [ 84%]\r\n.............                                                            [100%]\r\n85 passed in 0.15s"
+    "output":  "........................................................................ [ 81%]\n................                                                         [100%]\n88 passed in 0.14s"
 }

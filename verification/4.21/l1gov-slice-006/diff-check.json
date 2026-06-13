@@ -1,5 +1,5 @@
 {
     "command":  "git diff --check origin/master",
     "exit_code":  0,
-    "output":  "git.exe : warning: in the working copy of \u0027verification/4.21/l1gov-slice-006/test-output/full-governance-pytest-output.\r\njson\u0027, LF will be replaced by CRLF the next time Git touches it\r\nAt line:9 char:54\r\n+ ... st){$output=\u0026 $ArgList[0] @($ArgList[1..($ArgList.Count-1)]) 2\u003e\u00261;$co ...\r\n+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : NotSpecified: (warning: in the... Git touches it:String) [], RemoteException\r\n    + FullyQualifiedErrorId : NativeCommandError\r\n \r\nwarning: in the working copy of \u0027verification/4.21/l1gov-slice-006/test-output/targeted-pytest-output.json\u0027, LF will be\r\n replaced by CRLF the next time Git touches it"
+    "output":  ""
 }
