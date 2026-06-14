@@ -85,6 +85,7 @@ def test_slice012_desktop_surface_contains_required_operable_regions() -> None:
         "module-navigation",
         "inspector",
         "status-bar",
+        "service-chip",
         "notes-evidence",
         "command-draft-preview",
         "service-rejection",
@@ -103,6 +104,25 @@ def test_slice012_desktop_surface_contains_required_operable_regions() -> None:
         "renderFutureIntegrationBoundary",
     ):
         assert hook in main_js
+
+
+def test_slice012_renderer_consumes_deterministic_fixture_data() -> None:
+    fixture = load_fixture()
+    main_js = read_app_file("src/main.js")
+
+    assert "const state = {" not in main_js
+    assert "fetch(\"./fixtures/slice012_desktop_state.json\")" in main_js
+    assert "buildSurfaceState(fixture)" in main_js
+    assert "display_state" in fixture
+    assert fixture["display_state"]["workspace_name"] == "4.21 Layer 1 Governance"
+
+
+def test_slice012_footer_declares_fixture_only_service_status() -> None:
+    html = read_app_file("src/index.html")
+
+    assert 'id="service-state">fixture only' in html
+    assert "Service: connected" not in html
+    assert "connected</strong>" not in html
 
 
 def test_slice012_desktop_launch_and_macos_notes_are_present() -> None:

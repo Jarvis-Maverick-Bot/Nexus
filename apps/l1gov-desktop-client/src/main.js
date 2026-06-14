@@ -1,49 +1,47 @@
-const state = {
-  workspaceName: "4.21 Layer 1 Governance",
-  freshness: "current",
-  freshnessCycle: ["stale", "rebuilding", "current"],
-  freshnessIndex: 2,
-  projectSummary: {
-    acceptedSlices: 11,
-    activeSlice: "L1GOV-SLICE-012",
-    blockedItems: 0
-  },
-  modules: {
-    mission_control: {
-      title: "Mission Control",
-      summary: "Projection freshness."
-    },
-    standardization: {
-      title: "Standardization",
-      summary: "Profiles and policy references shown for UX inspection."
-    },
-    monitor_hitl: {
-      title: "Monitor/HITL",
-      summary: "Review task and decision state shown without local approval authority."
-    },
-    delivery_feedback: {
-      title: "Delivery Feedback",
-      summary: "Feedback metric and triage candidates visible for review."
-    },
-    notes_evidence: {
-      title: "Notes Evidence",
-      summary: "UX direction and render evidence references shown as evidence only."
-    }
-  },
-  workspaces: [
-    { id: "workspace:4.21", label: "4.21 Layer 1 Governance", freshness: "current" },
-    { id: "workspace:4.21-review", label: "4.21 Review Evidence", freshness: "stale" },
-    { id: "workspace:4.21-parked", label: "Parked desktop review candidate", freshness: "blocked" }
-  ],
-  notes: [
-    "PR #20 is draft/reference only.",
-    "Slice 010 contracts define view-model boundaries.",
-    "Slice 011 fixtures prove cross-component composition.",
-    "Desktop app is non-authoritative."
-  ]
-};
+let state;
 
 const $ = (id) => document.getElementById(id);
+
+function normalizeFreshness(value) {
+  return ["stale", "rebuilding", "current", "blocked"].includes(value) ? value : "stale";
+}
+
+function buildSurfaceState(fixture) {
+  const displayState = fixture.display_state;
+  const freshnessCycle = fixture.stale_refresh.states;
+  const freshnessIndex = displayState.freshness_index;
+  const freshness = normalizeFreshness(freshnessCycle[freshnessIndex] || "stale");
+
+  return {
+    fixture,
+    workspaceName: displayState.workspace_name,
+    freshness,
+    freshnessCycle,
+    freshnessIndex,
+    projectSummary: {
+      acceptedSlices: displayState.project_summary.accepted_slices,
+      activeSlice: displayState.project_summary.active_slice,
+      blockedItems: displayState.project_summary.blocked_items
+    },
+    modules: displayState.modules,
+    workspaces: displayState.workspaces,
+    notes: displayState.notes,
+    serviceState: displayState.service_state,
+    syncState: displayState.sync_state
+  };
+}
+
+async function loadFixtureState() {
+  const response = await fetch("./fixtures/slice012_desktop_state.json");
+  if (!response.ok) {
+    throw new Error(`failed to load deterministic fixture: ${response.status}`);
+  }
+  const fixture = await response.json();
+  if (fixture.slice_id !== "L1GOV-SLICE-012" || fixture.live_execution_invoked !== false) {
+    throw new Error("invalid Slice 012 fixture boundary");
+  }
+  return buildSurfaceState(fixture);
+}
 
 function render() {
   $("workspace-name").textContent = state.workspaceName;
@@ -53,6 +51,9 @@ function render() {
   $("freshness-chip").textContent = state.freshness;
   $("freshness-chip").className = `chip ${state.freshness}`;
   $("freshness-state").textContent = state.freshness;
+  $("service-state").textContent = state.serviceState;
+  $("service-chip").textContent = `service ${state.serviceState}`;
+  $("sync-state").textContent = state.syncState;
   $("notes-list").replaceChildren(
     ...state.notes.map((note) => {
       const item = document.createElement("li");
@@ -74,7 +75,7 @@ function openWorkspacePicker() {
       button.innerHTML = `<span>${workspace.label}</span><span class="chip ${workspace.freshness}">${workspace.freshness}</span>`;
       button.addEventListener("click", () => {
         state.workspaceName = workspace.label;
-        state.freshness = workspace.freshness;
+        state.freshness = normalizeFreshness(workspace.freshness);
         overlay.close();
         render();
       });
@@ -113,13 +114,14 @@ function showNoGoBlock() {
 
 function cycleStaleRefresh() {
   state.freshnessIndex = (state.freshnessIndex + 1) % state.freshnessCycle.length;
-  state.freshness = state.freshnessCycle[state.freshnessIndex];
+  state.freshness = normalizeFreshness(state.freshnessCycle[state.freshnessIndex]);
   $("stale-copy").textContent = `Projection display state is ${state.freshness}. No canonical mutation.`;
   render();
 }
 
 function renderFutureIntegrationBoundary() {
-  $("future-boundary").textContent = "disabled future boundary; deterministic fixture display only";
+  const boundary = state.fixture.future_integration_boundary.daemon_controller_bridge;
+  $("future-boundary").textContent = `${boundary}; deterministic fixture display only`;
 }
 
 function bindEvents() {
@@ -133,10 +135,20 @@ function bindEvents() {
   });
 }
 
-bindEvents();
-render();
+async function initialize() {
+  state = await loadFixtureState();
+  bindEvents();
+  render();
+}
+
+initialize().catch((error) => {
+  $("service-outcome-copy").textContent = `Fixture load failed: ${error.message}`;
+  $("service-rejection").classList.add("blocked");
+});
 
 window.slice012DesktopSurface = {
+  buildSurfaceState,
+  loadFixtureState,
   openWorkspacePicker,
   selectModule,
   showCommandDraftPreview,

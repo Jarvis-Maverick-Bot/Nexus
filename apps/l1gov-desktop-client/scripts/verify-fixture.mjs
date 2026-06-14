@@ -10,4 +10,12 @@ if (fixture.non_authoritative !== true || fixture.live_execution_invoked !== fal
   throw new Error("fixture boundary is invalid");
 }
 
+if (fixture.display_state?.service_state !== "fixture only") {
+  throw new Error("fixture service state must be fixture only");
+}
+
+if (fixture.display_state?.workspace_name !== "4.21 Layer 1 Governance") {
+  throw new Error("fixture workspace name is invalid");
+}
+
 console.log("slice012 desktop fixture verified");
