@@ -1,0 +1,4 @@
+JSON_PARSE_OK
+json_file_count=16
+utf8_bom_findings=0
+exit_code=0

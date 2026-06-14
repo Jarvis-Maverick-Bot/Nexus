@@ -1,0 +1,60 @@
+{
+    "accepted":  true,
+    "component":  "local_app_contract",
+    "positive_fixture":  {
+                             "accepted":  true,
+                             "component":  "local_app_contract",
+                             "contract_refs":  [
+                                                   "LocalDesktopShellViewModel",
+                                                   "WorkspacePickerOverlayViewModel",
+                                                   "NotesEvidenceFrameViewModel"
+                                               ],
+                             "error_code":  null,
+                             "evidence_id":  "l1gov-slice-011/local_app_contract.json",
+                             "mode":  "deterministic_fixture",
+                             "records_appended":  0,
+                             "source_refs":  [
+                                                 "WBS V0.6",
+                                                 "L1GOV-SLICE-010",
+                                                 "PR18:39001610"
+                                             ]
+                         },
+    "negative_fixture_count":  4,
+    "negative_fixtures":  [
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "local_app_contract",
+                                  "error_code":  "ERR_INVALID_TRANSITION",
+                                  "family":  "missing_slice010_evidence",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "local_app_contract",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "local_app_direct_approval",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "local_app_contract",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "read_only_mutation",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "local_app_contract",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "local_app_view_model_authority",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              }
+                          ],
+    "mode":  "deterministic_in_process_dry_run",
+    "live_execution_invoked":  false,
+    "records_appended":  0
+}

@@ -1,0 +1,86 @@
+{
+    "accepted":  true,
+    "component":  "delivery_feedback",
+    "positive_fixture":  {
+                             "accepted":  true,
+                             "component":  "delivery_feedback",
+                             "contract_refs":  [
+                                                   "DeliveryRecord",
+                                                   "FeedbackMetricExtraction",
+                                                   "FeedbackTriageDecision",
+                                                   "CompletionContinuityPacket"
+                                               ],
+                             "error_code":  null,
+                             "evidence_id":  "l1gov-slice-011/delivery_feedback.json",
+                             "mode":  "deterministic_fixture",
+                             "records_appended":  0,
+                             "source_refs":  [
+                                                 "solution-design/subtopics/4_21_DELIVERY_FEEDBACK_LOOP_DETAILED_DESIGN.md",
+                                                 "implementation-design/subtopics/L1_11_8_DELIVERY_FEEDBACK_LOOP_IMPLEMENTATION_DESIGN.md",
+                                                 "review-evidence/2026-06-13_NOVA_4_21_SLICE_008_TASK_PACKAGE_REVIEW.md",
+                                                 "SharedDocs:eddbe4f"
+                                             ]
+                         },
+    "negative_fixture_count":  7,
+    "negative_fixtures":  [
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "delivery_feedback",
+                                  "error_code":  "ERR_DELIVERY_FEEDBACK_RECORD_INVALID",
+                                  "family":  "stale_feedback_metric_policy",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "delivery_feedback",
+                                  "error_code":  "ERR_RAW_FEEDBACK_NO_AUTHORITY_MUTATION",
+                                  "family":  "raw_feedback_mutation",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "delivery_feedback",
+                                  "error_code":  "ERR_MISSING_HUMAN_DECISION",
+                                  "family":  "completion_decision_wording",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "delivery_feedback",
+                                  "error_code":  "ERR_MISSING_HUMAN_DECISION",
+                                  "family":  "continuity_activation_wording",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "delivery_feedback",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "production_readiness_wording",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "delivery_feedback",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "deploy_readiness_wording",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "delivery_feedback",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "final_pass_wording",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              }
+                          ],
+    "mode":  "deterministic_in_process_dry_run",
+    "live_execution_invoked":  false,
+    "records_appended":  0
+}

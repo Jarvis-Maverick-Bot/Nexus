@@ -1,0 +1,1876 @@
+{
+    "accepted":  true,
+    "scan_scope":  "changed files against origin/master",
+    "match_count":  266,
+    "unclassified_count":  0,
+    "classifications":  {
+                            "negative_fixture_or_fixture_contract":  34,
+                            "test_assertion":  6,
+                            "evidence_record":  226,
+                            "unclassified":  0
+                        },
+    "matches":  [
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  17,
+                        "term":  "completion",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_completion_continuity_packet,"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  98,
+                        "term":  "direct_ui_approval",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "\"direct_ui_approval\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  102,
+                        "term":  "runtime",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "\"runtime_private_agent_invocation\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  108,
+                        "term":  "completion",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "\"completion_decision_wording\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  111,
+                        "term":  "deploy",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "\"deploy_readiness_wording\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  112,
+                        "term":  "final_pass",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "\"final_pass_wording\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  115,
+                        "term":  "idempotency",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "\"idempotency_mismatch\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  206,
+                        "term":  "completion",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "(\"DeliveryRecord\", \"FeedbackMetricExtraction\", \"FeedbackTriageDecision\", \"CompletionContinuityPacket\"),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  215,
+                        "term":  "completion",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_completion_continuity_packet(delivery.valid_completion_packet()),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  252,
+                        "term":  "final_pass",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_workspace_manifest(workspace_init.valid_manifest(status=\"final_pass\")),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  283,
+                        "term":  "controller execution",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_handoff_candidate(dispatch.valid_handoff_candidate(expected_outputs=(\"controller execution\",))),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  286,
+                        "term":  "direct_ui_approval",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "\"direct_ui_approval\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  288,
+                        "term":  "direct_ui_approval",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "_service().handle(service_fx.service_command(payload={\"requested_action\": \"direct_ui_approval\"})),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  293,
+                        "term":  "local app approves",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_command_affordance(_local_app_affordance(label=\"Approve now\", payload={\"requested_action\": \"local app approves\"})),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  315,
+                        "term":  "runtime",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "\"runtime_private_agent_invocation\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  317,
+                        "term":  "private-agent",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "_service().handle(service_fx.service_command(payload={\"requested_action\": \"private-agent invocation\"})),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  322,
+                        "term":  "route activation",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_handoff_candidate(dispatch.valid_handoff_candidate(expected_outputs=(\"route activation\",))),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  327,
+                        "term":  "adapter call",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_handoff_candidate(dispatch.valid_handoff_candidate(expected_outputs=(\"adapter call\", \"transport call\"))),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  327,
+                        "term":  "transport call",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_handoff_candidate(dispatch.valid_handoff_candidate(expected_outputs=(\"adapter call\", \"transport call\"))),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  332,
+                        "term":  "owner path",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_impact_control_request(impact.valid_impact_request(proposed_action=\"please call owner path now\")),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  337,
+                        "term":  "lower layer",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_impact_control_request(impact.valid_impact_request(proposed_action=\"send lower layer request\")),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  345,
+                        "term":  "completion",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "\"completion_decision_wording\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  347,
+                        "term":  "complete project",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_completion_continuity_packet(delivery.valid_completion_packet(requested_decision=\"complete project\")),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  347,
+                        "term":  "completion",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_completion_continuity_packet(delivery.valid_completion_packet(requested_decision=\"complete project\")),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  352,
+                        "term":  "completion",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_completion_continuity_packet(delivery.valid_completion_packet(requested_decision=\"activate continuity\")),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  352,
+                        "term":  "activate continuity",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_completion_continuity_packet(delivery.valid_completion_packet(requested_decision=\"activate continuity\")),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  358,
+                        "term":  "production readiness",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "delivery.valid_delivery_record(preview_or_release_scope=\"mark production readiness\"),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  363,
+                        "term":  "deploy",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "\"deploy_readiness_wording\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  366,
+                        "term":  "deploy",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "delivery.valid_delivery_record(preview_or_release_scope=\"deploy to production\"),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  371,
+                        "term":  "final_pass",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "\"final_pass_wording\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  373,
+                        "term":  "completion",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_completion_continuity_packet(delivery.valid_completion_packet(requested_decision=\"final pass\")),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  373,
+                        "term":  "final pass",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "validate_completion_continuity_packet(delivery.valid_completion_packet(requested_decision=\"final pass\")),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  393,
+                        "term":  "idempotency",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "\"idempotency_mismatch\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/fixtures/layer1_dry_run.py",
+                        "line":  395,
+                        "term":  "idempotency",
+                        "classification":  "negative_fixture_or_fixture_contract",
+                        "text":  "_service().handle(service_fx.service_command(payload={\"idempotency_key\": \"different-idempotency-key\"})),"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_layer1_governance_dry_run_no_go.py",
+                        "line":  19,
+                        "term":  "direct_ui_approval",
+                        "classification":  "test_assertion",
+                        "text":  "\"direct_ui_approval\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_layer1_governance_dry_run_no_go.py",
+                        "line":  23,
+                        "term":  "runtime",
+                        "classification":  "test_assertion",
+                        "text":  "\"runtime_private_agent_invocation\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_layer1_governance_dry_run_no_go.py",
+                        "line":  29,
+                        "term":  "completion",
+                        "classification":  "test_assertion",
+                        "text":  "\"completion_decision_wording\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_layer1_governance_dry_run_no_go.py",
+                        "line":  32,
+                        "term":  "deploy",
+                        "classification":  "test_assertion",
+                        "text":  "\"deploy_readiness_wording\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_layer1_governance_dry_run_no_go.py",
+                        "line":  33,
+                        "term":  "final_pass",
+                        "classification":  "test_assertion",
+                        "text":  "\"final_pass_wording\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_layer1_governance_dry_run_no_go.py",
+                        "line":  37,
+                        "term":  "idempotency",
+                        "classification":  "test_assertion",
+                        "text":  "\"idempotency_mismatch\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/delivery-feedback-fixtures.json",
+                        "line":  11,
+                        "term":  "completion",
+                        "classification":  "evidence_record",
+                        "text":  "\"CompletionContinuityPacket\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/dry-run-trace.json",
+                        "line":  139,
+                        "term":  "completion",
+                        "classification":  "evidence_record",
+                        "text":  "\"CompletionContinuityPacket\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/negative-fixture-results.json",
+                        "line":  81,
+                        "term":  "direct_ui_approval",
+                        "classification":  "evidence_record",
+                        "text":  "\"family\": \"direct_ui_approval\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/negative-fixture-results.json",
+                        "line":  113,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"family\": \"runtime_private_agent_invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/negative-fixture-results.json",
+                        "line":  161,
+                        "term":  "completion",
+                        "classification":  "evidence_record",
+                        "text":  "\"family\": \"completion_decision_wording\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/negative-fixture-results.json",
+                        "line":  185,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"family\": \"deploy_readiness_wording\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/negative-fixture-results.json",
+                        "line":  193,
+                        "term":  "final_pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"family\": \"final_pass_wording\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/negative-fixture-results.json",
+                        "line":  216,
+                        "term":  "idempotency",
+                        "classification":  "evidence_record",
+                        "text":  "\"error_code\": \"ERR_IDEMPOTENCY_KEY_REUSE\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/negative-fixture-results.json",
+                        "line":  217,
+                        "term":  "idempotency",
+                        "classification":  "evidence_record",
+                        "text":  "\"family\": \"idempotency_mismatch\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/positive-dry-run-result.json",
+                        "line":  141,
+                        "term":  "completion",
+                        "classification":  "evidence_record",
+                        "text":  "\"CompletionContinuityPacket\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/source-authority-fixtures.json",
+                        "line":  13,
+                        "term":  "direct_ui_approval",
+                        "classification":  "evidence_record",
+                        "text":  "\"direct_ui_approval\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/source-authority-fixtures.json",
+                        "line":  17,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"runtime_private_agent_invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/source-authority-fixtures.json",
+                        "line":  23,
+                        "term":  "completion",
+                        "classification":  "evidence_record",
+                        "text":  "\"completion_decision_wording\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/source-authority-fixtures.json",
+                        "line":  26,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"deploy_readiness_wording\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/source-authority-fixtures.json",
+                        "line":  27,
+                        "term":  "final_pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"final_pass_wording\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/source-authority-fixtures.json",
+                        "line":  30,
+                        "term":  "idempotency",
+                        "classification":  "evidence_record",
+                        "text":  "\"idempotency_mismatch\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/source-authority.json",
+                        "line":  27,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"deploy_config_credential_package_mutation\":  false,"
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/source-authority.json",
+                        "line":  28,
+                        "term":  "completion",
+                        "classification":  "evidence_record",
+                        "text":  "\"completion_or_production_readiness_claim\":  false"
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  5,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  6,
+                        "term":  "private-agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"private-agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  7,
+                        "term":  "private agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"private agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  8,
+                        "term":  "actual dispatch",
+                        "classification":  "evidence_record",
+                        "text":  "\"actual dispatch\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  9,
+                        "term":  "dispatch execution",
+                        "classification":  "evidence_record",
+                        "text":  "\"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  10,
+                        "term":  "route activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  11,
+                        "term":  "adapter call",
+                        "classification":  "evidence_record",
+                        "text":  "\"adapter call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  12,
+                        "term":  "transport call",
+                        "classification":  "evidence_record",
+                        "text":  "\"transport call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  15,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  16,
+                        "term":  "owner path",
+                        "classification":  "evidence_record",
+                        "text":  "\"owner path call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  17,
+                        "term":  "lower layer",
+                        "classification":  "evidence_record",
+                        "text":  "\"lower layer request\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  19,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  20,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  23,
+                        "term":  "continuity activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  24,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  67,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  73,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  79,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  85,
+                        "term":  "continuity activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  91,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  97,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  103,
+                        "term":  "private agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  109,
+                        "term":  "private-agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private-agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  115,
+                        "term":  "dispatch execution",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  121,
+                        "term":  "route activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  127,
+                        "term":  "adapter call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"adapter call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  133,
+                        "term":  "transport call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"transport call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  145,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  169,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  175,
+                        "term":  "continuity activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  187,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  193,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  199,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  205,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  211,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  217,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  235,
+                        "term":  "dispatch execution",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  241,
+                        "term":  "actual dispatch",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"actual dispatch\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  247,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  253,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  259,
+                        "term":  "owner path",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"owner path call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  265,
+                        "term":  "adapter call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"adapter call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  271,
+                        "term":  "transport call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"transport call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  277,
+                        "term":  "route activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  295,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  301,
+                        "term":  "private agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  307,
+                        "term":  "private-agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private-agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  313,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  319,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  325,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  331,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  337,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  343,
+                        "term":  "continuity activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  349,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  355,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  361,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  367,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  373,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  379,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  385,
+                        "term":  "actual dispatch",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"actual dispatch\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  391,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  397,
+                        "term":  "adapter call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"adapter call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  403,
+                        "term":  "route activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  409,
+                        "term":  "private-agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private-agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  415,
+                        "term":  "private agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  421,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  427,
+                        "term":  "transport call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"transport call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  439,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  445,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  451,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  457,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  463,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  469,
+                        "term":  "owner path",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"owner path call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  475,
+                        "term":  "adapter call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"adapter call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  481,
+                        "term":  "transport call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"transport call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  487,
+                        "term":  "route activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  499,
+                        "term":  "dispatch execution",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  505,
+                        "term":  "actual dispatch",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"actual dispatch\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  511,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  517,
+                        "term":  "private-agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private-agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  523,
+                        "term":  "private agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  529,
+                        "term":  "lower layer",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"lower layer request\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  535,
+                        "term":  "lower layer",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"lower layer request\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  541,
+                        "term":  "lower layer",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"lower layer request\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  547,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  559,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  583,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  589,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  595,
+                        "term":  "dispatch execution",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  601,
+                        "term":  "actual dispatch",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"actual dispatch\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  607,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  613,
+                        "term":  "private-agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private-agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  619,
+                        "term":  "private agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  625,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  631,
+                        "term":  "adapter call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"adapter call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  637,
+                        "term":  "transport call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"transport call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  643,
+                        "term":  "route activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  655,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  661,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  667,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  673,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  679,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  685,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  691,
+                        "term":  "continuity activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  697,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  703,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  709,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  715,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  721,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  727,
+                        "term":  "private agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  733,
+                        "term":  "private-agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private-agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  739,
+                        "term":  "dispatch execution",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  745,
+                        "term":  "actual dispatch",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"actual dispatch\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  751,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  757,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  763,
+                        "term":  "owner path",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"owner path call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  769,
+                        "term":  "adapter call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"adapter call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  775,
+                        "term":  "transport call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"transport call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  781,
+                        "term":  "route activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  809,
+                        "term":  "completion",
+                        "classification":  "evidence_record",
+                        "text":  "\"path\":  \"nexus\\\\governance\\\\tests\\\\test_delivery_feedback_completion_continuity.py\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  811,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  815,
+                        "term":  "completion",
+                        "classification":  "evidence_record",
+                        "text":  "\"path\":  \"nexus\\\\governance\\\\tests\\\\test_delivery_feedback_completion_continuity.py\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  817,
+                        "term":  "continuity activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  821,
+                        "term":  "completion",
+                        "classification":  "evidence_record",
+                        "text":  "\"path\":  \"nexus\\\\governance\\\\tests\\\\test_delivery_feedback_completion_continuity.py\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  823,
+                        "term":  "continuity activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  841,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  847,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  853,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  859,
+                        "term":  "actual dispatch",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"actual dispatch\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  865,
+                        "term":  "private-agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private-agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  871,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  877,
+                        "term":  "actual dispatch",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"actual dispatch\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  883,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  889,
+                        "term":  "owner path",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"owner path call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  895,
+                        "term":  "adapter call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"adapter call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  901,
+                        "term":  "transport call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"transport call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  907,
+                        "term":  "route activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  919,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  925,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  931,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  937,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  943,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  949,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  955,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  961,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  967,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  973,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  979,
+                        "term":  "private-agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private-agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  985,
+                        "term":  "adapter call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"adapter call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  991,
+                        "term":  "route activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  997,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1003,
+                        "term":  "private-agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private-agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1009,
+                        "term":  "adapter call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"adapter call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1015,
+                        "term":  "route activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1027,
+                        "term":  "lower layer",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"lower layer request\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1033,
+                        "term":  "lower layer",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"lower layer request\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1039,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1057,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1063,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1069,
+                        "term":  "actual dispatch",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"actual dispatch\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1075,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1093,
+                        "term":  "lower layer",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"lower layer request\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1099,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1105,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1129,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1135,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1141,
+                        "term":  "continuity activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1147,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1153,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1159,
+                        "term":  "dispatch execution",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1165,
+                        "term":  "route activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1171,
+                        "term":  "adapter call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"adapter call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1177,
+                        "term":  "transport call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"transport call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1189,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1195,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1201,
+                        "term":  "private-agent",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"private-agent invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1207,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1213,
+                        "term":  "adapter call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"adapter call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1219,
+                        "term":  "route activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1231,
+                        "term":  "actual dispatch",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"actual dispatch\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1237,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1243,
+                        "term":  "dispatch execution",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1249,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1255,
+                        "term":  "actual dispatch",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"actual dispatch\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1261,
+                        "term":  "route activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1267,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1273,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1279,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1285,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1291,
+                        "term":  "continuity activation",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1297,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1303,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1309,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1321,
+                        "term":  "deploy",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"deploy\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1327,
+                        "term":  "production readiness",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1333,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1339,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1345,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1351,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1357,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1363,
+                        "term":  "runtime",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1369,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1375,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1381,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1387,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1393,
+                        "term":  "controller call",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1399,
+                        "term":  "lower layer",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"lower layer request\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-011/structured-no-go-scan.json",
+                        "line":  1405,
+                        "term":  "final pass",
+                        "classification":  "evidence_record",
+                        "text":  "\"term\":  \"final pass\","
+                    }
+                ]
+}

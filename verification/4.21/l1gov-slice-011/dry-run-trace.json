@@ -1,0 +1,189 @@
+{
+  "accepted": true,
+  "step_count": 10,
+  "steps": [
+    {
+      "accepted": true,
+      "component": "source_authority",
+      "contract_refs": [
+        "SourceAuthorityManifest"
+      ],
+      "error_code": null,
+      "evidence_id": "l1gov-slice-011/source_authority.json",
+      "mode": "deterministic_fixture",
+      "records_appended": 0,
+      "source_refs": [
+        "WBS V0.6",
+        "parent Solution Design V0.8.5"
+      ]
+    },
+    {
+      "accepted": true,
+      "component": "workspace_init",
+      "contract_refs": [
+        "WorkspaceManifest",
+        "GovernanceSurfaceIndex"
+      ],
+      "error_code": null,
+      "evidence_id": "l1gov-slice-011/workspace_init.json",
+      "mode": "deterministic_fixture",
+      "records_appended": 0,
+      "source_refs": [
+        "WBS V0.6",
+        "L1.11.2",
+        "PR9:7007b4a"
+      ]
+    },
+    {
+      "accepted": true,
+      "component": "standardization",
+      "contract_refs": [
+        "ExecutionPlanCandidate",
+        "DeliverableEvaluationProfile",
+        "FeedbackMetricPolicy"
+      ],
+      "error_code": null,
+      "evidence_id": "l1gov-slice-011/standardization.json",
+      "mode": "deterministic_fixture",
+      "records_appended": 0,
+      "source_refs": [
+        "solution-design/subtopics/4_21_PROJECT_STANDARDIZATION_DETAILED_DESIGN.md",
+        "implementation-design/subtopics/L1_11_3_PROJECT_STANDARDIZATION_IMPLEMENTATION_DESIGN.md",
+        "review-evidence/2026-06-11_NOVA_L1_11_QA_FEEDBACK_METRICS_CORRECTION.md",
+        "PR10:5f94c27038d4b8f84361d2336a6a826afcdea987"
+      ]
+    },
+    {
+      "accepted": true,
+      "component": "project_execution",
+      "contract_refs": [
+        "ApprovedExecutionPlanCandidateRef",
+        "PacketMap",
+        "Layer1WorkPacket",
+        "PacketReadinessDecision"
+      ],
+      "error_code": null,
+      "evidence_id": "l1gov-slice-011/project_execution.json",
+      "mode": "deterministic_fixture",
+      "records_appended": 0,
+      "source_refs": [
+        "solution-design/subtopics/4_21_PROJECT_EXECUTION_DETAILED_DESIGN.md",
+        "implementation-design/subtopics/L1_11_4_PROJECT_EXECUTION_IMPLEMENTATION_DESIGN.md",
+        "PR11:0fc70602cc864eb6eb8fe82f7707371f1adbba6e"
+      ]
+    },
+    {
+      "accepted": true,
+      "component": "dispatch_contract",
+      "contract_refs": [
+        "DispatchReadinessReview",
+        "DispatchDecision",
+        "DispatchControllerHandoffCandidate"
+      ],
+      "error_code": null,
+      "evidence_id": "l1gov-slice-011/dispatch_contract.json",
+      "mode": "deterministic_fixture",
+      "records_appended": 0,
+      "source_refs": [
+        "solution-design/subtopics/4_21_LAYER1_LAYER2_DISPATCH_CONTRACT_DETAILED_DESIGN.md",
+        "implementation-design/subtopics/L1_11_5_LAYER1_LAYER2_DISPATCH_CONTRACT_IMPLEMENTATION_DESIGN.md",
+        "PR12:2cd4a1e06dc93908d2e9bac2f493a17489344e0d"
+      ]
+    },
+    {
+      "accepted": true,
+      "component": "monitor_hitl",
+      "contract_refs": [
+        "HumanReviewTask",
+        "HumanDecision",
+        "DeliverableEvaluationResult",
+        "ReviewDisposition"
+      ],
+      "error_code": null,
+      "evidence_id": "l1gov-slice-011/monitor_hitl.json",
+      "mode": "deterministic_fixture",
+      "records_appended": 0,
+      "source_refs": [
+        "solution-design/subtopics/4_21_PROJECT_MONITOR_HITL_DETAILED_DESIGN.md",
+        "implementation-design/subtopics/L1_11_6_PROJECT_MONITOR_HITL_IMPLEMENTATION_DESIGN.md",
+        "review-evidence/2026-06-13_NOVA_4_21_SLICE_006_TASK_PACKAGE_REVIEW.md",
+        "SharedDocs:b3d3f67"
+      ]
+    },
+    {
+      "accepted": true,
+      "component": "impact_control",
+      "contract_refs": [
+        "ImpactControlRequest",
+        "ImpactAssessment",
+        "LowerLayerRequestCandidate"
+      ],
+      "error_code": null,
+      "evidence_id": "l1gov-slice-011/impact_control.json",
+      "mode": "deterministic_fixture",
+      "records_appended": 0,
+      "source_refs": [
+        "solution-design/subtopics/4_21_LAYER_DEPENDENCY_IMPACT_CONTROL_DETAILED_DESIGN.md",
+        "implementation-design/subtopics/L1_11_7_LAYER_DEPENDENCY_IMPACT_CONTROL_IMPLEMENTATION_DESIGN.md",
+        "review-evidence/2026-06-13_NOVA_4_21_SLICE_007_TASK_PACKAGE_REVIEW.md",
+        "SharedDocs:565ce91"
+      ]
+    },
+    {
+      "accepted": true,
+      "component": "delivery_feedback",
+      "contract_refs": [
+        "DeliveryRecord",
+        "FeedbackMetricExtraction",
+        "FeedbackTriageDecision",
+        "CompletionContinuityPacket"
+      ],
+      "error_code": null,
+      "evidence_id": "l1gov-slice-011/delivery_feedback.json",
+      "mode": "deterministic_fixture",
+      "records_appended": 0,
+      "source_refs": [
+        "solution-design/subtopics/4_21_DELIVERY_FEEDBACK_LOOP_DETAILED_DESIGN.md",
+        "implementation-design/subtopics/L1_11_8_DELIVERY_FEEDBACK_LOOP_IMPLEMENTATION_DESIGN.md",
+        "review-evidence/2026-06-13_NOVA_4_21_SLICE_008_TASK_PACKAGE_REVIEW.md",
+        "SharedDocs:eddbe4f"
+      ]
+    },
+    {
+      "accepted": true,
+      "component": "governance_service",
+      "contract_refs": [
+        "CommandDraft",
+        "CommandEnvelope",
+        "ServiceCommandOutcome"
+      ],
+      "error_code": null,
+      "evidence_id": "l1gov-slice-011/governance_service.json",
+      "mode": "deterministic_fixture",
+      "records_appended": 0,
+      "source_refs": [
+        "WBS V0.6",
+        "L1.11.9",
+        "a8aae37032502800778f02c7defc0dce5d1231fd"
+      ]
+    },
+    {
+      "accepted": true,
+      "component": "local_app_contract",
+      "contract_refs": [
+        "LocalDesktopShellViewModel",
+        "WorkspacePickerOverlayViewModel",
+        "NotesEvidenceFrameViewModel"
+      ],
+      "error_code": null,
+      "evidence_id": "l1gov-slice-011/local_app_contract.json",
+      "mode": "deterministic_fixture",
+      "records_appended": 0,
+      "source_refs": [
+        "WBS V0.6",
+        "L1GOV-SLICE-010",
+        "PR18:39001610"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+    "accepted":  true,
+    "component":  "dispatch_contract",
+    "positive_fixture":  {
+                             "accepted":  true,
+                             "component":  "dispatch_contract",
+                             "contract_refs":  [
+                                                   "DispatchReadinessReview",
+                                                   "DispatchDecision",
+                                                   "DispatchControllerHandoffCandidate"
+                                               ],
+                             "error_code":  null,
+                             "evidence_id":  "l1gov-slice-011/dispatch_contract.json",
+                             "mode":  "deterministic_fixture",
+                             "records_appended":  0,
+                             "source_refs":  [
+                                                 "solution-design/subtopics/4_21_LAYER1_LAYER2_DISPATCH_CONTRACT_DETAILED_DESIGN.md",
+                                                 "implementation-design/subtopics/L1_11_5_LAYER1_LAYER2_DISPATCH_CONTRACT_IMPLEMENTATION_DESIGN.md",
+                                                 "PR12:2cd4a1e06dc93908d2e9bac2f493a17489344e0d"
+                                             ]
+                         },
+    "negative_fixture_count":  3,
+    "negative_fixtures":  [
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "dispatch_contract",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "handoff_controller_execution",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "dispatch_contract",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "route_activation",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "dispatch_contract",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "adapter_transport_activation",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              }
+                          ],
+    "mode":  "deterministic_in_process_dry_run",
+    "live_execution_invoked":  false,
+    "records_appended":  0
+}
