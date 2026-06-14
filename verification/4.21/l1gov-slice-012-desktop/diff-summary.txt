@@ -1,7 +1,4 @@
-git diff --stat origin/master...HEAD
-Generated at: 2026-06-14T17:18:04.228576+08:00
-Commit: 4fd7a4f5c8a9d3289316e921de5ab7e4425f6009
-
+ apps/l1gov-desktop-client/.gitignore               |   5 +
  apps/l1gov-desktop-client/README.md                |  32 ++
  apps/l1gov-desktop-client/package-lock.json        |  15 +
  apps/l1gov-desktop-client/package.json             |  14 +
@@ -11,9 +8,35 @@ Commit: 4fd7a4f5c8a9d3289316e921de5ab7e4425f6009
  apps/l1gov-desktop-client/src-tauri/src/main.rs    |   7 +
  .../l1gov-desktop-client/src-tauri/tauri.conf.json |  29 ++
  .../src/fixtures/slice012_desktop_state.json       |  64 ++++
- apps/l1gov-desktop-client/src/index.html           | 120 +++++++
- apps/l1gov-desktop-client/src/main.js              | 147 +++++++++
- apps/l1gov-desktop-client/src/styles.css           | 344 +++++++++++++++++++++
+ apps/l1gov-desktop-client/src/index.html           | 120 ++++++
+ apps/l1gov-desktop-client/src/main.js              | 147 ++++++++
+ apps/l1gov-desktop-client/src/styles.css           | 344 +++++++++++++++++
  .../tests/fixtures/client_test_surface.py          |   8 +
- .../tests/test_client_desktop_surface_slice012.py  | 156 ++++++++++
- 14 files changed, 963 insertions(+)
+ .../tests/test_client_desktop_surface_slice012.py  | 170 +++++++++
+ .../desktop-fixture-node-verify.txt                |   7 +
+ .../desktop-launch-render-check.txt                |  10 +
+ .../desktop-toolchain-check.txt                    |  12 +
+ .../4.21/l1gov-slice-012-desktop/diff-check.txt    |   6 +
+ .../4.21/l1gov-slice-012-desktop/diff-summary.txt  |  19 +
+ .../l1gov-slice-012-desktop/evidence-index.json    |  79 ++++
+ .../4.21/l1gov-slice-012-desktop/file-list.txt     |  30 ++
+ .../full-governance-pytest-output.txt              |  16 +
+ .../4.21/l1gov-slice-012-desktop/json-parse.txt    |  14 +
+ .../macos-compatibility-note.md                    |   5 +
+ .../nexus-mq-import-scan.txt                       |   6 +
+ .../package-manager-scope.json                     |  10 +
+ .../4.21/l1gov-slice-012-desktop/scope-check.json  |  99 +++++
+ .../screenshots/README_NO_SCREENSHOTS.txt          |   1 +
+ .../structured-no-go-scan.json                     | 407 +++++++++++++++++++++
+ .../targeted-desktop-pytest-output.txt             |   8 +
+ 31 files changed, 1711 insertions(+)
+ apps/l1gov-desktop-client/package-lock.json        | 199 +++++++++++++++++++++
+ apps/l1gov-desktop-client/src-tauri/Cargo.toml     |   4 +-
+ .../desktop-fixture-node-verify.txt                |   9 +-
+ .../desktop-launch-render-check.txt                |  10 +-
+ .../desktop-toolchain-check.txt                    |  21 ++-
+ .../4.21/l1gov-slice-012-desktop/diff-check.txt    |   7 +-
+ .../full-governance-pytest-output.txt              |  15 +-
+ .../screenshots/README_NO_SCREENSHOTS.txt          |   4 +-
+ .../targeted-desktop-pytest-output.txt             |  11 +-
+ 9 files changed, 232 insertions(+), 48 deletions(-)

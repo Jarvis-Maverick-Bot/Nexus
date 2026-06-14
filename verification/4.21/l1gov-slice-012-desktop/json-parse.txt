@@ -1,14 +1,5 @@
-Slice 012 desktop JSON parse check
-Generated at: 2026-06-14T17:18:45.860958+08:00
-Implementation commit: 4fd7a4f5c8a9d3289316e921de5ab7e4425f6009
-
-PASS D:\Projects\Nexus\verification\4.21\l1gov-slice-012-desktop\evidence-index.json
-PASS D:\Projects\Nexus\verification\4.21\l1gov-slice-012-desktop\package-manager-scope.json
-PASS D:\Projects\Nexus\verification\4.21\l1gov-slice-012-desktop\scope-check.json
-PASS D:\Projects\Nexus\verification\4.21\l1gov-slice-012-desktop\structured-no-go-scan.json
-PASS D:\Projects\Nexus\apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json
-PASS D:\Projects\Nexus\apps\l1gov-desktop-client\package.json
-PASS D:\Projects\Nexus\apps\l1gov-desktop-client\package-lock.json
-PASS D:\Projects\Nexus\apps\l1gov-desktop-client\src-tauri\tauri.conf.json
-
-Accepted: True
+OK D:\Projects\Nexus\verification\4.21\l1gov-slice-012-desktop\evidence-index.json
+OK D:\Projects\Nexus\verification\4.21\l1gov-slice-012-desktop\package-manager-scope.json
+OK D:\Projects\Nexus\verification\4.21\l1gov-slice-012-desktop\scope-check.json
+OK D:\Projects\Nexus\verification\4.21\l1gov-slice-012-desktop\structured-no-go-scan.json
+EXIT_CODE=0

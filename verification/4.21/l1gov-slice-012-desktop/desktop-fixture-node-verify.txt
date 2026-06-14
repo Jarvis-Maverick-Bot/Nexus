@@ -1,7 +1,6 @@
-Desktop fixture Node verification
-Generated at: 2026-06-14T17:17:06.8307130+08:00
-Commit: 4fd7a4f5c8a9d3289316e921de5ab7e4425f6009
+
+> @nexus/l1gov-desktop-client@0.0.0-slice012 test
+> node scripts/verify-fixture.mjs
 
 slice012 desktop fixture verified
-
-Exit code: 0
+EXIT_CODE=0

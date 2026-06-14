@@ -1,12 +1,11 @@
 Slice 012 desktop toolchain check
-Generated at: 2026-06-14T17:17:06.9324492+08:00
-Commit: 4fd7a4f5c8a9d3289316e921de5ab7e4425f6009
-
-node: MISSING
-npm: MISSING
-rustc: MISSING
-cargo: MISSING
-bundled_node: C:\Users\John\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe
-launch_status: BLOCKED_TOOLCHAIN_MISSING
-reason: npm, rustc, and cargo are not available on PATH; bundled Codex runtime provides node.exe only.
-no_external_toolchain_install_performed: true
+Generated at: 2026-06-14T17:35:50.6044870+08:00
+Branch: codex/4.21-slice012-desktop-app-test-surface
+Head before evidence commit: 06b6700fbe6844417224fca434aaa8b58eb4df92
+Bundled node: v24.14.0
+App-local npm: 11.6.2
+App-local rustc: rustc 1.96.0 (ac68faa20 2026-05-25)
+App-local cargo: cargo 1.96.0 (30a34c682 2026-05-25)
+MSVC link.exe on PATH: False
+Visual Studio link.exe search: none found under Program Files Visual Studio paths
+Status: BLOCKED_MSVC_LINKER_MISSING

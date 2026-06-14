@@ -1,8 +1,3 @@
-Targeted desktop Slice 012 pytest
-Generated at: 2026-06-14T17:17:05.2470598+08:00
-Commit: 4fd7a4f5c8a9d3289316e921de5ab7e4425f6009
-
-.......                                                                  [100%]
-7 passed in 0.02s
-
-Exit code: 0
+........                                                                 [100%]
+8 passed in 0.02s
+EXIT_CODE=0

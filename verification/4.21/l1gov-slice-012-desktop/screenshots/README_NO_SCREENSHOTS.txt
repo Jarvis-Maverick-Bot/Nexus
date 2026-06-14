@@ -1,1 +1,3 @@
-Desktop screenshots were not generated because the local Windows environment lacks npm and Rust/Cargo required to launch the Tauri app. See ../desktop-launch-render-check.txt.
+No screenshot artifacts were generated for this evidence package.
+Reason: Windows Tauri build is blocked before executable launch because MSVC link.exe is missing.
+No live runtime, daemon, controller, dispatch, route, adapter, transport, owner-path, or lower-layer call was invoked.

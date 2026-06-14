@@ -1,5 +1,7 @@
 # macOS Compatibility Note
 
-macOS compatibility is considered through the Tauri app structure and platform-neutral renderer files.
-macOS launch evidence was not produced on this Windows host.
-A macOS reviewer should run `npm install` and `npm run dev` from `apps/l1gov-desktop-client/` after installing Node/npm, Rust/Cargo, and macOS Tauri prerequisites.
+The Slice 012 desktop implementation uses Tauri project structure and deterministic renderer assets that are compatible with Windows and macOS Tauri targets in source form.
+
+This verification run occurred on Windows only. macOS launch/render evidence is not available from this host and remains a reviewer-side compatibility check after platform prerequisites are installed.
+
+The current Windows build is blocked before launch by missing MSVC link.exe, so no platform runtime execution was performed.

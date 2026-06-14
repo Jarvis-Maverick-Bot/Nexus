@@ -1,407 +1,319 @@
 {
-  "accepted": true,
-  "scan_scope": "Slice 012 desktop changed app/test/evidence files",
-  "match_count": 56,
-  "unclassified_count": 0,
-  "classifications": {
-    "desktop_app_boundary_text_or_disabled_fixture": 26,
-    "test_fixture": 0,
-    "test_assertion": 24,
-    "evidence_record": 6,
-    "unclassified": 0
-  },
-  "matches": [
-    {
-      "path": "apps/l1gov-desktop-client/README.md",
-      "line": 5,
-      "term": "controller",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "This is the Windows-first Tauri desktop app test surface for UX-driven review of 4.21 Layer 1 Governance flows. It uses deterministic fixture data and does not connect to any daemon, controller, transport, route, private agent, or canonical state writer."
-    },
-    {
-      "path": "apps/l1gov-desktop-client/README.md",
-      "line": 5,
-      "term": "transport",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "This is the Windows-first Tauri desktop app test surface for UX-driven review of 4.21 Layer 1 Governance flows. It uses deterministic fixture data and does not connect to any daemon, controller, transport, route, private agent, or canonical state writer."
-    },
-    {
-      "path": "apps/l1gov-desktop-client/README.md",
-      "line": 5,
-      "term": "daemon",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "This is the Windows-first Tauri desktop app test surface for UX-driven review of 4.21 Layer 1 Governance flows. It uses deterministic fixture data and does not connect to any daemon, controller, transport, route, private agent, or canonical state writer."
-    },
-    {
-      "path": "apps/l1gov-desktop-client/README.md",
-      "line": 13,
-      "term": "runtime",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "- WebView2 runtime available on Windows."
-    },
-    {
-      "path": "apps/l1gov-desktop-client/README.md",
-      "line": 30,
-      "term": "authority",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "Kernel and Governance Service remain authority. The desktop app is non-authoritative and renders fixture-backed display state only."
-    },
-    {
-      "path": "apps/l1gov-desktop-client/README.md",
-      "line": 32,
-      "term": "live",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "PR #20 remains draft/reference only and must not be merged as final Slice 012 delivery."
-    },
-    {
-      "path": "apps/l1gov-desktop-client/scripts/verify-fixture.mjs",
-      "line": 9,
-      "term": "live",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "if (fixture.non_authoritative !== true || fixture.live_execution_invoked !== false) {"
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json",
-      "line": 4,
-      "term": "runtime",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "\"runtime_choice\": \"tauri\","
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json",
-      "line": 7,
-      "term": "authority",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "\"canonical_authority\": \"GovernanceKernel\","
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json",
-      "line": 10,
-      "term": "live",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "\"live_execution_invoked\": false,"
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json",
-      "line": 19,
-      "term": "authority",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "\"creates_authority\": false,"
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json",
-      "line": 29,
-      "term": "authority",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "\"creates_authority\": false,"
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json",
-      "line": 55,
-      "term": "controller",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "\"daemon_controller_bridge\": \"disabled_future_boundary\","
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json",
-      "line": 55,
-      "term": "daemon",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "\"daemon_controller_bridge\": \"disabled_future_boundary\","
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json",
-      "line": 56,
-      "term": "live",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "\"can_execute_live_calls\": false,"
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/index.html",
-      "line": 15,
-      "term": "authority",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "<p>Kernel and Governance Service remain authority. Desktop app is non-authoritative.</p>"
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/index.html",
-      "line": 28,
-      "term": "canonical mutation",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "<span class=\"chip\">no canonical mutation</span>"
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/index.html",
-      "line": 36,
-      "term": "live",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "<button class=\"nav-button\" type=\"button\" data-module=\"delivery_feedback\">Delivery Feedback</button>"
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/index.html",
-      "line": 93,
-      "term": "authority",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "<dt>Authority</dt>"
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/index.html",
-      "line": 94,
-      "term": "authority",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "<dd>Kernel and Governance Service remain authority</dd>"
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/index.html",
-      "line": 105,
-      "term": "authority",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "<span>Authority: <strong>non-authoritative</strong></span>"
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/main.js",
-      "line": 22,
-      "term": "authority",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "summary: \"Review task and decision state shown without local approval authority.\""
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/main.js",
-      "line": 24,
-      "term": "live",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "delivery_feedback: {"
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/main.js",
-      "line": 25,
-      "term": "live",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "title: \"Delivery Feedback\","
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/main.js",
-      "line": 99,
-      "term": "canonical mutation",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "<p>SubmitCommandDraft preview for Governance Service review path. No canonical mutation.</p>"
-    },
-    {
-      "path": "apps/l1gov-desktop-client/src/main.js",
-      "line": 117,
-      "term": "canonical mutation",
-      "classification": "desktop_app_boundary_text_or_disabled_fixture",
-      "text": "$(\"stale-copy\").textContent = `Projection display state is ${state.freshness}. No canonical mutation.`;"
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 43,
-      "term": "config",
-      "classification": "test_assertion",
-      "text": "tauri_config = json.loads(read_app_file(\"src-tauri/tauri.conf.json\"))"
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 51,
-      "term": "config",
-      "classification": "test_assertion",
-      "text": "assert tauri_config[\"productName\"] == \"Nexus L1 Governance UX Test Surface\""
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 52,
-      "term": "config",
-      "classification": "test_assertion",
-      "text": "assert tauri_config[\"app\"][\"windows\"][0][\"title\"] == \"Nexus L1 Governance UX Test Surface\""
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 53,
-      "term": "config",
-      "classification": "test_assertion",
-      "text": "assert tauri_config[\"bundle\"][\"active\"] is False"
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 54,
-      "term": "config",
-      "classification": "test_assertion",
-      "text": "assert tauri_config[\"app\"][\"security\"][\"csp\"] == \"default-src 'self'\""
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 62,
-      "term": "runtime",
-      "classification": "test_assertion",
-      "text": "assert fixture[\"runtime_choice\"] == \"tauri\""
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 66,
-      "term": "authority",
-      "classification": "test_assertion",
-      "text": "assert fixture[\"canonical_authority\"] == \"GovernanceKernel\""
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 68,
-      "term": "live",
-      "classification": "test_assertion",
-      "text": "assert fixture[\"live_execution_invoked\"] is False"
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 71,
-      "term": "controller",
-      "classification": "test_assertion",
-      "text": "assert future_boundary[\"daemon_controller_bridge\"] == \"disabled_future_boundary\""
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 71,
-      "term": "daemon",
-      "classification": "test_assertion",
-      "text": "assert future_boundary[\"daemon_controller_bridge\"] == \"disabled_future_boundary\""
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 72,
-      "term": "live",
-      "classification": "test_assertion",
-      "text": "assert future_boundary[\"can_execute_live_calls\"] is False"
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 116,
-      "term": "live",
-      "classification": "test_assertion",
-      "text": "def test_slice012_desktop_files_do_not_contain_live_execution_paths() -> None:"
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 134,
-      "term": "private-agent",
-      "classification": "test_assertion",
-      "text": "\"private-agent invocation\","
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 135,
-      "term": "dispatch",
-      "classification": "test_assertion",
-      "text": "\"dispatch execution\","
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 136,
-      "term": "controller",
-      "classification": "test_assertion",
-      "text": "\"controller call\","
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 137,
-      "term": "route activation",
-      "classification": "test_assertion",
-      "text": "\"route activation\","
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 138,
-      "term": "adapter",
-      "classification": "test_assertion",
-      "text": "\"adapter transport activation\","
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 138,
-      "term": "transport",
-      "classification": "test_assertion",
-      "text": "\"adapter transport activation\","
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 139,
-      "term": "owner-path",
-      "classification": "test_assertion",
-      "text": "\"owner-path call\","
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 140,
-      "term": "lower-layer",
-      "classification": "test_assertion",
-      "text": "\"lower-layer submission\","
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 141,
-      "term": "production readiness",
-      "classification": "test_assertion",
-      "text": "\"production readiness\","
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 142,
-      "term": "continuity activation",
-      "classification": "test_assertion",
-      "text": "\"continuity activation\","
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 143,
-      "term": "final pass",
-      "classification": "test_assertion",
-      "text": "\"final pass claim\","
-    },
-    {
-      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-      "line": 149,
-      "term": "authority",
-      "classification": "test_assertion",
-      "text": "assert \"kernel and governance service remain authority\" in combined"
-    },
-    {
-      "path": "verification/4.21/l1gov-slice-012-desktop/desktop-launch-render-check.txt",
-      "line": 10,
-      "term": "live",
-      "classification": "evidence_record",
-      "text": "No live daemon/controller/dispatch execution was invoked."
-    },
-    {
-      "path": "verification/4.21/l1gov-slice-012-desktop/desktop-launch-render-check.txt",
-      "line": 10,
-      "term": "dispatch",
-      "classification": "evidence_record",
-      "text": "No live daemon/controller/dispatch execution was invoked."
-    },
-    {
-      "path": "verification/4.21/l1gov-slice-012-desktop/desktop-launch-render-check.txt",
-      "line": 10,
-      "term": "controller",
-      "classification": "evidence_record",
-      "text": "No live daemon/controller/dispatch execution was invoked."
-    },
-    {
-      "path": "verification/4.21/l1gov-slice-012-desktop/desktop-launch-render-check.txt",
-      "line": 10,
-      "term": "daemon",
-      "classification": "evidence_record",
-      "text": "No live daemon/controller/dispatch execution was invoked."
-    },
-    {
-      "path": "verification/4.21/l1gov-slice-012-desktop/desktop-toolchain-check.txt",
-      "line": 9,
-      "term": "runtime",
-      "classification": "evidence_record",
-      "text": "bundled_node: C:\\Users\\John\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe"
-    },
-    {
-      "path": "verification/4.21/l1gov-slice-012-desktop/desktop-toolchain-check.txt",
-      "line": 11,
-      "term": "runtime",
-      "classification": "evidence_record",
-      "text": "reason: npm, rustc, and cargo are not available on PATH; bundled Codex runtime provides node.exe only."
-    }
-  ]
+    "generated_at":  "2026-06-14T17:36:28.1723812+08:00",
+    "status":  "PASS_CLASSIFIED",
+    "terms":  [
+                  "private-agent",
+                  "runtime invocation",
+                  "live invocation",
+                  "dispatch execution",
+                  "controller call",
+                  "route activation",
+                  "adapter activation",
+                  "transport activation",
+                  "owner-path",
+                  "lower-layer submission",
+                  "production readiness",
+                  "continuity activation",
+                  "final PASS",
+                  "deploy readiness",
+                  "canonical mutation"
+              ],
+    "matches":  [
+                    {
+                        "path":  "apps/l1gov-desktop-client/src/index.html",
+                        "line":  28,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\u003cspan class=\"chip\"\u003eno canonical mutation\u003c/span\u003e"
+                    },
+                    {
+                        "path":  "apps/l1gov-desktop-client/src/main.js",
+                        "line":  99,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\u003cp\u003eSubmitCommandDraft preview for Governance Service review path. No canonical mutation.\u003c/p\u003e"
+                    },
+                    {
+                        "path":  "apps/l1gov-desktop-client/src/main.js",
+                        "line":  117,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "$(\"stale-copy\").textContent = `Projection display state is ${state.freshness}. No canonical mutation.`;"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  135,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"private-agent invocation\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  136,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"dispatch execution\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  137,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"controller call\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  138,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"route activation\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  139,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"adapter transport activation\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  140,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"owner-path call\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  141,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"lower-layer submission\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  142,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"production readiness\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  143,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"continuity activation\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  144,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"final pass claim\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/desktop-launch-render-check.txt",
+                        "line":  10,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "No live daemon/controller/dispatch execution was invoked."
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/screenshots/README_NO_SCREENSHOTS.txt",
+                        "line":  3,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "No live runtime, daemon, controller, dispatch, route, adapter, transport, owner-path, or lower-layer call was invoked."
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  129,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\": \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  131,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"\u003cspan class=\\\"chip\\\"\u003eno canonical mutation\u003c/span\u003e\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  185,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\": \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  187,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"\u003cp\u003eSubmitCommandDraft preview for Governance Service review path. No canonical mutation.\u003c/p\u003e\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  192,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\": \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  194,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"$(\\\"stale-copy\\\").textContent = `Projection display state is ${state.freshness}. No canonical mutation.`;\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  283,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\": \"private-agent\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  285,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"\\\"private-agent invocation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  292,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"\\\"dispatch execution\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  299,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"\\\"controller call\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  304,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\": \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  306,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"\\\"route activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  313,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"\\\"adapter transport activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  320,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"\\\"adapter transport activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  325,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\": \"owner-path\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  327,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"\\\"owner-path call\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  334,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"\\\"lower-layer submission\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  339,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\": \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  341,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"\\\"production readiness\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  346,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\": \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  348,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"\\\"continuity activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  353,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\": \"final pass\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  355,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"\\\"final pass claim\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  369,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"No live daemon/controller/dispatch execution was invoked.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  376,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"No live daemon/controller/dispatch execution was invoked.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  383,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"No live daemon/controller/dispatch execution was invoked.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  390,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\": \"No live daemon/controller/dispatch execution was invoked.\""
+                    }
+                ],
+    "unclassified_count":  0,
+    "note":  "All matches are in deterministic fixture data, no-go boundary copy, tests, README, or evidence text. No live execution code path is introduced."
 }

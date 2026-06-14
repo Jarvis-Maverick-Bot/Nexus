@@ -1,10 +1,18 @@
 {
-  "accepted": true,
-  "root_package_manager_mutations": [],
-  "app_package_manager_files": [
-    "apps/l1gov-desktop-client/package-lock.json",
-    "apps/l1gov-desktop-client/package.json",
-    "apps/l1gov-desktop-client/src-tauri/Cargo.toml"
-  ],
-  "boundary": "Dependency/package-manager files are allowed only under apps/l1gov-desktop-client/."
+    "generated_at":  "2026-06-14T17:35:50.6044870+08:00",
+    "root_package_manager_files_mutated":  false,
+    "app_directory":  "apps/l1gov-desktop-client/",
+    "committed_dependency_files":  [
+                                       "apps/l1gov-desktop-client/package.json",
+                                       "apps/l1gov-desktop-client/package-lock.json",
+                                       "apps/l1gov-desktop-client/src-tauri/Cargo.toml",
+                                       "apps/l1gov-desktop-client/src-tauri/Cargo.lock"
+                                   ],
+    "local_uncommitted_tooling_ignored":  [
+                                              "apps/l1gov-desktop-client/.toolchain/",
+                                              "apps/l1gov-desktop-client/node_modules/",
+                                              "apps/l1gov-desktop-client/src-tauri/target/",
+                                              "apps/l1gov-desktop-client/.tmp-render/"
+                                          ],
+    "status":  "APP_LOCAL_ONLY"
 }
