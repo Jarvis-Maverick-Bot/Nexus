@@ -1,0 +1,2 @@
+﻿NO_DIFF_CHECK_FINDINGS
+exit_code=0

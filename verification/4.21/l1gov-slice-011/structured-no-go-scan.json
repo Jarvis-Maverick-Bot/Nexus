@@ -1,0 +1,1409 @@
+{
+    "accepted":  true,
+    "scan_scope":  "nexus/governance/**/*.py",
+    "terms":  [
+                  "runtime invocation",
+                  "private-agent invocation",
+                  "private agent invocation",
+                  "actual dispatch",
+                  "dispatch execution",
+                  "route activation",
+                  "adapter call",
+                  "transport call",
+                  "workpacket execution",
+                  "work packet execution",
+                  "controller call",
+                  "owner path call",
+                  "lower layer request",
+                  "lower-layer request",
+                  "production readiness",
+                  "deploy",
+                  "delivery completed",
+                  "project accepted",
+                  "continuity activation",
+                  "final pass",
+                  "cache authority",
+                  "projection authority",
+                  "view model authority",
+                  "direct canonical mutation"
+              ],
+    "match_count":  228,
+    "unclassified_count":  0,
+    "classifications":  {
+                            "guard":  128,
+                            "negative_fixture":  15,
+                            "test_assertion":  85,
+                            "evidence_record":  0,
+                            "unclassified":  0
+                        },
+    "matches":  [
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  85,
+                        "term":  "view model authority",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  86,
+                        "term":  "projection authority",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  88,
+                        "term":  "cache authority",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  90,
+                        "term":  "direct canonical mutation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  101,
+                        "term":  "production readiness",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  104,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  105,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  106,
+                        "term":  "continuity activation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  108,
+                        "term":  "final pass",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  109,
+                        "term":  "runtime invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  110,
+                        "term":  "private agent invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  111,
+                        "term":  "private-agent invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  112,
+                        "term":  "dispatch execution",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  114,
+                        "term":  "route activation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  115,
+                        "term":  "adapter call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  116,
+                        "term":  "transport call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  117,
+                        "term":  "workpacket execution",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  405,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  715,
+                        "term":  "projection authority",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  717,
+                        "term":  "cache authority",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\app_contract.py",
+                        "line":  718,
+                        "term":  "view model authority",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  119,
+                        "term":  "production readiness",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  129,
+                        "term":  "continuity activation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  138,
+                        "term":  "delivery completed",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  146,
+                        "term":  "production readiness",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  150,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  151,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  152,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  153,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  154,
+                        "term":  "final pass",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  157,
+                        "term":  "project accepted",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  160,
+                        "term":  "delivery completed",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  164,
+                        "term":  "dispatch execution",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  166,
+                        "term":  "actual dispatch",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  168,
+                        "term":  "controller call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  175,
+                        "term":  "controller call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  177,
+                        "term":  "owner path call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  184,
+                        "term":  "adapter call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  187,
+                        "term":  "transport call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  189,
+                        "term":  "route activation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  194,
+                        "term":  "workpacket execution",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  196,
+                        "term":  "work packet execution",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  200,
+                        "term":  "runtime invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  204,
+                        "term":  "private agent invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  206,
+                        "term":  "private-agent invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  476,
+                        "term":  "production readiness",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  476,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  476,
+                        "term":  "final pass",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  628,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  628,
+                        "term":  "final pass",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  709,
+                        "term":  "continuity activation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  712,
+                        "term":  "production readiness",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  712,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  712,
+                        "term":  "final pass",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  1171,
+                        "term":  "production readiness",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  1171,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\delivery_feedback.py",
+                        "line":  1172,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\dispatch_contract.py",
+                        "line":  55,
+                        "term":  "actual dispatch",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\dispatch_contract.py",
+                        "line":  57,
+                        "term":  "controller call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\dispatch_contract.py",
+                        "line":  62,
+                        "term":  "adapter call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\dispatch_contract.py",
+                        "line":  63,
+                        "term":  "route activation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\dispatch_contract.py",
+                        "line":  64,
+                        "term":  "private-agent invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\dispatch_contract.py",
+                        "line":  65,
+                        "term":  "private agent invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\dispatch_contract.py",
+                        "line":  66,
+                        "term":  "runtime invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\dispatch_contract.py",
+                        "line":  67,
+                        "term":  "transport call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\dispatch_contract.py",
+                        "line":  68,
+                        "term":  "workpacket execution",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  123,
+                        "term":  "controller call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  124,
+                        "term":  "controller call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  126,
+                        "term":  "controller call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  127,
+                        "term":  "controller call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  129,
+                        "term":  "controller call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  134,
+                        "term":  "owner path call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  137,
+                        "term":  "adapter call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  139,
+                        "term":  "transport call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  141,
+                        "term":  "route activation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  144,
+                        "term":  "workpacket execution",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  147,
+                        "term":  "dispatch execution",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  149,
+                        "term":  "actual dispatch",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  151,
+                        "term":  "runtime invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  154,
+                        "term":  "private-agent invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  155,
+                        "term":  "private agent invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  160,
+                        "term":  "lower layer request",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  162,
+                        "term":  "lower layer request",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  164,
+                        "term":  "lower layer request",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  172,
+                        "term":  "final pass",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  175,
+                        "term":  "delivery completed",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  178,
+                        "term":  "production readiness",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  180,
+                        "term":  "project accepted",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  425,
+                        "term":  "lower-layer request",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\impact_control.py",
+                        "line":  427,
+                        "term":  "lower-layer request",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  62,
+                        "term":  "final pass",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  67,
+                        "term":  "production readiness",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  70,
+                        "term":  "dispatch execution",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  76,
+                        "term":  "actual dispatch",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  78,
+                        "term":  "controller call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  87,
+                        "term":  "private-agent invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  88,
+                        "term":  "private agent invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  89,
+                        "term":  "runtime invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  91,
+                        "term":  "adapter call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  93,
+                        "term":  "transport call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  95,
+                        "term":  "route activation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  98,
+                        "term":  "workpacket execution",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  303,
+                        "term":  "production readiness",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  377,
+                        "term":  "production readiness",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\monitor_hitl.py",
+                        "line":  459,
+                        "term":  "production readiness",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\no_go.py",
+                        "line":  36,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\no_go.py",
+                        "line":  111,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\no_go.py",
+                        "line":  142,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  79,
+                        "term":  "continuity activation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  81,
+                        "term":  "final pass",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  85,
+                        "term":  "production readiness",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  86,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  87,
+                        "term":  "deploy",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  89,
+                        "term":  "runtime invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  91,
+                        "term":  "private agent invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  92,
+                        "term":  "private-agent invocation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  94,
+                        "term":  "dispatch execution",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  95,
+                        "term":  "actual dispatch",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  98,
+                        "term":  "controller call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  99,
+                        "term":  "controller call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  101,
+                        "term":  "owner path call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  102,
+                        "term":  "adapter call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  103,
+                        "term":  "transport call",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  104,
+                        "term":  "route activation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  106,
+                        "term":  "workpacket execution",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  115,
+                        "term":  "projection authority",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  119,
+                        "term":  "direct canonical mutation",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\service_facade.py",
+                        "line":  361,
+                        "term":  "projection authority",
+                        "classification":  "guard"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_completion_continuity.py",
+                        "line":  12,
+                        "term":  "deploy",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_completion_continuity.py",
+                        "line":  40,
+                        "term":  "continuity activation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_completion_continuity.py",
+                        "line":  71,
+                        "term":  "continuity activation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  25,
+                        "term":  "project accepted",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  26,
+                        "term":  "delivery completed",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  27,
+                        "term":  "production readiness",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  29,
+                        "term":  "deploy",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  30,
+                        "term":  "final pass",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  35,
+                        "term":  "actual dispatch",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  41,
+                        "term":  "private-agent invocation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  42,
+                        "term":  "runtime invocation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  61,
+                        "term":  "actual dispatch",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  62,
+                        "term":  "controller call",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  63,
+                        "term":  "owner path call",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  64,
+                        "term":  "adapter call",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  65,
+                        "term":  "transport call",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  66,
+                        "term":  "route activation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  67,
+                        "term":  "workpacket execution",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  68,
+                        "term":  "runtime invocation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  82,
+                        "term":  "production readiness",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  82,
+                        "term":  "deploy",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_no_go.py",
+                        "line":  82,
+                        "term":  "final pass",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_records.py",
+                        "line":  56,
+                        "term":  "deploy",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_records.py",
+                        "line":  58,
+                        "term":  "deploy",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_records.py",
+                        "line":  64,
+                        "term":  "deploy",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_triage_decision.py",
+                        "line":  28,
+                        "term":  "deploy",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_delivery_feedback_triage_decision.py",
+                        "line":  29,
+                        "term":  "deploy",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_dispatch_records.py",
+                        "line":  101,
+                        "term":  "controller call",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_dispatch_records.py",
+                        "line":  102,
+                        "term":  "private-agent invocation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_dispatch_records.py",
+                        "line":  106,
+                        "term":  "adapter call",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_dispatch_records.py",
+                        "line":  107,
+                        "term":  "route activation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_dispatch_service_contract.py",
+                        "line":  76,
+                        "term":  "controller call",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_dispatch_service_contract.py",
+                        "line":  77,
+                        "term":  "private-agent invocation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_dispatch_service_contract.py",
+                        "line":  81,
+                        "term":  "adapter call",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_dispatch_service_contract.py",
+                        "line":  82,
+                        "term":  "route activation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_impact_control_decision_gate.py",
+                        "line":  43,
+                        "term":  "lower-layer request",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                        "line":  33,
+                        "term":  "lower layer request",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                        "line":  35,
+                        "term":  "lower layer request",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                        "line":  40,
+                        "term":  "runtime invocation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                        "line":  76,
+                        "term":  "project accepted",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                        "line":  77,
+                        "term":  "delivery completed",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_impact_control_lower_layer_candidate.py",
+                        "line":  78,
+                        "term":  "production readiness",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_impact_control_records.py",
+                        "line":  40,
+                        "term":  "controller call",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_impact_control_records.py",
+                        "line":  45,
+                        "term":  "actual dispatch",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_impact_control_records.py",
+                        "line":  46,
+                        "term":  "production readiness",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_impact_control_records.py",
+                        "line":  47,
+                        "term":  "project accepted",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_impact_control_records.py",
+                        "line":  48,
+                        "term":  "delivery completed",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_impact_control_records.py",
+                        "line":  50,
+                        "term":  "lower layer request",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_impact_control_records.py",
+                        "line":  52,
+                        "term":  "runtime invocation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_no_go.py",
+                        "line":  36,
+                        "term":  "deploy",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_no_go.py",
+                        "line":  60,
+                        "term":  "view model authority",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_no_go.py",
+                        "line":  61,
+                        "term":  "projection authority",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_no_go.py",
+                        "line":  62,
+                        "term":  "cache authority",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_no_go.py",
+                        "line":  68,
+                        "term":  "production readiness",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_no_go.py",
+                        "line":  69,
+                        "term":  "deploy",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_no_go.py",
+                        "line":  70,
+                        "term":  "continuity activation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_no_go.py",
+                        "line":  71,
+                        "term":  "final pass",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_no_go.py",
+                        "line":  72,
+                        "term":  "runtime invocation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_no_go.py",
+                        "line":  73,
+                        "term":  "dispatch execution",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_no_go.py",
+                        "line":  74,
+                        "term":  "route activation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_no_go.py",
+                        "line":  75,
+                        "term":  "adapter call",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_no_go.py",
+                        "line":  76,
+                        "term":  "transport call",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_no_go.py",
+                        "line":  77,
+                        "term":  "workpacket execution",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_local_app_read_only_mode.py",
+                        "line":  60,
+                        "term":  "final pass",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_monitor_hitl_no_go.py",
+                        "line":  59,
+                        "term":  "controller call",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_monitor_hitl_no_go.py",
+                        "line":  63,
+                        "term":  "private-agent invocation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_monitor_hitl_no_go.py",
+                        "line":  64,
+                        "term":  "runtime invocation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_monitor_hitl_no_go.py",
+                        "line":  65,
+                        "term":  "adapter call",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_monitor_hitl_no_go.py",
+                        "line":  66,
+                        "term":  "route activation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_monitor_hitl_no_go.py",
+                        "line":  67,
+                        "term":  "workpacket execution",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_monitor_hitl_no_go.py",
+                        "line":  90,
+                        "term":  "actual dispatch",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_monitor_hitl_no_go.py",
+                        "line":  91,
+                        "term":  "runtime invocation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_monitor_hitl_no_go.py",
+                        "line":  93,
+                        "term":  "dispatch execution",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_monitor_hitl_no_go.py",
+                        "line":  115,
+                        "term":  "production readiness",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_monitor_hitl_records.py",
+                        "line":  97,
+                        "term":  "actual dispatch",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_monitor_hitl_records.py",
+                        "line":  98,
+                        "term":  "route activation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_no_go_policy.py",
+                        "line":  17,
+                        "term":  "deploy",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_no_go_policy.py",
+                        "line":  20,
+                        "term":  "deploy",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_service_facade_command_draft.py",
+                        "line":  43,
+                        "term":  "deploy",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_service_facade_command_draft.py",
+                        "line":  55,
+                        "term":  "production readiness",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_service_facade_impact_hitl_no_go.py",
+                        "line":  56,
+                        "term":  "continuity activation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_service_facade_impact_hitl_no_go.py",
+                        "line":  57,
+                        "term":  "production readiness",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_service_facade_impact_hitl_no_go.py",
+                        "line":  58,
+                        "term":  "deploy",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_service_facade_impact_hitl_no_go.py",
+                        "line":  59,
+                        "term":  "final pass",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\test_service_facade_impact_hitl_no_go.py",
+                        "line":  70,
+                        "term":  "direct canonical mutation",
+                        "classification":  "test_assertion"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\delivery_feedback.py",
+                        "line":  90,
+                        "term":  "deploy",
+                        "classification":  "negative_fixture"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\delivery_feedback.py",
+                        "line":  91,
+                        "term":  "production readiness",
+                        "classification":  "negative_fixture"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\dispatch_contract.py",
+                        "line":  56,
+                        "term":  "runtime invocation",
+                        "classification":  "negative_fixture"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\dispatch_contract.py",
+                        "line":  163,
+                        "term":  "runtime invocation",
+                        "classification":  "negative_fixture"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\dispatch_contract.py",
+                        "line":  163,
+                        "term":  "controller call",
+                        "classification":  "negative_fixture"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\dispatch_contract.py",
+                        "line":  166,
+                        "term":  "final pass",
+                        "classification":  "negative_fixture"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\dispatch_contract.py",
+                        "line":  167,
+                        "term":  "controller call",
+                        "classification":  "negative_fixture"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\dispatch_contract.py",
+                        "line":  240,
+                        "term":  "runtime invocation",
+                        "classification":  "negative_fixture"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\dispatch_contract.py",
+                        "line":  244,
+                        "term":  "controller call",
+                        "classification":  "negative_fixture"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\execution.py",
+                        "line":  108,
+                        "term":  "controller call",
+                        "classification":  "negative_fixture"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\execution.py",
+                        "line":  118,
+                        "term":  "controller call",
+                        "classification":  "negative_fixture"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\execution.py",
+                        "line":  183,
+                        "term":  "controller call",
+                        "classification":  "negative_fixture"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\execution.py",
+                        "line":  193,
+                        "term":  "controller call",
+                        "classification":  "negative_fixture"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\layer1_dry_run.py",
+                        "line":  251,
+                        "term":  "lower layer request",
+                        "classification":  "negative_fixture"
+                    },
+                    {
+                        "path":  "nexus\\governance\\tests\\fixtures\\standardization.py",
+                        "line":  92,
+                        "term":  "final pass",
+                        "classification":  "negative_fixture"
+                    }
+                ]
+}

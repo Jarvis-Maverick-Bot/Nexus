@@ -1,0 +1,3 @@
+A	nexus/governance/tests/fixtures/layer1_dry_run.py
+A	nexus/governance/tests/test_layer1_governance_dry_run.py
+A	nexus/governance/tests/test_layer1_governance_dry_run_no_go.py

@@ -1,0 +1,86 @@
+{
+  "accepted": true,
+  "fixture_count": 10,
+  "results": [
+    {
+      "accepted": false,
+      "blocked_by": "source_authority",
+      "error_code": "ERR_STALE_SOURCE_AUTHORITY",
+      "family": "stale_wbs_source_authority",
+      "live_execution_invoked": false,
+      "records_appended": 0
+    },
+    {
+      "accepted": false,
+      "blocked_by": "workspace_init",
+      "error_code": "ERR_WORKSPACE_MANIFEST_INVALID",
+      "family": "workspace_final_status",
+      "live_execution_invoked": false,
+      "records_appended": 0
+    },
+    {
+      "accepted": false,
+      "blocked_by": "standardization",
+      "error_code": "ERR_MISSING_EVALUATION_PROFILE",
+      "family": "missing_evaluation_profile",
+      "live_execution_invoked": false,
+      "records_appended": 0
+    },
+    {
+      "accepted": false,
+      "blocked_by": "project_execution",
+      "error_code": "ERR_EXECUTION_WORKPACKET_INVALID",
+      "family": "workpacket_submitted_state",
+      "live_execution_invoked": false,
+      "records_appended": 0
+    },
+    {
+      "accepted": false,
+      "blocked_by": "dispatch_contract",
+      "error_code": "ERR_NO_GO_BOUNDARY",
+      "family": "handoff_controller_execution",
+      "live_execution_invoked": false,
+      "records_appended": 0
+    },
+    {
+      "accepted": false,
+      "blocked_by": "monitor_hitl",
+      "error_code": "ERR_NO_GO_BOUNDARY",
+      "family": "monitor_workpacket_execution",
+      "live_execution_invoked": false,
+      "records_appended": 0
+    },
+    {
+      "accepted": false,
+      "blocked_by": "impact_control",
+      "error_code": "ERR_NO_GO_BOUNDARY",
+      "family": "lower_layer_submission",
+      "live_execution_invoked": false,
+      "records_appended": 0
+    },
+    {
+      "accepted": false,
+      "blocked_by": "delivery_feedback",
+      "error_code": "ERR_RAW_FEEDBACK_NO_AUTHORITY_MUTATION",
+      "family": "raw_feedback_mutation",
+      "live_execution_invoked": false,
+      "records_appended": 0
+    },
+    {
+      "accepted": false,
+      "blocked_by": "governance_service",
+      "error_code": "ERR_NO_GO_BOUNDARY",
+      "family": "projection_as_authority",
+      "live_execution_invoked": false,
+      "records_appended": 0
+    },
+    {
+      "accepted": false,
+      "blocked_by": "local_app_contract",
+      "error_code": "ERR_NO_GO_BOUNDARY",
+      "family": "local_app_view_model_authority",
+      "live_execution_invoked": false,
+      "records_appended": 0
+    }
+  ]
+}

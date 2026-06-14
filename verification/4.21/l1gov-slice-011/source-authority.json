@@ -1,0 +1,30 @@
+{
+    "accepted":  true,
+    "branch":  "codex/4.21-slice011-dry-run-fixtures",
+    "base_commit":  "39001610bdc36e8d2b635fbeb9a6939529a873bc",
+    "origin_master_at_generation":  "39001610bdc36e8d2b635fbeb9a6939529a873bc",
+    "merge_base":  "39001610bdc36e8d2b635fbeb9a6939529a873bc",
+    "implementation_commit":  "01ff26a414df416042a88d3f517b79d1fb6af5c9",
+    "reviewed_pr_head":  "pending_nova_review_after_pr_creation",
+    "authority":  {
+                      "package_path":  "\\\\192.168.31.124\\Nova-Jarvis-Inbox\\Thunder\\_submitted\\2026-06-14_4.21_slice011_task_package_thunder_v0.1\\",
+                      "source_repo":  "Nexus",
+                      "allowed_scope":  [
+                                            "nexus/governance/tests/",
+                                            "nexus/governance/tests/fixtures/",
+                                            "verification/4.21/l1gov-slice-011/"
+                                        ],
+                      "shared_docs_mode":  "verified_git_authority_for_package; smb_handoff_only"
+                  },
+    "explicit_no_go":  {
+                           "production_code_changes":  false,
+                           "live_execution_invoked":  false,
+                           "dispatch_execution":  false,
+                           "controller_call":  false,
+                           "route_adapter_transport_activation":  false,
+                           "owner_path_call":  false,
+                           "lower_layer_request_submission":  false,
+                           "deploy_config_credential_package_mutation":  false,
+                           "completion_or_production_readiness_claim":  false
+                       }
+}

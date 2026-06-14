@@ -1,0 +1,68 @@
+{
+    "accepted":  true,
+    "slice":  "L1GOV-SLICE-011",
+    "package":  "cross-component dry-run fixtures only",
+    "branch":  "codex/4.21-slice011-dry-run-fixtures",
+    "base_commit":  "39001610bdc36e8d2b635fbeb9a6939529a873bc",
+    "implementation_commit":  "01ff26a414df416042a88d3f517b79d1fb6af5c9",
+    "reviewed_pr_head":  "pending_nova_review_after_pr_creation",
+    "evidence_root":  "verification/4.21/l1gov-slice-011/",
+    "verification":  {
+                         "targeted_pytest":  "targeted-pytest-output.txt",
+                         "full_governance_pytest":  "full-governance-pytest-output.txt",
+                         "diff_check":  "diff-check.txt",
+                         "nexus_mq_import_scan":  "nexus-mq-import-scan.txt",
+                         "structured_no_go_scan":  {
+                                                       "file":  "structured-no-go-scan.json",
+                                                       "accepted":  true,
+                                                       "unclassified_count":  0,
+                                                       "match_count":  228
+                                                   },
+                         "json_parse":  {
+                                            "file":  "json-parse.txt",
+                                            "json_file_count":  16,
+                                            "utf8_bom_findings":  0,
+                                            "exit_code":  0
+                                        }
+                     },
+    "fixture_outputs":  [
+                            "dry-run-trace.json",
+                            "positive-dry-run-result.json",
+                            "negative-fixture-results.json",
+                            "source-authority-fixtures.json",
+                            "workspace-init-fixtures.json",
+                            "standardization-fixtures.json",
+                            "execution-packet-fixtures.json",
+                            "dispatch-contract-fixtures.json",
+                            "monitor-hitl-fixtures.json",
+                            "impact-control-fixtures.json",
+                            "delivery-feedback-fixtures.json",
+                            "service-facade-fixtures.json",
+                            "local-app-contract-fixtures.json"
+                        ],
+    "files":  [
+                  "delivery-feedback-fixtures.json",
+                  "diff-check.txt",
+                  "diff-summary.txt",
+                  "dispatch-contract-fixtures.json",
+                  "dry-run-trace.json",
+                  "evidence-index.json",
+                  "execution-packet-fixtures.json",
+                  "file-list.txt",
+                  "full-governance-pytest-output.txt",
+                  "impact-control-fixtures.json",
+                  "json-parse.txt",
+                  "local-app-contract-fixtures.json",
+                  "monitor-hitl-fixtures.json",
+                  "negative-fixture-results.json",
+                  "nexus-mq-import-scan.txt",
+                  "positive-dry-run-result.json",
+                  "service-facade-fixtures.json",
+                  "source-authority.json",
+                  "source-authority-fixtures.json",
+                  "standardization-fixtures.json",
+                  "structured-no-go-scan.json",
+                  "targeted-pytest-output.txt",
+                  "workspace-init-fixtures.json"
+              ]
+}
