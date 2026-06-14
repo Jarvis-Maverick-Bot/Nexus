@@ -1,0 +1,14 @@
+{
+  "records": {
+    "app-shell/no-framework-selection.json": {
+      "accepted": false,
+      "error_code": "ERR_NO_GO_BOUNDARY",
+      "message": "final UI framework selection is out of Slice 010 scope"
+    }
+  },
+  "slice_id": "l1gov-slice-010",
+  "source_evidence": [
+    "app-shell/no-framework-selection.json"
+  ],
+  "status": "evidence_recorded"
+}

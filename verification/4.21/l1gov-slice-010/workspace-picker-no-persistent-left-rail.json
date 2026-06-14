@@ -1,0 +1,14 @@
+{
+  "records": {
+    "workspace-picker/no-persistent-left-rail.json": {
+      "accepted": false,
+      "error_code": "ERR_NO_GO_BOUNDARY",
+      "message": "workspace picker cannot be a persistent left rail"
+    }
+  },
+  "slice_id": "l1gov-slice-010",
+  "source_evidence": [
+    "workspace-picker/no-persistent-left-rail.json"
+  ],
+  "status": "evidence_recorded"
+}

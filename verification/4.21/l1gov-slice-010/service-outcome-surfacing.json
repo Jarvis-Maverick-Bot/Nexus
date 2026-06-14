@@ -1,0 +1,18 @@
+{
+  "records": {
+    "service-outcomes/rejection-surfaced.json": {
+      "blocked_reason": "blocked by local app no-go boundary",
+      "command_id": "cmd-complete-project",
+      "error_code": "ERR_NO_GO_BOUNDARY",
+      "locally_overridden": false,
+      "projection_refresh": "none",
+      "source": "GovernanceService",
+      "status": "blocked"
+    }
+  },
+  "slice_id": "l1gov-slice-010",
+  "source_evidence": [
+    "service-outcomes/rejection-surfaced.json"
+  ],
+  "status": "evidence_recorded"
+}

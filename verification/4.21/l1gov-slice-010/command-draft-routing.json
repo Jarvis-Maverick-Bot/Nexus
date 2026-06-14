@@ -1,0 +1,40 @@
+{
+  "records": {
+    "command-drafts/routes-to-submit-command-draft.json": {
+      "authorization_source": "Nova-approved-baseline",
+      "command_draft": {
+        "command_type": "SubmitCommandDraft",
+        "created_by": "agent:thunder",
+        "draft_id": "draft:cmd-request-hitl-review:ui-draft-001",
+        "draft_status": "draft",
+        "payload": {
+          "requested_action": "create_human_review_task",
+          "target_ref": "deliverable:001"
+        },
+        "read_only_blocked": false,
+        "source_refs": [
+          "WBS V0.6",
+          "L1GOV-SLICE-010",
+          "eef9c05"
+        ],
+        "target_ref": "deliverable:001"
+      },
+      "expected_kernel_version": 0,
+      "expected_state": "local_app_preview",
+      "expected_version": 0,
+      "idempotency_key": "ui-draft-001",
+      "source_refs": [
+        "WBS V0.6",
+        "L1GOV-SLICE-010",
+        "eef9c05"
+      ],
+      "target_ref": "deliverable:001",
+      "ui_correlation_ref": "cmd-request-hitl-review"
+    }
+  },
+  "slice_id": "l1gov-slice-010",
+  "source_evidence": [
+    "command-drafts/routes-to-submit-command-draft.json"
+  ],
+  "status": "evidence_recorded"
+}

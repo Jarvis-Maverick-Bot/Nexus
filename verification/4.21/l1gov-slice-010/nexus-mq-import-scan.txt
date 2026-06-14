@@ -1,0 +1,2 @@
+NO_MATCHES
+exit_code=1

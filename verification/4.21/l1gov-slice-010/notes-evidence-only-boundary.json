@@ -1,0 +1,31 @@
+{
+  "records": {
+    "notes/evidence-only-boundary.json": {
+      "creates_authority": false,
+      "figma_refs": [
+        "figma:file:612813643"
+      ],
+      "frame_id": "notes-evidence-001",
+      "governance_boundaries": [
+        "not_authority",
+        "not_final_ui"
+      ],
+      "is_app_screen": false,
+      "open_questions": [
+        "final framework deferred"
+      ],
+      "prototype_refs": [
+        "figma:ux-v0.2-cs"
+      ],
+      "source_docs_read": [
+        "UX V0.2-CS README"
+      ],
+      "ux_only_status": "review_direction_only"
+    }
+  },
+  "slice_id": "l1gov-slice-010",
+  "source_evidence": [
+    "notes/evidence-only-boundary.json"
+  ],
+  "status": "evidence_recorded"
+}

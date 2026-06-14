@@ -1,0 +1,14 @@
+{
+  "records": {
+    "workspace-picker/overlay-not-authority.json": {
+      "accepted": true,
+      "error_code": null,
+      "message": ""
+    }
+  },
+  "slice_id": "l1gov-slice-010",
+  "source_evidence": [
+    "workspace-picker/overlay-not-authority.json"
+  ],
+  "status": "evidence_recorded"
+}

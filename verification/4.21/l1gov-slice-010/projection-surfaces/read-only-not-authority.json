@@ -1,0 +1,10 @@
+{
+  "authority_notice": "projection read surface is not canonical state",
+  "canonical_authority": false,
+  "freshness_state": "current",
+  "projection_ref": "workspace-001:mission_control:kernel:9a3144b",
+  "projection_type": "mission_control",
+  "read_only": true,
+  "stale_affordance": "none",
+  "surface_id": "mission-control-main"
+}
