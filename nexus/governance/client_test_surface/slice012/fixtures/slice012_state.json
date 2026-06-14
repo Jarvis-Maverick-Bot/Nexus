@@ -1,0 +1,172 @@
+{
+  "slice_id": "L1GOV-SLICE-012",
+  "surface_mode": "static_local_browser_test_surface",
+  "canonical_authority": "GovernanceKernel",
+  "service_boundary": "GovernanceService",
+  "non_authoritative": true,
+  "live_execution_invoked": false,
+  "source_refs": [
+    "Nexus:aa2ff2ad757988429764b6f5b9d748d75f5ab2bd",
+    "L1GOV-SLICE-010",
+    "L1GOV-SLICE-011",
+    "UX V0.2-CS direction"
+  ],
+  "workspace_picker": {
+    "mode": "temporary_overlay",
+    "creates_authority": false,
+    "current_workspace_ref": "Workspace:4.21-layer1-governance",
+    "workspaces": [
+      {
+        "ref": "Workspace:4.21-layer1-governance",
+        "name": "4.21 Layer 1 Governance",
+        "freshness": "current",
+        "open_mode": "read_only_preview"
+      },
+      {
+        "ref": "Workspace:4.21-ux-review",
+        "name": "4.21 UX Review",
+        "freshness": "stale",
+        "open_mode": "read_only_preview"
+      }
+    ]
+  },
+  "mission_control": {
+    "projection_surface": {
+      "surface_id": "mission-control-main",
+      "projection_ref": "ProjectionSnapshot:mission-control:aa2ff2ad",
+      "projection_type": "mission_control",
+      "freshness_state": "current",
+      "read_only": true,
+      "stale_affordance": "request_rebuild",
+      "authority_notice": "Kernel and Governance Service remain authority",
+      "canonical_authority": false
+    },
+    "project_summary": {
+      "status": "ux_surface_review",
+      "active_slice": "L1GOV-SLICE-012",
+      "accepted_slices": 11,
+      "blocked_items": 0
+    },
+    "module_summaries": {
+      "standardization": "Profiles and policies are available for review display.",
+      "monitor_hitl": "Human decision and review task states are visible as read-only projections.",
+      "delivery_feedback": "Feedback trend and triage states are visible as review candidates.",
+      "notes_evidence": "UX direction and evidence are displayed as review notes only."
+    },
+    "blocker_refs": [],
+    "hitl_refs": [
+      "HumanReviewTask:slice012-ux-review"
+    ],
+    "feedback_refs": [
+      "FeedbackRecord:slice012-review-script"
+    ],
+    "creates_authority": false
+  },
+  "modules": [
+    {
+      "id": "mission_control",
+      "label": "Mission Control",
+      "summary": "Projection freshness.",
+      "source_refs": [
+        "ProjectionSnapshot:mission-control"
+      ]
+    },
+    {
+      "id": "standardization",
+      "label": "Standardization",
+      "summary": "Planning profiles and policy references shown for UX inspection.",
+      "source_refs": [
+        "DeliverableEvaluationProfile:421",
+        "FeedbackMetricPolicy:421"
+      ]
+    },
+    {
+      "id": "monitor_hitl",
+      "label": "Monitor/HITL",
+      "summary": "Review task and decision state shown without local approval authority.",
+      "source_refs": [
+        "HumanReviewTask:slice012-ux-review"
+      ]
+    },
+    {
+      "id": "delivery_feedback",
+      "label": "Delivery Feedback",
+      "summary": "Feedback metric and triage candidates visible for review.",
+      "source_refs": [
+        "FeedbackMetricTrend:slice012"
+      ]
+    },
+    {
+      "id": "notes_evidence",
+      "label": "Notes Evidence",
+      "summary": "UX direction and rendered evidence references shown as evidence only.",
+      "source_refs": [
+        "UX V0.2-CS",
+        "Slice 012 package"
+      ]
+    }
+  ],
+  "command_affordances": [
+    {
+      "command_id": "cmd-draft-review-packet",
+      "label": "Prepare Review Draft",
+      "surface": "toolbar",
+      "service_command_type": "SubmitCommandDraft",
+      "creates_command_draft": true,
+      "requires_human_decision": true,
+      "disabled": false,
+      "target_ref": "layer1-governance",
+      "expected_state": "ux_surface_review"
+    },
+    {
+      "command_id": "cmd-refresh-projection",
+      "label": "Refresh Projection",
+      "surface": "header",
+      "service_command_type": "RefreshProjection",
+      "creates_command_draft": false,
+      "requires_human_decision": false,
+      "disabled": false,
+      "target_ref": "ProjectionSnapshot:mission-control:aa2ff2ad",
+      "expected_state": "display_state_only"
+    }
+  ],
+  "service_outcomes": {
+    "draft_preview": {
+      "status": "draft_preview",
+      "command_type": "SubmitCommandDraft",
+      "target_ref": "layer1-governance",
+      "source": "GovernanceService",
+      "authority_effect": "display state only"
+    },
+    "rejection": {
+      "status": "rejected",
+      "error_code": "ERR_INVALID_TRANSITION",
+      "blocked_reason": "SubmitCommandDraft requires a valid embedded command draft",
+      "source": "GovernanceService"
+    },
+    "no_go_block": {
+      "status": "blocked",
+      "error_code": "ERR_NO_GO_BOUNDARY",
+      "blocked_reason": "Direct UI approval is blocked and must route through Monitor/HITL",
+      "source": "GovernanceService"
+    }
+  },
+  "stale_refresh": {
+    "states": [
+      "stale",
+      "rebuilding",
+      "current"
+    ],
+    "canonical_mutation": false,
+    "note": "Refresh controls update display state only with no canonical mutation"
+  },
+  "notes_evidence": {
+    "status": "evidence_only",
+    "creates_authority": false,
+    "items": [
+      "UX V0.2-CS is review direction for the surface.",
+      "Slice 010 contracts define view-model boundaries.",
+      "Slice 011 fixtures prove cross-component composition."
+    ]
+  }
+}

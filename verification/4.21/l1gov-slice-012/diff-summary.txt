@@ -1,0 +1,12 @@
+git diff --stat origin/master...HEAD
+Generated at: 2026-06-14T16:33:19.790968+08:00
+Commit: efd0b6974de9436438fdf2800fb0238603b605b3
+
+ .../client_test_surface/slice012/README.md         |  17 +
+ .../governance/client_test_surface/slice012/app.js | 173 ++++++++
+ .../slice012/fixtures/slice012_state.json          | 172 ++++++++
+ .../client_test_surface/slice012/index.html        | 116 ++++++
+ .../client_test_surface/slice012/styles.css        | 443 +++++++++++++++++++++
+ .../tests/fixtures/client_test_surface.py          |  32 ++
+ .../tests/test_client_test_surface_slice012.py     | 142 +++++++
+ 7 files changed, 1095 insertions(+)
