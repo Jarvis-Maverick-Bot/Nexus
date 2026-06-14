@@ -9,6 +9,7 @@ from .fixtures.client_test_surface import DESKTOP_APP_ROOT, DESKTOP_FIXTURE_PATH
 REQUIRED_DESKTOP_FILES = (
     "package.json",
     "package-lock.json",
+    ".gitignore",
     "README.md",
     "src/index.html",
     "src/main.js",
@@ -154,3 +155,16 @@ def test_slice012_desktop_scope_does_not_mutate_root_package_managers() -> None:
     root_files = {path.name for path in Path.cwd().iterdir() if path.is_file()}
     assert "package.json" not in root_files
     assert "package-lock.json" not in root_files
+
+
+def test_slice012_desktop_app_ignores_local_toolchain_and_build_outputs() -> None:
+    gitignore = read_app_file(".gitignore")
+
+    for pattern in (
+        "node_modules/",
+        "src-tauri/target/",
+        ".toolchain/",
+        "dist/",
+        ".tmp-render/",
+    ):
+        assert pattern in gitignore
