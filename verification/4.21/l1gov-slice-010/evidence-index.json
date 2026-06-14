@@ -121,8 +121,11 @@
     "workspace-picker/no-persistent-left-rail.json",
     "workspace-picker/overlay-not-authority.json"
   ],
+  "head_semantics": {
+    "implementation_commit": "code implementation commit for Slice 010 contracts",
+    "reviewed_pr_head": "PR head reviewed by Nova before this evidence hygiene patch"
+  },
   "implementation_commit": "ccaa2f836bc681ad5e98639c4881209c0efde4c0",
-  "implementation_head": "ccaa2f836bc681ad5e98639c4881209c0efde4c0",
   "no_go": {
     "no_direct_canonical_mutation_outside_service_kernel": true,
     "no_dispatch_execution": true,
@@ -132,8 +135,9 @@
     "no_ui_framework_runtime_server_database_api_package_selection": true
   },
   "pr_url": "https://github.com/Jarvis-Maverick-Bot/Nexus/pull/18",
+  "reviewed_pr_head": "e96fe7f299e9e986f4cf959330d80bb70281ec85",
   "slice_id": "l1gov-slice-010",
-  "status": "PR_READY_FOR_NOVA_REVIEW",
+  "status": "PR_READY_FOR_NOVA_REVIEW_EVIDENCE_PATCH",
   "task_package_review_commit": "eef9c051",
   "verification": {
     "diff_check": "diff-check.txt",
