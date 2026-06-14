@@ -1,0 +1,12 @@
+Slice 012 desktop toolchain check
+Generated at: 2026-06-14T17:17:06.9324492+08:00
+Commit: 4fd7a4f5c8a9d3289316e921de5ab7e4425f6009
+
+node: MISSING
+npm: MISSING
+rustc: MISSING
+cargo: MISSING
+bundled_node: C:\Users\John\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe
+launch_status: BLOCKED_TOOLCHAIN_MISSING
+reason: npm, rustc, and cargo are not available on PATH; bundled Codex runtime provides node.exe only.
+no_external_toolchain_install_performed: true

@@ -1,0 +1,19 @@
+git diff --stat origin/master...HEAD
+Generated at: 2026-06-14T17:18:04.228576+08:00
+Commit: 4fd7a4f5c8a9d3289316e921de5ab7e4425f6009
+
+ apps/l1gov-desktop-client/README.md                |  32 ++
+ apps/l1gov-desktop-client/package-lock.json        |  15 +
+ apps/l1gov-desktop-client/package.json             |  14 +
+ .../scripts/verify-fixture.mjs                     |  13 +
+ apps/l1gov-desktop-client/src-tauri/Cargo.toml     |  11 +
+ apps/l1gov-desktop-client/src-tauri/build.rs       |   3 +
+ apps/l1gov-desktop-client/src-tauri/src/main.rs    |   7 +
+ .../l1gov-desktop-client/src-tauri/tauri.conf.json |  29 ++
+ .../src/fixtures/slice012_desktop_state.json       |  64 ++++
+ apps/l1gov-desktop-client/src/index.html           | 120 +++++++
+ apps/l1gov-desktop-client/src/main.js              | 147 +++++++++
+ apps/l1gov-desktop-client/src/styles.css           | 344 +++++++++++++++++++++
+ .../tests/fixtures/client_test_surface.py          |   8 +
+ .../tests/test_client_desktop_surface_slice012.py  | 156 ++++++++++
+ 14 files changed, 963 insertions(+)

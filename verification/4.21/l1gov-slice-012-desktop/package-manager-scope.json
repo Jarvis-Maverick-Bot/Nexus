@@ -1,0 +1,10 @@
+{
+  "accepted": true,
+  "root_package_manager_mutations": [],
+  "app_package_manager_files": [
+    "apps/l1gov-desktop-client/package-lock.json",
+    "apps/l1gov-desktop-client/package.json",
+    "apps/l1gov-desktop-client/src-tauri/Cargo.toml"
+  ],
+  "boundary": "Dependency/package-manager files are allowed only under apps/l1gov-desktop-client/."
+}

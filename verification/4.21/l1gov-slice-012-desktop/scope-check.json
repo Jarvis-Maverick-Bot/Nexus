@@ -1,0 +1,99 @@
+{
+  "accepted": true,
+  "allowed_paths": [
+    "apps/l1gov-desktop-client/",
+    "nexus/governance/tests/fixtures/client_test_surface.py",
+    "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+    "verification/4.21/l1gov-slice-012-desktop/"
+  ],
+  "files": [
+    {
+      "path": "apps/l1gov-desktop-client/README.md",
+      "allowed": true
+    },
+    {
+      "path": "apps/l1gov-desktop-client/package-lock.json",
+      "allowed": true
+    },
+    {
+      "path": "apps/l1gov-desktop-client/package.json",
+      "allowed": true
+    },
+    {
+      "path": "apps/l1gov-desktop-client/scripts/verify-fixture.mjs",
+      "allowed": true
+    },
+    {
+      "path": "apps/l1gov-desktop-client/src-tauri/Cargo.toml",
+      "allowed": true
+    },
+    {
+      "path": "apps/l1gov-desktop-client/src-tauri/build.rs",
+      "allowed": true
+    },
+    {
+      "path": "apps/l1gov-desktop-client/src-tauri/src/main.rs",
+      "allowed": true
+    },
+    {
+      "path": "apps/l1gov-desktop-client/src-tauri/tauri.conf.json",
+      "allowed": true
+    },
+    {
+      "path": "apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json",
+      "allowed": true
+    },
+    {
+      "path": "apps/l1gov-desktop-client/src/index.html",
+      "allowed": true
+    },
+    {
+      "path": "apps/l1gov-desktop-client/src/main.js",
+      "allowed": true
+    },
+    {
+      "path": "apps/l1gov-desktop-client/src/styles.css",
+      "allowed": true
+    },
+    {
+      "path": "nexus/governance/tests/fixtures/client_test_surface.py",
+      "allowed": true
+    },
+    {
+      "path": "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012-desktop/desktop-fixture-node-verify.txt",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012-desktop/desktop-launch-render-check.txt",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012-desktop/desktop-toolchain-check.txt",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012-desktop/diff-check.txt",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012-desktop/full-governance-pytest-output.txt",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012-desktop/nexus-mq-import-scan.txt",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012-desktop/screenshots/README_NO_SCREENSHOTS.txt",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012-desktop/targeted-desktop-pytest-output.txt",
+      "allowed": true
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+Slice 012 desktop launch/render check
+Generated at: 2026-06-14T17:17:07.1904334+08:00
+Commit: 4fd7a4f5c8a9d3289316e921de5ab7e4425f6009
+
+Expected launch command: npm install; npm run dev from apps/l1gov-desktop-client/
+Actual status: BLOCKED_TOOLCHAIN_MISSING
+Windows desktop screenshot evidence: NOT_GENERATED
+Reason: npm, rustc, and cargo are unavailable in this environment; installing external toolchains was not performed because dependency/package-manager mutation is authorized only for project files under apps/l1gov-desktop-client and no root/toolchain install was approved.
+macOS launch evidence: NOT_AVAILABLE_ON_WINDOWS_HOST
+No live daemon/controller/dispatch execution was invoked.
