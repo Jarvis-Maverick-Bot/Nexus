@@ -4,9 +4,11 @@ from dataclasses import replace
 from typing import Any
 
 from nexus.governance.app_contract import (
+    CommandAffordance,
     NotesEvidenceFrameViewModel,
     WorkspacePickerOverlayViewModel,
     build_read_only_desktop_shell,
+    validate_command_affordance,
     validate_local_desktop_shell,
     validate_notes_evidence_frame,
     validate_workspace_picker_overlay,
@@ -85,14 +87,32 @@ POSITIVE_COMPONENTS: tuple[str, ...] = (
 
 REQUIRED_NEGATIVE_FAMILIES: tuple[str, ...] = (
     "stale_wbs_source_authority",
+    "smb_only_authority",
+    "missing_slice010_evidence",
     "workspace_final_status",
     "missing_evaluation_profile",
+    "stale_deliverable_evaluation_profile",
+    "stale_feedback_metric_policy",
     "workpacket_submitted_state",
     "handoff_controller_execution",
+    "direct_ui_approval",
+    "local_app_direct_approval",
+    "read_only_mutation",
     "monitor_workpacket_execution",
+    "runtime_private_agent_invocation",
+    "route_activation",
+    "adapter_transport_activation",
+    "owner_path_call",
     "lower_layer_submission",
     "raw_feedback_mutation",
+    "completion_decision_wording",
+    "continuity_activation_wording",
+    "production_readiness_wording",
+    "deploy_readiness_wording",
+    "final_pass_wording",
     "projection_as_authority",
+    "version_mismatch",
+    "idempotency_mismatch",
     "local_app_view_model_authority",
 )
 
@@ -217,6 +237,16 @@ def build_negative_fixture_results() -> tuple[dict[str, Any], ...]:
             verify_source_authority(valid_source_manifest(wbs_version="V0.4")),
         ),
         _negative(
+            "smb_only_authority",
+            "source_authority",
+            verify_source_authority(valid_source_manifest(source_root="\\\\192.168.31.124\\Nova-Jarvis-Shared")),
+        ),
+        _negative(
+            "missing_slice010_evidence",
+            "local_app_contract",
+            validate_notes_evidence_frame(_notes_evidence_frame(source_docs_read=())),
+        ),
+        _negative(
             "workspace_final_status",
             "workspace_init",
             validate_workspace_manifest(workspace_init.valid_manifest(status="final_pass")),
@@ -231,6 +261,18 @@ def build_negative_fixture_results() -> tuple[dict[str, Any], ...]:
             ),
         ),
         _negative(
+            "stale_deliverable_evaluation_profile",
+            "monitor_hitl",
+            validate_deliverable_evaluation_result(
+                monitor.valid_evaluation_result(evaluation_profile_ref=monitor.valid_profile_ref(status="stale"))
+            ),
+        ),
+        _negative(
+            "stale_feedback_metric_policy",
+            "delivery_feedback",
+            validate_feedback_metric_extraction(delivery.valid_extraction(), delivery.valid_policy(status="stale")),
+        ),
+        _negative(
             "workpacket_submitted_state",
             "project_execution",
             validate_layer1_workpacket(execution.valid_workpacket(status="submitted")),
@@ -241,9 +283,53 @@ def build_negative_fixture_results() -> tuple[dict[str, Any], ...]:
             validate_handoff_candidate(dispatch.valid_handoff_candidate(expected_outputs=("controller execution",))),
         ),
         _negative(
+            "direct_ui_approval",
+            "governance_service",
+            _service().handle(service_fx.service_command(payload={"requested_action": "direct_ui_approval"})),
+        ),
+        _negative(
+            "local_app_direct_approval",
+            "local_app_contract",
+            validate_command_affordance(_local_app_affordance(label="Approve now", payload={"requested_action": "local app approves"})),
+        ),
+        _negative(
+            "read_only_mutation",
+            "local_app_contract",
+            validate_local_desktop_shell(
+                replace(
+                    build_read_only_desktop_shell(
+                        workspace_id="ws-421",
+                        workspace_display_name="Layer 1 Governance",
+                        kernel_source_ref="kernel:39001610",
+                    ),
+                    disabled_commands=("approve",),
+                )
+            ),
+        ),
+        _negative(
             "monitor_workpacket_execution",
             "monitor_hitl",
             validate_human_review_task(monitor.valid_review_task(recommended_next_action="please execute workpacket now")),
+        ),
+        _negative(
+            "runtime_private_agent_invocation",
+            "governance_service",
+            _service().handle(service_fx.service_command(payload={"requested_action": "private-agent invocation"})),
+        ),
+        _negative(
+            "route_activation",
+            "dispatch_contract",
+            validate_handoff_candidate(dispatch.valid_handoff_candidate(expected_outputs=("route activation",))),
+        ),
+        _negative(
+            "adapter_transport_activation",
+            "dispatch_contract",
+            validate_handoff_candidate(dispatch.valid_handoff_candidate(expected_outputs=("adapter call", "transport call"))),
+        ),
+        _negative(
+            "owner_path_call",
+            "impact_control",
+            validate_impact_control_request(impact.valid_impact_request(proposed_action="please call owner path now")),
         ),
         _negative(
             "lower_layer_submission",
@@ -256,6 +342,37 @@ def build_negative_fixture_results() -> tuple[dict[str, Any], ...]:
             validate_feedback_record(delivery.valid_feedback_record(raw_summary="please mutate backlog now")),
         ),
         _negative(
+            "completion_decision_wording",
+            "delivery_feedback",
+            validate_completion_continuity_packet(delivery.valid_completion_packet(requested_decision="complete project")),
+        ),
+        _negative(
+            "continuity_activation_wording",
+            "delivery_feedback",
+            validate_completion_continuity_packet(delivery.valid_completion_packet(requested_decision="activate continuity")),
+        ),
+        _negative(
+            "production_readiness_wording",
+            "delivery_feedback",
+            validate_delivery_record(
+                delivery.valid_delivery_record(preview_or_release_scope="mark production readiness"),
+                delivery.valid_accepted_increment(),
+            ),
+        ),
+        _negative(
+            "deploy_readiness_wording",
+            "delivery_feedback",
+            validate_delivery_record(
+                delivery.valid_delivery_record(preview_or_release_scope="deploy to production"),
+                delivery.valid_accepted_increment(),
+            ),
+        ),
+        _negative(
+            "final_pass_wording",
+            "delivery_feedback",
+            validate_completion_continuity_packet(delivery.valid_completion_packet(requested_decision="final pass")),
+        ),
+        _negative(
             "projection_as_authority",
             "governance_service",
             _service().handle(
@@ -266,6 +383,16 @@ def build_negative_fixture_results() -> tuple[dict[str, Any], ...]:
                     }
                 )
             ),
+        ),
+        _negative(
+            "version_mismatch",
+            "governance_service",
+            _service().handle(service_fx.service_command(expected_version=1, payload={"expected_version": 2})),
+        ),
+        _negative(
+            "idempotency_mismatch",
+            "governance_service",
+            _service().handle(service_fx.service_command(payload={"idempotency_key": "different-idempotency-key"})),
         ),
         _negative(
             "local_app_view_model_authority",
@@ -346,6 +473,40 @@ def _local_app_step() -> dict[str, Any]:
             validate_notes_evidence_frame(notes),
         ),
     )
+
+
+def _notes_evidence_frame(**overrides: object) -> NotesEvidenceFrameViewModel:
+    values = {
+        "frame_id": "notes-evidence-011",
+        "source_docs_read": ("UX V0.2-CS requirements", "Slice 010 package"),
+        "prototype_refs": ("ux-v0.2-cs-client",),
+        "figma_refs": ("figma:review-direction-only",),
+        "ux_only_status": "evidence_only",
+        "governance_boundaries": ("not authority", "not app screen", "no canonical mutation"),
+        "open_questions": (),
+        "is_app_screen": False,
+        "creates_authority": False,
+    }
+    values.update(overrides)
+    return NotesEvidenceFrameViewModel(**values)
+
+
+def _local_app_affordance(**overrides: object) -> CommandAffordance:
+    values = {
+        "command_id": "cmd-local-approval-no-go",
+        "label": "Prepare review packet",
+        "module_id": "monitor_hitl",
+        "surface": "toolbar",
+        "creates_command_draft": True,
+        "service_command_type": "SubmitCommandDraft",
+        "requires_human_decision": True,
+        "disabled": False,
+        "disabled_reason": "",
+        "source_refs": ("WBS V0.6", "L1GOV-SLICE-010", "eef9c05"),
+        "payload": {"target_ref": "layer1-governance", "draft_command_type": "SubmitCommandDraft"},
+    }
+    values.update(overrides)
+    return CommandAffordance(**values)
 
 
 def _service() -> GovernanceServiceFacade:

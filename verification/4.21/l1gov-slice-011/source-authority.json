@@ -5,7 +5,8 @@
     "origin_master_at_generation":  "39001610bdc36e8d2b635fbeb9a6939529a873bc",
     "merge_base":  "39001610bdc36e8d2b635fbeb9a6939529a873bc",
     "implementation_commit":  "01ff26a414df416042a88d3f517b79d1fb6af5c9",
-    "reviewed_pr_head":  "pending_nova_review_after_pr_creation",
+    "reviewed_pr_head":  "cf0ac6fa08cef449c4bec3cb0b034f10287f2ecb",
+    "patch_base_head":  "cf0ac6fa08cef449c4bec3cb0b034f10287f2ecb",
     "authority":  {
                       "package_path":  "\\\\192.168.31.124\\Nova-Jarvis-Inbox\\Thunder\\_submitted\\2026-06-14_4.21_slice011_task_package_thunder_v0.1\\",
                       "source_repo":  "Nexus",

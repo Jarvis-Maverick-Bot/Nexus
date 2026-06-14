@@ -20,8 +20,16 @@
                                                  "SharedDocs:565ce91"
                                              ]
                          },
-    "negative_fixture_count":  1,
+    "negative_fixture_count":  2,
     "negative_fixtures":  [
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "impact_control",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "owner_path_call",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
                               {
                                   "accepted":  false,
                                   "blocked_by":  "impact_control",

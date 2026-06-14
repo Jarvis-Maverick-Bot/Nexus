@@ -5,18 +5,33 @@
     "branch":  "codex/4.21-slice011-dry-run-fixtures",
     "base_commit":  "39001610bdc36e8d2b635fbeb9a6939529a873bc",
     "implementation_commit":  "01ff26a414df416042a88d3f517b79d1fb6af5c9",
-    "reviewed_pr_head":  "pending_nova_review_after_pr_creation",
+    "reviewed_pr_head":  "cf0ac6fa08cef449c4bec3cb0b034f10287f2ecb",
+    "patch_base_head":  "cf0ac6fa08cef449c4bec3cb0b034f10287f2ecb",
     "evidence_root":  "verification/4.21/l1gov-slice-011/",
     "verification":  {
-                         "targeted_pytest":  "targeted-pytest-output.txt",
-                         "full_governance_pytest":  "full-governance-pytest-output.txt",
-                         "diff_check":  "diff-check.txt",
-                         "nexus_mq_import_scan":  "nexus-mq-import-scan.txt",
+                         "targeted_pytest":  {
+                                                 "file":  "targeted-pytest-output.txt",
+                                                 "result":  "5 passed",
+                                                 "exit_code":  0
+                                             },
+                         "full_governance_pytest":  {
+                                                        "file":  "full-governance-pytest-output.txt",
+                                                        "result":  "628 passed",
+                                                        "exit_code":  0
+                                                    },
+                         "diff_check":  {
+                                            "file":  "diff-check.txt",
+                                            "exit_code":  0
+                                        },
+                         "nexus_mq_import_scan":  {
+                                                      "file":  "nexus-mq-import-scan.txt",
+                                                      "exit_code":  0
+                                                  },
                          "structured_no_go_scan":  {
                                                        "file":  "structured-no-go-scan.json",
                                                        "accepted":  true,
                                                        "unclassified_count":  0,
-                                                       "match_count":  228
+                                                       "match_count":  266
                                                    },
                          "json_parse":  {
                                             "file":  "json-parse.txt",
@@ -40,6 +55,7 @@
                             "service-facade-fixtures.json",
                             "local-app-contract-fixtures.json"
                         ],
+    "no_go_family_count":  28,
     "files":  [
                   "delivery-feedback-fixtures.json",
                   "diff-check.txt",

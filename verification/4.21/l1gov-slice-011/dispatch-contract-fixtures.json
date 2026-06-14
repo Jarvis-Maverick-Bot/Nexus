@@ -19,13 +19,29 @@
                                                  "PR12:2cd4a1e06dc93908d2e9bac2f493a17489344e0d"
                                              ]
                          },
-    "negative_fixture_count":  1,
+    "negative_fixture_count":  3,
     "negative_fixtures":  [
                               {
                                   "accepted":  false,
                                   "blocked_by":  "dispatch_contract",
                                   "error_code":  "ERR_NO_GO_BOUNDARY",
                                   "family":  "handoff_controller_execution",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "dispatch_contract",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "route_activation",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "dispatch_contract",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "adapter_transport_activation",
                                   "live_execution_invoked":  false,
                                   "records_appended":  0
                               }

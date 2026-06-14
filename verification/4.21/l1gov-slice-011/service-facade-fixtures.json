@@ -19,13 +19,45 @@
                                                  "a8aae37032502800778f02c7defc0dce5d1231fd"
                                              ]
                          },
-    "negative_fixture_count":  1,
+    "negative_fixture_count":  5,
     "negative_fixtures":  [
                               {
                                   "accepted":  false,
                                   "blocked_by":  "governance_service",
                                   "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "direct_ui_approval",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "governance_service",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "runtime_private_agent_invocation",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "governance_service",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
                                   "family":  "projection_as_authority",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "governance_service",
+                                  "error_code":  "ERR_STALE_EXPECTED_VERSION",
+                                  "family":  "version_mismatch",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "governance_service",
+                                  "error_code":  "ERR_IDEMPOTENCY_KEY_REUSE",
+                                  "family":  "idempotency_mismatch",
                                   "live_execution_invoked":  false,
                                   "records_appended":  0
                               }

@@ -6,6 +6,44 @@ from ._evidence import write_evidence
 from .fixtures.layer1_dry_run import REQUIRED_NEGATIVE_FAMILIES, build_negative_fixture_results
 
 
+APPROVED_PACKAGE_NEGATIVE_FAMILIES = {
+    "stale_wbs_source_authority",
+    "smb_only_authority",
+    "missing_slice010_evidence",
+    "workspace_final_status",
+    "missing_evaluation_profile",
+    "stale_deliverable_evaluation_profile",
+    "stale_feedback_metric_policy",
+    "workpacket_submitted_state",
+    "handoff_controller_execution",
+    "direct_ui_approval",
+    "local_app_direct_approval",
+    "read_only_mutation",
+    "monitor_workpacket_execution",
+    "runtime_private_agent_invocation",
+    "route_activation",
+    "adapter_transport_activation",
+    "owner_path_call",
+    "lower_layer_submission",
+    "raw_feedback_mutation",
+    "completion_decision_wording",
+    "continuity_activation_wording",
+    "production_readiness_wording",
+    "deploy_readiness_wording",
+    "final_pass_wording",
+    "projection_as_authority",
+    "local_app_view_model_authority",
+    "version_mismatch",
+    "idempotency_mismatch",
+}
+
+
+def test_cross_component_negative_fixtures_cover_approved_package_no_go_families() -> None:
+    observed = {result["family"] for result in build_negative_fixture_results()}
+
+    assert APPROVED_PACKAGE_NEGATIVE_FAMILIES <= observed
+
+
 def test_cross_component_negative_fixtures_cover_required_no_go_families() -> None:
     results = build_negative_fixture_results()
 

@@ -21,13 +21,61 @@
                                                  "SharedDocs:eddbe4f"
                                              ]
                          },
-    "negative_fixture_count":  1,
+    "negative_fixture_count":  7,
     "negative_fixtures":  [
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "delivery_feedback",
+                                  "error_code":  "ERR_DELIVERY_FEEDBACK_RECORD_INVALID",
+                                  "family":  "stale_feedback_metric_policy",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
                               {
                                   "accepted":  false,
                                   "blocked_by":  "delivery_feedback",
                                   "error_code":  "ERR_RAW_FEEDBACK_NO_AUTHORITY_MUTATION",
                                   "family":  "raw_feedback_mutation",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "delivery_feedback",
+                                  "error_code":  "ERR_MISSING_HUMAN_DECISION",
+                                  "family":  "completion_decision_wording",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "delivery_feedback",
+                                  "error_code":  "ERR_MISSING_HUMAN_DECISION",
+                                  "family":  "continuity_activation_wording",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "delivery_feedback",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "production_readiness_wording",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "delivery_feedback",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "deploy_readiness_wording",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "delivery_feedback",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "final_pass_wording",
                                   "live_execution_invoked":  false,
                                   "records_appended":  0
                               }

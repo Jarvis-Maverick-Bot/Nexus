@@ -19,8 +19,32 @@
                                                  "PR18:39001610"
                                              ]
                          },
-    "negative_fixture_count":  1,
+    "negative_fixture_count":  4,
     "negative_fixtures":  [
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "local_app_contract",
+                                  "error_code":  "ERR_INVALID_TRANSITION",
+                                  "family":  "missing_slice010_evidence",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "local_app_contract",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "local_app_direct_approval",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "local_app_contract",
+                                  "error_code":  "ERR_NO_GO_BOUNDARY",
+                                  "family":  "read_only_mutation",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
                               {
                                   "accepted":  false,
                                   "blocked_by":  "local_app_contract",

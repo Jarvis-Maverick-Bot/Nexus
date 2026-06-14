@@ -21,8 +21,16 @@
                                                  "SharedDocs:b3d3f67"
                                              ]
                          },
-    "negative_fixture_count":  1,
+    "negative_fixture_count":  2,
     "negative_fixtures":  [
+                              {
+                                  "accepted":  false,
+                                  "blocked_by":  "monitor_hitl",
+                                  "error_code":  "ERR_MISSING_EVALUATION_PROFILE",
+                                  "family":  "stale_deliverable_evaluation_profile",
+                                  "live_execution_invoked":  false,
+                                  "records_appended":  0
+                              },
                               {
                                   "accepted":  false,
                                   "blocked_by":  "monitor_hitl",
