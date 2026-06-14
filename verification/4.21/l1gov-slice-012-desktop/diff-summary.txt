@@ -1,0 +1,87 @@
+ apps/l1gov-desktop-client/.gitignore               |    6 +
+ apps/l1gov-desktop-client/README.md                |   39 +
+ apps/l1gov-desktop-client/package-lock.json        |  214 +
+ apps/l1gov-desktop-client/package.json             |   15 +
+ .../scripts/verify-fixture.mjs                     |   21 +
+ apps/l1gov-desktop-client/src-tauri/Cargo.lock     | 4852 ++++++++++++++++++++
+ apps/l1gov-desktop-client/src-tauri/Cargo.toml     |   15 +
+ apps/l1gov-desktop-client/src-tauri/build.rs       |    3 +
+ apps/l1gov-desktop-client/src-tauri/icons/icon.ico |  Bin 0 -> 2686 bytes
+ apps/l1gov-desktop-client/src-tauri/src/main.rs    |    7 +
+ .../l1gov-desktop-client/src-tauri/tauri.conf.json |   29 +
+ .../src/fixtures/slice012_desktop_state.json       |  121 +
+ apps/l1gov-desktop-client/src/index.html           |  121 +
+ apps/l1gov-desktop-client/src/main.js              |  159 +
+ apps/l1gov-desktop-client/src/styles.css           |  357 ++
+ .../tests/fixtures/client_test_surface.py          |    8 +
+ .../tests/test_client_desktop_surface_slice012.py  |  192 +
+ .../desktop-build-output.txt                       |    8 +
+ .../desktop-fixture-node-verify.txt                |    6 +
+ .../desktop-launch-render-check.txt                |   12 +
+ .../desktop-toolchain-check.txt                    |   14 +
+ .../4.21/l1gov-slice-012-desktop/diff-check.txt    |    1 +
+ .../4.21/l1gov-slice-012-desktop/diff-summary.txt  |   58 +
+ .../l1gov-slice-012-desktop/evidence-index.json    |   99 +
+ .../4.21/l1gov-slice-012-desktop/file-list.txt     |   37 +
+ .../full-governance-pytest-output.txt              |   11 +
+ .../4.21/l1gov-slice-012-desktop/json-parse.txt    |    5 +
+ .../macos-compatibility-note.md                    |    7 +
+ .../nexus-mq-import-scan.txt                       |    2 +
+ .../package-manager-scope.json                     |   23 +
+ .../4.21/l1gov-slice-012-desktop/scope-check.json  |  162 +
+ .../screenshots/windows-compact-app.png            |  Bin 0 -> 56476 bytes
+ .../screenshots/windows-desktop-app.png            |  Bin 0 -> 85249 bytes
+ .../structured-no-go-scan.json                     | 1817 ++++++++
+ .../targeted-desktop-pytest-output.txt             |    3 +
+ .../worktree-diff-check.txt                        |   10 +
+ 36 files changed, 8434 insertions(+)
+A	apps/l1gov-desktop-client/.gitignore
+A	apps/l1gov-desktop-client/README.md
+A	apps/l1gov-desktop-client/package-lock.json
+A	apps/l1gov-desktop-client/package.json
+A	apps/l1gov-desktop-client/scripts/verify-fixture.mjs
+A	apps/l1gov-desktop-client/src-tauri/Cargo.lock
+A	apps/l1gov-desktop-client/src-tauri/Cargo.toml
+A	apps/l1gov-desktop-client/src-tauri/build.rs
+A	apps/l1gov-desktop-client/src-tauri/icons/icon.ico
+A	apps/l1gov-desktop-client/src-tauri/src/main.rs
+A	apps/l1gov-desktop-client/src-tauri/tauri.conf.json
+A	apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json
+A	apps/l1gov-desktop-client/src/index.html
+A	apps/l1gov-desktop-client/src/main.js
+A	apps/l1gov-desktop-client/src/styles.css
+A	nexus/governance/tests/fixtures/client_test_surface.py
+A	nexus/governance/tests/test_client_desktop_surface_slice012.py
+A	verification/4.21/l1gov-slice-012-desktop/desktop-build-output.txt
+A	verification/4.21/l1gov-slice-012-desktop/desktop-fixture-node-verify.txt
+A	verification/4.21/l1gov-slice-012-desktop/desktop-launch-render-check.txt
+A	verification/4.21/l1gov-slice-012-desktop/desktop-toolchain-check.txt
+A	verification/4.21/l1gov-slice-012-desktop/diff-check.txt
+A	verification/4.21/l1gov-slice-012-desktop/diff-summary.txt
+A	verification/4.21/l1gov-slice-012-desktop/evidence-index.json
+A	verification/4.21/l1gov-slice-012-desktop/file-list.txt
+A	verification/4.21/l1gov-slice-012-desktop/full-governance-pytest-output.txt
+A	verification/4.21/l1gov-slice-012-desktop/json-parse.txt
+A	verification/4.21/l1gov-slice-012-desktop/macos-compatibility-note.md
+A	verification/4.21/l1gov-slice-012-desktop/nexus-mq-import-scan.txt
+A	verification/4.21/l1gov-slice-012-desktop/package-manager-scope.json
+A	verification/4.21/l1gov-slice-012-desktop/scope-check.json
+A	verification/4.21/l1gov-slice-012-desktop/screenshots/windows-compact-app.png
+A	verification/4.21/l1gov-slice-012-desktop/screenshots/windows-desktop-app.png
+A	verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json
+A	verification/4.21/l1gov-slice-012-desktop/targeted-desktop-pytest-output.txt
+A	verification/4.21/l1gov-slice-012-desktop/worktree-diff-check.txt
+warning: in the working copy of 'verification/4.21/l1gov-slice-012-desktop/desktop-launch-render-check.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'verification/4.21/l1gov-slice-012-desktop/desktop-toolchain-check.txt', LF will be replaced by CRLF the next time Git touches it
+M	verification/4.21/l1gov-slice-012-desktop/desktop-build-output.txt
+M	verification/4.21/l1gov-slice-012-desktop/desktop-launch-render-check.txt
+M	verification/4.21/l1gov-slice-012-desktop/desktop-toolchain-check.txt
+M	verification/4.21/l1gov-slice-012-desktop/file-list.txt
+M	verification/4.21/l1gov-slice-012-desktop/full-governance-pytest-output.txt
+M	verification/4.21/l1gov-slice-012-desktop/package-manager-scope.json
+M	verification/4.21/l1gov-slice-012-desktop/scope-check.json
+M	verification/4.21/l1gov-slice-012-desktop/screenshots/windows-compact-app.png
+M	verification/4.21/l1gov-slice-012-desktop/screenshots/windows-desktop-app.png
+M	verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json
+M	verification/4.21/l1gov-slice-012-desktop/targeted-desktop-pytest-output.txt
+EXIT_CODE=0

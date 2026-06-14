@@ -1,0 +1,15 @@
+{
+  "name": "@nexus/l1gov-desktop-client",
+  "version": "0.0.0-slice012",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "build:windows-gnu": "tauri build --target x86_64-pc-windows-gnu --no-bundle --debug --ci",
+    "test": "node scripts/verify-fixture.mjs"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.0.0"
+  }
+}

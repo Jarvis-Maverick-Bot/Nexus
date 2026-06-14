@@ -1,0 +1,6 @@
+
+> @nexus/l1gov-desktop-client@0.0.0-slice012 test
+> node scripts/verify-fixture.mjs
+
+slice012 desktop fixture verified
+EXIT_CODE=0

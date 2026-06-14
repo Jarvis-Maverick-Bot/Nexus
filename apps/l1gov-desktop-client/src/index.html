@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus L1 Governance UX Test Surface</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="identity">
+        <span class="mark">L1</span>
+        <div>
+          <h1>Nexus L1 Governance UX Test Surface</h1>
+        <p>Kernel and Governance Service remain authority.</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button id="workspace-picker" class="button primary" type="button">Workspace</button>
+        <button id="refresh-projection" class="button" type="button">Refresh projection</button>
+      </div>
+    </header>
+
+    <section class="workspace-strip" aria-label="Workspace status">
+      <span id="workspace-name">4.21 Layer 1 Governance</span>
+      <span id="freshness-chip" class="chip current">current</span>
+      <span class="chip">desktop preview</span>
+      <span id="service-chip" class="chip">service fixture only</span>
+      <span class="chip">no canonical mutation</span>
+    </section>
+
+    <main class="shell">
+      <nav id="module-navigation" class="module-nav" aria-label="Module navigation">
+        <button class="nav-button active" type="button" data-module="mission_control">Mission Control</button>
+        <button class="nav-button" type="button" data-module="standardization">Standardization</button>
+        <button class="nav-button" type="button" data-module="monitor_hitl">Monitor/HITL</button>
+        <button class="nav-button" type="button" data-module="delivery_feedback">Delivery Feedback</button>
+        <button class="nav-button" type="button" data-module="notes_evidence">Notes Evidence</button>
+      </nav>
+
+      <section id="mission-control" class="mission-control" aria-label="Mission Control">
+        <div class="section-head">
+          <div>
+            <h2 id="active-module-title">Mission Control</h2>
+            <p id="active-module-summary">Projection freshness and review flow.</p>
+          </div>
+          <button id="draft-command-button" class="button primary" type="button">Draft Command</button>
+        </div>
+
+        <div class="metrics-grid">
+          <article class="metric">
+            <span>Accepted Slices</span>
+            <strong id="accepted-slices">11</strong>
+          </article>
+          <article class="metric">
+            <span>Active Slice</span>
+            <strong id="active-slice">L1GOV-SLICE-012</strong>
+          </article>
+          <article class="metric">
+            <span>Blocked Items</span>
+            <strong id="blocked-items">0</strong>
+          </article>
+        </div>
+
+        <div class="review-grid">
+          <article id="command-draft-preview" class="panel">
+            <h3>Command Draft Preview</h3>
+            <p>Select Draft Command to preview the Governance Service route shape.</p>
+          </article>
+          <article id="service-rejection" class="panel">
+            <h3>Service Outcome</h3>
+            <p id="service-outcome-copy">No command has been submitted. Fixture outcomes only.</p>
+            <div class="button-row">
+              <button id="show-rejection" class="button" type="button">Show Rejection</button>
+              <button id="no-go-block" class="button danger" type="button">Show No-Go Block</button>
+            </div>
+          </article>
+          <article id="stale-refresh" class="panel">
+            <h3>Stale Refresh Display</h3>
+            <p id="stale-copy">Refresh controls update display state only.</p>
+          </article>
+          <article id="notes-evidence" class="panel">
+            <h3>Notes Evidence Frame</h3>
+            <ul id="notes-list"></ul>
+          </article>
+        </div>
+      </section>
+
+      <aside id="inspector" class="inspector" aria-label="Inspector">
+        <h2>Inspector</h2>
+        <dl>
+          <dt>Projection</dt>
+          <dd id="inspector-projection">ProjectionSnapshot:mission-control:aa2ff2ad</dd>
+          <dt>Authority</dt>
+          <dd>Kernel and Governance Service remain authority</dd>
+          <dt>Future integration</dt>
+          <dd id="future-boundary">disabled future boundary</dd>
+        </dl>
+      </aside>
+    </main>
+
+    <footer id="status-bar" class="status-bar">
+      <span>Service: <strong id="service-state">fixture only</strong></span>
+      <span>Freshness: <strong id="freshness-state">current</strong></span>
+      <span>Sync: <strong id="sync-state">offline fixture</strong></span>
+      <span>Authority: <strong>non-authoritative</strong></span>
+    </footer>
+
+    <dialog id="workspace-overlay" class="overlay">
+      <form method="dialog" class="overlay-panel">
+        <header class="panel-head">
+          <h2>Workspace Picker</h2>
+          <button class="icon-button" value="cancel" aria-label="Close workspace picker">x</button>
+        </header>
+        <div id="workspace-list" class="workspace-list"></div>
+      </form>
+    </dialog>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

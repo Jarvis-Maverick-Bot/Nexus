@@ -1,0 +1,8 @@
+
+> @nexus/l1gov-desktop-client@0.0.0-slice012 build:windows-gnu
+> tauri build --target x86_64-pc-windows-gnu --no-bundle --debug --ci
+
+   Compiling nexus-l1gov-desktop-client v0.0.0-slice012 (D:\Projects\Nexus\apps\l1gov-desktop-client\src-tauri)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.66s
+    Built application at: D:\Projects\Nexus\apps\l1gov-desktop-client\src-tauri\target\x86_64-pc-windows-gnu\debug\nexus-l1gov-desktop-client.exe
+EXIT_CODE=0

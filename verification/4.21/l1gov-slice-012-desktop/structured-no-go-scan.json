@@ -1,0 +1,715 @@
+{
+    "generated_at":  "2026-06-14T18:47:19.5274854+08:00",
+    "implementation_commit_before_evidence_commit":  "c08c75aebfc8d41514aa4ff1a5e660f57c930c58",
+    "status":  "PASS_CLASSIFIED",
+    "terms":  [
+                  "private-agent",
+                  "runtime invocation",
+                  "live invocation",
+                  "dispatch execution",
+                  "controller call",
+                  "route activation",
+                  "adapter activation",
+                  "transport activation",
+                  "owner-path",
+                  "lower-layer submission",
+                  "production readiness",
+                  "continuity activation",
+                  "final PASS",
+                  "deploy readiness",
+                  "canonical mutation",
+                  "service: connected"
+              ],
+    "matches":  [
+                    {
+                        "path":  "apps/l1gov-desktop-client/src/index.html",
+                        "line":  29,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\u003cspan class=\"chip\"\u003eno canonical mutation\u003c/span\u003e"
+                    },
+                    {
+                        "path":  "apps/l1gov-desktop-client/src/main.js",
+                        "line":  100,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\u003cp\u003eSubmitCommandDraft preview for Governance Service review path. No canonical mutation.\u003c/p\u003e"
+                    },
+                    {
+                        "path":  "apps/l1gov-desktop-client/src/main.js",
+                        "line":  118,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "$(\"stale-copy\").textContent = `Projection display state is ${state.freshness}. No canonical mutation.`;"
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  156,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"private-agent invocation\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  157,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"dispatch execution\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  158,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"controller call\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  159,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"route activation\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  160,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"adapter transport activation\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  161,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"owner-path call\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  162,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"lower-layer submission\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  163,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"production readiness\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  164,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"continuity activation\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  165,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"final pass claim\","
+                    },
+                    {
+                        "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                        "line":  124,
+                        "term":  "service: connected",
+                        "classification":  "allowed_negative_regression_test",
+                        "text":  "assert \"Service: connected\" not in html"
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/desktop-launch-render-check.txt",
+                        "line":  13,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "No live daemon/controller/dispatch execution was invoked."
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/macos-compatibility-note.md",
+                        "line":  8,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed."
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/macos-compatibility-note.md",
+                        "line":  8,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed."
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/macos-compatibility-note.md",
+                        "line":  8,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed."
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/macos-compatibility-note.md",
+                        "line":  8,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed."
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/macos-compatibility-note.md",
+                        "line":  8,
+                        "term":  "deploy readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed."
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  6,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"private-agent\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  48,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"private-agent\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  50,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"private-agent invocation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  7,
+                        "term":  "runtime invocation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  8,
+                        "term":  "live invocation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"live invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  9,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  55,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  57,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"dispatch execution\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  125,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  127,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No live daemon/controller/dispatch execution was invoked.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  132,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  134,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  141,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  148,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  155,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  162,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  10,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  62,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  64,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"controller call\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  11,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  69,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  71,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"route activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  12,
+                        "term":  "adapter activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"adapter activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  13,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"transport activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  76,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"transport activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  78,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"adapter transport activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  14,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"owner-path\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  83,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"owner-path\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  85,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"owner-path call\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  15,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"lower-layer submission\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  90,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"lower-layer submission\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  92,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"lower-layer submission\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  16,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  97,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  99,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"production readiness\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  134,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  139,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  141,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  148,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  155,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  162,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  17,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  104,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  106,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"continuity activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  134,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  141,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  146,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  148,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  155,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  162,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  18,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"final PASS\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  111,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"final PASS\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  113,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"final pass claim\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  134,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  141,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  148,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  153,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"final PASS\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  155,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  162,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  19,
+                        "term":  "deploy readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"deploy readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  134,
+                        "term":  "deploy readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  141,
+                        "term":  "deploy readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  148,
+                        "term":  "deploy readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  155,
+                        "term":  "deploy readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  160,
+                        "term":  "deploy readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"deploy readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  162,
+                        "term":  "deploy readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  20,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  27,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  29,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\u003cspan class=\\\"chip\\\"\\u003eno canonical mutation\\u003c/span\\u003e\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  34,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  36,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\u003cp\\u003eSubmitCommandDraft preview for Governance Service review path. No canonical mutation.\\u003c/p\\u003e\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  41,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  43,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"$(\\\"stale-copy\\\").textContent = `Projection display state is ${state.freshness}. No canonical mutation.`;\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  21,
+                        "term":  "service: connected",
+                        "classification":  "allowed_evidence_reference",
+                        "text":  "\"service: connected\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  118,
+                        "term":  "service: connected",
+                        "classification":  "allowed_evidence_reference",
+                        "text":  "\"term\":  \"service: connected\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  120,
+                        "term":  "service: connected",
+                        "classification":  "allowed_evidence_reference",
+                        "text":  "\"text\":  \"assert \\\"Service: connected\\\" not in html\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  170,
+                        "term":  "service: connected",
+                        "classification":  "allowed_evidence_reference",
+                        "text":  "\"term\":  \"service: connected\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  172,
+                        "term":  "service: connected",
+                        "classification":  "allowed_evidence_reference",
+                        "text":  "\"text\":  \"assert \\\"Service: connected\\\" not in html\""
+                    }
+                ],
+    "unclassified_count":  0,
+    "unclassified":  [
+
+                     ]
+}
