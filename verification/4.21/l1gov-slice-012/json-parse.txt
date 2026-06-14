@@ -1,0 +1,11 @@
+Slice 012 JSON parse check
+Generated at: 2026-06-14T16:34:50.914088+08:00
+Commit: metadata-no-self-reference
+
+PASS D:\Projects\Nexus\verification\4.21\l1gov-slice-012\evidence-index.json
+PASS D:\Projects\Nexus\verification\4.21\l1gov-slice-012\scope-check.json
+PASS D:\Projects\Nexus\verification\4.21\l1gov-slice-012\source-authority.json
+PASS D:\Projects\Nexus\verification\4.21\l1gov-slice-012\structured-no-go-scan.json
+PASS D:\Projects\Nexus\nexus\governance\client_test_surface\slice012\fixtures\slice012_state.json
+
+Accepted: True

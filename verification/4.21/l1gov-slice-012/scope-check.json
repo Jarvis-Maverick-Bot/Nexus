@@ -1,0 +1,79 @@
+{
+  "accepted": true,
+  "allowed_paths": [
+    "nexus/governance/client_test_surface/slice012/",
+    "nexus/governance/tests/fixtures/client_test_surface.py",
+    "nexus/governance/tests/test_client_test_surface_slice012.py",
+    "verification/4.21/l1gov-slice-012/"
+  ],
+  "files": [
+    {
+      "path": "nexus/governance/client_test_surface/slice012/README.md",
+      "allowed": true
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/app.js",
+      "allowed": true
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "allowed": true
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/index.html",
+      "allowed": true
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/styles.css",
+      "allowed": true
+    },
+    {
+      "path": "nexus/governance/tests/fixtures/client_test_surface.py",
+      "allowed": true
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/diff-check.txt",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/diff-summary.txt",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/full-governance-pytest-output.txt",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/nexus-mq-import-scan.txt",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/open-render-check.txt",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/scope-check.json",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/screenshots/compact-390x844.png",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/screenshots/desktop-1440x900.png",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/source-authority.json",
+      "allowed": true
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/targeted-pytest-output.txt",
+      "allowed": true
+    }
+  ]
+}

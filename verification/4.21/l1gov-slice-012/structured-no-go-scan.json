@@ -1,0 +1,423 @@
+{
+  "accepted": true,
+  "scan_scope": "Slice 012 changed implementation/test files plus evidence metadata, excluding this scan self-reference",
+  "match_count": 57,
+  "unclassified_count": 0,
+  "classifications": {
+    "client_test_surface_contract": 25,
+    "test_fixture": 0,
+    "test_assertion": 23,
+    "evidence_record": 9,
+    "unclassified": 0
+  },
+  "no_go_boundaries": [
+    "no runtime/live/private-agent invocation",
+    "no dispatch execution or controller call",
+    "no route/adapter/transport activation",
+    "no owner-path call or lower-layer submission",
+    "no deploy/config/credential/package-manager mutation",
+    "no production readiness, continuity activation, final PASS, or 4.21 closeout claim",
+    "client surface remains non-authoritative"
+  ],
+  "matches": [
+    {
+      "path": "nexus/governance/client_test_surface/slice012/README.md",
+      "line": 17,
+      "term": "canonical mutation",
+      "classification": "client_test_surface_contract",
+      "text": "The page uses deterministic fixture data from `fixtures/slice012_state.json`. Browser interactions change display state only. Kernel and Governance Service remain authority, and the surface performs no canonical mutation."
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/README.md",
+      "line": 17,
+      "term": "authority",
+      "classification": "client_test_surface_contract",
+      "text": "The page uses deterministic fixture data from `fixtures/slice012_state.json`. Browser interactions change display state only. Kernel and Governance Service remain authority, and the surface performs no canonical mutation."
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/app.js",
+      "line": 32,
+      "term": "no-go",
+      "classification": "client_test_surface_contract",
+      "text": "$(\"no-go-button\").onclick = showNoGoBlock;"
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/app.js",
+      "line": 64,
+      "term": "authority",
+      "classification": "client_test_surface_contract",
+      "text": "`${draft.command_type} preview for ${draft.target_ref}. ${draft.authority_effect}.`;"
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/app.js",
+      "line": 95,
+      "term": "no-go",
+      "classification": "client_test_surface_contract",
+      "text": "if (scenario === \"no-go\") {"
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "line": 4,
+      "term": "authority",
+      "classification": "client_test_surface_contract",
+      "text": "\"canonical_authority\": \"GovernanceKernel\","
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "line": 7,
+      "term": "live",
+      "classification": "client_test_surface_contract",
+      "text": "\"live_execution_invoked\": false,"
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "line": 16,
+      "term": "authority",
+      "classification": "client_test_surface_contract",
+      "text": "\"creates_authority\": false,"
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "line": 41,
+      "term": "authority",
+      "classification": "client_test_surface_contract",
+      "text": "\"authority_notice\": \"Kernel and Governance Service remain authority\","
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "line": 42,
+      "term": "authority",
+      "classification": "client_test_surface_contract",
+      "text": "\"canonical_authority\": false"
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "line": 53,
+      "term": "live",
+      "classification": "client_test_surface_contract",
+      "text": "\"delivery_feedback\": \"Feedback trend and triage states are visible as review candidates.\","
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "line": 63,
+      "term": "authority",
+      "classification": "client_test_surface_contract",
+      "text": "\"creates_authority\": false"
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "line": 79,
+      "term": "live",
+      "classification": "client_test_surface_contract",
+      "text": "\"DeliverableEvaluationProfile:421\","
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "line": 86,
+      "term": "authority",
+      "classification": "client_test_surface_contract",
+      "text": "\"summary\": \"Review task and decision state shown without local approval authority.\","
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "line": 92,
+      "term": "live",
+      "classification": "client_test_surface_contract",
+      "text": "\"id\": \"delivery_feedback\","
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "line": 93,
+      "term": "live",
+      "classification": "client_test_surface_contract",
+      "text": "\"label\": \"Delivery Feedback\","
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "line": 139,
+      "term": "authority",
+      "classification": "client_test_surface_contract",
+      "text": "\"authority_effect\": \"display state only\""
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "line": 161,
+      "term": "canonical mutation",
+      "classification": "client_test_surface_contract",
+      "text": "\"note\": \"Refresh controls update display state only with no canonical mutation\""
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/fixtures/slice012_state.json",
+      "line": 165,
+      "term": "authority",
+      "classification": "client_test_surface_contract",
+      "text": "\"creates_authority\": false,"
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/index.html",
+      "line": 29,
+      "term": "canonical mutation",
+      "classification": "client_test_surface_contract",
+      "text": "<span class=\"chip neutral\">no canonical mutation</span>"
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/index.html",
+      "line": 76,
+      "term": "no-go",
+      "classification": "client_test_surface_contract",
+      "text": "<p id=\"service-outcome-text\">Service rejection and no-go block examples are available for review.</p>"
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/index.html",
+      "line": 79,
+      "term": "no-go",
+      "classification": "client_test_surface_contract",
+      "text": "<button id=\"no-go-button\" class=\"button danger\" type=\"button\">Show No-Go Block</button>"
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/index.html",
+      "line": 98,
+      "term": "authority",
+      "classification": "client_test_surface_contract",
+      "text": "<dt>Authority</dt>"
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/index.html",
+      "line": 99,
+      "term": "authority",
+      "classification": "client_test_surface_contract",
+      "text": "<dd>Kernel and Governance Service remain authority</dd>"
+    },
+    {
+      "path": "nexus/governance/client_test_surface/slice012/index.html",
+      "line": 110,
+      "term": "authority",
+      "classification": "client_test_surface_contract",
+      "text": "<span>Authority: <strong>non-authoritative</strong></span>"
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 44,
+      "term": "authority",
+      "classification": "test_assertion",
+      "text": "assert fixture[\"canonical_authority\"] == \"GovernanceKernel\""
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 47,
+      "term": "live",
+      "classification": "test_assertion",
+      "text": "assert fixture[\"live_execution_invoked\"] is False"
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 57,
+      "term": "authority",
+      "classification": "test_assertion",
+      "text": "assert workspace_picker[\"creates_authority\"] is False"
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 61,
+      "term": "authority",
+      "classification": "test_assertion",
+      "text": "assert mission_control[\"projection_surface\"][\"canonical_authority\"] is False"
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 102,
+      "term": "no-go",
+      "classification": "test_assertion",
+      "text": "assert '\"no-go\"' in js"
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 106,
+      "term": "runtime",
+      "classification": "test_assertion",
+      "text": "def test_slice012_surface_blocks_authority_and_live_runtime_paths() -> None:"
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 106,
+      "term": "live",
+      "classification": "test_assertion",
+      "text": "def test_slice012_surface_blocks_authority_and_live_runtime_paths() -> None:"
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 106,
+      "term": "authority",
+      "classification": "test_assertion",
+      "text": "def test_slice012_surface_blocks_authority_and_live_runtime_paths() -> None:"
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 125,
+      "term": "runtime",
+      "classification": "test_assertion",
+      "text": "r\"runtime/live\","
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 125,
+      "term": "live",
+      "classification": "test_assertion",
+      "text": "r\"runtime/live\","
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 126,
+      "term": "private-agent",
+      "classification": "test_assertion",
+      "text": "r\"private-agent invocation\","
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 127,
+      "term": "dispatch",
+      "classification": "test_assertion",
+      "text": "r\"dispatch execution\","
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 128,
+      "term": "controller",
+      "classification": "test_assertion",
+      "text": "r\"controller call\","
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 129,
+      "term": "route activation",
+      "classification": "test_assertion",
+      "text": "r\"route activation\","
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 130,
+      "term": "adapter",
+      "classification": "test_assertion",
+      "text": "r\"adapter transport activation\","
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 130,
+      "term": "transport",
+      "classification": "test_assertion",
+      "text": "r\"adapter transport activation\","
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 131,
+      "term": "owner-path",
+      "classification": "test_assertion",
+      "text": "r\"owner-path call\","
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 132,
+      "term": "lower-layer",
+      "classification": "test_assertion",
+      "text": "r\"lower-layer submission\","
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 133,
+      "term": "production readiness",
+      "classification": "test_assertion",
+      "text": "r\"production readiness\","
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 134,
+      "term": "continuity activation",
+      "classification": "test_assertion",
+      "text": "r\"continuity activation\","
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 135,
+      "term": "final pass",
+      "classification": "test_assertion",
+      "text": "r\"final pass claim\","
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 140,
+      "term": "authority",
+      "classification": "test_assertion",
+      "text": "assert \"kernel and governance service remain authority\" in combined"
+    },
+    {
+      "path": "nexus/governance/tests/test_client_test_surface_slice012.py",
+      "line": 142,
+      "term": "canonical mutation",
+      "classification": "test_assertion",
+      "text": "assert \"no canonical mutation\" in combined"
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/open-render-check.txt",
+      "line": 7,
+      "term": "no-go",
+      "classification": "evidence_record",
+      "text": "HTTP probe: PASS index.html?scenario=no-go status 200, 4938 bytes"
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/scope-check.json",
+      "line": 71,
+      "term": "authority",
+      "classification": "evidence_record",
+      "text": "\"path\": \"verification/4.21/l1gov-slice-012/source-authority.json\","
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/source-authority.json",
+      "line": 17,
+      "term": "runtime",
+      "classification": "evidence_record",
+      "text": "\"no_runtime_live_private_agent_invocation\": true,"
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/source-authority.json",
+      "line": 17,
+      "term": "live",
+      "classification": "evidence_record",
+      "text": "\"no_runtime_live_private_agent_invocation\": true,"
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/source-authority.json",
+      "line": 18,
+      "term": "dispatch",
+      "classification": "evidence_record",
+      "text": "\"no_dispatch_execution_or_controller_call\": true,"
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/source-authority.json",
+      "line": 18,
+      "term": "controller",
+      "classification": "evidence_record",
+      "text": "\"no_dispatch_execution_or_controller_call\": true,"
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/source-authority.json",
+      "line": 19,
+      "term": "adapter",
+      "classification": "evidence_record",
+      "text": "\"no_route_adapter_transport_activation\": true,"
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/source-authority.json",
+      "line": 19,
+      "term": "transport",
+      "classification": "evidence_record",
+      "text": "\"no_route_adapter_transport_activation\": true,"
+    },
+    {
+      "path": "verification/4.21/l1gov-slice-012/source-authority.json",
+      "line": 21,
+      "term": "deploy",
+      "classification": "evidence_record",
+      "text": "\"no_deploy_config_credential_package_manager_mutation\": true,"
+    }
+  ]
+}

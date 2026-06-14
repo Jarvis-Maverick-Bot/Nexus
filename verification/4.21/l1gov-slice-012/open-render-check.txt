@@ -1,0 +1,9 @@
+Slice 012 open/render screenshot check
+Generated at: 2026-06-14T16:27:23.7804303+08:00
+Implementation commit: efd0b6974de9436438fdf2800fb0238603b605b3
+Surface root: D:\Projects\Nexus\nexus\governance\client_test_surface\slice012
+Renderer: C:\Program Files\Google\Chrome\Application\chrome.exe
+Local server: http://127.0.0.1:8777/
+HTTP probe: PASS index.html?scenario=no-go status 200, 4938 bytes
+desktop: PASS 74237 bytes D:\Projects\Nexus\verification\4.21\l1gov-slice-012\screenshots\desktop-1440x900.png
+compact: PASS 28712 bytes D:\Projects\Nexus\verification\4.21\l1gov-slice-012\screenshots\compact-390x844.png
