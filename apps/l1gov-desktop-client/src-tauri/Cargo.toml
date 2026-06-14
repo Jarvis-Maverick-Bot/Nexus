@@ -1,0 +1,11 @@
+[package]
+name = "nexus-l1gov-desktop-client"
+version = "0.0.0-slice012"
+description = "Nexus L1 Governance UX test surface"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = "2.0.0"
+
+[dependencies]
+tauri = "2.0.0"

@@ -1,0 +1,64 @@
+{
+  "slice_id": "L1GOV-SLICE-012",
+  "surface_form": "tauri_desktop_app_test_surface",
+  "runtime_choice": "tauri",
+  "windows_first": true,
+  "macos_compatibility_considered": true,
+  "canonical_authority": "GovernanceKernel",
+  "service_boundary": "GovernanceService",
+  "non_authoritative": true,
+  "live_execution_invoked": false,
+  "source_refs": [
+    "Nexus:aa2ff2ad757988429764b6f5b9d748d75f5ab2bd",
+    "L1GOV-SLICE-010",
+    "L1GOV-SLICE-011",
+    "2026-06-14_4.21_slice012_desktop_app_implementation_design_thunder_v0.1"
+  ],
+  "workspace_picker": {
+    "mode": "desktop_window_overlay",
+    "creates_authority": false,
+    "workspace_groups": [
+      "recent",
+      "active",
+      "parked"
+    ]
+  },
+  "mission_control": {
+    "projection_ref": "ProjectionSnapshot:mission-control:aa2ff2ad",
+    "read_only": true,
+    "creates_authority": false,
+    "accepted_slices": 11,
+    "active_slice": "L1GOV-SLICE-012",
+    "blocked_items": 0
+  },
+  "service_outcomes": {
+    "rejection": {
+      "status": "rejected",
+      "error_code": "ERR_INVALID_TRANSITION",
+      "local_override": false
+    },
+    "no_go_block": {
+      "status": "blocked",
+      "error_code": "ERR_NO_GO_BOUNDARY",
+      "local_override": false
+    }
+  },
+  "stale_refresh": {
+    "states": [
+      "stale",
+      "rebuilding",
+      "current"
+    ],
+    "canonical_mutation": false
+  },
+  "future_integration_boundary": {
+    "daemon_controller_bridge": "disabled_future_boundary",
+    "can_execute_live_calls": false,
+    "uses_deterministic_fixtures_only": true
+  },
+  "pr20_reference": {
+    "url": "github-pr-20",
+    "status": "draft_reference_only",
+    "head": "ea2df31b228717e44660a3f674f174926cad01bd"
+  }
+}

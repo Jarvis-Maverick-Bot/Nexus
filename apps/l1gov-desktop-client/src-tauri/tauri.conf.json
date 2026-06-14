@@ -1,0 +1,29 @@
+{
+  "$schema": "tauri-schema",
+  "productName": "Nexus L1 Governance UX Test Surface",
+  "version": "0.0.0-slice012",
+  "identifier": "com.nexus.l1gov.slice012",
+  "build": {
+    "frontendDist": "../src"
+  },
+  "app": {
+    "security": {
+      "csp": "default-src 'self'"
+    },
+    "windows": [
+      {
+        "title": "Nexus L1 Governance UX Test Surface",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 900,
+        "minHeight": 640,
+        "resizable": true
+      }
+    ]
+  },
+  "bundle": {
+    "active": false,
+    "targets": "all",
+    "icon": []
+  }
+}
