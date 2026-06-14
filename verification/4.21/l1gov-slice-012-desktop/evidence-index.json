@@ -3,7 +3,12 @@
     "status":  "PR_READY_FOR_NOVA_REVIEW",
     "branch":  "codex/4.21-slice012-desktop-app-test-surface",
     "base_commit":  "aa2ff2ad757988429764b6f5b9d748d75f5ab2bd",
-    "implementation_commit_before_evidence_commit":  "890d97a611b3f01b21e7e548fcc5fcf962002536",
+    "implementation_commit_before_evidence_commit":  "c08c75aebfc8d41514aa4ff1a5e660f57c930c58",
+    "review_patch_addresses":  [
+                                   "renderer consumes deterministic fixture data from src/fixtures/slice012_desktop_state.json",
+                                   "service status is fixture only / offline fixture, not connected",
+                                   "regression tests cover fixture-backed renderer and fixture-only service status"
+                               ],
     "pr20_status":  {
                         "url":  "https://github.com/Jarvis-Maverick-Bot/Nexus/pull/20",
                         "state":  "open_draft_reference_only",
@@ -11,7 +16,10 @@
                     },
     "replacement_pr":  {
                            "url":  "https://github.com/Jarvis-Maverick-Bot/Nexus/pull/21",
-                           "state":  "open_draft_to_be_marked_ready_after_evidence_push"
+                           "state":  "open_ready_for_review",
+                           "current_head_before_evidence_commit":  "82a9ccf73792ee6012363a0dfe51d253493e2837",
+                           "base":  "master",
+                           "merge_state":  "CLEAN"
                        },
     "changed_files":  [
                           "apps/l1gov-desktop-client/.gitignore",
@@ -45,7 +53,6 @@
                           "verification/4.21/l1gov-slice-012-desktop/nexus-mq-import-scan.txt",
                           "verification/4.21/l1gov-slice-012-desktop/package-manager-scope.json",
                           "verification/4.21/l1gov-slice-012-desktop/scope-check.json",
-                          "verification/4.21/l1gov-slice-012-desktop/screenshots/README_NO_SCREENSHOTS.txt",
                           "verification/4.21/l1gov-slice-012-desktop/screenshots/windows-compact-app.png",
                           "verification/4.21/l1gov-slice-012-desktop/screenshots/windows-desktop-app.png",
                           "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",

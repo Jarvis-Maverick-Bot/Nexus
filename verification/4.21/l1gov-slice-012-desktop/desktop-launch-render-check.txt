@@ -1,6 +1,6 @@
 Slice 012 desktop launch/render check
-Generated at: 2026-06-14T18:19:08.9861890+08:00
-Head before evidence commit: 890d97a611b3f01b21e7e548fcc5fcf962002536
+Generated at: 2026-06-14T18:45:45.7258912+08:00
+Implementation commit before evidence commit: c08c75aebfc8d41514aa4ff1a5e660f57c930c58
 Executable: D:\Projects\Nexus\apps\l1gov-desktop-client\src-tauri\target\x86_64-pc-windows-gnu\debug\nexus-l1gov-desktop-client.exe
 Actual status: PASS_RENDERED_WINDOWS_DESKTOP_APP
 Windows desktop screenshot evidence: D:\Projects\Nexus\verification\4.21\l1gov-slice-012-desktop\screenshots\windows-desktop-app.png
@@ -8,5 +8,6 @@ Windows compact screenshot evidence: D:\Projects\Nexus\verification\4.21\l1gov-s
 Window title: Nexus L1 Governance UX Test Surface
 Desktop viewport captured: 1360x820
 Compact viewport captured: 940x700
+Rendered fixture/service status visible: service fixture only
 macOS launch evidence: NOT_AVAILABLE_ON_WINDOWS_HOST; source remains Tauri-compatible for macOS prerequisites.
 No live daemon/controller/dispatch execution was invoked.

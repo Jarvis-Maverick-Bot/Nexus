@@ -1,1 +1,4 @@
+warning: in the working copy of 'verification/4.21/l1gov-slice-012-desktop/desktop-launch-render-check.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'verification/4.21/l1gov-slice-012-desktop/desktop-toolchain-check.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'verification/4.21/l1gov-slice-012-desktop/macos-compatibility-note.md', LF will be replaced by CRLF the next time Git touches it
 EXIT_CODE=0

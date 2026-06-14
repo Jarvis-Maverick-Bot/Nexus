@@ -1,7 +1,7 @@
 Slice 012 desktop toolchain check
-Generated at: 2026-06-14T18:19:08.9861890+08:00
+Generated at: 2026-06-14T18:45:45.7258912+08:00
 Branch: codex/4.21-slice012-desktop-app-test-surface
-Head before evidence commit: 890d97a611b3f01b21e7e548fcc5fcf962002536
+Implementation commit before evidence commit: c08c75aebfc8d41514aa4ff1a5e660f57c930c58
 Bundled node: v24.14.0
 App-local npm: 11.6.2
 App-local rustc: rustc 1.96.0 (ac68faa20 2026-05-25)

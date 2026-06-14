@@ -1,3 +1,7 @@
+Slice 012 desktop changed files
+Generated at: 2026-06-14T18:45:45.7258912+08:00
+Implementation commit before evidence commit: c08c75aebfc8d41514aa4ff1a5e660f57c930c58
+
 apps/l1gov-desktop-client/.gitignore
 apps/l1gov-desktop-client/package.json
 apps/l1gov-desktop-client/package-lock.json
@@ -29,7 +33,6 @@ verification/4.21/l1gov-slice-012-desktop/macos-compatibility-note.md
 verification/4.21/l1gov-slice-012-desktop/nexus-mq-import-scan.txt
 verification/4.21/l1gov-slice-012-desktop/package-manager-scope.json
 verification/4.21/l1gov-slice-012-desktop/scope-check.json
-verification/4.21/l1gov-slice-012-desktop/screenshots/README_NO_SCREENSHOTS.txt
 verification/4.21/l1gov-slice-012-desktop/screenshots/windows-compact-app.png
 verification/4.21/l1gov-slice-012-desktop/screenshots/windows-desktop-app.png
 verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json

@@ -1,10 +1,4 @@
-warning: in the working copy of 'apps/l1gov-desktop-client/.gitignore', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'apps/l1gov-desktop-client/README.md', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'apps/l1gov-desktop-client/package.json', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'apps/l1gov-desktop-client/src-tauri/Cargo.lock', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'apps/l1gov-desktop-client/src-tauri/Cargo.toml', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'apps/l1gov-desktop-client/src/index.html', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'apps/l1gov-desktop-client/src/styles.css', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'nexus/governance/tests/test_client_desktop_surface_slice012.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'verification/4.21/l1gov-slice-012-desktop/desktop-launch-render-check.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'verification/4.21/l1gov-slice-012-desktop/desktop-toolchain-check.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'verification/4.21/l1gov-slice-012-desktop/macos-compatibility-note.md', LF will be replaced by CRLF the next time Git touches it
 EXIT_CODE=0

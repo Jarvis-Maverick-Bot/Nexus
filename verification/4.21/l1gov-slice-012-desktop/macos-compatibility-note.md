@@ -1,7 +1,8 @@
 # macOS Compatibility Note
 
-The Slice 012 desktop implementation uses Tauri project structure and deterministic renderer assets compatible with Windows and macOS Tauri targets in source form.
+Generated at: 2026-06-14T18:45:45.7258912+08:00
+Implementation commit before evidence commit: c08c75aebfc8d41514aa4ff1a5e660f57c930c58
 
-This verification run occurred on Windows only. macOS launch/render evidence is not available from this host and remains a reviewer-side compatibility check after macOS platform prerequisites are installed.
+Slice 012 desktop uses Tauri 2 with vanilla HTML/CSS/JS fixture rendering. The Windows host rendered the GNU Windows debug executable. macOS runtime verification is not available on this Windows host, but the source layout, Tauri configuration, and static fixture model remain compatible with a future macOS build when a macOS runner and approved signing/notarization decisions exist.
 
-Windows launch/render evidence was captured from the Tauri desktop executable using the app-local GNU toolchain path. No live daemon/controller/dispatch execution was invoked.
+No daemon/controller bridge, dispatch execution, deploy readiness, production readiness, continuity activation, or final PASS is claimed.

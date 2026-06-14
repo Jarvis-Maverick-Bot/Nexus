@@ -1,7 +1,7 @@
 {
-    "generated_at":  "2026-06-14T18:19:08.9861890+08:00",
+    "generated_at":  "2026-06-14T18:45:45.7258912+08:00",
     "branch":  "codex/4.21-slice012-desktop-app-test-surface",
-    "head_before_evidence_commit":  "890d97a611b3f01b21e7e548fcc5fcf962002536",
+    "implementation_commit_before_evidence_commit":  "c08c75aebfc8d41514aa4ff1a5e660f57c930c58",
     "allowed_prefixes":  [
                              "apps/l1gov-desktop-client/",
                              "nexus/governance/tests/fixtures/client_test_surface.py",
@@ -134,10 +134,6 @@
                       "allowed":  true
                   },
                   {
-                      "path":  "verification/4.21/l1gov-slice-012-desktop/screenshots/README_NO_SCREENSHOTS.txt",
-                      "allowed":  true
-                  },
-                  {
                       "path":  "verification/4.21/l1gov-slice-012-desktop/screenshots/windows-compact-app.png",
                       "allowed":  true
                   },
@@ -158,5 +154,5 @@
                       "allowed":  true
                   }
               ],
-    "out_of_scope_count":  0
+    "all_allowed":  true
 }

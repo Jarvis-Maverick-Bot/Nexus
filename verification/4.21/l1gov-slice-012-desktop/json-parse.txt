@@ -1,5 +1,9 @@
-OK D:\Projects\Nexus\verification\4.21\l1gov-slice-012-desktop\evidence-index.json
-OK D:\Projects\Nexus\verification\4.21\l1gov-slice-012-desktop\package-manager-scope.json
-OK D:\Projects\Nexus\verification\4.21\l1gov-slice-012-desktop\scope-check.json
-OK D:\Projects\Nexus\verification\4.21\l1gov-slice-012-desktop\structured-no-go-scan.json
-EXIT_CODE=0
+Slice 012 desktop evidence JSON parse
+Generated at: 2026-06-14T18:47:19.5274854+08:00
+Implementation commit before evidence commit: c08c75aebfc8d41514aa4ff1a5e660f57c930c58
+Status: PASS
+
+OK evidence-index.json
+OK package-manager-scope.json
+OK scope-check.json
+OK structured-no-go-scan.json
