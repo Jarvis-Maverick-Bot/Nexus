@@ -1,7 +1,7 @@
 {
-    "generated_at":  "2026-06-14T17:35:50.6044870+08:00",
+    "generated_at":  "2026-06-14T18:19:08.9861890+08:00",
     "branch":  "codex/4.21-slice012-desktop-app-test-surface",
-    "head_before_evidence_commit":  "06b6700fbe6844417224fca434aaa8b58eb4df92",
+    "head_before_evidence_commit":  "890d97a611b3f01b21e7e548fcc5fcf962002536",
     "allowed_prefixes":  [
                              "apps/l1gov-desktop-client/",
                              "nexus/governance/tests/fixtures/client_test_surface.py",
@@ -55,6 +55,10 @@
                   },
                   {
                       "path":  "apps/l1gov-desktop-client/src-tauri/Cargo.toml",
+                      "allowed":  true
+                  },
+                  {
+                      "path":  "apps/l1gov-desktop-client/src-tauri/icons/icon.ico",
                       "allowed":  true
                   },
                   {
@@ -131,6 +135,14 @@
                   },
                   {
                       "path":  "verification/4.21/l1gov-slice-012-desktop/screenshots/README_NO_SCREENSHOTS.txt",
+                      "allowed":  true
+                  },
+                  {
+                      "path":  "verification/4.21/l1gov-slice-012-desktop/screenshots/windows-compact-app.png",
+                      "allowed":  true
+                  },
+                  {
+                      "path":  "verification/4.21/l1gov-slice-012-desktop/screenshots/windows-desktop-app.png",
                       "allowed":  true
                   },
                   {

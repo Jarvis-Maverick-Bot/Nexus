@@ -1,11 +1,14 @@
 Slice 012 desktop toolchain check
-Generated at: 2026-06-14T17:35:50.6044870+08:00
+Generated at: 2026-06-14T18:19:08.9861890+08:00
 Branch: codex/4.21-slice012-desktop-app-test-surface
-Head before evidence commit: 06b6700fbe6844417224fca434aaa8b58eb4df92
+Head before evidence commit: 890d97a611b3f01b21e7e548fcc5fcf962002536
 Bundled node: v24.14.0
 App-local npm: 11.6.2
 App-local rustc: rustc 1.96.0 (ac68faa20 2026-05-25)
 App-local cargo: cargo 1.96.0 (30a34c682 2026-05-25)
-MSVC link.exe on PATH: False
-Visual Studio link.exe search: none found under Program Files Visual Studio paths
-Status: BLOCKED_MSVC_LINKER_MISSING
+App-local GNU rustc: rustc 1.96.0 (ac68faa20 2026-05-25)
+App-local w64devkit gcc: gcc.exe (GCC) 16.1.0
+App-local w64devkit dlltool present: True
+Host MSVC link.exe on PATH: False
+Host-level Visual Studio Build Tools install: NOT_PERFORMED
+Status: PASS_APP_LOCAL_GNU_TOOLCHAIN

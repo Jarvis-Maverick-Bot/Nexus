@@ -1,9 +1,9 @@
 {
     "slice_id":  "l1gov-slice-012-desktop",
-    "status":  "BLOCKED_MSVC_LINKER_MISSING",
+    "status":  "PR_READY_FOR_NOVA_REVIEW",
     "branch":  "codex/4.21-slice012-desktop-app-test-surface",
     "base_commit":  "aa2ff2ad757988429764b6f5b9d748d75f5ab2bd",
-    "implementation_commit_before_evidence_commit":  "06b6700fbe6844417224fca434aaa8b58eb4df92",
+    "implementation_commit_before_evidence_commit":  "890d97a611b3f01b21e7e548fcc5fcf962002536",
     "pr20_status":  {
                         "url":  "https://github.com/Jarvis-Maverick-Bot/Nexus/pull/20",
                         "state":  "open_draft_reference_only",
@@ -11,7 +11,7 @@
                     },
     "replacement_pr":  {
                            "url":  "https://github.com/Jarvis-Maverick-Bot/Nexus/pull/21",
-                           "state":  "open_draft_blocked"
+                           "state":  "open_draft_to_be_marked_ready_after_evidence_push"
                        },
     "changed_files":  [
                           "apps/l1gov-desktop-client/.gitignore",
@@ -26,6 +26,7 @@
                           "apps/l1gov-desktop-client/src-tauri/build.rs",
                           "apps/l1gov-desktop-client/src-tauri/Cargo.lock",
                           "apps/l1gov-desktop-client/src-tauri/Cargo.toml",
+                          "apps/l1gov-desktop-client/src-tauri/icons/icon.ico",
                           "apps/l1gov-desktop-client/src-tauri/src/main.rs",
                           "apps/l1gov-desktop-client/src-tauri/tauri.conf.json",
                           "nexus/governance/tests/fixtures/client_test_surface.py",
@@ -45,6 +46,8 @@
                           "verification/4.21/l1gov-slice-012-desktop/package-manager-scope.json",
                           "verification/4.21/l1gov-slice-012-desktop/scope-check.json",
                           "verification/4.21/l1gov-slice-012-desktop/screenshots/README_NO_SCREENSHOTS.txt",
+                          "verification/4.21/l1gov-slice-012-desktop/screenshots/windows-compact-app.png",
+                          "verification/4.21/l1gov-slice-012-desktop/screenshots/windows-desktop-app.png",
                           "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
                           "verification/4.21/l1gov-slice-012-desktop/targeted-desktop-pytest-output.txt",
                           "verification/4.21/l1gov-slice-012-desktop/worktree-diff-check.txt"
@@ -64,30 +67,33 @@
                            "verification/4.21/l1gov-slice-012-desktop/nexus-mq-import-scan.txt",
                            "verification/4.21/l1gov-slice-012-desktop/package-manager-scope.json",
                            "verification/4.21/l1gov-slice-012-desktop/scope-check.json",
-                           "verification/4.21/l1gov-slice-012-desktop/screenshots/README_NO_SCREENSHOTS.txt",
+                           "verification/4.21/l1gov-slice-012-desktop/screenshots/windows-compact-app.png",
+                           "verification/4.21/l1gov-slice-012-desktop/screenshots/windows-desktop-app.png",
                            "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
                            "verification/4.21/l1gov-slice-012-desktop/targeted-desktop-pytest-output.txt",
                            "verification/4.21/l1gov-slice-012-desktop/worktree-diff-check.txt"
                        ],
+    "screenshots":  [
+                        "verification/4.21/l1gov-slice-012-desktop/screenshots/windows-desktop-app.png",
+                        "verification/4.21/l1gov-slice-012-desktop/screenshots/windows-compact-app.png"
+                    ],
     "verification":  {
                          "targeted_desktop_pytest":  "targeted-desktop-pytest-output.txt",
                          "full_governance_pytest":  "full-governance-pytest-output.txt",
                          "desktop_fixture_node_verify":  "desktop-fixture-node-verify.txt",
+                         "desktop_build_output":  "desktop-build-output.txt",
+                         "desktop_launch_render_check":  "desktop-launch-render-check.txt",
                          "diff_check":  "diff-check.txt",
                          "worktree_diff_check":  "worktree-diff-check.txt",
                          "nexus_mq_import_scan":  "nexus-mq-import-scan.txt",
                          "structured_no_go_scan":  "structured-no-go-scan.json",
                          "json_parse":  "json-parse.txt",
                          "desktop_toolchain_check":  "desktop-toolchain-check.txt",
-                         "desktop_build_output":  "desktop-build-output.txt",
-                         "desktop_launch_render_check":  "desktop-launch-render-check.txt",
                          "package_manager_scope":  "package-manager-scope.json",
                          "macos_compatibility_note":  "macos-compatibility-note.md"
                      },
     "missing_required_evidence":  [
-                                      "Windows desktop app screenshot evidence",
-                                      "successful Tauri app launch/render evidence"
+
                                   ],
-    "blocker":  "Tauri/Rust Windows build reaches Rust compilation but fails because MSVC linker link.exe is missing. Host-level Visual Studio Build Tools installation is outside the authorized implementation boundary.",
-    "final_verdict":  "BLOCKED"
+    "final_verdict":  "PR_READY_FOR_NOVA_REVIEW"
 }

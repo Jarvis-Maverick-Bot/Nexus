@@ -17,6 +17,7 @@ REQUIRED_DESKTOP_FILES = (
     "src/fixtures/slice012_desktop_state.json",
     "src-tauri/Cargo.toml",
     "src-tauri/tauri.conf.json",
+    "src-tauri/icons/icon.ico",
     "src-tauri/src/main.rs",
 )
 
@@ -163,6 +164,7 @@ def test_slice012_desktop_app_ignores_local_toolchain_and_build_outputs() -> Non
     for pattern in (
         "node_modules/",
         "src-tauri/target/",
+        "src-tauri/gen/",
         ".toolchain/",
         "dist/",
         ".tmp-render/",

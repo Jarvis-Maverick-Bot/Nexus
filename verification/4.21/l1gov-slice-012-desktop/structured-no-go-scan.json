@@ -1,5 +1,5 @@
 {
-    "generated_at":  "2026-06-14T17:36:28.1723812+08:00",
+    "generated_at":  "2026-06-14T18:19:08.9861890+08:00",
     "status":  "PASS_CLASSIFIED",
     "terms":  [
                   "private-agent",
@@ -42,276 +42,1774 @@
                     },
                     {
                         "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-                        "line":  135,
+                        "line":  136,
                         "term":  "private-agent",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
                         "text":  "\"private-agent invocation\","
                     },
                     {
                         "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-                        "line":  136,
+                        "line":  137,
                         "term":  "dispatch execution",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
                         "text":  "\"dispatch execution\","
                     },
                     {
                         "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-                        "line":  137,
+                        "line":  138,
                         "term":  "controller call",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
                         "text":  "\"controller call\","
                     },
                     {
                         "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-                        "line":  138,
+                        "line":  139,
                         "term":  "route activation",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
                         "text":  "\"route activation\","
                     },
                     {
                         "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-                        "line":  139,
+                        "line":  140,
                         "term":  "transport activation",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
                         "text":  "\"adapter transport activation\","
                     },
                     {
                         "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-                        "line":  140,
+                        "line":  141,
                         "term":  "owner-path",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
                         "text":  "\"owner-path call\","
                     },
                     {
                         "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-                        "line":  141,
+                        "line":  142,
                         "term":  "lower-layer submission",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
                         "text":  "\"lower-layer submission\","
                     },
                     {
                         "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-                        "line":  142,
+                        "line":  143,
                         "term":  "production readiness",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
                         "text":  "\"production readiness\","
                     },
                     {
                         "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-                        "line":  143,
+                        "line":  144,
                         "term":  "continuity activation",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
                         "text":  "\"continuity activation\","
                     },
                     {
                         "path":  "nexus/governance/tests/test_client_desktop_surface_slice012.py",
-                        "line":  144,
+                        "line":  145,
                         "term":  "final PASS",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
                         "text":  "\"final pass claim\","
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/desktop-launch-render-check.txt",
-                        "line":  10,
+                        "line":  12,
                         "term":  "dispatch execution",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
                         "text":  "No live daemon/controller/dispatch execution was invoked."
                     },
                     {
-                        "path":  "verification/4.21/l1gov-slice-012-desktop/screenshots/README_NO_SCREENSHOTS.txt",
-                        "line":  3,
-                        "term":  "owner-path",
-                        "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "No live runtime, daemon, controller, dispatch, route, adapter, transport, owner-path, or lower-layer call was invoked."
-                    },
-                    {
-                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  129,
-                        "term":  "canonical mutation",
-                        "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"term\": \"canonical mutation\","
-                    },
-                    {
-                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  131,
-                        "term":  "canonical mutation",
-                        "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"\u003cspan class=\\\"chip\\\"\u003eno canonical mutation\u003c/span\u003e\""
-                    },
-                    {
-                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  185,
-                        "term":  "canonical mutation",
-                        "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"term\": \"canonical mutation\","
-                    },
-                    {
-                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  187,
-                        "term":  "canonical mutation",
-                        "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"\u003cp\u003eSubmitCommandDraft preview for Governance Service review path. No canonical mutation.\u003c/p\u003e\""
-                    },
-                    {
-                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  192,
-                        "term":  "canonical mutation",
-                        "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"term\": \"canonical mutation\","
-                    },
-                    {
-                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  194,
-                        "term":  "canonical mutation",
-                        "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"$(\\\"stale-copy\\\").textContent = `Projection display state is ${state.freshness}. No canonical mutation.`;\""
-                    },
-                    {
-                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  283,
-                        "term":  "private-agent",
-                        "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"term\": \"private-agent\","
-                    },
-                    {
-                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  285,
-                        "term":  "private-agent",
-                        "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"\\\"private-agent invocation\\\",\""
-                    },
-                    {
-                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  292,
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/macos-compatibility-note.md",
+                        "line":  7,
                         "term":  "dispatch execution",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"\\\"dispatch execution\\\",\""
+                        "text":  "Windows launch/render evidence was captured from the Tauri desktop executable using the app-local GNU toolchain path. No live daemon/controller/dispatch execution was invoked."
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  299,
+                        "line":  5,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"private-agent\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  6,
+                        "term":  "runtime invocation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  7,
+                        "term":  "live invocation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"live invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  8,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  9,
                         "term":  "controller call",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"\\\"controller call\\\",\""
+                        "text":  "\"controller call\","
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  304,
+                        "line":  10,
                         "term":  "route activation",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"term\": \"route activation\","
+                        "text":  "\"route activation\","
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  306,
-                        "term":  "route activation",
+                        "line":  11,
+                        "term":  "adapter activation",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"\\\"route activation\\\",\""
+                        "text":  "\"adapter activation\","
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  313,
+                        "line":  12,
                         "term":  "transport activation",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"\\\"adapter transport activation\\\",\""
+                        "text":  "\"transport activation\","
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  320,
-                        "term":  "transport activation",
-                        "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"\\\"adapter transport activation\\\",\""
-                    },
-                    {
-                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  325,
+                        "line":  13,
                         "term":  "owner-path",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"term\": \"owner-path\","
+                        "text":  "\"owner-path\","
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  327,
-                        "term":  "owner-path",
-                        "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"\\\"owner-path call\\\",\""
-                    },
-                    {
-                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  334,
+                        "line":  14,
                         "term":  "lower-layer submission",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"\\\"lower-layer submission\\\",\""
+                        "text":  "\"lower-layer submission\","
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  339,
+                        "line":  15,
                         "term":  "production readiness",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"term\": \"production readiness\","
+                        "text":  "\"production readiness\","
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  341,
+                        "line":  16,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  17,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"final PASS\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  18,
+                        "term":  "deploy readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"deploy readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  19,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"canonical mutation\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  25,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  27,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\u003cspan class=\\\"chip\\\"\\u003eno canonical mutation\\u003c/span\\u003e\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  32,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  34,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\u003cp\\u003eSubmitCommandDraft preview for Governance Service review path. No canonical mutation.\\u003c/p\\u003e\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  39,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  41,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"$(\\\"stale-copy\\\").textContent = `Projection display state is ${state.freshness}. No canonical mutation.`;\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  46,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"private-agent\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  48,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"private-agent invocation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  53,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  55,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"dispatch execution\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  60,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  62,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"controller call\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  67,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  69,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"route activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  74,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"transport activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  76,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"adapter transport activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  81,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"owner-path\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  83,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"owner-path call\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  88,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"lower-layer submission\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  90,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"lower-layer submission\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  95,
                         "term":  "production readiness",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"\\\"production readiness\\\",\""
+                        "text":  "\"term\":  \"production readiness\","
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  346,
+                        "line":  97,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"production readiness\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  102,
                         "term":  "continuity activation",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"term\": \"continuity activation\","
+                        "text":  "\"term\":  \"continuity activation\","
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  348,
+                        "line":  104,
                         "term":  "continuity activation",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"\\\"continuity activation\\\",\""
+                        "text":  "\"text\":  \"\\\"continuity activation\\\",\""
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  353,
+                        "line":  109,
                         "term":  "final PASS",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"term\": \"final pass\","
+                        "text":  "\"term\":  \"final PASS\","
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  355,
+                        "line":  111,
                         "term":  "final PASS",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"\\\"final pass claim\\\",\""
+                        "text":  "\"text\":  \"\\\"final pass claim\\\",\""
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  369,
+                        "line":  116,
                         "term":  "dispatch execution",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"No live daemon/controller/dispatch execution was invoked.\""
+                        "text":  "\"term\":  \"dispatch execution\","
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  376,
+                        "line":  118,
                         "term":  "dispatch execution",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"No live daemon/controller/dispatch execution was invoked.\""
+                        "text":  "\"text\":  \"No live daemon/controller/dispatch execution was invoked.\""
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  383,
-                        "term":  "dispatch execution",
+                        "line":  123,
+                        "term":  "private-agent",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"No live daemon/controller/dispatch execution was invoked.\""
+                        "text":  "\"term\":  \"private-agent\","
                     },
                     {
                         "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
-                        "line":  390,
+                        "line":  125,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"private-agent\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  130,
+                        "term":  "runtime invocation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"runtime invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  132,
+                        "term":  "runtime invocation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"runtime invocation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  137,
+                        "term":  "live invocation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"live invocation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  139,
+                        "term":  "live invocation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"live invocation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  144,
                         "term":  "dispatch execution",
                         "classification":  "allowed_boundary_fixture_or_evidence_text",
-                        "text":  "\"text\": \"No live daemon/controller/dispatch execution was invoked.\""
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  146,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"dispatch execution\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  151,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  153,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"controller call\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  158,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  160,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"route activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  165,
+                        "term":  "adapter activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"adapter activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  167,
+                        "term":  "adapter activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"adapter activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  172,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"transport activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  174,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"transport activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  179,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"owner-path\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  181,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"owner-path\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  186,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"lower-layer submission\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  188,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"lower-layer submission\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  193,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  195,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"production readiness\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  200,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  202,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"continuity activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  207,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"final PASS\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  209,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"final PASS\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  214,
+                        "term":  "deploy readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"deploy readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  216,
+                        "term":  "deploy readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"deploy readiness\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  221,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  223,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"canonical mutation\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  228,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  230,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"canonical mutation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  235,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  237,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\u003cspan class=\\\\\\\"chip\\\\\\\"\\\\u003eno canonical mutation\\\\u003c/span\\\\u003e\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  242,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  244,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"canonical mutation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  249,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  251,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\u003cp\\\\u003eSubmitCommandDraft preview for Governance Service review path. No canonical mutation.\\\\u003c/p\\\\u003e\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  256,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  258,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"canonical mutation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  263,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  265,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"$(\\\\\\\"stale-copy\\\\\\\").textContent = `Projection display state is ${state.freshness}. No canonical mutation.`;\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  270,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"private-agent\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  272,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"private-agent\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  277,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"private-agent\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  279,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"private-agent invocation\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  284,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  286,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"dispatch execution\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  291,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  293,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"dispatch execution\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  298,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  300,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"controller call\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  305,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  307,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"controller call\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  312,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  314,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"route activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  319,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  321,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"route activation\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  326,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"transport activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  328,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"transport activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  333,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"transport activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  335,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"adapter transport activation\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  340,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"owner-path\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  342,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"owner-path\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  347,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"owner-path\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  349,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"owner-path call\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  354,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"lower-layer submission\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  356,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"lower-layer submission\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  361,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"lower-layer submission\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  363,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"lower-layer submission\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  368,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  370,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"production readiness\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  375,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  377,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"production readiness\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  382,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  384,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"continuity activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  389,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  391,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"continuity activation\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  396,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"final PASS\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  398,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"final PASS\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  403,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"final PASS\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  405,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"final pass claim\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  410,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  412,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"dispatch execution\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  417,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  419,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"No live daemon/controller/dispatch execution was invoked.\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  424,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"owner-path\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  426,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"owner-path\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  431,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"owner-path\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  433,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"No live runtime, daemon, controller, dispatch, route, adapter, transport, owner-path, or lower-layer call was invoked.\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  438,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  440,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"canonical mutation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  445,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  447,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"term\\\\\\\": \\\\\\\"canonical mutation\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  452,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  454,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"canonical mutation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  459,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  461,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"\\\\u003cspan class=\\\\\\\\\\\\\\\"chip\\\\\\\\\\\\\\\"\\\\u003eno canonical mutation\\\\u003c/span\\\\u003e\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  466,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  468,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"canonical mutation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  473,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  475,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"term\\\\\\\": \\\\\\\"canonical mutation\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  480,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  482,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"canonical mutation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  487,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  489,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"\\\\u003cp\\\\u003eSubmitCommandDraft preview for Governance Service review path. No canonical mutation.\\\\u003c/p\\\\u003e\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  494,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  496,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"canonical mutation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  501,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  503,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"term\\\\\\\": \\\\\\\"canonical mutation\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  508,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  510,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"canonical mutation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  515,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"canonical mutation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  517,
+                        "term":  "canonical mutation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"$(\\\\\\\\\\\\\\\"stale-copy\\\\\\\\\\\\\\\").textContent = `Projection display state is ${state.freshness}. No canonical mutation.`;\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  522,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"private-agent\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  524,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"private-agent\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  529,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"private-agent\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  531,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"term\\\\\\\": \\\\\\\"private-agent\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  536,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"private-agent\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  538,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"private-agent\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  543,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"private-agent\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  545,
+                        "term":  "private-agent",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"\\\\\\\\\\\\\\\"private-agent invocation\\\\\\\\\\\\\\\",\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  550,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  552,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"dispatch execution\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  557,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  559,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"\\\\\\\\\\\\\\\"dispatch execution\\\\\\\\\\\\\\\",\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  564,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  566,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"controller call\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  571,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"controller call\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  573,
+                        "term":  "controller call",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"\\\\\\\\\\\\\\\"controller call\\\\\\\\\\\\\\\",\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  578,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  580,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"route activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  585,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  587,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"term\\\\\\\": \\\\\\\"route activation\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  592,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  594,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"route activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  599,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"route activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  601,
+                        "term":  "route activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"\\\\\\\\\\\\\\\"route activation\\\\\\\\\\\\\\\",\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  606,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"transport activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  608,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"transport activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  613,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"transport activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  615,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"\\\\\\\\\\\\\\\"adapter transport activation\\\\\\\\\\\\\\\",\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  620,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"transport activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  622,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"transport activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  627,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"transport activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  629,
+                        "term":  "transport activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"\\\\\\\\\\\\\\\"adapter transport activation\\\\\\\\\\\\\\\",\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  634,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"owner-path\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  636,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"owner-path\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  641,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"owner-path\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  643,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"term\\\\\\\": \\\\\\\"owner-path\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  648,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"owner-path\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  650,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"owner-path\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  655,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"owner-path\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  657,
+                        "term":  "owner-path",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"\\\\\\\\\\\\\\\"owner-path call\\\\\\\\\\\\\\\",\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  662,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"lower-layer submission\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  664,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"lower-layer submission\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  669,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"lower-layer submission\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  671,
+                        "term":  "lower-layer submission",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"\\\\\\\\\\\\\\\"lower-layer submission\\\\\\\\\\\\\\\",\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  676,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  678,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"production readiness\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  683,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  685,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"term\\\\\\\": \\\\\\\"production readiness\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  690,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  692,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"production readiness\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  697,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"production readiness\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  699,
+                        "term":  "production readiness",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"\\\\\\\\\\\\\\\"production readiness\\\\\\\\\\\\\\\",\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  704,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  706,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"continuity activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  711,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  713,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"term\\\\\\\": \\\\\\\"continuity activation\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  718,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  720,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"continuity activation\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  725,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"continuity activation\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  727,
+                        "term":  "continuity activation",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"\\\\\\\\\\\\\\\"continuity activation\\\\\\\\\\\\\\\",\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  732,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"final PASS\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  734,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"final PASS\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  739,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"final PASS\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  741,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"term\\\\\\\": \\\\\\\"final pass\\\\\\\",\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  746,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"final PASS\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  748,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"final PASS\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  753,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"final PASS\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  755,
+                        "term":  "final PASS",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"\\\\\\\\\\\\\\\"final pass claim\\\\\\\\\\\\\\\",\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  760,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  762,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"dispatch execution\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  767,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  769,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"No live daemon/controller/dispatch execution was invoked.\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  774,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  776,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"dispatch execution\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  781,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  783,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"No live daemon/controller/dispatch execution was invoked.\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  788,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  790,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"dispatch execution\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  795,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  797,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"No live daemon/controller/dispatch execution was invoked.\\\\\\\"\\\"\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  802,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  804,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"term\\\":  \\\"dispatch execution\\\",\""
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  809,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"term\":  \"dispatch execution\","
+                    },
+                    {
+                        "path":  "verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json",
+                        "line":  811,
+                        "term":  "dispatch execution",
+                        "classification":  "allowed_boundary_fixture_or_evidence_text",
+                        "text":  "\"text\":  \"\\\"text\\\":  \\\"\\\\\\\"text\\\\\\\": \\\\\\\"No live daemon/controller/dispatch execution was invoked.\\\\\\\"\\\"\""
                     }
                 ],
     "unclassified_count":  0,

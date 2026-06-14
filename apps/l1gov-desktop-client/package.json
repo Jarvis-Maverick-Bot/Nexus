@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tauri dev",
     "build": "tauri build",
+    "build:windows-gnu": "tauri build --target x86_64-pc-windows-gnu --no-bundle --debug --ci",
     "test": "node scripts/verify-fixture.mjs"
   },
   "devDependencies": {

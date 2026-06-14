@@ -10,6 +10,7 @@ apps/l1gov-desktop-client/src/styles.css
 apps/l1gov-desktop-client/src-tauri/build.rs
 apps/l1gov-desktop-client/src-tauri/Cargo.lock
 apps/l1gov-desktop-client/src-tauri/Cargo.toml
+apps/l1gov-desktop-client/src-tauri/icons/icon.ico
 apps/l1gov-desktop-client/src-tauri/src/main.rs
 apps/l1gov-desktop-client/src-tauri/tauri.conf.json
 nexus/governance/tests/fixtures/client_test_surface.py
@@ -29,6 +30,8 @@ verification/4.21/l1gov-slice-012-desktop/nexus-mq-import-scan.txt
 verification/4.21/l1gov-slice-012-desktop/package-manager-scope.json
 verification/4.21/l1gov-slice-012-desktop/scope-check.json
 verification/4.21/l1gov-slice-012-desktop/screenshots/README_NO_SCREENSHOTS.txt
+verification/4.21/l1gov-slice-012-desktop/screenshots/windows-compact-app.png
+verification/4.21/l1gov-slice-012-desktop/screenshots/windows-desktop-app.png
 verification/4.21/l1gov-slice-012-desktop/structured-no-go-scan.json
 verification/4.21/l1gov-slice-012-desktop/targeted-desktop-pytest-output.txt
 verification/4.21/l1gov-slice-012-desktop/worktree-diff-check.txt

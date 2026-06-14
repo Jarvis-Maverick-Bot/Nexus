@@ -1,5 +1,5 @@
 {
-    "generated_at":  "2026-06-14T17:35:50.6044870+08:00",
+    "generated_at":  "2026-06-14T18:19:08.9861890+08:00",
     "root_package_manager_files_mutated":  false,
     "app_directory":  "apps/l1gov-desktop-client/",
     "committed_dependency_files":  [
@@ -12,7 +12,12 @@
                                               "apps/l1gov-desktop-client/.toolchain/",
                                               "apps/l1gov-desktop-client/node_modules/",
                                               "apps/l1gov-desktop-client/src-tauri/target/",
+                                              "apps/l1gov-desktop-client/src-tauri/gen/",
                                               "apps/l1gov-desktop-client/.tmp-render/"
                                           ],
+    "app_local_tooling_used":  [
+                                   "rustup stable-x86_64-pc-windows-gnu under .toolchain",
+                                   "w64devkit v2.8.0 under .toolchain"
+                               ],
     "status":  "APP_LOCAL_ONLY"
 }

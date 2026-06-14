@@ -5,7 +5,11 @@ description = "Nexus L1 Governance UX test surface"
 edition = "2021"
 
 [build-dependencies]
-tauri-build = "2.0.0"
+tauri-codegen = { version = "=2.0.0", features = [] }
+tauri-build = { version = "=2.0.0", features = [] }
 
 [dependencies]
-tauri = "2.0.0"
+tauri = { version = "=2.0.0", features = [] }
+tauri-runtime = { version = "=2.0.0", features = [] }
+tauri-runtime-wry = { version = "=2.0.0", features = [] }
+tauri-utils = { version = "=2.0.0", features = [] }
