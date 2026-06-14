@@ -54,6 +54,7 @@ def test_slice012_tauri_metadata_is_windows_first_and_non_authoritative() -> Non
     assert tauri_config["app"]["windows"][0]["title"] == "Nexus L1 Governance UX Test Surface"
     assert tauri_config["bundle"]["active"] is False
     assert tauri_config["app"]["security"]["csp"] == "default-src 'self'"
+    assert tauri_config["app"]["withGlobalTauri"] is True
 
 
 def test_slice012_desktop_fixture_declares_scope_and_future_integration_boundary() -> None:
@@ -78,14 +79,26 @@ def test_slice012_desktop_fixture_declares_scope_and_future_integration_boundary
 def test_slice012_desktop_surface_contains_required_operable_regions() -> None:
     html = read_app_file("src/index.html")
     main_js = read_app_file("src/main.js")
+    top_actions = html.split('<section class="workspace-strip"', 1)[0]
 
     for element_id in (
         "workspace-picker",
+        "workspace-overlay",
+        "create-testproject",
+        "cleanup-testproject",
+        "project-init",
+        "init-required-list",
+        "init-workspace-root",
+        "init-field-project-charter",
+        "init-field-execution-plan",
+        "save-init-draft",
+        "draft-init-command",
         "mission-control",
         "module-navigation",
         "inspector",
         "status-bar",
         "service-chip",
+        "real-uat-state",
         "notes-evidence",
         "command-draft-preview",
         "service-rejection",
@@ -94,33 +107,47 @@ def test_slice012_desktop_surface_contains_required_operable_regions() -> None:
     ):
         assert f'id="{element_id}"' in html
 
+    assert html.index('id="workspace-overlay"') < html.index('id="create-testproject"')
+    assert html.index('id="workspace-overlay"') < html.index('id="cleanup-testproject"')
+    assert 'id="create-testproject"' not in top_actions
+    assert 'id="cleanup-testproject"' not in top_actions
+
     for hook in (
         "openWorkspacePicker",
+        "renderProjectInit",
+        "saveProjectInitDraft",
+        "showInitCommandDraft",
         "selectModule",
         "showCommandDraftPreview",
         "showServiceRejection",
         "showNoGoBlock",
         "cycleStaleRefresh",
         "renderFutureIntegrationBoundary",
+        "createRealTestProject",
+        "loadRealProjectionState",
     ):
         assert hook in main_js
 
 
-def test_slice012_renderer_consumes_deterministic_fixture_data() -> None:
+def test_slice012_renderer_prefers_real_projection_state_and_keeps_fixture_parser() -> None:
     fixture = load_fixture()
     main_js = read_app_file("src/main.js")
 
     assert "const state = {" not in main_js
+    assert 'invoke("create_test_project"' in main_js
+    assert 'invoke("read_test_project_projection"' in main_js
+    assert "pendingRealUatState" in main_js
     assert "fetch(\"./fixtures/slice012_desktop_state.json\")" in main_js
-    assert "buildSurfaceState(fixture)" in main_js
+    assert "loadFixtureState" in main_js
     assert "display_state" in fixture
     assert fixture["display_state"]["workspace_name"] == "4.21 Layer 1 Governance"
 
 
-def test_slice012_footer_declares_fixture_only_service_status() -> None:
+def test_slice012_footer_declares_real_local_test_status() -> None:
     html = read_app_file("src/index.html")
 
-    assert 'id="service-state">fixture only' in html
+    assert 'id="service-state">real local test pending' in html
+    assert "service fixture only" not in html
     assert "Service: connected" not in html
     assert "connected</strong>" not in html
 
@@ -145,7 +172,6 @@ def test_slice012_desktop_files_do_not_contain_live_execution_paths() -> None:
     ]
     combined = "\n".join(path.read_text(encoding="utf-8").lower() for path in scanned_files)
     forbidden_terms = (
-        "invoke(",
         "@tauri-apps/api",
         "http://",
         "https://",
@@ -168,8 +194,10 @@ def test_slice012_desktop_files_do_not_contain_live_execution_paths() -> None:
     for term in forbidden_terms:
         assert term not in combined, term
 
+    assert 'invoke("create_test_project"' in combined
+    assert 'invoke("read_test_project_projection"' in combined
     assert "kernel and governance service remain authority" in combined
-    assert "desktop app is non-authoritative" in combined
+    assert "non-authoritative" in combined
 
 
 def test_slice012_desktop_scope_does_not_mutate_root_package_managers() -> None:

@@ -232,7 +232,7 @@ code {
 }
 
 .metrics-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-bottom: 12px;
 }
 
@@ -273,6 +273,54 @@ code {
   border-color: #e5aaa5;
 }
 
+.init-list {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.init-list li {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) auto;
+  gap: 6px 10px;
+  align-items: center;
+}
+
+.init-list code {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.init-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.init-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.init-form textarea {
+  width: 100%;
+  min-height: 74px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px;
+  color: var(--text);
+  font: inherit;
+  font-weight: 400;
+}
+
 .overlay {
   width: min(560px, calc(100vw - 32px));
   border: 1px solid var(--line);
@@ -292,6 +340,13 @@ code {
   display: grid;
   gap: 8px;
   padding: 14px;
+}
+
+.workspace-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 14px 0;
 }
 
 .workspace-option {
@@ -351,7 +406,8 @@ code {
 
   .module-nav,
   .metrics-grid,
-  .review-grid {
+  .review-grid,
+  .init-form {
     grid-template-columns: 1fr;
   }
 }

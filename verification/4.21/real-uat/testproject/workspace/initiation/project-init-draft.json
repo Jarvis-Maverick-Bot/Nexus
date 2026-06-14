@@ -1,0 +1,18 @@
+{
+  "generated_at": "2026-06-14T12:37:50.716628+00:00",
+  "init_values": {
+    "backlog_wbs": "UAT-001 create TestProject; UAT-002 draft init.",
+    "dependencies": "Governance Service and Kernel local test contracts.",
+    "execution_plan": "Run local verification, capture screenshots, then clean up.",
+    "project_charter": "TestProject charter for real UAT.",
+    "requirements": "Create project, record init draft, and display projection.",
+    "risks": "No live execution is allowed.",
+    "scope": "Exercise the 4.21 desktop client path.",
+    "stakeholder_authority": "Alex owns UAT decisions for this local test."
+  },
+  "non_authoritative": true,
+  "project_id": "project:testproject",
+  "project_name": "TestProject",
+  "status": "drafted_local",
+  "workspace_id": "workspace:testproject"
+}

@@ -1,0 +1,26 @@
+﻿{
+    "verdict":  "REAL_UAT_PASS_WITH_NOTES",
+    "branch":  "codex/4.21-real-testproject-e2e-uat",
+    "base_head":  "35e64b842ca41feacc97df8ca3c52e48fed72cf2",
+    "readiness_evidence":  "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\readiness-evidence",
+    "uat_evidence":  "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\uat-evidence",
+    "canonical_records":  "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\canonical-records.json",
+    "projection":  "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\projection.json",
+    "desktop_state":  "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\desktop-state.json",
+    "init_draft":  "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\initiation\\project-init-draft.json",
+    "screenshots":  [
+                        "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\uat-evidence\\desktop-pending-workspace-entry.png",
+                        "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\uat-evidence\\desktop-after-init-surface-start.png",
+                        "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\uat-evidence\\desktop-project-init-requirements.png"
+                    ],
+    "verification":  {
+                         "targeted_tests":  "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\readiness-evidence\\targeted-tests.txt",
+                         "full_governance_tests":  "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\readiness-evidence\\full-governance-tests.txt",
+                         "npm_test":  "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\readiness-evidence\\npm-test.txt",
+                         "tauri_build":  "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\readiness-evidence\\tauri-build-windows-gnu.txt",
+                         "diff_check":  "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\readiness-evidence\\git-diff-check.txt",
+                         "import_scan":  "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\readiness-evidence\\nexus-mq-import-scan.txt",
+                         "no_go_scan":  "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\readiness-evidence\\structured-no-go-scan.txt",
+                         "json_parse":  "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\readiness-evidence\\json-parse.txt"
+                     }
+}

@@ -1,0 +1,71 @@
+{
+  "authority_refs": [
+    "WBS V0.6",
+    "L1.11.12",
+    "REAL_UAT:TestProject"
+  ],
+  "freshness": "current",
+  "generated_at": "2026-06-14T12:28:29.411087+00:00",
+  "is_canonical_state": false,
+  "payload": {
+    "active_slice": "L1GOV-SLICE-012-REAL-UAT",
+    "blocked_items": 0,
+    "init_requirements": [
+      {
+        "field": "Project charter",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\initiation\\project-charter-stub.md",
+        "status": "drafted"
+      },
+      {
+        "field": "Stakeholder authority",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\initiation\\stakeholder-authority-seed.md",
+        "status": "drafted"
+      },
+      {
+        "field": "Scope",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\scope.placeholder.md",
+        "status": "drafted"
+      },
+      {
+        "field": "Requirements",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\requirements.placeholder.md",
+        "status": "drafted"
+      },
+      {
+        "field": "Risks",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\risk.placeholder.md",
+        "status": "drafted"
+      },
+      {
+        "field": "Dependencies",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\dependencies.placeholder.md",
+        "status": "drafted"
+      },
+      {
+        "field": "Backlog/WBS",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\backlog-wbs.placeholder.md",
+        "status": "drafted"
+      },
+      {
+        "field": "Execution plan",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\execution-plan.placeholder.md",
+        "status": "drafted"
+      }
+    ],
+    "init_status": "drafted_local",
+    "kernel_record_count": 4,
+    "kernel_state": "initiation_ready",
+    "kernel_version": 4,
+    "last_record_id": "krn-000004",
+    "project_init_draft_path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\initiation\\project-init-draft.json",
+    "project_name": "TestProject",
+    "service_state": "real local test",
+    "sync_state": "projection current",
+    "workspace_id": "workspace:testproject",
+    "workspace_root": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace"
+  },
+  "projection_id": "workspace:testproject:mission-control:krn-000004",
+  "projection_type": "mission-control",
+  "source_checkpoint": "krn-000004",
+  "workspace_id": "workspace:testproject"
+}

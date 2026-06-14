@@ -1,0 +1,210 @@
+{
+  "canonical_authority": "GovernanceKernel",
+  "canonical_records_path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\canonical-records.json",
+  "display_state": {
+    "freshness_index": 2,
+    "init_requirements": [
+      {
+        "field": "Project charter",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\initiation\\project-charter-stub.md",
+        "status": "drafted"
+      },
+      {
+        "field": "Stakeholder authority",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\initiation\\stakeholder-authority-seed.md",
+        "status": "drafted"
+      },
+      {
+        "field": "Scope",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\scope.placeholder.md",
+        "status": "drafted"
+      },
+      {
+        "field": "Requirements",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\requirements.placeholder.md",
+        "status": "drafted"
+      },
+      {
+        "field": "Risks",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\risk.placeholder.md",
+        "status": "drafted"
+      },
+      {
+        "field": "Dependencies",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\dependencies.placeholder.md",
+        "status": "drafted"
+      },
+      {
+        "field": "Backlog/WBS",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\backlog-wbs.placeholder.md",
+        "status": "drafted"
+      },
+      {
+        "field": "Execution plan",
+        "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\execution-plan.placeholder.md",
+        "status": "drafted"
+      }
+    ],
+    "init_status": "drafted_local",
+    "init_values": {
+      "backlog_wbs": "UAT-001 create TestProject; UAT-002 draft init.",
+      "dependencies": "Governance Service and Kernel local test contracts.",
+      "execution_plan": "Run local verification, capture screenshots, then clean up.",
+      "project_charter": "TestProject charter for real UAT.",
+      "requirements": "Create project, record init draft, and display projection.",
+      "risks": "No live execution is allowed.",
+      "scope": "Exercise the 4.21 desktop client path.",
+      "stakeholder_authority": "Alex owns UAT decisions for this local test."
+    },
+    "modules": {
+      "delivery_feedback": {
+        "summary": "No closeout claim is made.",
+        "title": "Delivery Feedback"
+      },
+      "mission_control": {
+        "summary": "Real TestProject projection loaded from local Governance Service output.",
+        "title": "Mission Control"
+      },
+      "monitor_hitl": {
+        "summary": "Direct UI approval remains blocked; decisions must route through Monitor/HITL.",
+        "title": "Monitor/HITL"
+      },
+      "notes_evidence": {
+        "summary": "Real UAT evidence is written under verification/4.21/real-uat.",
+        "title": "Notes Evidence"
+      },
+      "project_init": {
+        "summary": "Required initialization info is seeded in the workspace and must route through Governance Service.",
+        "title": "Project Init"
+      },
+      "standardization": {
+        "summary": "Pending later UAT; no local approval or baseline promotion.",
+        "title": "Standardization"
+      }
+    },
+    "notes": [
+      "Kernel canonical record: krn-000004",
+      "Projection checkpoint: krn-000004",
+      "Desktop state is non-authoritative and read-only.",
+      "Runs local test bridge only.",
+      "Project init draft saved locally: D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\initiation\\project-init-draft.json",
+      "Init draft still requires Governance Service routing before canonical change."
+    ],
+    "project_summary": {
+      "accepted_slices": 12,
+      "active_slice": "L1GOV-SLICE-012-REAL-UAT",
+      "blocked_items": 0,
+      "canonical_records": 4
+    },
+    "service_state": "real local test",
+    "sync_state": "projection current",
+    "workspace_name": "TestProject",
+    "workspaces": [
+      {
+        "freshness": "current",
+        "id": "workspace:testproject",
+        "label": "TestProject"
+      }
+    ]
+  },
+  "fixture_only": false,
+  "future_integration_boundary": {
+    "can_execute_live_calls": false,
+    "daemon_controller_bridge": "disabled_future_boundary"
+  },
+  "live_execution_invoked": false,
+  "non_authoritative": true,
+  "projection": {
+    "authority_refs": [
+      "WBS V0.6",
+      "L1.11.12",
+      "REAL_UAT:TestProject"
+    ],
+    "freshness": "current",
+    "generated_at": "2026-06-14T12:28:29.411087+00:00",
+    "is_canonical_state": false,
+    "payload": {
+      "active_slice": "L1GOV-SLICE-012-REAL-UAT",
+      "blocked_items": 0,
+      "init_requirements": [
+        {
+          "field": "Project charter",
+          "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\initiation\\project-charter-stub.md",
+          "status": "drafted"
+        },
+        {
+          "field": "Stakeholder authority",
+          "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\initiation\\stakeholder-authority-seed.md",
+          "status": "drafted"
+        },
+        {
+          "field": "Scope",
+          "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\scope.placeholder.md",
+          "status": "drafted"
+        },
+        {
+          "field": "Requirements",
+          "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\requirements.placeholder.md",
+          "status": "drafted"
+        },
+        {
+          "field": "Risks",
+          "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\risk.placeholder.md",
+          "status": "drafted"
+        },
+        {
+          "field": "Dependencies",
+          "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\dependencies.placeholder.md",
+          "status": "drafted"
+        },
+        {
+          "field": "Backlog/WBS",
+          "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\backlog-wbs.placeholder.md",
+          "status": "drafted"
+        },
+        {
+          "field": "Execution plan",
+          "path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\execution-plan.placeholder.md",
+          "status": "drafted"
+        }
+      ],
+      "init_status": "drafted_local",
+      "kernel_record_count": 4,
+      "kernel_state": "initiation_ready",
+      "kernel_version": 4,
+      "last_record_id": "krn-000004",
+      "project_init_draft_path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\initiation\\project-init-draft.json",
+      "project_name": "TestProject",
+      "service_state": "real local test",
+      "sync_state": "projection current",
+      "workspace_id": "workspace:testproject",
+      "workspace_root": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace"
+    },
+    "projection_id": "workspace:testproject:mission-control:krn-000004",
+    "projection_type": "mission-control",
+    "source_checkpoint": "krn-000004",
+    "workspace_id": "workspace:testproject"
+  },
+  "projection_path": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\projection.json",
+  "service_boundary": "GovernanceService",
+  "service_outcome": {
+    "blocked_reason": "",
+    "command_id": "cmd:real-uat-submit-testproject",
+    "error_code": null,
+    "errors": [],
+    "evidence_refs": [],
+    "kernel_record_ref": "krn-000004",
+    "projection_ref": null,
+    "projection_refresh": "stale",
+    "status": "accepted"
+  },
+  "slice_id": "L1GOV-SLICE-012",
+  "source_mode": "real_test_project",
+  "stale_refresh": {
+    "states": [
+      "stale",
+      "rebuilding",
+      "current"
+    ]
+  }
+}
