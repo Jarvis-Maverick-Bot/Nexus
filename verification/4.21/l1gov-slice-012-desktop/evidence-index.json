@@ -17,7 +17,7 @@
     "replacement_pr":  {
                            "url":  "https://github.com/Jarvis-Maverick-Bot/Nexus/pull/21",
                            "state":  "open_ready_for_review",
-                           "current_head_before_evidence_commit":  "82a9ccf73792ee6012363a0dfe51d253493e2837",
+                           "previous_remote_head_before_review_patch_push":  "82a9ccf73792ee6012363a0dfe51d253493e2837",
                            "base":  "master",
                            "merge_state":  "CLEAN"
                        },
