@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>L1GOV Slice 012 UX Client Test Surface</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main id="app" data-surface="l1gov-slice-012">
+      <header class="topbar">
+        <section class="identity" aria-label="Surface identity">
+          <div class="mark" aria-hidden="true">L1</div>
+          <div>
+            <h1>Governance UX Test Surface</h1>
+            <p>Display state only.</p>
+          </div>
+        </section>
+        <nav class="top-actions" aria-label="Workspace and projection actions">
+          <button id="workspace-picker-button" class="button primary" type="button">Workspace</button>
+          <button id="stale-refresh-button" class="button" type="button">Refresh Projection</button>
+        </nav>
+      </header>
+
+      <section class="workspace-strip" aria-label="Workspace state">
+        <span id="workspace-name">4.21 Layer 1 Governance</span>
+        <span id="freshness-chip" class="chip current">current</span>
+        <span class="chip neutral">read-only preview</span>
+        <span class="chip neutral">no canonical mutation</span>
+      </section>
+
+      <section id="workspace-picker-overlay" class="overlay hidden" aria-label="Workspace picker">
+        <div class="overlay-panel">
+          <div class="panel-head">
+            <h2>Workspace Picker</h2>
+            <button id="workspace-close-button" class="icon-button" type="button" aria-label="Close workspace picker">x</button>
+          </div>
+          <div id="workspace-list" class="workspace-list"></div>
+        </div>
+      </section>
+
+      <section class="shell">
+        <aside id="module-nav" class="module-nav" aria-label="Module navigation"></aside>
+
+        <section id="mission-control" class="mission-control" aria-label="Mission control projection">
+          <div class="section-head">
+            <div>
+              <h2 id="active-module-title">Mission Control</h2>
+              <p id="active-module-summary">Projection freshness.</p>
+            </div>
+            <button id="command-draft-button" class="button primary" type="button">Draft Command</button>
+          </div>
+
+          <div class="metrics-grid" aria-label="Projection metrics">
+            <article class="metric">
+              <span>Accepted Slices</span>
+              <strong id="accepted-slices">11</strong>
+            </article>
+            <article class="metric">
+              <span>Active Slice</span>
+              <strong id="active-slice">L1GOV-SLICE-012</strong>
+            </article>
+            <article class="metric">
+              <span>Blocked Items</span>
+              <strong id="blocked-items">0</strong>
+            </article>
+          </div>
+
+          <section class="review-grid">
+            <article id="command-draft-panel" class="panel">
+              <h3>Command Draft Preview</h3>
+              <p id="command-draft-text">Select Draft Command to preview a Governance Service route.</p>
+            </article>
+            <article id="service-outcome-panel" class="panel">
+              <h3>Service Outcome</h3>
+              <p id="service-outcome-text">Service rejection and no-go block examples are available for review.</p>
+              <div class="button-row">
+                <button id="service-rejection-button" class="button" type="button">Show Rejection</button>
+                <button id="no-go-button" class="button danger" type="button">Show No-Go Block</button>
+              </div>
+            </article>
+            <article id="stale-refresh-panel" class="panel">
+              <h3>Stale Refresh Display</h3>
+              <p id="stale-refresh-text">Refresh controls update display state only.</p>
+            </article>
+            <article id="notes-evidence-frame" class="panel">
+              <h3>Notes Evidence Frame</h3>
+              <ul id="notes-list"></ul>
+            </article>
+          </section>
+        </section>
+
+        <aside id="inspector-panel" class="inspector" aria-label="Inspector">
+          <h2>Inspector</h2>
+          <dl>
+            <dt>Projection</dt>
+            <dd id="inspector-projection">ProjectionSnapshot:mission-control:aa2ff2ad</dd>
+            <dt>Authority</dt>
+            <dd>Kernel and Governance Service remain authority</dd>
+            <dt>Source Refs</dt>
+            <dd id="inspector-source-refs">Loading</dd>
+          </dl>
+        </aside>
+      </section>
+
+      <footer id="status-bar" class="status-bar">
+        <span>Service: <strong id="service-state">connected</strong></span>
+        <span>Freshness: <strong id="status-freshness">current</strong></span>
+        <span>Sync: <strong>ok</strong></span>
+        <span>Authority: <strong>non-authoritative</strong></span>
+      </footer>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
