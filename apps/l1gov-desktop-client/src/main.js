@@ -1,6 +1,44 @@
 let state;
+let activePanelId = "main_cockpit";
 
 const $ = (id) => document.getElementById(id);
+const PANEL_REGISTRY = Object.freeze({
+  main_cockpit: {
+    title: "Operation Panel Host",
+    body: "Select a shell menu item to open a child-panel placeholder. Main Cockpit and ContextEnvelope stay visible.",
+    status: "No command is executed from shell navigation."
+  },
+  project_shell: {
+    title: "Project Management",
+    body: "CP-001 shell route only. Project child panels are planned for CP-002.",
+    status: "Read-only navigation treatment; no command is executed from shell navigation."
+  },
+  agent_shell: {
+    title: "Agent Management",
+    body: "CP-001 shell route only. Agent child panels are planned for CP-003.",
+    status: "Read-only navigation treatment; no live agent calls."
+  },
+  mq_shell: {
+    title: "MQ Management",
+    body: "CP-001 shell route only. MQ child panels are planned for CP-004.",
+    status: "Read-only navigation treatment; no queue execution."
+  },
+  workspace_picker: {
+    title: "Workspace Picker",
+    body: "Workspace picker opens as an overlay and does not become canonical authority.",
+    status: "Workspace rows are navigation/display only."
+  },
+  evidence_drawer: {
+    title: "Evidence",
+    body: "Evidence links remain display-only. Evidence does not become canonical authority.",
+    status: "No command is executed from shell navigation."
+  },
+  status_toast: {
+    title: "Status Toast",
+    body: "Status toast is display-only and cannot submit commands.",
+    status: "Display-only status surface."
+  }
+});
 const INIT_FIELDS = [
   ["project_charter", "init-field-project-charter"],
   ["stakeholder_authority", "init-field-stakeholder-authority"],
@@ -48,7 +86,7 @@ function pendingRealUatState() {
       },
       modules: {
         mission_control: {
-          title: "Mission Control",
+          title: "Active Session Cockpit",
           summary: "Create TestProject to start real local UAT."
         },
         project_init: {
@@ -114,7 +152,16 @@ function buildSurfaceState(source) {
     initRequirements: displayState.init_requirements || [],
     notes: displayState.notes,
     serviceState: displayState.service_state,
-    syncState: displayState.sync_state
+    syncState: displayState.sync_state,
+    contextEnvelope: {
+      project: displayState.workspace_name,
+      session: displayState.session_name || "Session 2",
+      agent: displayState.active_agent || "Agent2 observer",
+      source: source.source_mode,
+      freshness,
+      liveInvocation: source.live_execution_invoked === true ? "true" : "false",
+      authority: source.non_authoritative === false ? "service-mediated" : "non-authoritative"
+    }
   };
 }
 
@@ -159,6 +206,7 @@ async function loadFixtureState() {
 }
 
 function render() {
+  renderContextEnvelope();
   $("workspace-name").textContent = state.workspaceName;
   $("accepted-slices").textContent = state.projectSummary.acceptedSlices;
   $("active-slice").textContent = state.projectSummary.activeSlice;
@@ -174,6 +222,7 @@ function render() {
   $("real-uat-copy").textContent = realUatCopy();
   $("real-uat-path").textContent = state.source.projection_path || "No real projection loaded.";
   renderProjectInit();
+  renderOperationPanel(activePanelId);
   $("notes-list").replaceChildren(
     ...state.notes.map((note) => {
       const item = document.createElement("li");
@@ -182,6 +231,42 @@ function render() {
     })
   );
   renderFutureIntegrationBoundary();
+}
+
+function renderContextEnvelope() {
+  const context = state.contextEnvelope;
+  $("context-project").textContent = context.project;
+  $("context-session").textContent = context.session;
+  $("context-agent").textContent = context.agent;
+  $("context-source").textContent = context.source;
+  $("context-freshness").textContent = context.freshness;
+  $("context-freshness").className = `chip ${context.freshness}`;
+  $("context-live-invocation").textContent = context.liveInvocation;
+  $("context-authority").textContent = context.authority;
+}
+
+function failClosedPanelRoute(panelId) {
+  activePanelId = "main_cockpit";
+  $("operation-panel-title").textContent = "Panel route rejected";
+  $("operation-panel-status").textContent = "ERR_INVALID_PANEL_ROUTE";
+  $("operation-panel-body").textContent = `Unknown panel route ${panelId}; shell navigation failed closed. No command is executed from shell navigation.`;
+  return false;
+}
+
+function renderOperationPanel(panelId = activePanelId) {
+  const panel = PANEL_REGISTRY[panelId];
+  if (!panel) {
+    return failClosedPanelRoute(panelId);
+  }
+  $("operation-panel-title").textContent = panel.title;
+  $("operation-panel-status").textContent = panel.status;
+  $("operation-panel-body").textContent = panel.body;
+  return true;
+}
+
+function selectOperationPanel(panelId) {
+  activePanelId = panelId;
+  renderOperationPanel(panelId);
 }
 
 function openWorkspacePicker() {
@@ -299,6 +384,9 @@ function collectInitValues() {
 
 function bindEvents() {
   $("workspace-picker").addEventListener("click", openWorkspacePicker);
+  document.querySelectorAll("[data-panel-route]").forEach((button) => {
+    button.addEventListener("click", () => selectOperationPanel(button.dataset.panelRoute));
+  });
   $("create-testproject").addEventListener("click", () => {
     createRealTestProject().catch((error) => setServiceError(error));
   });
@@ -362,6 +450,7 @@ initialize().catch((error) => setServiceError(error));
 
 window.slice012DesktopSurface = {
   buildSurfaceState,
+  PANEL_REGISTRY,
   loadFixtureState,
   loadRealProjectionState,
   createRealTestProject,
@@ -370,6 +459,10 @@ window.slice012DesktopSurface = {
   openWorkspacePicker,
   renderProjectInit,
   collectInitValues,
+  renderContextEnvelope,
+  selectOperationPanel,
+  renderOperationPanel,
+  failClosedPanelRoute,
   selectModule,
   showCommandDraftPreview,
   showInitCommandDraft,

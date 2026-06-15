@@ -16,7 +16,11 @@
         </div>
       </div>
       <div class="top-actions">
+        <button id="top-menu-project" class="button" type="button" data-panel-route="project_shell">Project</button>
+        <button id="top-menu-agent" class="button" type="button" data-panel-route="agent_shell">Agent</button>
+        <button id="top-menu-mq" class="button" type="button" data-panel-route="mq_shell">MQ</button>
         <button id="workspace-picker" class="button primary" type="button">Workspace</button>
+        <button id="top-menu-evidence" class="button" type="button" data-panel-route="evidence_drawer">Evidence</button>
         <button id="refresh-projection" class="button" type="button">Refresh projection</button>
       </div>
     </header>
@@ -31,7 +35,7 @@
 
     <main class="shell">
       <nav id="module-navigation" class="module-nav" aria-label="Module navigation">
-        <button class="nav-button active" type="button" data-module="mission_control">Mission Control</button>
+        <button class="nav-button active" type="button" data-module="mission_control">Main Cockpit</button>
         <button class="nav-button" type="button" data-module="project_init">Project Init</button>
         <button class="nav-button" type="button" data-module="standardization">Standardization</button>
         <button class="nav-button" type="button" data-module="monitor_hitl">Monitor/HITL</button>
@@ -39,10 +43,43 @@
         <button class="nav-button" type="button" data-module="notes_evidence">Notes Evidence</button>
       </nav>
 
-      <section id="mission-control" class="mission-control" aria-label="Mission Control">
+      <section id="mission-control" class="mission-control" aria-label="Main Cockpit">
+        <section id="context-envelope" class="context-envelope" aria-label="ContextEnvelope">
+          <header class="context-head">
+            <h2>ContextEnvelope</h2>
+            <span id="context-authority" class="chip">non-authoritative</span>
+          </header>
+          <dl class="context-grid">
+            <div>
+              <dt>Project</dt>
+              <dd id="context-project">No project</dd>
+            </div>
+            <div>
+              <dt>Session</dt>
+              <dd id="context-session">No session</dd>
+            </div>
+            <div>
+              <dt>Agent</dt>
+              <dd id="context-agent">No agent</dd>
+            </div>
+            <div>
+              <dt>Source</dt>
+              <dd id="context-source">pending</dd>
+            </div>
+            <div>
+              <dt>Freshness</dt>
+              <dd id="context-freshness" class="chip stale">stale</dd>
+            </div>
+            <div>
+              <dt>Live invocation</dt>
+              <dd id="context-live-invocation">false</dd>
+            </div>
+          </dl>
+        </section>
+
         <div class="section-head">
           <div>
-            <h2 id="active-module-title">Mission Control</h2>
+            <h2 id="active-module-title">Main Cockpit</h2>
             <p id="active-module-summary">Projection freshness and review flow.</p>
           </div>
           <button id="draft-command-button" class="button primary" type="button">Draft Command</button>
@@ -132,16 +169,23 @@
         </div>
       </section>
 
-      <aside id="inspector" class="inspector" aria-label="Inspector">
-        <h2>Inspector</h2>
-        <dl>
-          <dt>Projection</dt>
-          <dd id="inspector-projection">ProjectionSnapshot:mission-control:aa2ff2ad</dd>
-          <dt>Authority</dt>
-          <dd>Kernel and Governance Service remain authority</dd>
-          <dt>Future integration</dt>
-          <dd id="future-boundary">disabled future boundary</dd>
-        </dl>
+      <aside id="operation-panel-host" class="operation-panel-host" aria-label="Operation Panel Host">
+        <h2 id="operation-panel-title">Operation Panel Host</h2>
+        <p id="operation-panel-status">No command is executed from shell navigation.</p>
+        <div id="operation-panel-body" class="operation-panel-body">
+          Select Project, Agent, MQ, Workspace, or Evidence to review shell routing.
+        </div>
+        <section id="inspector" class="inspector-card" aria-label="Inspector">
+          <h3>Inspector</h3>
+          <dl>
+            <dt>Projection</dt>
+            <dd id="inspector-projection">ProjectionSnapshot:mission-control:aa2ff2ad</dd>
+            <dt>Authority</dt>
+            <dd>Kernel and Governance Service remain authority</dd>
+            <dt>Future integration</dt>
+            <dd id="future-boundary">disabled future boundary</dd>
+          </dl>
+        </section>
       </aside>
     </main>
 
