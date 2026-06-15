@@ -10,8 +10,28 @@ const PANEL_REGISTRY = Object.freeze({
   },
   project_shell: {
     title: "Project Management",
-    body: "CP-001 shell route only. Project child panels are planned for CP-002.",
-    status: "Read-only navigation treatment; no command is executed from shell navigation."
+    body: "Project menu open. Choose a Project Management child panel; shell state and ContextEnvelope stay visible.",
+    status: "Frame 03 Project menu open; no command is executed from shell navigation.",
+    actions: [
+      { label: "Create Project", panelId: "project_create" },
+      { label: "Init Project", panelId: "project_init_dirty" },
+      { label: "Standardization", panelId: "project_standardization_preview" }
+    ]
+  },
+  project_create: {
+    title: "Create Project",
+    status: "Command draft preview only; creates_authority=false.",
+    render: renderProjectCreatePanel
+  },
+  project_init_dirty: {
+    title: "Init Project Dirty State",
+    status: "Dirty local draft fields; affects_state=false until service-mediated review.",
+    render: renderProjectInitDirtyPanel
+  },
+  project_standardization_preview: {
+    title: "Standardization Preview",
+    status: "Preview-only planning packet candidate; no direct baseline approval.",
+    render: renderProjectStandardizationPanel
   },
   agent_shell: {
     title: "Agent Management",
@@ -49,6 +69,30 @@ const INIT_FIELDS = [
   ["backlog_wbs", "init-field-backlog-wbs"],
   ["execution_plan", "init-field-execution-plan"]
 ];
+const DEFAULT_PROJECT_MANAGEMENT = Object.freeze({
+  creates_authority: false,
+  command_draft_preview_only: true,
+  create_project: {
+    project_name: "TestProject",
+    workspace_root: "verification/4.21/real-uat/testproject/workspace",
+    source_refs: ["ContextEnvelope", "Workspace Picker"],
+    expected_version: 1,
+    idempotency_key: "cp002-create-project-preview"
+  },
+  init_project: {
+    dirty_state: true,
+    dirty_fields: ["project_charter", "stakeholder_authority", "scope", "requirements"],
+    expected_version: 1,
+    idempotency_key: "cp002-init-project-preview"
+  },
+  standardization_preview: {
+    profile_ref: "DeliverableEvaluationProfile:standardization-preview",
+    feedback_policy_ref: "FeedbackMetricPolicy:project-management-preview",
+    evidence_plan: "README_EVIDENCE.md + screenshot evidence",
+    expected_version: 1,
+    idempotency_key: "cp002-standardization-preview"
+  }
+});
 
 function normalizeFreshness(value) {
   return ["stale", "rebuilding", "current", "blocked"].includes(value) ? value : "stale";
@@ -150,6 +194,7 @@ function buildSurfaceState(source) {
     initStatus: displayState.init_status || "create_project_first",
     initValues: displayState.init_values || {},
     initRequirements: displayState.init_requirements || [],
+    projectManagement: displayState.project_management || DEFAULT_PROJECT_MANAGEMENT,
     notes: displayState.notes,
     serviceState: displayState.service_state,
     syncState: displayState.sync_state,
@@ -260,7 +305,14 @@ function renderOperationPanel(panelId = activePanelId) {
   }
   $("operation-panel-title").textContent = panel.title;
   $("operation-panel-status").textContent = panel.status;
-  $("operation-panel-body").textContent = panel.body;
+  const body = $("operation-panel-body");
+  body.replaceChildren();
+  if (panel.render) {
+    panel.render(body);
+    return true;
+  }
+  appendPanelParagraph(body, panel.body);
+  renderPanelActions(body, panel.actions || []);
   return true;
 }
 
@@ -311,6 +363,171 @@ function showCommandDraftPreview() {
     <p>SubmitCommandDraft preview for Governance Service review path. No canonical mutation.</p>
     <code>target_ref=layer1-governance, affects_state=false, source_mode=${state.sourceMode}</code>
   `;
+}
+
+function projectManagementState() {
+  return state?.projectManagement || DEFAULT_PROJECT_MANAGEMENT;
+}
+
+function appendPanelParagraph(container, text) {
+  const paragraph = document.createElement("p");
+  paragraph.textContent = text;
+  container.append(paragraph);
+}
+
+function appendPanelCode(container, text) {
+  const code = document.createElement("code");
+  code.textContent = text;
+  container.append(code);
+}
+
+function appendPanelList(container, items) {
+  const list = document.createElement("ul");
+  list.className = "panel-detail-list";
+  for (const item of items) {
+    const row = document.createElement("li");
+    row.textContent = item;
+    list.append(row);
+  }
+  container.append(list);
+}
+
+function renderPanelActions(container, actions) {
+  if (!actions.length) {
+    return;
+  }
+  const row = document.createElement("div");
+  row.className = "operation-panel-actions";
+  for (const action of actions) {
+    const button = document.createElement("button");
+    button.className = action.danger ? "button danger" : "button";
+    button.type = "button";
+    button.textContent = action.label;
+    button.addEventListener("click", () => {
+      if (action.panelId) {
+        selectOperationPanel(action.panelId);
+      }
+      if (action.command === "create_project_preview") {
+        showProjectCreateDraftPreview();
+      }
+      if (action.command === "init_project_preview") {
+        showProjectInitDraftPreview();
+      }
+      if (action.command === "standardization_preview") {
+        showProjectStandardizationDraftPreview();
+      }
+      if (action.command === "project_no_go") {
+        showProjectNoGoBoundary();
+      }
+    });
+    row.append(button);
+  }
+  container.append(row);
+}
+
+function renderProjectCreatePanel(container) {
+  const createProject = projectManagementState().create_project;
+  appendPanelParagraph(container, "Draft a new project candidate from workspace root and source refs. This panel creates a command draft preview only.");
+  appendPanelCode(container, `project_name=${createProject.project_name}; workspace_root=${createProject.workspace_root}`);
+  appendPanelList(container, [
+    `source_refs=${createProject.source_refs.join(", ")}`,
+    `expected_version=${createProject.expected_version}`,
+    `idempotency_key=${createProject.idempotency_key}`,
+    "affects_state=false",
+    "creates_authority=false"
+  ]);
+  renderPanelActions(container, [
+    { label: "Preview Create Project Draft", command: "create_project_preview" },
+    { label: "Show Project Boundary Block", command: "project_no_go", danger: true }
+  ]);
+}
+
+function renderProjectInitDirtyPanel(container) {
+  const initProject = projectManagementState().init_project;
+  appendPanelParagraph(container, "Init Project Dirty State keeps local draft fields visible until a Governance Service command draft is reviewed.");
+  appendPanelList(container, [
+    `dirty_state=${initProject.dirty_state}`,
+    `dirty_fields=${initProject.dirty_fields.join(", ")}`,
+    `expected_version=${initProject.expected_version}`,
+    `idempotency_key=${initProject.idempotency_key}`,
+    "affects_state=false",
+    "creates_authority=false"
+  ]);
+  renderPanelActions(container, [
+    { label: "Preview Init Project Draft", command: "init_project_preview" },
+    { label: "Show Project Boundary Block", command: "project_no_go", danger: true }
+  ]);
+}
+
+function renderProjectStandardizationPanel(container) {
+  const preview = projectManagementState().standardization_preview;
+  appendPanelParagraph(container, "Standardization Preview displays a planning packet candidate for review. It cannot approve a baseline or write canonical records.");
+  appendPanelList(container, [
+    `profile_ref=${preview.profile_ref}`,
+    `feedback_policy_ref=${preview.feedback_policy_ref}`,
+    `evidence_plan=${preview.evidence_plan}`,
+    `expected_version=${preview.expected_version}`,
+    `idempotency_key=${preview.idempotency_key}`,
+    "affects_state=false",
+    "creates_authority=false"
+  ]);
+  renderPanelActions(container, [
+    { label: "Preview Standardization Draft", command: "standardization_preview" },
+    { label: "Show Project Boundary Block", command: "project_no_go", danger: true }
+  ]);
+}
+
+function renderProjectDraftPreview(title, description, details) {
+  $("command-draft-preview").innerHTML = `
+    <h3>${title}</h3>
+    <p>${description}</p>
+    <code>${details.join("; ")}</code>
+  `;
+}
+
+function showProjectCreateDraftPreview() {
+  const createProject = projectManagementState().create_project;
+  renderProjectDraftPreview("Command Draft Preview", "Create Project route is preview-only and must be mediated by Governance Service.", [
+    "command_type=SubmitCommandDraft",
+    "subtype=ProjectCreatePanel",
+    `project_name=${createProject.project_name}`,
+    `source_refs=${createProject.source_refs.join("|")}`,
+    `expected_version=${createProject.expected_version}`,
+    `idempotency_key=${createProject.idempotency_key}`,
+    "affects_state=false",
+    "creates_authority=false"
+  ]);
+}
+
+function showProjectInitDraftPreview() {
+  const initProject = projectManagementState().init_project;
+  renderProjectDraftPreview("Command Draft Preview", "Init Project dirty fields are prepared as draft metadata only.", [
+    "command_type=SubmitCommandDraft",
+    "subtype=ProjectInitPanel",
+    `dirty_fields=${initProject.dirty_fields.join("|")}`,
+    `expected_version=${initProject.expected_version}`,
+    `idempotency_key=${initProject.idempotency_key}`,
+    "affects_state=false",
+    "creates_authority=false"
+  ]);
+}
+
+function showProjectStandardizationDraftPreview() {
+  const preview = projectManagementState().standardization_preview;
+  renderProjectDraftPreview("Command Draft Preview", "Standardization candidate remains preview-only until a later approved service path.", [
+    "command_type=SubmitCommandDraft",
+    "subtype=ProjectStandardizationPanel",
+    `source_refs=${preview.profile_ref}|${preview.feedback_policy_ref}`,
+    `expected_version=${preview.expected_version}`,
+    `idempotency_key=${preview.idempotency_key}`,
+    "affects_state=false",
+    "creates_authority=false"
+  ]);
+}
+
+function showProjectNoGoBoundary() {
+  $("service-outcome-copy").textContent = "BLOCKED ERR_NO_GO_BOUNDARY: direct baseline approval and direct canonical mutation are blocked; use Governance Service command draft preview.";
+  $("service-rejection").classList.add("blocked");
 }
 
 function showInitCommandDraft() {
@@ -463,6 +680,13 @@ window.slice012DesktopSurface = {
   selectOperationPanel,
   renderOperationPanel,
   failClosedPanelRoute,
+  renderProjectCreatePanel,
+  renderProjectInitDirtyPanel,
+  renderProjectStandardizationPanel,
+  showProjectCreateDraftPreview,
+  showProjectInitDraftPreview,
+  showProjectStandardizationDraftPreview,
+  showProjectNoGoBoundary,
   selectModule,
   showCommandDraftPreview,
   showInitCommandDraft,

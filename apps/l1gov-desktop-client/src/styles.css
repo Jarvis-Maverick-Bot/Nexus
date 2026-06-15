@@ -265,6 +265,33 @@ code {
   line-height: 1.35;
 }
 
+.operation-panel-body {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.operation-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.panel-detail-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.operation-panel-body code,
+.panel-detail-list li {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
 .section-head {
   display: flex;
   align-items: flex-start;

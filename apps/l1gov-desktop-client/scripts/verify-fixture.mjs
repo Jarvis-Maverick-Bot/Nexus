@@ -22,6 +22,14 @@ if (fixture.display_state?.workspace_name !== "4.21 Layer 1 Governance") {
   throw new Error("fixture workspace name is invalid");
 }
 
+if (fixture.display_state?.project_management?.creates_authority !== false) {
+  throw new Error("Project Management fixture must remain non-authoritative");
+}
+
+if (fixture.display_state?.project_management?.command_draft_preview_only !== true) {
+  throw new Error("Project Management fixture must be command draft preview only");
+}
+
 if (!html.includes('id="create-testproject"') || !html.includes("Create TestProject")) {
   throw new Error("real TestProject creation surface is missing");
 }
@@ -66,6 +74,23 @@ for (const expected of [
 ]) {
   if (!mainJs.includes(expected)) {
     throw new Error(`desktop bridge is missing ${expected}`);
+  }
+}
+
+for (const expected of [
+  "project_create",
+  "project_init_dirty",
+  "project_standardization_preview",
+  "renderProjectCreatePanel",
+  "renderProjectInitDirtyPanel",
+  "renderProjectStandardizationPanel",
+  "showProjectCreateDraftPreview",
+  "showProjectInitDraftPreview",
+  "showProjectStandardizationDraftPreview",
+  "creates_authority=false"
+]) {
+  if (!mainJs.includes(expected)) {
+    throw new Error(`CP-002 Project Management panel is missing ${expected}`);
   }
 }
 
