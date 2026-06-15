@@ -218,3 +218,83 @@ def test_slice012_desktop_app_ignores_local_toolchain_and_build_outputs() -> Non
         ".tmp-render/",
     ):
         assert pattern in gitignore
+
+
+def test_cp001_shell_foundation_exposes_context_envelope_and_operation_host() -> None:
+    html = read_app_file("src/index.html")
+    main_js = read_app_file("src/main.js")
+
+    for element_id in (
+        "context-envelope",
+        "context-project",
+        "context-session",
+        "context-agent",
+        "context-source",
+        "context-freshness",
+        "context-live-invocation",
+        "context-authority",
+        "operation-panel-host",
+        "operation-panel-title",
+        "operation-panel-body",
+        "operation-panel-status",
+    ):
+        assert f'id="{element_id}"' in html
+
+    for hook in (
+        "renderContextEnvelope",
+        "PANEL_REGISTRY",
+        "selectOperationPanel",
+        "renderOperationPanel",
+    ):
+        assert hook in main_js
+
+
+def test_cp001_visible_labels_migrate_to_main_cockpit_while_internal_keys_stay_compatible() -> None:
+    html = read_app_file("src/index.html")
+    main_js = read_app_file("src/main.js")
+    fixture = load_fixture()
+
+    assert ">Mission Control<" not in html
+    assert 'aria-label="Mission Control"' not in html
+    assert "Main Cockpit" in html
+    assert "Active Session Cockpit" in main_js
+    assert "mission_control" in main_js
+    assert "mission_control" in fixture["display_state"]["modules"]
+    assert fixture["display_state"]["modules"]["mission_control"]["title"] == "Main Cockpit"
+
+
+def test_cp001_panel_registry_is_shell_only_and_fails_closed_for_unknown_routes() -> None:
+    html = read_app_file("src/index.html")
+    main_js = read_app_file("src/main.js")
+
+    for route in (
+        'data-panel-route="project_shell"',
+        'data-panel-route="agent_shell"',
+        'data-panel-route="mq_shell"',
+        'data-panel-route="evidence_drawer"',
+    ):
+        assert route in html
+
+    for panel_id in (
+        "main_cockpit",
+        "project_shell",
+        "agent_shell",
+        "mq_shell",
+        "workspace_picker",
+        "evidence_drawer",
+        "status_toast",
+    ):
+        assert panel_id in main_js
+
+    assert "ERR_INVALID_PANEL_ROUTE" in main_js
+    assert "failClosedPanelRoute" in main_js
+    assert "No command is executed from shell navigation" in main_js
+
+
+def test_cp001_compact_layout_keeps_operation_host_in_responsive_flow() -> None:
+    styles = read_app_file("src/styles.css")
+
+    assert "@media (max-width: 1120px)" in styles
+    assert ".operation-panel-host" in styles
+    assert "order: 2;" in styles
+    assert "order: 3;" in styles

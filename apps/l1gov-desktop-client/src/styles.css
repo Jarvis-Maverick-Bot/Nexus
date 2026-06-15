@@ -179,13 +179,13 @@ code {
 }
 
 .module-nav,
-.inspector {
+.operation-panel-host {
   padding: 16px;
   border-right: 1px solid var(--line);
   background: var(--surface);
 }
 
-.inspector {
+.operation-panel-host {
   border-right: 0;
   border-left: 1px solid var(--line);
 }
@@ -215,6 +215,54 @@ code {
 .mission-control {
   min-width: 0;
   padding: 18px;
+}
+
+.context-envelope,
+.inspector-card {
+  padding: 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.context-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.context-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.context-grid div,
+.inspector-card dl {
+  min-width: 0;
+}
+
+.context-grid dt,
+.inspector-card dt {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.context-grid dd,
+.inspector-card dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.operation-panel-body,
+.operation-panel-host p {
+  margin-top: 10px;
+  color: var(--muted);
+  line-height: 1.35;
 }
 
 .section-head {
@@ -398,8 +446,20 @@ code {
     grid-template-columns: 1fr;
   }
 
+  .module-nav {
+    order: 1;
+  }
+
+  .operation-panel-host {
+    order: 2;
+  }
+
+  .mission-control {
+    order: 3;
+  }
+
   .module-nav,
-  .inspector {
+  .operation-panel-host {
     border: 0;
     border-bottom: 1px solid var(--line);
   }
