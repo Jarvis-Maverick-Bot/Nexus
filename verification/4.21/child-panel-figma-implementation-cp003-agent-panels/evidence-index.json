@@ -1,0 +1,39 @@
+{
+  "slice": "CP-003 Agent Management Panels",
+  "status": "CP003_IMPLEMENTED_FOR_NOVA_REVIEW",
+  "authorization_record": "AUTHORIZATION_RECORD.md",
+  "checkout_path": "D:\\Projects\\Nexus_cp001_child_panel_shell",
+  "branch": "codex/4.21-child-panel-cp003-agent-panels",
+  "base_branch": "codex/4.21-real-testproject-e2e-uat",
+  "base_head": "0205122d153e7864b93bd3f6f6190917165371e9",
+  "implementation_boundary": [
+    "apps/l1gov-desktop-client/scripts/verify-fixture.mjs",
+    "apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json",
+    "apps/l1gov-desktop-client/src/main.js",
+    "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+    "verification/4.21/child-panel-figma-implementation-cp003-agent-panels/"
+  ],
+  "tests": {
+    "targeted_desktop_surface": "21 passed in 0.03s",
+    "real_uat_desktop_bridge": "3 passed in 0.02s",
+    "local_app_contract": "76 passed in 0.18s",
+    "full_governance": "658 passed in 0.77s",
+    "desktop_fixture_verifier": "slice012 desktop real UAT surface verified",
+    "git_diff_check": "exit 0"
+  },
+  "screenshots": [
+    "cp003-07-agent-menu-open-desktop.png",
+    "cp003-07-agent-menu-open-compact.png",
+    "cp003-08-agent-directory-desktop.png",
+    "cp003-09-assign-agent-context-preview-desktop.png",
+    "cp003-10-runtime-status-blocked-desktop.png",
+    "cp003-21-configure-agent-desktop.png"
+  ],
+  "no_go": {
+    "nexus_mq_import_scan": "no matches",
+    "ui_affordance_scan": "no matches",
+    "runtime_dispatch_controller_scan": "test fixtures and display-only label only",
+    "runtime_live_dispatch_controller_paths_added": false
+  },
+  "implementation_not_authorized_beyond_cp003": true
+}

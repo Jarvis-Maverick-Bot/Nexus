@@ -30,6 +30,18 @@ if (fixture.display_state?.project_management?.command_draft_preview_only !== tr
   throw new Error("Project Management fixture must be command draft preview only");
 }
 
+if (fixture.display_state?.agent_management?.private_agent_invocation !== false) {
+  throw new Error("Agent Management fixture must not allow private_agent_invocation");
+}
+
+if (fixture.display_state?.agent_management?.runtime_control_activation !== false) {
+  throw new Error("Agent Management fixture must not allow runtime_control_activation");
+}
+
+if (fixture.display_state?.agent_management?.command_draft_preview_only !== true) {
+  throw new Error("Agent Management fixture must be command draft preview only");
+}
+
 if (!html.includes('id="create-testproject"') || !html.includes("Create TestProject")) {
   throw new Error("real TestProject creation surface is missing");
 }
@@ -91,6 +103,26 @@ for (const expected of [
 ]) {
   if (!mainJs.includes(expected)) {
     throw new Error(`CP-002 Project Management panel is missing ${expected}`);
+  }
+}
+
+for (const expected of [
+  "agent_directory",
+  "agent_assignment",
+  "agent_runtime_status_blocked",
+  "agent_configure",
+  "renderAgentDirectoryPanel",
+  "renderAgentAssignmentPanel",
+  "renderAgentRuntimeStatusPanel",
+  "renderAgentConfigurePanel",
+  "showAgentAssignmentDraftPreview",
+  "showAgentConfigureDraftPreview",
+  "showAgentRuntimeBlocked",
+  "private_agent_invocation=false",
+  "runtime_control_activation=false"
+]) {
+  if (!mainJs.includes(expected)) {
+    throw new Error(`CP-003 Agent Management panel is missing ${expected}`);
   }
 }
 

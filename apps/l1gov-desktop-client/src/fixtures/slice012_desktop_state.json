@@ -93,6 +93,52 @@
         "idempotency_key": "cp002-standardization-preview"
       }
     },
+    "agent_management": {
+      "private_agent_invocation": false,
+      "runtime_control_activation": false,
+      "command_draft_preview_only": true,
+      "directory": {
+        "agents": [
+          {
+            "id": "agent:observer",
+            "label": "Agent2 observer",
+            "status": "current",
+            "role": "Observer"
+          },
+          {
+            "id": "agent:planner",
+            "label": "Agent3 planning candidate",
+            "status": "preview",
+            "role": "Planner"
+          }
+        ]
+      },
+      "assignment": {
+        "target_agent": "Agent3 planning candidate",
+        "target_session": "Session 2",
+        "context_update": "display-only",
+        "expected_version": 1,
+        "idempotency_key": "cp003-agent-assignment-preview"
+      },
+      "runtime_status": {
+        "status": "blocked",
+        "error_code": "ERR_NO_GO_BOUNDARY",
+        "reason": "private_agent_invocation=false; runtime_control_activation=false"
+      },
+      "configure_agent": {
+        "role": "Planner",
+        "allowed_actions": [
+          "draft planning notes",
+          "prepare evidence checklist"
+        ],
+        "forbidden_actions": [
+          "private_agent_invocation",
+          "runtime_control_activation"
+        ],
+        "expected_version": 1,
+        "idempotency_key": "cp003-agent-configure-preview"
+      }
+    },
     "modules": {
       "mission_control": {
         "title": "Main Cockpit",
