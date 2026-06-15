@@ -54,6 +54,7 @@ def test_slice012_tauri_metadata_is_windows_first_and_non_authoritative() -> Non
     assert tauri_config["app"]["windows"][0]["title"] == "Nexus L1 Governance UX Test Surface"
     assert tauri_config["bundle"]["active"] is False
     assert tauri_config["app"]["security"]["csp"] == "default-src 'self'"
+    assert tauri_config["app"]["withGlobalTauri"] is True
 
 
 def test_slice012_desktop_fixture_declares_scope_and_future_integration_boundary() -> None:
@@ -78,14 +79,26 @@ def test_slice012_desktop_fixture_declares_scope_and_future_integration_boundary
 def test_slice012_desktop_surface_contains_required_operable_regions() -> None:
     html = read_app_file("src/index.html")
     main_js = read_app_file("src/main.js")
+    top_actions = html.split('<section class="workspace-strip"', 1)[0]
 
     for element_id in (
         "workspace-picker",
+        "workspace-overlay",
+        "create-testproject",
+        "cleanup-testproject",
+        "project-init",
+        "init-required-list",
+        "init-workspace-root",
+        "init-field-project-charter",
+        "init-field-execution-plan",
+        "save-init-draft",
+        "draft-init-command",
         "mission-control",
         "module-navigation",
         "inspector",
         "status-bar",
         "service-chip",
+        "real-uat-state",
         "notes-evidence",
         "command-draft-preview",
         "service-rejection",
@@ -94,33 +107,47 @@ def test_slice012_desktop_surface_contains_required_operable_regions() -> None:
     ):
         assert f'id="{element_id}"' in html
 
+    assert html.index('id="workspace-overlay"') < html.index('id="create-testproject"')
+    assert html.index('id="workspace-overlay"') < html.index('id="cleanup-testproject"')
+    assert 'id="create-testproject"' not in top_actions
+    assert 'id="cleanup-testproject"' not in top_actions
+
     for hook in (
         "openWorkspacePicker",
+        "renderProjectInit",
+        "saveProjectInitDraft",
+        "showInitCommandDraft",
         "selectModule",
         "showCommandDraftPreview",
         "showServiceRejection",
         "showNoGoBlock",
         "cycleStaleRefresh",
         "renderFutureIntegrationBoundary",
+        "createRealTestProject",
+        "loadRealProjectionState",
     ):
         assert hook in main_js
 
 
-def test_slice012_renderer_consumes_deterministic_fixture_data() -> None:
+def test_slice012_renderer_prefers_real_projection_state_and_keeps_fixture_parser() -> None:
     fixture = load_fixture()
     main_js = read_app_file("src/main.js")
 
     assert "const state = {" not in main_js
+    assert 'invoke("create_test_project"' in main_js
+    assert 'invoke("read_test_project_projection"' in main_js
+    assert "pendingRealUatState" in main_js
     assert "fetch(\"./fixtures/slice012_desktop_state.json\")" in main_js
-    assert "buildSurfaceState(fixture)" in main_js
+    assert "loadFixtureState" in main_js
     assert "display_state" in fixture
     assert fixture["display_state"]["workspace_name"] == "4.21 Layer 1 Governance"
 
 
-def test_slice012_footer_declares_fixture_only_service_status() -> None:
+def test_slice012_footer_declares_real_local_test_status() -> None:
     html = read_app_file("src/index.html")
 
-    assert 'id="service-state">fixture only' in html
+    assert 'id="service-state">real local test pending' in html
+    assert "service fixture only" not in html
     assert "Service: connected" not in html
     assert "connected</strong>" not in html
 
@@ -145,7 +172,6 @@ def test_slice012_desktop_files_do_not_contain_live_execution_paths() -> None:
     ]
     combined = "\n".join(path.read_text(encoding="utf-8").lower() for path in scanned_files)
     forbidden_terms = (
-        "invoke(",
         "@tauri-apps/api",
         "http://",
         "https://",
@@ -168,8 +194,10 @@ def test_slice012_desktop_files_do_not_contain_live_execution_paths() -> None:
     for term in forbidden_terms:
         assert term not in combined, term
 
+    assert 'invoke("create_test_project"' in combined
+    assert 'invoke("read_test_project_projection"' in combined
     assert "kernel and governance service remain authority" in combined
-    assert "desktop app is non-authoritative" in combined
+    assert "non-authoritative" in combined
 
 
 def test_slice012_desktop_scope_does_not_mutate_root_package_managers() -> None:
@@ -190,3 +218,83 @@ def test_slice012_desktop_app_ignores_local_toolchain_and_build_outputs() -> Non
         ".tmp-render/",
     ):
         assert pattern in gitignore
+
+
+def test_cp001_shell_foundation_exposes_context_envelope_and_operation_host() -> None:
+    html = read_app_file("src/index.html")
+    main_js = read_app_file("src/main.js")
+
+    for element_id in (
+        "context-envelope",
+        "context-project",
+        "context-session",
+        "context-agent",
+        "context-source",
+        "context-freshness",
+        "context-live-invocation",
+        "context-authority",
+        "operation-panel-host",
+        "operation-panel-title",
+        "operation-panel-body",
+        "operation-panel-status",
+    ):
+        assert f'id="{element_id}"' in html
+
+    for hook in (
+        "renderContextEnvelope",
+        "PANEL_REGISTRY",
+        "selectOperationPanel",
+        "renderOperationPanel",
+    ):
+        assert hook in main_js
+
+
+def test_cp001_visible_labels_migrate_to_main_cockpit_while_internal_keys_stay_compatible() -> None:
+    html = read_app_file("src/index.html")
+    main_js = read_app_file("src/main.js")
+    fixture = load_fixture()
+
+    assert ">Mission Control<" not in html
+    assert 'aria-label="Mission Control"' not in html
+    assert "Main Cockpit" in html
+    assert "Active Session Cockpit" in main_js
+    assert "mission_control" in main_js
+    assert "mission_control" in fixture["display_state"]["modules"]
+    assert fixture["display_state"]["modules"]["mission_control"]["title"] == "Main Cockpit"
+
+
+def test_cp001_panel_registry_is_shell_only_and_fails_closed_for_unknown_routes() -> None:
+    html = read_app_file("src/index.html")
+    main_js = read_app_file("src/main.js")
+
+    for route in (
+        'data-panel-route="project_shell"',
+        'data-panel-route="agent_shell"',
+        'data-panel-route="mq_shell"',
+        'data-panel-route="evidence_drawer"',
+    ):
+        assert route in html
+
+    for panel_id in (
+        "main_cockpit",
+        "project_shell",
+        "agent_shell",
+        "mq_shell",
+        "workspace_picker",
+        "evidence_drawer",
+        "status_toast",
+    ):
+        assert panel_id in main_js
+
+    assert "ERR_INVALID_PANEL_ROUTE" in main_js
+    assert "failClosedPanelRoute" in main_js
+    assert "No command is executed from shell navigation" in main_js
+
+
+def test_cp001_compact_layout_keeps_operation_host_in_responsive_flow() -> None:
+    styles = read_app_file("src/styles.css")
+
+    assert "@media (max-width: 1120px)" in styles
+    assert ".operation-panel-host" in styles
+    assert "order: 2;" in styles
+    assert "order: 3;" in styles

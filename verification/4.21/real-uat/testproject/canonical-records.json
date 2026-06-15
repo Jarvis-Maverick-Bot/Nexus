@@ -1,0 +1,157 @@
+{
+  "generated_at": "2026-06-14T12:28:29.411106+00:00",
+  "kernel_state": {
+    "aggregate_id": "layer1-governance",
+    "authority_refs": [
+      "WBS V0.6",
+      "L1.11.12",
+      "REAL_UAT:TestProject"
+    ],
+    "last_record_id": "krn-000004",
+    "state": "initiation_ready",
+    "version": 4
+  },
+  "project_id": "project:testproject",
+  "project_name": "TestProject",
+  "records": [
+    {
+      "actor_id": "alex:real-uat",
+      "aggregate_id": "layer1-governance",
+      "authority_refs": [
+        "WBS V0.6",
+        "L1.11.12",
+        "REAL_UAT:TestProject"
+      ],
+      "command_type": "InitializeAuthority",
+      "new_state": "authority_initialized",
+      "payload": {
+        "source_refs": [
+          "WBS V0.6",
+          "L1.11.12",
+          "REAL_UAT:TestProject"
+        ],
+        "test_environment": true
+      },
+      "previous_state": "not_started",
+      "previous_version": 0,
+      "record_id": "krn-000001",
+      "version": 1
+    },
+    {
+      "actor_id": "alex:real-uat",
+      "aggregate_id": "layer1-governance",
+      "authority_refs": [
+        "WBS V0.6",
+        "L1.11.12",
+        "REAL_UAT:TestProject"
+      ],
+      "command_type": "MarkKernelReady",
+      "new_state": "kernel_ready",
+      "payload": {
+        "source_refs": [
+          "WBS V0.6",
+          "L1.11.12",
+          "REAL_UAT:TestProject"
+        ],
+        "test_environment": true
+      },
+      "previous_state": "authority_initialized",
+      "previous_version": 1,
+      "record_id": "krn-000002",
+      "version": 2
+    },
+    {
+      "actor_id": "alex:real-uat",
+      "aggregate_id": "layer1-governance",
+      "authority_refs": [
+        "WBS V0.6",
+        "L1.11.12",
+        "REAL_UAT:TestProject"
+      ],
+      "command_type": "RefreshProjectionCheckpoint",
+      "new_state": "projection_contract_ready",
+      "payload": {
+        "source_refs": [
+          "WBS V0.6",
+          "L1.11.12",
+          "REAL_UAT:TestProject"
+        ],
+        "test_environment": true
+      },
+      "previous_state": "kernel_ready",
+      "previous_version": 2,
+      "record_id": "krn-000003",
+      "version": 3
+    },
+    {
+      "actor_id": "alex:real-uat",
+      "aggregate_id": "layer1-governance",
+      "authority_refs": [
+        "WBS V0.6",
+        "L1.11.12",
+        "REAL_UAT:TestProject"
+      ],
+      "command_type": "SubmitWorkspaceInitRecord",
+      "new_state": "initiation_ready",
+      "payload": {
+        "authorization_source": "Nova-approved-baseline",
+        "expected_kernel_version": 3,
+        "expected_state": "projection_contract_ready",
+        "expected_version": 3,
+        "idempotency_key": "real-uat-submit-testproject",
+        "manifest_ref": "manifest-testproject",
+        "source_refs": [
+          "WBS V0.6",
+          "L1.11.12",
+          "REAL_UAT:TestProject"
+        ],
+        "target_ref": "layer1-governance",
+        "validation_report_ref": "validation-testproject",
+        "workspace_id": "workspace:testproject"
+      },
+      "previous_state": "projection_contract_ready",
+      "previous_version": 3,
+      "record_id": "krn-000004",
+      "version": 4
+    }
+  ],
+  "service_outcome": {
+    "blocked_reason": "",
+    "command_id": "cmd:real-uat-submit-testproject",
+    "error_code": null,
+    "errors": [],
+    "evidence_refs": [],
+    "kernel_record_ref": "krn-000004",
+    "projection_ref": null,
+    "projection_refresh": "stale",
+    "status": "accepted"
+  },
+  "workspace_id": "workspace:testproject",
+  "workspace_manifest": {
+    "created_paths": [
+      "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\README.md",
+      "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\initiation\\project-charter-stub.md",
+      "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\initiation\\stakeholder-authority-seed.md",
+      "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\evidence",
+      "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\decisions",
+      "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\feedback",
+      "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\review-evidence",
+      "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\scope.placeholder.md",
+      "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\requirements.placeholder.md",
+      "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\risk.placeholder.md",
+      "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\dependencies.placeholder.md",
+      "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\backlog-wbs.placeholder.md",
+      "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace\\planning\\execution-plan.placeholder.md"
+    ],
+    "manifest_id": "manifest-testproject",
+    "manifest_version": 1,
+    "source_refs": [
+      "WBS V0.6",
+      "L1.11.12",
+      "REAL_UAT:TestProject"
+    ],
+    "status": "validated",
+    "workspace_id": "workspace:testproject",
+    "workspace_root": "D:\\Projects\\Nexus\\verification\\4.21\\real-uat\\testproject\\workspace"
+  }
+}

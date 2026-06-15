@@ -1,0 +1,41 @@
+{
+  "slice": "CP-001 Shell, ContextEnvelope, Panel Registry Foundation",
+  "status": "CP001_IMPLEMENTED_FOR_NOVA_REVIEW",
+  "checkout_path": "D:\\Projects\\Nexus_cp001_child_panel_shell",
+  "branch": "codex/4.21-child-panel-cp001-shell-host",
+  "base_head": "61fbf692ecd228ab7e8d3b5478fcc62e563a6731",
+  "implementation_boundary": [
+    "apps/l1gov-desktop-client/src/index.html",
+    "apps/l1gov-desktop-client/src/main.js",
+    "apps/l1gov-desktop-client/src/styles.css",
+    "apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json",
+    "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+    "verification/4.21/child-panel-figma-implementation-cp001-shell-host/"
+  ],
+  "tests": {
+    "targeted": "14 passed in 0.02s",
+    "full_governance": "651 passed in 1.11s",
+    "desktop_fixture_verifier": "slice012 desktop real UAT surface verified",
+    "git_diff_check": "exit 0"
+  },
+  "screenshots": [
+    {
+      "file": "screenshots/cp001-02-main-cockpit-desktop.png",
+      "dimensions": "1440x900"
+    },
+    {
+      "file": "screenshots/cp001-02-main-cockpit-compact.png",
+      "dimensions": "900x700"
+    },
+    {
+      "file": "screenshots/cp001-02-main-cockpit-compact-full.png",
+      "dimensions": "900x1400"
+    }
+  ],
+  "no_go": {
+    "nexus_mq_import_scan": "no matches",
+    "changed_app_source_scan": "display-only Live invocation label only",
+    "runtime_live_dispatch_controller_paths_added": false
+  },
+  "implementation_not_authorized_beyond_cp001": true
+}

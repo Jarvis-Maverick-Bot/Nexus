@@ -62,7 +62,7 @@
     },
     "modules": {
       "mission_control": {
-        "title": "Mission Control",
+        "title": "Main Cockpit",
         "summary": "Projection freshness and review flow."
       },
       "standardization": {

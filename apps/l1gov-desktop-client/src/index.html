@@ -16,32 +16,70 @@
         </div>
       </div>
       <div class="top-actions">
+        <button id="top-menu-project" class="button" type="button" data-panel-route="project_shell">Project</button>
+        <button id="top-menu-agent" class="button" type="button" data-panel-route="agent_shell">Agent</button>
+        <button id="top-menu-mq" class="button" type="button" data-panel-route="mq_shell">MQ</button>
         <button id="workspace-picker" class="button primary" type="button">Workspace</button>
+        <button id="top-menu-evidence" class="button" type="button" data-panel-route="evidence_drawer">Evidence</button>
         <button id="refresh-projection" class="button" type="button">Refresh projection</button>
       </div>
     </header>
 
     <section class="workspace-strip" aria-label="Workspace status">
-      <span id="workspace-name">4.21 Layer 1 Governance</span>
-      <span id="freshness-chip" class="chip current">current</span>
-      <span class="chip">desktop preview</span>
-      <span id="service-chip" class="chip">service fixture only</span>
+      <span id="workspace-name">No real TestProject yet</span>
+      <span id="freshness-chip" class="chip stale">stale</span>
+      <span class="chip">real UAT surface</span>
+      <span id="service-chip" class="chip">service real local test pending</span>
       <span class="chip">no canonical mutation</span>
     </section>
 
     <main class="shell">
       <nav id="module-navigation" class="module-nav" aria-label="Module navigation">
-        <button class="nav-button active" type="button" data-module="mission_control">Mission Control</button>
+        <button class="nav-button active" type="button" data-module="mission_control">Main Cockpit</button>
+        <button class="nav-button" type="button" data-module="project_init">Project Init</button>
         <button class="nav-button" type="button" data-module="standardization">Standardization</button>
         <button class="nav-button" type="button" data-module="monitor_hitl">Monitor/HITL</button>
         <button class="nav-button" type="button" data-module="delivery_feedback">Delivery Feedback</button>
         <button class="nav-button" type="button" data-module="notes_evidence">Notes Evidence</button>
       </nav>
 
-      <section id="mission-control" class="mission-control" aria-label="Mission Control">
+      <section id="mission-control" class="mission-control" aria-label="Main Cockpit">
+        <section id="context-envelope" class="context-envelope" aria-label="ContextEnvelope">
+          <header class="context-head">
+            <h2>ContextEnvelope</h2>
+            <span id="context-authority" class="chip">non-authoritative</span>
+          </header>
+          <dl class="context-grid">
+            <div>
+              <dt>Project</dt>
+              <dd id="context-project">No project</dd>
+            </div>
+            <div>
+              <dt>Session</dt>
+              <dd id="context-session">No session</dd>
+            </div>
+            <div>
+              <dt>Agent</dt>
+              <dd id="context-agent">No agent</dd>
+            </div>
+            <div>
+              <dt>Source</dt>
+              <dd id="context-source">pending</dd>
+            </div>
+            <div>
+              <dt>Freshness</dt>
+              <dd id="context-freshness" class="chip stale">stale</dd>
+            </div>
+            <div>
+              <dt>Live invocation</dt>
+              <dd id="context-live-invocation">false</dd>
+            </div>
+          </dl>
+        </section>
+
         <div class="section-head">
           <div>
-            <h2 id="active-module-title">Mission Control</h2>
+            <h2 id="active-module-title">Main Cockpit</h2>
             <p id="active-module-summary">Projection freshness and review flow.</p>
           </div>
           <button id="draft-command-button" class="button primary" type="button">Draft Command</button>
@@ -60,16 +98,61 @@
             <span>Blocked Items</span>
             <strong id="blocked-items">0</strong>
           </article>
+          <article class="metric">
+            <span>Canonical Records</span>
+            <strong id="canonical-records">0</strong>
+          </article>
         </div>
 
         <div class="review-grid">
+          <article id="real-uat-state" class="panel">
+            <h3>Real UAT State</h3>
+            <p id="real-uat-copy">Create TestProject to write local Kernel records and rebuild the projection.</p>
+            <code id="real-uat-path">No real projection loaded.</code>
+          </article>
+          <article id="project-init" class="panel">
+            <h3>Project Init</h3>
+            <p id="init-status-copy">Create TestProject first to unlock the workspace init checklist.</p>
+            <code id="init-workspace-root">No workspace loaded.</code>
+            <div id="init-form" class="init-form" aria-label="Project initialization form">
+              <label>Project charter
+                <textarea id="init-field-project-charter" rows="3"></textarea>
+              </label>
+              <label>Stakeholder authority
+                <textarea id="init-field-stakeholder-authority" rows="3"></textarea>
+              </label>
+              <label>Scope
+                <textarea id="init-field-scope" rows="3"></textarea>
+              </label>
+              <label>Requirements
+                <textarea id="init-field-requirements" rows="3"></textarea>
+              </label>
+              <label>Risks
+                <textarea id="init-field-risks" rows="3"></textarea>
+              </label>
+              <label>Dependencies
+                <textarea id="init-field-dependencies" rows="3"></textarea>
+              </label>
+              <label>Backlog/WBS
+                <textarea id="init-field-backlog-wbs" rows="3"></textarea>
+              </label>
+              <label>Execution plan
+                <textarea id="init-field-execution-plan" rows="3"></textarea>
+              </label>
+            </div>
+            <ul id="init-required-list" class="init-list"></ul>
+            <div class="button-row">
+              <button id="save-init-draft" class="button primary" type="button">Save Init Draft</button>
+              <button id="draft-init-command" class="button primary" type="button">Draft Init Command</button>
+            </div>
+          </article>
           <article id="command-draft-preview" class="panel">
             <h3>Command Draft Preview</h3>
             <p>Select Draft Command to preview the Governance Service route shape.</p>
           </article>
           <article id="service-rejection" class="panel">
             <h3>Service Outcome</h3>
-            <p id="service-outcome-copy">No command has been submitted. Fixture outcomes only.</p>
+            <p id="service-outcome-copy">No command has been submitted. Real local test service is pending.</p>
             <div class="button-row">
               <button id="show-rejection" class="button" type="button">Show Rejection</button>
               <button id="no-go-block" class="button danger" type="button">Show No-Go Block</button>
@@ -86,23 +169,30 @@
         </div>
       </section>
 
-      <aside id="inspector" class="inspector" aria-label="Inspector">
-        <h2>Inspector</h2>
-        <dl>
-          <dt>Projection</dt>
-          <dd id="inspector-projection">ProjectionSnapshot:mission-control:aa2ff2ad</dd>
-          <dt>Authority</dt>
-          <dd>Kernel and Governance Service remain authority</dd>
-          <dt>Future integration</dt>
-          <dd id="future-boundary">disabled future boundary</dd>
-        </dl>
+      <aside id="operation-panel-host" class="operation-panel-host" aria-label="Operation Panel Host">
+        <h2 id="operation-panel-title">Operation Panel Host</h2>
+        <p id="operation-panel-status">No command is executed from shell navigation.</p>
+        <div id="operation-panel-body" class="operation-panel-body">
+          Select Project, Agent, MQ, Workspace, or Evidence to review shell routing.
+        </div>
+        <section id="inspector" class="inspector-card" aria-label="Inspector">
+          <h3>Inspector</h3>
+          <dl>
+            <dt>Projection</dt>
+            <dd id="inspector-projection">ProjectionSnapshot:mission-control:aa2ff2ad</dd>
+            <dt>Authority</dt>
+            <dd>Kernel and Governance Service remain authority</dd>
+            <dt>Future integration</dt>
+            <dd id="future-boundary">disabled future boundary</dd>
+          </dl>
+        </section>
       </aside>
     </main>
 
     <footer id="status-bar" class="status-bar">
-      <span>Service: <strong id="service-state">fixture only</strong></span>
-      <span>Freshness: <strong id="freshness-state">current</strong></span>
-      <span>Sync: <strong id="sync-state">offline fixture</strong></span>
+      <span>Service: <strong id="service-state">real local test pending</strong></span>
+      <span>Freshness: <strong id="freshness-state">stale</strong></span>
+      <span>Sync: <strong id="sync-state">no projection loaded</strong></span>
       <span>Authority: <strong>non-authoritative</strong></span>
     </footer>
 
@@ -112,6 +202,10 @@
           <h2>Workspace Picker</h2>
           <button class="icon-button" value="cancel" aria-label="Close workspace picker">x</button>
         </header>
+        <div class="workspace-actions" aria-label="Project actions">
+          <button id="create-testproject" class="button primary" type="button">Create TestProject</button>
+          <button id="cleanup-testproject" class="button" type="button">Cleanup TestProject</button>
+        </div>
         <div id="workspace-list" class="workspace-list"></div>
       </form>
     </dialog>
