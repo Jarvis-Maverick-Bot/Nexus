@@ -298,3 +298,78 @@ def test_cp001_compact_layout_keeps_operation_host_in_responsive_flow() -> None:
     assert ".operation-panel-host" in styles
     assert "order: 2;" in styles
     assert "order: 3;" in styles
+
+
+def test_cp002_project_management_panels_are_registered_from_fixture_state() -> None:
+    main_js = read_app_file("src/main.js")
+    fixture = load_fixture()
+
+    project_management = fixture["display_state"]["project_management"]
+    assert project_management["creates_authority"] is False
+    assert project_management["command_draft_preview_only"] is True
+
+    for panel_id in (
+        "project_shell",
+        "project_create",
+        "project_init_dirty",
+        "project_standardization_preview",
+    ):
+        assert panel_id in main_js
+
+    for hook in (
+        "renderProjectCreatePanel",
+        "renderProjectInitDirtyPanel",
+        "renderProjectStandardizationPanel",
+        "showProjectCreateDraftPreview",
+        "showProjectInitDraftPreview",
+        "showProjectStandardizationDraftPreview",
+    ):
+        assert hook in main_js
+
+
+def test_cp002_project_menu_routes_to_preview_only_child_panels() -> None:
+    html = read_app_file("src/index.html")
+    main_js = read_app_file("src/main.js")
+
+    assert 'id="top-menu-project"' in html
+    assert 'data-panel-route="project_shell"' in html
+
+    for visible_label in (
+        "Create Project",
+        "Init Project Dirty State",
+        "Standardization Preview",
+    ):
+        assert visible_label in main_js
+
+    for expected_contract in (
+        "command_type=SubmitCommandDraft",
+        "expected_version",
+        "idempotency_key",
+        "source_refs",
+        "affects_state=false",
+        "creates_authority=false",
+    ):
+        assert expected_contract in main_js
+
+
+def test_cp002_project_panels_do_not_add_direct_authority_or_baseline_controls() -> None:
+    main_js = read_app_file("src/main.js").lower()
+    html = read_app_file("src/index.html").lower()
+    combined = "\n".join((main_js, html))
+
+    forbidden_affordances = (
+        "approve baseline",
+        "make canonical",
+        "canonical write",
+        "create baseline entry",
+        "submit canonical",
+        "mark approved",
+        "final pass",
+    )
+
+    for affordance in forbidden_affordances:
+        assert affordance not in combined, affordance
+
+    assert "direct baseline approval" in main_js
+    assert "direct canonical mutation" in main_js
+    assert "err_no_go_boundary" in main_js

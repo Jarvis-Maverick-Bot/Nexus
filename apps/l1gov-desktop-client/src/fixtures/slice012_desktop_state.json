@@ -60,6 +60,39 @@
       "active_slice": "L1GOV-SLICE-012",
       "blocked_items": 0
     },
+    "project_management": {
+      "creates_authority": false,
+      "command_draft_preview_only": true,
+      "create_project": {
+        "project_name": "TestProject",
+        "workspace_root": "verification/4.21/real-uat/testproject/workspace",
+        "source_refs": [
+          "ContextEnvelope",
+          "Workspace Picker",
+          "ProjectCreatePanel"
+        ],
+        "expected_version": 1,
+        "idempotency_key": "cp002-create-project-preview"
+      },
+      "init_project": {
+        "dirty_state": true,
+        "dirty_fields": [
+          "project_charter",
+          "stakeholder_authority",
+          "scope",
+          "requirements"
+        ],
+        "expected_version": 1,
+        "idempotency_key": "cp002-init-project-preview"
+      },
+      "standardization_preview": {
+        "profile_ref": "DeliverableEvaluationProfile:standardization-preview",
+        "feedback_policy_ref": "FeedbackMetricPolicy:project-management-preview",
+        "evidence_plan": "README_EVIDENCE.md + screenshot evidence",
+        "expected_version": 1,
+        "idempotency_key": "cp002-standardization-preview"
+      }
+    },
     "modules": {
       "mission_control": {
         "title": "Main Cockpit",

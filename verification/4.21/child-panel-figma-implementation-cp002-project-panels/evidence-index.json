@@ -1,0 +1,38 @@
+{
+  "slice": "CP-002 Project Management Panels",
+  "status": "CP002_IMPLEMENTED_FOR_NOVA_REVIEW",
+  "checkout_path": "D:\\Projects\\Nexus_cp001_child_panel_shell",
+  "branch": "codex/4.21-child-panel-cp002-project-panels",
+  "base_branch": "codex/4.21-real-testproject-e2e-uat",
+  "base_head": "88c0f1e441f0dcabb52149b03f9d1a4af87def10",
+  "implementation_boundary": [
+    "apps/l1gov-desktop-client/scripts/verify-fixture.mjs",
+    "apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json",
+    "apps/l1gov-desktop-client/src/main.js",
+    "apps/l1gov-desktop-client/src/styles.css",
+    "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+    "verification/4.21/child-panel-figma-implementation-cp002-project-panels/"
+  ],
+  "tests": {
+    "targeted_desktop_surface": "17 passed in 0.03s",
+    "real_uat_desktop_bridge": "3 passed in 0.02s",
+    "local_app_contract": "76 passed in 0.17s",
+    "full_governance": "654 passed in 0.85s",
+    "desktop_fixture_verifier": "slice012 desktop real UAT surface verified",
+    "git_diff_check": "exit 0"
+  },
+  "screenshots": [
+    "cp002-03-project-menu-open-desktop.png",
+    "cp002-03-project-menu-open-compact.png",
+    "cp002-04-create-project-panel-desktop.png",
+    "cp002-05-init-project-dirty-desktop.png",
+    "cp002-06-standardization-preview-desktop.png"
+  ],
+  "no_go": {
+    "nexus_mq_import_scan": "no matches",
+    "ui_affordance_scan": "no matches",
+    "runtime_dispatch_controller_scan": "test fixtures and display-only label only",
+    "runtime_live_dispatch_controller_paths_added": false
+  },
+  "implementation_not_authorized_beyond_cp002": true
+}
