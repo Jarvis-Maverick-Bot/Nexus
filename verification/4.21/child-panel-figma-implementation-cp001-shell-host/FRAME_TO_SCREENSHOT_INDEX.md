@@ -7,4 +7,3 @@
 | `02 Main Workbench - Normal` | `screenshots/cp001-02-main-cockpit-compact-full.png` | Compact-width taller viewport with Operation Panel Host and ContextEnvelope visible. |
 
 CP-001 only implements the shared shell foundation. Project, Agent, MQ, and auxiliary-specific screenshots remain for later approved slices.
-

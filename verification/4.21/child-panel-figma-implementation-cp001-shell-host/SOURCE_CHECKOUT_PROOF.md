@@ -19,4 +19,3 @@
 ## Source Boundary
 
 Implementation stayed inside the approved CP-001 desktop-client/test/evidence boundary. No `src-tauri` bridge file was modified.
-

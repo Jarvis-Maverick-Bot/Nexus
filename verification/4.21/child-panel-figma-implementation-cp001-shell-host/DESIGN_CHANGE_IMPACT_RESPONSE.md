@@ -24,4 +24,3 @@
 ## Dependency Impact
 
 No new package dependency, framework, package-manager mutation, or root package file mutation.
-

@@ -21,4 +21,3 @@ No Playwright/npm dependency was installed. No Tauri bridge expansion was used f
 - Compact responsive flow places Operation Panel Host before Main Cockpit content, then ContextEnvelope and Main Cockpit content.
 - Status bar remains non-authoritative.
 - No command-like execution affordance was added to tree/sidebar rows or shell route buttons.
-

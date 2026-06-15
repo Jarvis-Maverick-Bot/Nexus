@@ -28,4 +28,3 @@ This patch does not implement CP-002 through CP-006. It does not add new depende
 - `DESIGN_CHANGE_IMPACT_RESPONSE.md`
 - `evidence-index.json`
 - `screenshots/`
-

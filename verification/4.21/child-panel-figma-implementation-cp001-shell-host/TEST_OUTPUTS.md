@@ -73,4 +73,3 @@ git diff --check
 ```
 
 Result: exit 0. Git emitted Windows line-ending warnings only.
-
