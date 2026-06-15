@@ -6,6 +6,7 @@
 - Create Project panel renders command draft preview-only data.
 - Init Project Dirty State panel renders dirty field metadata.
 - Standardization Preview panel renders profile, policy, and evidence-plan metadata.
+- Standardization Preview right-panel metadata wraps within the Operation Panel Host without clipping at the panel edge.
 - Compact Project menu open screenshot is nonblank.
 - ContextEnvelope, Main Cockpit, Operation Panel Host, Inspector, and status bar remain visible.
 

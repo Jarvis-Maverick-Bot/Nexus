@@ -373,3 +373,12 @@ def test_cp002_project_panels_do_not_add_direct_authority_or_baseline_controls()
     assert "direct baseline approval" in main_js
     assert "direct canonical mutation" in main_js
     assert "err_no_go_boundary" in main_js
+
+
+def test_cp002_operation_panel_metadata_wraps_inside_right_panel() -> None:
+    styles = read_app_file("src/styles.css")
+
+    assert ".operation-panel-body code" in styles
+    assert ".panel-detail-list li" in styles
+    assert "overflow-wrap: anywhere" in styles
+    assert "max-width: 100%" in styles

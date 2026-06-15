@@ -4,11 +4,14 @@
 
 CP-002 replaces the CP-001 Project placeholder with Project Management child panels mapped to accepted Figma frames `03` through `06`.
 
+After Nova review, CP-002 also adds a small wrapping patch for right-panel metadata in the Standardization Preview.
+
 ## UX Impact
 
 - Project menu now opens a child-panel menu inside Operation Panel Host.
 - Create Project, Init Project Dirty State, and Standardization Preview are reviewable without replacing the shell.
 - Command draft previews expose expected version, idempotency key, source refs, and non-authoritative status.
+- Long Project panel metadata wraps inside Operation Panel Host instead of clipping at the right edge.
 
 ## Governance Impact
 

@@ -1,6 +1,7 @@
 {
   "slice": "CP-002 Project Management Panels",
   "status": "CP002_IMPLEMENTED_FOR_NOVA_REVIEW",
+  "authorization_record": "AUTHORIZATION_RECORD.md",
   "checkout_path": "D:\\Projects\\Nexus_cp001_child_panel_shell",
   "branch": "codex/4.21-child-panel-cp002-project-panels",
   "base_branch": "codex/4.21-real-testproject-e2e-uat",
@@ -14,10 +15,10 @@
     "verification/4.21/child-panel-figma-implementation-cp002-project-panels/"
   ],
   "tests": {
-    "targeted_desktop_surface": "17 passed in 0.03s",
+    "targeted_desktop_surface": "18 passed in 0.03s",
     "real_uat_desktop_bridge": "3 passed in 0.02s",
-    "local_app_contract": "76 passed in 0.17s",
-    "full_governance": "654 passed in 0.85s",
+    "local_app_contract": "76 passed in 0.18s",
+    "full_governance": "655 passed in 0.76s",
     "desktop_fixture_verifier": "slice012 desktop real UAT surface verified",
     "git_diff_check": "exit 0"
   },

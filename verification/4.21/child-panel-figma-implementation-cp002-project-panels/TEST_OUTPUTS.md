@@ -11,7 +11,7 @@ python -m pytest nexus/governance/tests/test_client_desktop_surface_slice012.py 
 Result:
 
 ```text
-17 passed in 0.03s
+18 passed in 0.03s
 ```
 
 ## Real UAT Desktop Bridge Tests
@@ -39,7 +39,7 @@ python -m pytest nexus/governance/tests/test_local_app_shell_contract.py nexus/g
 Result:
 
 ```text
-76 passed in 0.17s
+76 passed in 0.18s
 ```
 
 ## Full Governance Tests
@@ -53,7 +53,7 @@ python -m pytest nexus/governance/tests -q
 Result:
 
 ```text
-654 passed in 0.85s
+655 passed in 0.76s
 ```
 
 ## Desktop Fixture Verifier
