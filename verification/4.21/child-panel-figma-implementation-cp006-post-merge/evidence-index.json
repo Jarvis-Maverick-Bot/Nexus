@@ -1,0 +1,50 @@
+{
+    "status":  "CP006_POST_MERGE_EVIDENCE",
+    "target_branch":  "codex/4.21-real-testproject-e2e-uat",
+    "source_branch":  "codex/4.21-child-panel-cp006-visual-qa",
+    "target_pre_merge_head":  "68353eedc2395d5abe8efe3bc8cfc70317c93a79",
+    "source_head":  "a89259e432c0962f58e77540df23a46ef9a2090f",
+    "accepted_merge_base":  "68353eedc2395d5abe8efe3bc8cfc70317c93a79",
+    "post_merge_commit_before_evidence":  "fefad4de5fe26bc1a23ce75dc43c217d0047d28e",
+    "merge_parents":  [
+                          "68353eedc2395d5abe8efe3bc8cfc70317c93a79",
+                          "a89259e432c0962f58e77540df23a46ef9a2090f"
+                      ],
+    "verification":  [
+                         {
+                             "command":  "python -m pytest nexus/governance/tests/test_client_desktop_surface_slice012.py -q",
+                             "result":  ".............................                                            [100%] 29 passed in 0.03s"
+                         },
+                         {
+                             "command":  "bundled Node apps/l1gov-desktop-client/scripts/verify-fixture.mjs",
+                             "result":  "slice012 desktop real UAT surface verified"
+                         },
+                         {
+                             "command":  "git diff --cached --check",
+                             "result":  "see outputs/git-diff-check-output.txt"
+                         },
+                         {
+                             "command":  "no-go scan",
+                             "result":  "NO MATCHES (rg exit 1)"
+                         }
+                     ],
+    "outputs":  [
+                    "outputs/pytest-output.txt",
+                    "outputs/bundled-node-verifier-output.txt",
+                    "outputs/git-diff-check-output.txt",
+                    "outputs/no-go-scan-output.txt",
+                    "outputs/runtime-boundary-scan-output.txt",
+                    "outputs/json-tool-output.txt",
+                    "outputs/bom-scan-output.txt"
+                ],
+    "boundaries":  {
+                       "cp007_included":  false,
+                       "production_readiness_claimed":  false,
+                       "final_pass_claimed":  false,
+                       "delivery_completion_claimed":  false,
+                       "closeout_claimed":  false,
+                       "tauri_bridge_expanded_by_post_merge":  false,
+                       "runtime_mq_dispatch_controller_route_adapter_transport_work":  false,
+                       "deploy_config_credential_package_manager_mutation":  false
+                   }
+}

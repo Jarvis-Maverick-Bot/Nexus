@@ -1,0 +1,236 @@
+nexus\governance\tests\test_client_desktop_surface_slice012.py:65:    assert fixture["runtime_choice"] == "tauri"
+nexus\governance\tests\test_client_desktop_surface_slice012.py:74:    assert future_boundary["daemon_controller_bridge"] == "disabled_future_boundary"
+nexus\governance\tests\test_client_desktop_surface_slice012.py:183:        "dispatch execution",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:184:        "controller call",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:185:        "route activation",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:186:        "adapter transport activation",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:189:        "production readiness",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:191:        "final pass claim",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:266:def test_cp001_panel_registry_is_shell_only_and_fails_closed_for_unknown_routes() -> None:
+nexus\governance\tests\test_client_desktop_surface_slice012.py:270:    for route in (
+nexus\governance\tests\test_client_desktop_surface_slice012.py:271:        'data-panel-route="project_shell"',
+nexus\governance\tests\test_client_desktop_surface_slice012.py:272:        'data-panel-route="agent_shell"',
+nexus\governance\tests\test_client_desktop_surface_slice012.py:273:        'data-panel-route="mq_shell"',
+nexus\governance\tests\test_client_desktop_surface_slice012.py:274:        'data-panel-route="evidence_drawer"',
+nexus\governance\tests\test_client_desktop_surface_slice012.py:276:        assert route in html
+nexus\governance\tests\test_client_desktop_surface_slice012.py:282:        "mq_shell",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:289:    assert "ERR_INVALID_PANEL_ROUTE" in main_js
+nexus\governance\tests\test_client_desktop_surface_slice012.py:290:    assert "failClosedPanelRoute" in main_js
+nexus\governance\tests\test_client_desktop_surface_slice012.py:330:def test_cp002_project_menu_routes_to_preview_only_child_panels() -> None:
+nexus\governance\tests\test_client_desktop_surface_slice012.py:335:    assert 'data-panel-route="project_shell"' in html
+nexus\governance\tests\test_client_desktop_surface_slice012.py:367:        "final pass",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:393:    assert agent_management["runtime_control_activation"] is False
+nexus\governance\tests\test_client_desktop_surface_slice012.py:400:        "agent_runtime_status_blocked",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:408:        "renderAgentRuntimeStatusPanel",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:412:        "showAgentRuntimeBlocked",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:417:def test_cp003_agent_menu_routes_to_display_and_preview_only_child_panels() -> None:
+nexus\governance\tests\test_client_desktop_surface_slice012.py:422:    assert 'data-panel-route="agent_shell"' in html
+nexus\governance\tests\test_client_desktop_surface_slice012.py:427:        "Runtime Status Blocked",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:439:        "runtime_control_activation=false",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:445:def test_cp003_agent_panels_do_not_add_runtime_or_private_agent_controls() -> None:
+nexus\governance\tests\test_client_desktop_surface_slice012.py:452:        "start runtime",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:453:        "stop runtime",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:454:        "activate runtime",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:457:        "dispatch agent",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:458:        "call controller",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:459:        "activate route",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:466:    assert "runtime_control_activation" in main_js
+nexus\governance\tests\test_client_desktop_surface_slice012.py:470:def test_cp004_mq_management_fixture_is_display_and_preview_only() -> None:
+nexus\governance\tests\test_client_desktop_surface_slice012.py:473:    mq_management = fixture["display_state"]["mq_management"]
+nexus\governance\tests\test_client_desktop_surface_slice012.py:474:    assert mq_management["queue_execution"] is False
+nexus\governance\tests\test_client_desktop_surface_slice012.py:475:    assert mq_management["dispatch_execution"] is False
+nexus\governance\tests\test_client_desktop_surface_slice012.py:476:    assert mq_management["controller_call"] is False
+nexus\governance\tests\test_client_desktop_surface_slice012.py:477:    assert mq_management["route_activation"] is False
+nexus\governance\tests\test_client_desktop_surface_slice012.py:478:    assert mq_management["adapter_transport_activation"] is False
+nexus\governance\tests\test_client_desktop_surface_slice012.py:479:    assert mq_management["replay_execution"] is False
+nexus\governance\tests\test_client_desktop_surface_slice012.py:480:    assert mq_management["command_draft_preview_only"] is True
+nexus\governance\tests\test_client_desktop_surface_slice012.py:482:    assert mq_management["queue_overview"]["queues"][0]["label"] == "Governance inbox"
+nexus\governance\tests\test_client_desktop_surface_slice012.py:483:    assert mq_management["message_detail"]["correlation_id"] == "corr-cp004-message-preview"
+nexus\governance\tests\test_client_desktop_surface_slice012.py:484:    assert mq_management["dispatch_no_go"]["error_code"] == "ERR_NO_GO_BOUNDARY"
+nexus\governance\tests\test_client_desktop_surface_slice012.py:485:    assert mq_management["replay_evidence"]["evidence_only"] is True
+nexus\governance\tests\test_client_desktop_surface_slice012.py:488:def test_cp004_mq_management_panels_are_registered_from_fixture_state() -> None:
+nexus\governance\tests\test_client_desktop_surface_slice012.py:492:        "mq_shell",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:493:        "mq_queue_overview",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:494:        "mq_message_detail",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:495:        "mq_no_go_diagnostics",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:496:        "mq_replay_evidence",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:501:        "renderMqQueueOverviewPanel",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:502:        "renderMqMessageDetailPanel",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:503:        "renderMqNoGoDiagnosticsPanel",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:504:        "renderMqReplayEvidencePanel",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:505:        "showMqMessageDraftPreview",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:506:        "showMqDispatchNoGo",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:507:        "showMqReplayEvidencePreview",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:512:def test_cp004_mq_menu_routes_to_display_and_preview_only_child_panels() -> None:
+nexus\governance\tests\test_client_desktop_surface_slice012.py:516:    assert 'id="top-menu-mq"' in html
+nexus\governance\tests\test_client_desktop_surface_slice012.py:517:    assert 'data-panel-route="mq_shell"' in html
+nexus\governance\tests\test_client_desktop_surface_slice012.py:522:        "Dispatch No-Go Diagnostics",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:529:        "subtype=MqMessageDetailPanel",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:534:        "dispatch_execution=false",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:535:        "controller_call=false",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:543:def test_cp004_mq_panels_do_not_add_executable_mq_or_dispatch_controls() -> None:
+nexus\governance\tests\test_client_desktop_surface_slice012.py:556:        "dispatch now",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:557:        "call controller",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:558:        "activate route",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:559:        "activate adapter",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:560:        "activate transport",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:567:    assert "dispatch_execution" in main_js
+nexus\governance\tests\test_client_desktop_surface_slice012.py:620:    assert "ERR_INVALID_PANEL_ROUTE" in main_js
+nexus\governance\tests\test_client_desktop_surface_slice012.py:665:        "deploy now",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:666:        "closeout",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:670:        "dispatch now",
+nexus\governance\tests\test_client_desktop_surface_slice012.py:671:        "call controller",
+apps\l1gov-desktop-client\src\main.js:44:    status: "Frame 07 Agent menu open; private_agent_invocation=false; runtime_control_activation=false.",
+apps\l1gov-desktop-client\src\main.js:48:      { label: "Runtime Status", panelId: "agent_runtime_status_blocked" },
+apps\l1gov-desktop-client\src\main.js:62:  agent_runtime_status_blocked: {
+apps\l1gov-desktop-client\src\main.js:63:    title: "Runtime Status Blocked",
+apps\l1gov-desktop-client\src\main.js:64:    status: "Blocked runtime status display; runtime_control_activation=false.",
+apps\l1gov-desktop-client\src\main.js:65:    render: renderAgentRuntimeStatusPanel
+apps\l1gov-desktop-client\src\main.js:72:  mq_shell: {
+apps\l1gov-desktop-client\src\main.js:73:    title: "MQ Management",
+apps\l1gov-desktop-client\src\main.js:74:    body: "MQ menu open. Choose an MQ Management child panel; ContextEnvelope remains visible.",
+apps\l1gov-desktop-client\src\main.js:75:    status: "Frame 11 MQ menu open; queue_execution=false; dispatch_execution=false.",
+apps\l1gov-desktop-client\src\main.js:77:      { label: "Queue Overview", panelId: "mq_queue_overview" },
+apps\l1gov-desktop-client\src\main.js:78:      { label: "Message Detail", panelId: "mq_message_detail" },
+apps\l1gov-desktop-client\src\main.js:79:      { label: "Dispatch No-Go Diagnostics", panelId: "mq_no_go_diagnostics" },
+apps\l1gov-desktop-client\src\main.js:80:      { label: "Replay Evidence", panelId: "mq_replay_evidence" }
+apps\l1gov-desktop-client\src\main.js:83:  mq_queue_overview: {
+apps\l1gov-desktop-client\src\main.js:85:    status: "Read-only projected MQ rows; queue_execution=false.",
+apps\l1gov-desktop-client\src\main.js:86:    render: renderMqQueueOverviewPanel
+apps\l1gov-desktop-client\src\main.js:88:  mq_message_detail: {
+apps\l1gov-desktop-client\src\main.js:91:    render: renderMqMessageDetailPanel
+apps\l1gov-desktop-client\src\main.js:93:  mq_no_go_diagnostics: {
+apps\l1gov-desktop-client\src\main.js:94:    title: "Dispatch No-Go Diagnostics",
+apps\l1gov-desktop-client\src\main.js:95:    status: "Blocked diagnostics display; dispatch_execution=false.",
+apps\l1gov-desktop-client\src\main.js:96:    render: renderMqNoGoDiagnosticsPanel
+apps\l1gov-desktop-client\src\main.js:98:  mq_replay_evidence: {
+apps\l1gov-desktop-client\src\main.js:101:    render: renderMqReplayEvidencePanel
+apps\l1gov-desktop-client\src\main.js:173:  runtime_control_activation: false,
+apps\l1gov-desktop-client\src\main.js:188:  runtime_status: {
+apps\l1gov-desktop-client\src\main.js:191:    reason: "private_agent_invocation=false; runtime_control_activation=false"
+apps\l1gov-desktop-client\src\main.js:196:    forbidden_actions: ["private_agent_invocation", "runtime_control_activation"],
+apps\l1gov-desktop-client\src\main.js:201:const DEFAULT_MQ_MANAGEMENT = Object.freeze({
+apps\l1gov-desktop-client\src\main.js:203:  dispatch_execution: false,
+apps\l1gov-desktop-client\src\main.js:204:  controller_call: false,
+apps\l1gov-desktop-client\src\main.js:205:  route_activation: false,
+apps\l1gov-desktop-client\src\main.js:206:  adapter_transport_activation: false,
+apps\l1gov-desktop-client\src\main.js:212:      { id: "queue:dispatch-diagnostics", label: "Dispatch diagnostics", status: "blocked", message_count: 1 }
+apps\l1gov-desktop-client\src\main.js:220:    payload_summary: "Projected MQ message metadata for UX inspection only"
+apps\l1gov-desktop-client\src\main.js:222:  dispatch_no_go: {
+apps\l1gov-desktop-client\src\main.js:225:    reason: "dispatch_execution=false; controller_call=false; route_activation=false; adapter_transport_activation=false"
+apps\l1gov-desktop-client\src\main.js:228:    evidence_ref: "verification/4.21/child-panel-figma-implementation-cp004-mq-panels/",
+apps\l1gov-desktop-client\src\main.js:290:      daemon_controller_bridge: "disabled_future_boundary",
+apps\l1gov-desktop-client\src\main.js:371:    mqManagement: displayState.mq_management || DEFAULT_MQ_MANAGEMENT,
+apps\l1gov-desktop-client\src\main.js:468:function failClosedPanelRoute(panelId) {
+apps\l1gov-desktop-client\src\main.js:470:  $("operation-panel-title").textContent = "Panel route rejected";
+apps\l1gov-desktop-client\src\main.js:471:  $("operation-panel-status").textContent = "ERR_INVALID_PANEL_ROUTE";
+apps\l1gov-desktop-client\src\main.js:472:  $("operation-panel-body").textContent = `Unknown panel route ${panelId}; shell navigation failed closed. No command is executed from shell navigation.`;
+apps\l1gov-desktop-client\src\main.js:479:    return failClosedPanelRoute(panelId);
+apps\l1gov-desktop-client\src\main.js:701:      if (action.command === "agent_runtime_block") {
+apps\l1gov-desktop-client\src\main.js:702:        showAgentRuntimeBlocked();
+apps\l1gov-desktop-client\src\main.js:704:      if (action.command === "mq_message_preview") {
+apps\l1gov-desktop-client\src\main.js:705:        showMqMessageDraftPreview();
+apps\l1gov-desktop-client\src\main.js:707:      if (action.command === "mq_dispatch_no_go") {
+apps\l1gov-desktop-client\src\main.js:708:        showMqDispatchNoGo();
+apps\l1gov-desktop-client\src\main.js:710:      if (action.command === "mq_replay_evidence_preview") {
+apps\l1gov-desktop-client\src\main.js:711:        showMqReplayEvidencePreview();
+apps\l1gov-desktop-client\src\main.js:796:  renderProjectDraftPreview("Command Draft Preview", "Create Project route is preview-only and must be mediated by Governance Service.", [
+apps\l1gov-desktop-client\src\main.js:850:    { label: "Runtime Status", panelId: "agent_runtime_status_blocked" }
+apps\l1gov-desktop-client\src\main.js:864:    "runtime_control_activation=false"
+apps\l1gov-desktop-client\src\main.js:868:    { label: "Show Runtime Boundary Block", command: "agent_runtime_block", danger: true }
+apps\l1gov-desktop-client\src\main.js:872:function renderAgentRuntimeStatusPanel(container) {
+apps\l1gov-desktop-client\src\main.js:873:  const runtimeStatus = agentManagementState().runtime_status;
+apps\l1gov-desktop-client\src\main.js:874:  appendPanelParagraph(container, "Runtime Status Blocked shows diagnostic state only. Runtime control activation stays disabled.");
+apps\l1gov-desktop-client\src\main.js:876:    `status=${runtimeStatus.status}`,
+apps\l1gov-desktop-client\src\main.js:877:    `error_code=${runtimeStatus.error_code}`,
+apps\l1gov-desktop-client\src\main.js:878:    runtimeStatus.reason
+apps\l1gov-desktop-client\src\main.js:881:    { label: "Show Runtime Boundary Block", command: "agent_runtime_block", danger: true }
+apps\l1gov-desktop-client\src\main.js:895:    "runtime_control_activation=false"
+apps\l1gov-desktop-client\src\main.js:899:    { label: "Show Runtime Boundary Block", command: "agent_runtime_block", danger: true }
+apps\l1gov-desktop-client\src\main.js:916:    "runtime_control_activation=false"
+apps\l1gov-desktop-client\src\main.js:929:    "runtime_control_activation=false"
+apps\l1gov-desktop-client\src\main.js:933:function showAgentRuntimeBlocked() {
+apps\l1gov-desktop-client\src\main.js:934:  const runtimeStatus = agentManagementState().runtime_status;
+apps\l1gov-desktop-client\src\main.js:935:  $("service-outcome-copy").textContent = `BLOCKED ${runtimeStatus.error_code}: private_agent_invocation=false; runtime_control_activation=false.`;
+apps\l1gov-desktop-client\src\main.js:939:function mqManagementState() {
+apps\l1gov-desktop-client\src\main.js:940:  return state?.mqManagement || DEFAULT_MQ_MANAGEMENT;
+apps\l1gov-desktop-client\src\main.js:943:function renderMqQueueOverviewPanel(container) {
+apps\l1gov-desktop-client\src\main.js:944:  const mq = mqManagementState();
+apps\l1gov-desktop-client\src\main.js:945:  const overview = mq.queue_overview;
+apps\l1gov-desktop-client\src\main.js:946:  appendPanelParagraph(container, "Queue Overview displays projected MQ rows for UX inspection only. queue_execution=false.");
+apps\l1gov-desktop-client\src\main.js:952:    `queue_execution=${mq.queue_execution}`,
+apps\l1gov-desktop-client\src\main.js:953:    `dispatch_execution=${mq.dispatch_execution}`,
+apps\l1gov-desktop-client\src\main.js:954:    `command_draft_preview_only=${mq.command_draft_preview_only}`
+apps\l1gov-desktop-client\src\main.js:957:    { label: "Message Detail", panelId: "mq_message_detail" },
+apps\l1gov-desktop-client\src\main.js:958:    { label: "Dispatch No-Go Diagnostics", panelId: "mq_no_go_diagnostics" },
+apps\l1gov-desktop-client\src\main.js:959:    { label: "Replay Evidence", panelId: "mq_replay_evidence" }
+apps\l1gov-desktop-client\src\main.js:963:function renderMqMessageDetailPanel(container) {
+apps\l1gov-desktop-client\src\main.js:964:  const mq = mqManagementState();
+apps\l1gov-desktop-client\src\main.js:965:  const detail = mq.message_detail;
+apps\l1gov-desktop-client\src\main.js:973:    `queue_execution=${mq.queue_execution}`,
+apps\l1gov-desktop-client\src\main.js:974:    `dispatch_execution=${mq.dispatch_execution}`
+apps\l1gov-desktop-client\src\main.js:977:    { label: "Preview Message Draft", command: "mq_message_preview" },
+apps\l1gov-desktop-client\src\main.js:978:    { label: "Show Dispatch No-Go", command: "mq_dispatch_no_go", danger: true }
+apps\l1gov-desktop-client\src\main.js:982:function renderMqNoGoDiagnosticsPanel(container) {
+apps\l1gov-desktop-client\src\main.js:983:  const mq = mqManagementState();
+apps\l1gov-desktop-client\src\main.js:984:  const diagnostics = mq.dispatch_no_go;
+apps\l1gov-desktop-client\src\main.js:985:  appendPanelParagraph(container, "Dispatch No-Go Diagnostics is a blocked diagnostic display. It does not open a runtime path.");
+apps\l1gov-desktop-client\src\main.js:990:    `controller_call=${mq.controller_call}`,
+apps\l1gov-desktop-client\src\main.js:991:    `route_activation=${mq.route_activation}`,
+apps\l1gov-desktop-client\src\main.js:992:    `adapter_transport_activation=${mq.adapter_transport_activation}`
+apps\l1gov-desktop-client\src\main.js:995:    { label: "Show Dispatch No-Go", command: "mq_dispatch_no_go", danger: true },
+apps\l1gov-desktop-client\src\main.js:996:    { label: "Replay Evidence", panelId: "mq_replay_evidence" }
+apps\l1gov-desktop-client\src\main.js:1000:function renderMqReplayEvidencePanel(container) {
+apps\l1gov-desktop-client\src\main.js:1001:  const mq = mqManagementState();
+apps\l1gov-desktop-client\src\main.js:1002:  const replay = mq.replay_evidence;
+apps\l1gov-desktop-client\src\main.js:1011:    { label: "Preview Replay Evidence", command: "mq_replay_evidence_preview" },
+apps\l1gov-desktop-client\src\main.js:1012:    { label: "Show Dispatch No-Go", command: "mq_dispatch_no_go", danger: true }
+apps\l1gov-desktop-client\src\main.js:1016:function showMqMessageDraftPreview() {
+apps\l1gov-desktop-client\src\main.js:1017:  const detail = mqManagementState().message_detail;
+apps\l1gov-desktop-client\src\main.js:1018:  renderProjectDraftPreview("Command Draft Preview", "MQ Message Detail is a display-only command draft preview.", [
+apps\l1gov-desktop-client\src\main.js:1020:    "subtype=MqMessageDetailPanel",
+apps\l1gov-desktop-client\src\main.js:1026:    "dispatch_execution=false",
+apps\l1gov-desktop-client\src\main.js:1027:    "controller_call=false",
+apps\l1gov-desktop-client\src\main.js:1032:function showMqDispatchNoGo() {
+apps\l1gov-desktop-client\src\main.js:1033:  const diagnostics = mqManagementState().dispatch_no_go;
+apps\l1gov-desktop-client\src\main.js:1034:  $("service-outcome-copy").textContent = `BLOCKED ${diagnostics.error_code}: dispatch_execution=false; controller_call=false; route_activation=false; adapter_transport_activation=false.`;
+apps\l1gov-desktop-client\src\main.js:1038:function showMqReplayEvidencePreview() {
+apps\l1gov-desktop-client\src\main.js:1039:  const replay = mqManagementState().replay_evidence;
+apps\l1gov-desktop-client\src\main.js:1046:    "dispatch_execution=false"
+apps\l1gov-desktop-client\src\main.js:1065:  $("service-outcome-copy").textContent = "BLOCKED ERR_NO_GO_BOUNDARY: direct UI approval is blocked and must route through Monitor/HITL. no_go_bypass_allowed=false.";
+apps\l1gov-desktop-client\src\main.js:1080:  const boundary = state.source.future_integration_boundary.daemon_controller_bridge;
+apps\l1gov-desktop-client\src\main.js:1129:  document.querySelectorAll("[data-panel-route]").forEach((button) => {
+apps\l1gov-desktop-client\src\main.js:1130:    button.addEventListener("click", () => selectOperationPanel(button.dataset.panelRoute));
+apps\l1gov-desktop-client\src\main.js:1217:  failClosedPanelRoute,
+apps\l1gov-desktop-client\src\main.js:1227:  renderAgentRuntimeStatusPanel,
+apps\l1gov-desktop-client\src\main.js:1231:  showAgentRuntimeBlocked,
+apps\l1gov-desktop-client\src\main.js:1232:  renderMqQueueOverviewPanel,
+apps\l1gov-desktop-client\src\main.js:1233:  renderMqMessageDetailPanel,
+apps\l1gov-desktop-client\src\main.js:1234:  renderMqNoGoDiagnosticsPanel,
+apps\l1gov-desktop-client\src\main.js:1235:  renderMqReplayEvidencePanel,
+apps\l1gov-desktop-client\src\main.js:1236:  showMqMessageDraftPreview,
+apps\l1gov-desktop-client\src\main.js:1237:  showMqDispatchNoGo,
+apps\l1gov-desktop-client\src\main.js:1238:  showMqReplayEvidencePreview,
+apps\l1gov-desktop-client\src\index.html:19:        <button id="top-menu-project" class="button" type="button" data-panel-route="project_shell">Project</button>
+apps\l1gov-desktop-client\src\index.html:20:        <button id="top-menu-agent" class="button" type="button" data-panel-route="agent_shell">Agent</button>
+apps\l1gov-desktop-client\src\index.html:21:        <button id="top-menu-mq" class="button" type="button" data-panel-route="mq_shell">MQ</button>
+apps\l1gov-desktop-client\src\index.html:23:        <button id="top-menu-evidence" class="button" type="button" data-panel-route="evidence_drawer">Evidence</button>
+apps\l1gov-desktop-client\src\index.html:151:            <p>Select Draft Command to preview the Governance Service route shape.</p>
+apps\l1gov-desktop-client\src\index.html:182:          Select Project, Agent, MQ, Workspace, or Evidence to review shell routing.
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:4:  "runtime_choice": "tauri",
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:98:      "runtime_control_activation": false,
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:123:      "runtime_status": {
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:126:        "reason": "private_agent_invocation=false; runtime_control_activation=false"
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:136:          "runtime_control_activation"
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:142:    "mq_management": {
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:144:      "dispatch_execution": false,
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:145:      "controller_call": false,
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:146:      "route_activation": false,
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:147:      "adapter_transport_activation": false,
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:159:            "id": "queue:dispatch-diagnostics",
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:160:            "label": "Dispatch diagnostics",
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:171:        "payload_summary": "Projected MQ message metadata for UX inspection only"
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:173:      "dispatch_no_go": {
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:176:        "reason": "dispatch_execution=false; controller_call=false; route_activation=false; adapter_transport_activation=false"
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:179:        "evidence_ref": "verification/4.21/child-panel-figma-implementation-cp004-mq-panels/",
+apps\l1gov-desktop-client\src\fixtures\slice012_desktop_state.json:272:    "daemon_controller_bridge": "disabled_future_boundary",
