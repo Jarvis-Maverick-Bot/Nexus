@@ -1,0 +1,1 @@
+npx not available on PATH; screenshots used bundled Playwright package with installed Chrome and no package-manager mutation.

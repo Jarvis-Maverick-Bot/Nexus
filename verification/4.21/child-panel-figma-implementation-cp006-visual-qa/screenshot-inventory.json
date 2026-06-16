@@ -1,0 +1,219 @@
+[
+  {
+    "frame": "02 Main Workbench - Normal",
+    "surface": "Main Cockpit shell",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp001-02-main-cockpit-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "02 Main Workbench - Normal",
+    "surface": "Main Cockpit shell compact top crop",
+    "viewport": "900x700",
+    "file": "screenshots/cp006-cp001-02-main-cockpit-compact.png",
+    "compact": true
+  },
+  {
+    "frame": "02 Main Workbench - Normal",
+    "surface": "Main Cockpit shell compact full flow",
+    "viewport": "900x1400",
+    "file": "screenshots/cp006-cp001-02-main-cockpit-compact-full.png",
+    "compact": true
+  },
+  {
+    "frame": "03 Top Menu - Project Open",
+    "surface": "Project menu open",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp002-03-project-menu-open-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "03 Top Menu - Project Open",
+    "surface": "Project menu open compact",
+    "viewport": "900x700",
+    "file": "screenshots/cp006-cp002-03-project-menu-open-compact.png",
+    "compact": true
+  },
+  {
+    "frame": "04 Project Panel - Create Project",
+    "surface": "Create Project child panel",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp002-04-create-project-panel-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "05 Project Panel - Init Project Dirty",
+    "surface": "Init Project dirty-state child panel",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp002-05-init-project-dirty-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "06 Project Panel - Standardization Preview",
+    "surface": "Standardization preview child panel",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp002-06-standardization-preview-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "07 Top Menu - Agent Open",
+    "surface": "Agent menu open",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp003-07-agent-menu-open-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "07 Top Menu - Agent Open",
+    "surface": "Agent menu open compact",
+    "viewport": "900x700",
+    "file": "screenshots/cp006-cp003-07-agent-menu-open-compact.png",
+    "compact": true
+  },
+  {
+    "frame": "08 Agent Panel - Directory",
+    "surface": "Agent Directory child panel",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp003-08-agent-directory-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "09 Agent Panel - Assign Agent Updates Context",
+    "surface": "Assign Agent context update preview",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp003-09-assign-agent-context-preview-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "10 Agent Panel - Runtime Status Blocked",
+    "surface": "Runtime Status blocked display",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp003-10-runtime-status-blocked-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "21 Agent Panel - Configure Agent",
+    "surface": "Configure Agent child panel",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp003-21-configure-agent-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "11 Top Menu - MQ Open",
+    "surface": "MQ menu open",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp004-11-mq-menu-open-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "11 Top Menu - MQ Open",
+    "surface": "MQ menu open compact",
+    "viewport": "900x700",
+    "file": "screenshots/cp006-cp004-11-mq-menu-open-compact.png",
+    "compact": true
+  },
+  {
+    "frame": "12 MQ Panel - Queue Overview",
+    "surface": "Queue Overview projected rows",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp004-12-mq-queue-overview-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "13 MQ Panel - Message Detail",
+    "surface": "Message Detail projected metadata",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp004-13-mq-message-detail-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "14 MQ Panel - Dispatch No-Go Diagnostics",
+    "surface": "Dispatch no-go diagnostic display",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp004-14-mq-dispatch-no-go-diagnostics-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "15 MQ Panel - Replay Evidence",
+    "surface": "Replay evidence display-only panel",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp004-15-mq-replay-evidence-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "CP-005 Main Cockpit Auxiliary Actions",
+    "surface": "Main Cockpit with auxiliary actions",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp005-00-main-cockpit-auxiliary-actions-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "CP-005 Workspace Picker Overlay",
+    "surface": "Workspace Picker Overlay",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp005-01-workspace-picker-overlay-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "CP-005 Command Preview",
+    "surface": "Command Preview display-only",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp005-02-command-preview-display-only-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "CP-005 Evidence Drawer",
+    "surface": "Evidence Drawer evidence-only",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp005-03-evidence-drawer-evidence-only-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "CP-005 No-Go Dialog",
+    "surface": "No-Go Dialog boundary",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp005-04-no-go-dialog-boundary-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "CP-005 Stale Projection Refresh",
+    "surface": "Stale Projection Refresh display-only",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp005-05-stale-projection-refresh-display-only-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "CP-005 Status Toast",
+    "surface": "Status Toast display-only",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp005-06-status-toast-display-only-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "CP-005 Host Close/Back Lifecycle",
+    "surface": "Host close/back lifecycle",
+    "viewport": "1440x950",
+    "file": "screenshots/cp006-cp005-07-host-close-back-lifecycle-desktop.png",
+    "compact": false
+  },
+  {
+    "frame": "CP-005 Workspace Picker Overlay",
+    "surface": "Workspace Picker Overlay compact",
+    "viewport": "900x700",
+    "file": "screenshots/cp006-cp005-01-workspace-picker-overlay-compact.png",
+    "compact": true
+  },
+  {
+    "frame": "CP-005 Command Preview",
+    "surface": "Command Preview compact",
+    "viewport": "900x700",
+    "file": "screenshots/cp006-cp005-02-command-preview-compact.png",
+    "compact": true
+  },
+  {
+    "frame": "CP-005 Host Close/Back Lifecycle",
+    "surface": "Host close/back compact",
+    "viewport": "900x700",
+    "file": "screenshots/cp006-cp005-07-host-close-back-compact.png",
+    "compact": true
+  }
+]

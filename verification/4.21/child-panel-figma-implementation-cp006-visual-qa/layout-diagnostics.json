@@ -1,0 +1,467 @@
+[
+  {
+    "name": "cp006-cp001-02-main-cockpit-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp001-02-main-cockpit-compact.png",
+    "viewport": {
+      "width": 900,
+      "height": 700
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 900,
+      "clientWidth": 900,
+      "bodyScrollWidth": 900,
+      "bodyClientWidth": 900
+    }
+  },
+  {
+    "name": "cp006-cp001-02-main-cockpit-compact-full.png",
+    "viewport": {
+      "width": 900,
+      "height": 1400
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 900,
+      "clientWidth": 900,
+      "bodyScrollWidth": 900,
+      "bodyClientWidth": 900
+    }
+  },
+  {
+    "name": "cp006-cp002-03-project-menu-open-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp002-03-project-menu-open-compact.png",
+    "viewport": {
+      "width": 900,
+      "height": 700
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 900,
+      "clientWidth": 900,
+      "bodyScrollWidth": 900,
+      "bodyClientWidth": 900
+    }
+  },
+  {
+    "name": "cp006-cp002-04-create-project-panel-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp002-05-init-project-dirty-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp002-06-standardization-preview-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp003-07-agent-menu-open-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp003-07-agent-menu-open-compact.png",
+    "viewport": {
+      "width": 900,
+      "height": 700
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 900,
+      "clientWidth": 900,
+      "bodyScrollWidth": 900,
+      "bodyClientWidth": 900
+    }
+  },
+  {
+    "name": "cp006-cp003-08-agent-directory-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp003-09-assign-agent-context-preview-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp003-10-runtime-status-blocked-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp003-21-configure-agent-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp004-11-mq-menu-open-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp004-11-mq-menu-open-compact.png",
+    "viewport": {
+      "width": 900,
+      "height": 700
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 900,
+      "clientWidth": 900,
+      "bodyScrollWidth": 900,
+      "bodyClientWidth": 900
+    }
+  },
+  {
+    "name": "cp006-cp004-12-mq-queue-overview-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp004-13-mq-message-detail-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp004-14-mq-dispatch-no-go-diagnostics-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp004-15-mq-replay-evidence-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp005-00-main-cockpit-auxiliary-actions-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp005-01-workspace-picker-overlay-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp005-02-command-preview-display-only-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp005-03-evidence-drawer-evidence-only-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp005-04-no-go-dialog-boundary-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp005-05-stale-projection-refresh-display-only-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp005-06-status-toast-display-only-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp005-07-host-close-back-lifecycle-desktop.png",
+    "viewport": {
+      "width": 1440,
+      "height": 950
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "bodyClientWidth": 1440
+    }
+  },
+  {
+    "name": "cp006-cp005-01-workspace-picker-overlay-compact.png",
+    "viewport": {
+      "width": 900,
+      "height": 700
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 900,
+      "clientWidth": 900,
+      "bodyScrollWidth": 900,
+      "bodyClientWidth": 900
+    }
+  },
+  {
+    "name": "cp006-cp005-02-command-preview-compact.png",
+    "viewport": {
+      "width": 900,
+      "height": 700
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 900,
+      "clientWidth": 900,
+      "bodyScrollWidth": 900,
+      "bodyClientWidth": 900
+    }
+  },
+  {
+    "name": "cp006-cp005-07-host-close-back-compact.png",
+    "viewport": {
+      "width": 900,
+      "height": 700
+    },
+    "horizontalOverflow": false,
+    "offenders": [],
+    "document": {
+      "scrollWidth": 900,
+      "clientWidth": 900,
+      "bodyScrollWidth": 900,
+      "bodyClientWidth": 900
+    }
+  }
+]
