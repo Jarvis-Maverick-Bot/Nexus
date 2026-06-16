@@ -39,6 +39,20 @@ git rev-parse HEAD
 Result:
 
 ```text
+653426a12020b31f2827a85a68c971ff8e3069eb
+```
+
+## Accepted Base
+
+Command:
+
+```powershell
+git merge-base HEAD origin/codex/4.21-real-testproject-e2e-uat
+```
+
+Result:
+
+```text
 4ad9f6260697134f1587760a0af84a1e7003af50
 ```
 

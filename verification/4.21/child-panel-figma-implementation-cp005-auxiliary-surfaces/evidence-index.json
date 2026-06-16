@@ -1,7 +1,9 @@
 {
   "status": "CP005_IMPLEMENTED_FOR_NOVA_REVIEW",
   "branch": "codex/4.21-child-panel-cp005-auxiliary-surfaces",
-  "head": "4ad9f6260697134f1587760a0af84a1e7003af50",
+  "accepted_base": "4ad9f6260697134f1587760a0af84a1e7003af50",
+  "implementation_head": "653426a12020b31f2827a85a68c971ff8e3069eb",
+  "head": "653426a12020b31f2827a85a68c971ff8e3069eb",
   "verification": [
     {
       "command": "python -m pytest nexus/governance/tests/test_client_desktop_surface_slice012.py -q",
@@ -24,7 +26,8 @@
     "outputs/bundled-node-verifier-output.txt",
     "outputs/json-tool-output.txt",
     "outputs/git-diff-check-output.txt",
-    "outputs/no-go-scan-output.txt"
+    "outputs/no-go-scan-output.txt",
+    "outputs/bom-scan-output.txt"
   ],
   "screenshots": [
     "cp005-00-main-cockpit-auxiliary-actions-desktop.png",

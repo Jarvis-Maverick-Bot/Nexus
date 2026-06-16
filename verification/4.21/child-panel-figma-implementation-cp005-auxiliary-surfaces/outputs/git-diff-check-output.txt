@@ -1,1 +1,2 @@
-NO OUTPUT (git diff --check exit 0)
+warning: in the working copy of 'verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/SOURCE_CHECKOUT_PROOF.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/evidence-index.json', LF will be replaced by CRLF the next time Git touches it

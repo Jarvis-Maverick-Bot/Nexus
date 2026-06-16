@@ -1,4 +1,4 @@
-﻿diff --git a/apps/l1gov-desktop-client/scripts/verify-fixture.mjs b/apps/l1gov-desktop-client/scripts/verify-fixture.mjs
+diff --git a/apps/l1gov-desktop-client/scripts/verify-fixture.mjs b/apps/l1gov-desktop-client/scripts/verify-fixture.mjs
 index 1f65926..a0631de 100644
 --- a/apps/l1gov-desktop-client/scripts/verify-fixture.mjs
 +++ b/apps/l1gov-desktop-client/scripts/verify-fixture.mjs
