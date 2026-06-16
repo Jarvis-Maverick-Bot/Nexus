@@ -382,3 +382,86 @@ def test_cp002_operation_panel_metadata_wraps_inside_right_panel() -> None:
     assert ".panel-detail-list li" in styles
     assert "overflow-wrap: anywhere" in styles
     assert "max-width: 100%" in styles
+
+
+def test_cp003_agent_management_panels_are_registered_from_fixture_state() -> None:
+    main_js = read_app_file("src/main.js")
+    fixture = load_fixture()
+
+    agent_management = fixture["display_state"]["agent_management"]
+    assert agent_management["private_agent_invocation"] is False
+    assert agent_management["runtime_control_activation"] is False
+    assert agent_management["command_draft_preview_only"] is True
+
+    for panel_id in (
+        "agent_shell",
+        "agent_directory",
+        "agent_assignment",
+        "agent_runtime_status_blocked",
+        "agent_configure",
+    ):
+        assert panel_id in main_js
+
+    for hook in (
+        "renderAgentDirectoryPanel",
+        "renderAgentAssignmentPanel",
+        "renderAgentRuntimeStatusPanel",
+        "renderAgentConfigurePanel",
+        "showAgentAssignmentDraftPreview",
+        "showAgentConfigureDraftPreview",
+        "showAgentRuntimeBlocked",
+    ):
+        assert hook in main_js
+
+
+def test_cp003_agent_menu_routes_to_display_and_preview_only_child_panels() -> None:
+    html = read_app_file("src/index.html")
+    main_js = read_app_file("src/main.js")
+
+    assert 'id="top-menu-agent"' in html
+    assert 'data-panel-route="agent_shell"' in html
+
+    for visible_label in (
+        "Agent Directory",
+        "Assign Agent",
+        "Runtime Status Blocked",
+        "Configure Agent",
+    ):
+        assert visible_label in main_js
+
+    for expected_contract in (
+        "command_type=SubmitCommandDraft",
+        "subtype=AgentAssignmentPanel",
+        "subtype=AgentConfigurePanel",
+        "context_update",
+        "display-only",
+        "private_agent_invocation=false",
+        "runtime_control_activation=false",
+        "ERR_NO_GO_BOUNDARY",
+    ):
+        assert expected_contract in main_js
+
+
+def test_cp003_agent_panels_do_not_add_runtime_or_private_agent_controls() -> None:
+    main_js = read_app_file("src/main.js").lower()
+    html = read_app_file("src/index.html").lower()
+    combined = "\n".join((main_js, html))
+
+    forbidden_affordances = (
+        "invoke private agent",
+        "start runtime",
+        "stop runtime",
+        "activate runtime",
+        "run agent",
+        "execute agent",
+        "dispatch agent",
+        "call controller",
+        "activate route",
+    )
+
+    for affordance in forbidden_affordances:
+        assert affordance not in combined, affordance
+
+    assert "private_agent_invocation" in main_js
+    assert "runtime_control_activation" in main_js
+    assert "err_no_go_boundary" in main_js

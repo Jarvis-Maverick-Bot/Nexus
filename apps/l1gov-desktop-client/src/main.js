@@ -35,8 +35,34 @@ const PANEL_REGISTRY = Object.freeze({
   },
   agent_shell: {
     title: "Agent Management",
-    body: "CP-001 shell route only. Agent child panels are planned for CP-003.",
-    status: "Read-only navigation treatment; no live agent calls."
+    body: "Agent menu open. Choose an Agent Management child panel; ContextEnvelope remains visible.",
+    status: "Frame 07 Agent menu open; private_agent_invocation=false; runtime_control_activation=false.",
+    actions: [
+      { label: "Agent Directory", panelId: "agent_directory" },
+      { label: "Assign Agent", panelId: "agent_assignment" },
+      { label: "Runtime Status", panelId: "agent_runtime_status_blocked" },
+      { label: "Configure Agent", panelId: "agent_configure" }
+    ]
+  },
+  agent_directory: {
+    title: "Agent Directory",
+    status: "Read-only projected agent rows; private_agent_invocation=false.",
+    render: renderAgentDirectoryPanel
+  },
+  agent_assignment: {
+    title: "Assign Agent",
+    status: "Display-only ContextEnvelope update preview; command draft preview only.",
+    render: renderAgentAssignmentPanel
+  },
+  agent_runtime_status_blocked: {
+    title: "Runtime Status Blocked",
+    status: "Blocked runtime status display; runtime_control_activation=false.",
+    render: renderAgentRuntimeStatusPanel
+  },
+  agent_configure: {
+    title: "Configure Agent",
+    status: "Configuration preview only; private_agent_invocation=false.",
+    render: renderAgentConfigurePanel
   },
   mq_shell: {
     title: "MQ Management",
@@ -91,6 +117,36 @@ const DEFAULT_PROJECT_MANAGEMENT = Object.freeze({
     evidence_plan: "README_EVIDENCE.md + screenshot evidence",
     expected_version: 1,
     idempotency_key: "cp002-standardization-preview"
+  }
+});
+const DEFAULT_AGENT_MANAGEMENT = Object.freeze({
+  private_agent_invocation: false,
+  runtime_control_activation: false,
+  command_draft_preview_only: true,
+  directory: {
+    agents: [
+      { id: "agent:observer", label: "Agent2 observer", status: "current", role: "Observer" },
+      { id: "agent:planner", label: "Agent3 planning candidate", status: "preview", role: "Planner" }
+    ]
+  },
+  assignment: {
+    target_agent: "Agent3 planning candidate",
+    target_session: "Session 2",
+    context_update: "display-only",
+    expected_version: 1,
+    idempotency_key: "cp003-agent-assignment-preview"
+  },
+  runtime_status: {
+    status: "blocked",
+    error_code: "ERR_NO_GO_BOUNDARY",
+    reason: "private_agent_invocation=false; runtime_control_activation=false"
+  },
+  configure_agent: {
+    role: "Planner",
+    allowed_actions: ["draft planning notes", "prepare evidence checklist"],
+    forbidden_actions: ["private_agent_invocation", "runtime_control_activation"],
+    expected_version: 1,
+    idempotency_key: "cp003-agent-configure-preview"
   }
 });
 
@@ -195,6 +251,7 @@ function buildSurfaceState(source) {
     initValues: displayState.init_values || {},
     initRequirements: displayState.init_requirements || [],
     projectManagement: displayState.project_management || DEFAULT_PROJECT_MANAGEMENT,
+    agentManagement: displayState.agent_management || DEFAULT_AGENT_MANAGEMENT,
     notes: displayState.notes,
     serviceState: displayState.service_state,
     syncState: displayState.sync_state,
@@ -419,6 +476,15 @@ function renderPanelActions(container, actions) {
       if (action.command === "project_no_go") {
         showProjectNoGoBoundary();
       }
+      if (action.command === "agent_assignment_preview") {
+        showAgentAssignmentDraftPreview();
+      }
+      if (action.command === "agent_configure_preview") {
+        showAgentConfigureDraftPreview();
+      }
+      if (action.command === "agent_runtime_block") {
+        showAgentRuntimeBlocked();
+      }
     });
     row.append(button);
   }
@@ -527,6 +593,106 @@ function showProjectStandardizationDraftPreview() {
 
 function showProjectNoGoBoundary() {
   $("service-outcome-copy").textContent = "BLOCKED ERR_NO_GO_BOUNDARY: direct baseline approval and direct canonical mutation are blocked; use Governance Service command draft preview.";
+  $("service-rejection").classList.add("blocked");
+}
+
+function agentManagementState() {
+  return state?.agentManagement || DEFAULT_AGENT_MANAGEMENT;
+}
+
+function renderAgentDirectoryPanel(container) {
+  const directory = agentManagementState().directory;
+  appendPanelParagraph(container, "Agent Directory displays projected agent rows for review only. private_agent_invocation=false.");
+  appendPanelList(container, directory.agents.map((agent) => `${agent.label}; role=${agent.role}; status=${agent.status}`));
+  renderPanelActions(container, [
+    { label: "Assign Agent", panelId: "agent_assignment" },
+    { label: "Configure Agent", panelId: "agent_configure" },
+    { label: "Runtime Status", panelId: "agent_runtime_status_blocked" }
+  ]);
+}
+
+function renderAgentAssignmentPanel(container) {
+  const assignment = agentManagementState().assignment;
+  appendPanelParagraph(container, "Assign Agent prepares a display-only ContextEnvelope update and a Governance Service command draft preview.");
+  appendPanelList(container, [
+    `target_agent=${assignment.target_agent}`,
+    `target_session=${assignment.target_session}`,
+    `context_update=${assignment.context_update}`,
+    `expected_version=${assignment.expected_version}`,
+    `idempotency_key=${assignment.idempotency_key}`,
+    "private_agent_invocation=false",
+    "runtime_control_activation=false"
+  ]);
+  renderPanelActions(container, [
+    { label: "Preview Agent Assignment Draft", command: "agent_assignment_preview" },
+    { label: "Show Runtime Boundary Block", command: "agent_runtime_block", danger: true }
+  ]);
+}
+
+function renderAgentRuntimeStatusPanel(container) {
+  const runtimeStatus = agentManagementState().runtime_status;
+  appendPanelParagraph(container, "Runtime Status Blocked shows diagnostic state only. Runtime control activation stays disabled.");
+  appendPanelList(container, [
+    `status=${runtimeStatus.status}`,
+    `error_code=${runtimeStatus.error_code}`,
+    runtimeStatus.reason
+  ]);
+  renderPanelActions(container, [
+    { label: "Show Runtime Boundary Block", command: "agent_runtime_block", danger: true }
+  ]);
+}
+
+function renderAgentConfigurePanel(container) {
+  const config = agentManagementState().configure_agent;
+  appendPanelParagraph(container, "Configure Agent previews role and evidence expectations with private_agent_invocation=false.");
+  appendPanelList(container, [
+    `role=${config.role}`,
+    `allowed_actions=${config.allowed_actions.join(", ")}`,
+    `forbidden_actions=${config.forbidden_actions.join(", ")}`,
+    `expected_version=${config.expected_version}`,
+    `idempotency_key=${config.idempotency_key}`,
+    "private_agent_invocation=false",
+    "runtime_control_activation=false"
+  ]);
+  renderPanelActions(container, [
+    { label: "Preview Configure Agent Draft", command: "agent_configure_preview" },
+    { label: "Show Runtime Boundary Block", command: "agent_runtime_block", danger: true }
+  ]);
+}
+
+function showAgentAssignmentDraftPreview() {
+  const assignment = agentManagementState().assignment;
+  state.contextEnvelope.agent = assignment.target_agent;
+  renderContextEnvelope();
+  renderProjectDraftPreview("Command Draft Preview", "Agent assignment is a display-only context update plus command draft preview.", [
+    "command_type=SubmitCommandDraft",
+    "subtype=AgentAssignmentPanel",
+    `target_agent=${assignment.target_agent}`,
+    `target_session=${assignment.target_session}`,
+    `context_update=${assignment.context_update}`,
+    `expected_version=${assignment.expected_version}`,
+    `idempotency_key=${assignment.idempotency_key}`,
+    "private_agent_invocation=false",
+    "runtime_control_activation=false"
+  ]);
+}
+
+function showAgentConfigureDraftPreview() {
+  const config = agentManagementState().configure_agent;
+  renderProjectDraftPreview("Command Draft Preview", "Configure Agent prepares draft-only role and evidence expectations.", [
+    "command_type=SubmitCommandDraft",
+    "subtype=AgentConfigurePanel",
+    `role=${config.role}`,
+    `expected_version=${config.expected_version}`,
+    `idempotency_key=${config.idempotency_key}`,
+    "private_agent_invocation=false",
+    "runtime_control_activation=false"
+  ]);
+}
+
+function showAgentRuntimeBlocked() {
+  const runtimeStatus = agentManagementState().runtime_status;
+  $("service-outcome-copy").textContent = `BLOCKED ${runtimeStatus.error_code}: private_agent_invocation=false; runtime_control_activation=false.`;
   $("service-rejection").classList.add("blocked");
 }
 
@@ -687,6 +853,13 @@ window.slice012DesktopSurface = {
   showProjectInitDraftPreview,
   showProjectStandardizationDraftPreview,
   showProjectNoGoBoundary,
+  renderAgentDirectoryPanel,
+  renderAgentAssignmentPanel,
+  renderAgentRuntimeStatusPanel,
+  renderAgentConfigurePanel,
+  showAgentAssignmentDraftPreview,
+  showAgentConfigureDraftPreview,
+  showAgentRuntimeBlocked,
   selectModule,
   showCommandDraftPreview,
   showInitCommandDraft,
