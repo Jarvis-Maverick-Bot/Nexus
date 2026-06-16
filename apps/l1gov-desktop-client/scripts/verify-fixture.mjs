@@ -42,6 +42,34 @@ if (fixture.display_state?.agent_management?.command_draft_preview_only !== true
   throw new Error("Agent Management fixture must be command draft preview only");
 }
 
+if (fixture.display_state?.mq_management?.queue_execution !== false) {
+  throw new Error("MQ Management fixture must not allow queue_execution");
+}
+
+if (fixture.display_state?.mq_management?.dispatch_execution !== false) {
+  throw new Error("MQ Management fixture must not allow dispatch_execution");
+}
+
+if (fixture.display_state?.mq_management?.controller_call !== false) {
+  throw new Error("MQ Management fixture must not allow controller_call");
+}
+
+if (fixture.display_state?.mq_management?.route_activation !== false) {
+  throw new Error("MQ Management fixture must not allow route_activation");
+}
+
+if (fixture.display_state?.mq_management?.adapter_transport_activation !== false) {
+  throw new Error("MQ Management fixture must not allow adapter_transport_activation");
+}
+
+if (fixture.display_state?.mq_management?.replay_execution !== false) {
+  throw new Error("MQ Management fixture must not allow replay_execution");
+}
+
+if (fixture.display_state?.mq_management?.command_draft_preview_only !== true) {
+  throw new Error("MQ Management fixture must be command draft preview only");
+}
+
 if (!html.includes('id="create-testproject"') || !html.includes("Create TestProject")) {
   throw new Error("real TestProject creation surface is missing");
 }
@@ -123,6 +151,27 @@ for (const expected of [
 ]) {
   if (!mainJs.includes(expected)) {
     throw new Error(`CP-003 Agent Management panel is missing ${expected}`);
+  }
+}
+
+for (const expected of [
+  "mq_queue_overview",
+  "mq_message_detail",
+  "mq_no_go_diagnostics",
+  "mq_replay_evidence",
+  "renderMqQueueOverviewPanel",
+  "renderMqMessageDetailPanel",
+  "renderMqNoGoDiagnosticsPanel",
+  "renderMqReplayEvidencePanel",
+  "showMqMessageDraftPreview",
+  "showMqDispatchNoGo",
+  "showMqReplayEvidencePreview",
+  "queue_execution=false",
+  "dispatch_execution=false",
+  "replay_execution=false"
+]) {
+  if (!mainJs.includes(expected)) {
+    throw new Error(`CP-004 MQ Management panel is missing ${expected}`);
   }
 }
 

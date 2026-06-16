@@ -1,0 +1,41 @@
+{
+    "slice":  "CP-004 MQ Management Panels",
+    "status":  "CP004_IMPLEMENTED_FOR_NOVA_REVIEW",
+    "authorization_record":  "AUTHORIZATION_RECORD.md",
+    "checkout_path":  "D:\\Projects\\Nexus_cp001_child_panel_shell",
+    "branch":  "codex/4.21-child-panel-cp004-mq-panels",
+    "base_branch":  "codex/4.21-real-testproject-e2e-uat",
+    "base_head":  "ea487273183ba714ebeb336176bbaccfaed7c5a9",
+    "implementation_boundary":  [
+                                    "apps/l1gov-desktop-client/scripts/verify-fixture.mjs",
+                                    "apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json",
+                                    "apps/l1gov-desktop-client/src/main.js",
+                                    "nexus/governance/tests/test_client_desktop_surface_slice012.py",
+                                    "verification/4.21/child-panel-figma-implementation-cp004-mq-panels/"
+                                ],
+    "tests":  {
+                  "targeted_desktop_surface":  "25 passed in 0.03s",
+                  "real_uat_desktop_bridge":  "3 passed in 0.02s",
+                  "local_app_contract":  "76 passed in 0.19s",
+                  "full_governance":  "662 passed in 0.83s",
+                  "desktop_fixture_verifier":  "slice012 desktop real UAT surface verified",
+                  "git_diff_check":  "exit 0",
+                  "json_parse":  "JSON_PARSE_OK",
+                  "npm_test_note":  "npm executable unavailable on PATH; package verifier script run directly with bundled Node and passed"
+              },
+    "screenshots":  [
+                        "cp004-11-mq-menu-open-desktop.png",
+                        "cp004-11-mq-menu-open-compact.png",
+                        "cp004-12-mq-queue-overview-desktop.png",
+                        "cp004-13-mq-message-detail-desktop.png",
+                        "cp004-14-mq-dispatch-no-go-diagnostics-desktop.png",
+                        "cp004-15-mq-replay-evidence-desktop.png"
+                    ],
+    "no_go":  {
+                  "nexus_mq_import_scan":  "no matches",
+                  "ui_affordance_scan":  "no matches",
+                  "runtime_dispatch_controller_scan":  "display label and negative test fixtures only",
+                  "runtime_live_dispatch_controller_mq_paths_added":  false
+              },
+    "implementation_not_authorized_beyond_cp004":  true
+}

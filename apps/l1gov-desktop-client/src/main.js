@@ -66,8 +66,34 @@ const PANEL_REGISTRY = Object.freeze({
   },
   mq_shell: {
     title: "MQ Management",
-    body: "CP-001 shell route only. MQ child panels are planned for CP-004.",
-    status: "Read-only navigation treatment; no queue execution."
+    body: "MQ menu open. Choose an MQ Management child panel; ContextEnvelope remains visible.",
+    status: "Frame 11 MQ menu open; queue_execution=false; dispatch_execution=false.",
+    actions: [
+      { label: "Queue Overview", panelId: "mq_queue_overview" },
+      { label: "Message Detail", panelId: "mq_message_detail" },
+      { label: "Dispatch No-Go Diagnostics", panelId: "mq_no_go_diagnostics" },
+      { label: "Replay Evidence", panelId: "mq_replay_evidence" }
+    ]
+  },
+  mq_queue_overview: {
+    title: "Queue Overview",
+    status: "Read-only projected MQ rows; queue_execution=false.",
+    render: renderMqQueueOverviewPanel
+  },
+  mq_message_detail: {
+    title: "Message Detail",
+    status: "Projected message metadata only; command draft preview only.",
+    render: renderMqMessageDetailPanel
+  },
+  mq_no_go_diagnostics: {
+    title: "Dispatch No-Go Diagnostics",
+    status: "Blocked diagnostics display; dispatch_execution=false.",
+    render: renderMqNoGoDiagnosticsPanel
+  },
+  mq_replay_evidence: {
+    title: "Replay Evidence",
+    status: "Evidence-only replay reference; replay_execution=false.",
+    render: renderMqReplayEvidencePanel
   },
   workspace_picker: {
     title: "Workspace Picker",
@@ -147,6 +173,39 @@ const DEFAULT_AGENT_MANAGEMENT = Object.freeze({
     forbidden_actions: ["private_agent_invocation", "runtime_control_activation"],
     expected_version: 1,
     idempotency_key: "cp003-agent-configure-preview"
+  }
+});
+const DEFAULT_MQ_MANAGEMENT = Object.freeze({
+  queue_execution: false,
+  dispatch_execution: false,
+  controller_call: false,
+  route_activation: false,
+  adapter_transport_activation: false,
+  replay_execution: false,
+  command_draft_preview_only: true,
+  queue_overview: {
+    queues: [
+      { id: "queue:governance-inbox", label: "Governance inbox", status: "current", message_count: 3 },
+      { id: "queue:dispatch-diagnostics", label: "Dispatch diagnostics", status: "blocked", message_count: 1 }
+    ]
+  },
+  message_detail: {
+    message_id: "msg-cp004-preview-001",
+    correlation_id: "corr-cp004-message-preview",
+    idempotency_key: "cp004-message-detail-preview",
+    expected_version: 1,
+    payload_summary: "Projected MQ message metadata for UX inspection only"
+  },
+  dispatch_no_go: {
+    status: "blocked",
+    error_code: "ERR_NO_GO_BOUNDARY",
+    reason: "dispatch_execution=false; controller_call=false; route_activation=false; adapter_transport_activation=false"
+  },
+  replay_evidence: {
+    evidence_ref: "verification/4.21/child-panel-figma-implementation-cp004-mq-panels/",
+    evidence_only: true,
+    replay_allowed: false,
+    replay_execution: false
   }
 });
 
@@ -252,6 +311,7 @@ function buildSurfaceState(source) {
     initRequirements: displayState.init_requirements || [],
     projectManagement: displayState.project_management || DEFAULT_PROJECT_MANAGEMENT,
     agentManagement: displayState.agent_management || DEFAULT_AGENT_MANAGEMENT,
+    mqManagement: displayState.mq_management || DEFAULT_MQ_MANAGEMENT,
     notes: displayState.notes,
     serviceState: displayState.service_state,
     syncState: displayState.sync_state,
@@ -485,6 +545,15 @@ function renderPanelActions(container, actions) {
       if (action.command === "agent_runtime_block") {
         showAgentRuntimeBlocked();
       }
+      if (action.command === "mq_message_preview") {
+        showMqMessageDraftPreview();
+      }
+      if (action.command === "mq_dispatch_no_go") {
+        showMqDispatchNoGo();
+      }
+      if (action.command === "mq_replay_evidence_preview") {
+        showMqReplayEvidencePreview();
+      }
     });
     row.append(button);
   }
@@ -696,6 +765,117 @@ function showAgentRuntimeBlocked() {
   $("service-rejection").classList.add("blocked");
 }
 
+function mqManagementState() {
+  return state?.mqManagement || DEFAULT_MQ_MANAGEMENT;
+}
+
+function renderMqQueueOverviewPanel(container) {
+  const mq = mqManagementState();
+  const overview = mq.queue_overview;
+  appendPanelParagraph(container, "Queue Overview displays projected MQ rows for UX inspection only. queue_execution=false.");
+  appendPanelList(
+    container,
+    overview.queues.map((queue) => `${queue.label}; status=${queue.status}; message_count=${queue.message_count}`)
+  );
+  appendPanelList(container, [
+    `queue_execution=${mq.queue_execution}`,
+    `dispatch_execution=${mq.dispatch_execution}`,
+    `command_draft_preview_only=${mq.command_draft_preview_only}`
+  ]);
+  renderPanelActions(container, [
+    { label: "Message Detail", panelId: "mq_message_detail" },
+    { label: "Dispatch No-Go Diagnostics", panelId: "mq_no_go_diagnostics" },
+    { label: "Replay Evidence", panelId: "mq_replay_evidence" }
+  ]);
+}
+
+function renderMqMessageDetailPanel(container) {
+  const mq = mqManagementState();
+  const detail = mq.message_detail;
+  appendPanelParagraph(container, "Message Detail displays projected payload metadata and a Governance Service draft preview shape only.");
+  appendPanelList(container, [
+    `message_id=${detail.message_id}`,
+    `correlation_id=${detail.correlation_id}`,
+    `idempotency_key=${detail.idempotency_key}`,
+    `expected_version=${detail.expected_version}`,
+    `payload_summary=${detail.payload_summary}`,
+    `queue_execution=${mq.queue_execution}`,
+    `dispatch_execution=${mq.dispatch_execution}`
+  ]);
+  renderPanelActions(container, [
+    { label: "Preview Message Draft", command: "mq_message_preview" },
+    { label: "Show Dispatch No-Go", command: "mq_dispatch_no_go", danger: true }
+  ]);
+}
+
+function renderMqNoGoDiagnosticsPanel(container) {
+  const mq = mqManagementState();
+  const diagnostics = mq.dispatch_no_go;
+  appendPanelParagraph(container, "Dispatch No-Go Diagnostics is a blocked diagnostic display. It does not open a runtime path.");
+  appendPanelList(container, [
+    `status=${diagnostics.status}`,
+    `error_code=${diagnostics.error_code}`,
+    diagnostics.reason,
+    `controller_call=${mq.controller_call}`,
+    `route_activation=${mq.route_activation}`,
+    `adapter_transport_activation=${mq.adapter_transport_activation}`
+  ]);
+  renderPanelActions(container, [
+    { label: "Show Dispatch No-Go", command: "mq_dispatch_no_go", danger: true },
+    { label: "Replay Evidence", panelId: "mq_replay_evidence" }
+  ]);
+}
+
+function renderMqReplayEvidencePanel(container) {
+  const mq = mqManagementState();
+  const replay = mq.replay_evidence;
+  appendPanelParagraph(container, "Replay Evidence lists evidence-only references. replay_execution=false.");
+  appendPanelList(container, [
+    `evidence_ref=${replay.evidence_ref}`,
+    `evidence-only=${replay.evidence_only}`,
+    `replay_allowed=${replay.replay_allowed}`,
+    `replay_execution=${replay.replay_execution}`
+  ]);
+  renderPanelActions(container, [
+    { label: "Preview Replay Evidence", command: "mq_replay_evidence_preview" },
+    { label: "Show Dispatch No-Go", command: "mq_dispatch_no_go", danger: true }
+  ]);
+}
+
+function showMqMessageDraftPreview() {
+  const detail = mqManagementState().message_detail;
+  renderProjectDraftPreview("Command Draft Preview", "MQ Message Detail is a display-only command draft preview.", [
+    "command_type=SubmitCommandDraft",
+    "subtype=MqMessageDetailPanel",
+    `message_id=${detail.message_id}`,
+    `correlation_id=${detail.correlation_id}`,
+    `expected_version=${detail.expected_version}`,
+    `idempotency_key=${detail.idempotency_key}`,
+    "queue_execution=false",
+    "dispatch_execution=false",
+    "controller_call=false",
+    "replay_execution=false"
+  ]);
+}
+
+function showMqDispatchNoGo() {
+  const diagnostics = mqManagementState().dispatch_no_go;
+  $("service-outcome-copy").textContent = `BLOCKED ${diagnostics.error_code}: dispatch_execution=false; controller_call=false; route_activation=false; adapter_transport_activation=false.`;
+  $("service-rejection").classList.add("blocked");
+}
+
+function showMqReplayEvidencePreview() {
+  const replay = mqManagementState().replay_evidence;
+  renderProjectDraftPreview("Replay Evidence Preview", "Replay Evidence is evidence-only and cannot activate replay.", [
+    `evidence_ref=${replay.evidence_ref}`,
+    `evidence-only=${replay.evidence_only}`,
+    `replay_allowed=${replay.replay_allowed}`,
+    "replay_execution=false",
+    "queue_execution=false",
+    "dispatch_execution=false"
+  ]);
+}
+
 function showInitCommandDraft() {
   const draftedCount = state.initRequirements.filter((item) => item.status === "drafted").length;
   $("command-draft-preview").innerHTML = `
@@ -860,6 +1040,13 @@ window.slice012DesktopSurface = {
   showAgentAssignmentDraftPreview,
   showAgentConfigureDraftPreview,
   showAgentRuntimeBlocked,
+  renderMqQueueOverviewPanel,
+  renderMqMessageDetailPanel,
+  renderMqNoGoDiagnosticsPanel,
+  renderMqReplayEvidencePanel,
+  showMqMessageDraftPreview,
+  showMqDispatchNoGo,
+  showMqReplayEvidencePreview,
   selectModule,
   showCommandDraftPreview,
   showInitCommandDraft,

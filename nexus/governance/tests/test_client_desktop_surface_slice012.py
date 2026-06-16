@@ -465,3 +465,105 @@ def test_cp003_agent_panels_do_not_add_runtime_or_private_agent_controls() -> No
     assert "private_agent_invocation" in main_js
     assert "runtime_control_activation" in main_js
     assert "err_no_go_boundary" in main_js
+
+
+def test_cp004_mq_management_fixture_is_display_and_preview_only() -> None:
+    fixture = load_fixture()
+
+    mq_management = fixture["display_state"]["mq_management"]
+    assert mq_management["queue_execution"] is False
+    assert mq_management["dispatch_execution"] is False
+    assert mq_management["controller_call"] is False
+    assert mq_management["route_activation"] is False
+    assert mq_management["adapter_transport_activation"] is False
+    assert mq_management["replay_execution"] is False
+    assert mq_management["command_draft_preview_only"] is True
+
+    assert mq_management["queue_overview"]["queues"][0]["label"] == "Governance inbox"
+    assert mq_management["message_detail"]["correlation_id"] == "corr-cp004-message-preview"
+    assert mq_management["dispatch_no_go"]["error_code"] == "ERR_NO_GO_BOUNDARY"
+    assert mq_management["replay_evidence"]["evidence_only"] is True
+
+
+def test_cp004_mq_management_panels_are_registered_from_fixture_state() -> None:
+    main_js = read_app_file("src/main.js")
+
+    for panel_id in (
+        "mq_shell",
+        "mq_queue_overview",
+        "mq_message_detail",
+        "mq_no_go_diagnostics",
+        "mq_replay_evidence",
+    ):
+        assert panel_id in main_js
+
+    for hook in (
+        "renderMqQueueOverviewPanel",
+        "renderMqMessageDetailPanel",
+        "renderMqNoGoDiagnosticsPanel",
+        "renderMqReplayEvidencePanel",
+        "showMqMessageDraftPreview",
+        "showMqDispatchNoGo",
+        "showMqReplayEvidencePreview",
+    ):
+        assert hook in main_js
+
+
+def test_cp004_mq_menu_routes_to_display_and_preview_only_child_panels() -> None:
+    html = read_app_file("src/index.html")
+    main_js = read_app_file("src/main.js")
+
+    assert 'id="top-menu-mq"' in html
+    assert 'data-panel-route="mq_shell"' in html
+
+    for visible_label in (
+        "Queue Overview",
+        "Message Detail",
+        "Dispatch No-Go Diagnostics",
+        "Replay Evidence",
+    ):
+        assert visible_label in main_js
+
+    for expected_contract in (
+        "command_type=SubmitCommandDraft",
+        "subtype=MqMessageDetailPanel",
+        "correlation_id",
+        "idempotency_key",
+        "expected_version",
+        "queue_execution=false",
+        "dispatch_execution=false",
+        "controller_call=false",
+        "replay_execution=false",
+        "ERR_NO_GO_BOUNDARY",
+        "evidence-only",
+    ):
+        assert expected_contract in main_js
+
+
+def test_cp004_mq_panels_do_not_add_executable_mq_or_dispatch_controls() -> None:
+    main_js = read_app_file("src/main.js").lower()
+    html = read_app_file("src/index.html").lower()
+    combined = "\n".join((main_js, html))
+
+    forbidden_affordances = (
+        "execute queue",
+        "message execution",
+        "send message",
+        "publish message",
+        "replay message",
+        "run replay",
+        "execute replay",
+        "dispatch now",
+        "call controller",
+        "activate route",
+        "activate adapter",
+        "activate transport",
+    )
+
+    for affordance in forbidden_affordances:
+        assert affordance not in combined, affordance
+
+    assert "queue_execution" in main_js
+    assert "dispatch_execution" in main_js
+    assert "replay_execution" in main_js
+    assert "err_no_go_boundary" in main_js

@@ -139,6 +139,49 @@
         "idempotency_key": "cp003-agent-configure-preview"
       }
     },
+    "mq_management": {
+      "queue_execution": false,
+      "dispatch_execution": false,
+      "controller_call": false,
+      "route_activation": false,
+      "adapter_transport_activation": false,
+      "replay_execution": false,
+      "command_draft_preview_only": true,
+      "queue_overview": {
+        "queues": [
+          {
+            "id": "queue:governance-inbox",
+            "label": "Governance inbox",
+            "status": "current",
+            "message_count": 3
+          },
+          {
+            "id": "queue:dispatch-diagnostics",
+            "label": "Dispatch diagnostics",
+            "status": "blocked",
+            "message_count": 1
+          }
+        ]
+      },
+      "message_detail": {
+        "message_id": "msg-cp004-preview-001",
+        "correlation_id": "corr-cp004-message-preview",
+        "idempotency_key": "cp004-message-detail-preview",
+        "expected_version": 1,
+        "payload_summary": "Projected MQ message metadata for UX inspection only"
+      },
+      "dispatch_no_go": {
+        "status": "blocked",
+        "error_code": "ERR_NO_GO_BOUNDARY",
+        "reason": "dispatch_execution=false; controller_call=false; route_activation=false; adapter_transport_activation=false"
+      },
+      "replay_evidence": {
+        "evidence_ref": "verification/4.21/child-panel-figma-implementation-cp004-mq-panels/",
+        "evidence_only": true,
+        "replay_allowed": false,
+        "replay_execution": false
+      }
+    },
     "modules": {
       "mission_control": {
         "title": "Main Cockpit",
