@@ -1,0 +1,39 @@
+Target branch before merge: 4ad9f6260697134f1587760a0af84a1e7003af50
+CP-005 source branch head: 798588245c2d5a8fc21450532b130ea15935aaf4
+Accepted merge-base: 4ad9f6260697134f1587760a0af84a1e7003af50
+Post-merge commit: d95be82688fd64636a95d413e0d6718e7e959436
+
+Changed files from target pre-merge to post-merge:
+
+M	apps/l1gov-desktop-client/scripts/verify-fixture.mjs
+M	apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json
+M	apps/l1gov-desktop-client/src/index.html
+M	apps/l1gov-desktop-client/src/main.js
+M	apps/l1gov-desktop-client/src/styles.css
+M	nexus/governance/tests/test_client_desktop_surface_slice012.py
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/AUTHORIZATION_RECORD.md
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/CHANGED_FILES_SNAPSHOT.txt
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/DESIGN_CHANGE_IMPACT_RESPONSE.md
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/FRAME_TO_SCREENSHOT_INDEX.md
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/NO_GO_SCAN_RESULTS.md
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/NPM_PATH_LIMITATION.md
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/README_EVIDENCE.md
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/SOURCE_CHECKOUT_PROOF.md
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/TEST_OUTPUTS.md
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/VISUAL_QA_NOTES.md
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/cp005-00-main-cockpit-auxiliary-actions-desktop.png
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/cp005-01-workspace-picker-overlay-desktop.png
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/cp005-02-command-preview-display-only-desktop.png
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/cp005-03-evidence-drawer-evidence-only-desktop.png
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/cp005-04-no-go-dialog-boundary-desktop.png
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/cp005-05-stale-projection-refresh-display-only-desktop.png
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/cp005-06-status-toast-display-only-desktop.png
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/cp005-07-host-close-back-lifecycle-desktop.png
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/cp005-implementation-from-accepted-base.patch
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/evidence-index.json
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/outputs/bom-scan-output.txt
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/outputs/bundled-node-verifier-output.txt
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/outputs/git-diff-check-output.txt
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/outputs/json-tool-output.txt
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/outputs/no-go-scan-output.txt
+A	verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces/outputs/pytest-output.txt
