@@ -1,0 +1,44 @@
+{
+    "status":  "SLICE013_POST_MERGE_EVIDENCE_READY_FOR_NOVA_REVIEW",
+    "target_branch":  "codex/4.21-real-testproject-e2e-uat",
+    "source_branch":  "codex/4.21-slice013-closeout-readiness",
+    "target_pre_merge_head":  "419241165d3ce3d09ea663a8ea568b7e46508110",
+    "source_head":  "f7010089766a39d16d4775c1267750a19a0b5831",
+    "slice013_review_commit":  "be65a02",
+    "post_merge_commit_before_evidence":  "5d1f8caa9aeee35cf31a74237ddd0624daca95e1",
+    "merge_parents":  [
+                          "419241165d3ce3d09ea663a8ea568b7e46508110",
+                          "f7010089766a39d16d4775c1267750a19a0b5831"
+                      ],
+    "candidate_verdict":  "READY_FOR_NOVA_POST_MERGE_REVIEW",
+    "review_only":  true,
+    "closes_4_21":  false,
+    "cp007_included":  false,
+    "live_runtime_private_agent_dispatch_performed":  false,
+    "deploy_config_credential_mutation":  false,
+    "prod_readiness_asserted":  false,
+    "final_pass_asserted":  false,
+    "verification":  [
+                         {
+                             "command":  "python -m pytest nexus/governance/tests/test_client_desktop_surface_slice012.py -q",
+                             "result":  ".............................                                            [100%] 29 passed in 0.03s"
+                         },
+                         {
+                             "command":  "bundled Node apps/l1gov-desktop-client/scripts/verify-fixture.mjs",
+                             "result":  "slice012 desktop real UAT surface verified"
+                         },
+                         {
+                             "command":  "no-go scan",
+                             "result":  "NO MATCHES (rg exit 1)"
+                         }
+                     ],
+    "outputs":  [
+                    "outputs/pytest-output.txt",
+                    "outputs/bundled-node-verifier-output.txt",
+                    "outputs/git-diff-check-output.txt",
+                    "outputs/no-go-scan-output.txt",
+                    "outputs/scope-scan-output.txt",
+                    "outputs/json-tool-output.txt",
+                    "outputs/bom-scan-output.txt"
+                ]
+}
