@@ -1,0 +1,76 @@
+{
+    "status":  "SLICE013_CLOSEOUT_READINESS_READY_FOR_NOVA_REVIEW",
+    "branch":  "codex/4.21-slice013-closeout-readiness",
+    "branch_start_head":  "419241165d3ce3d09ea663a8ea568b7e46508110",
+    "target_remote_head_at_start":  "419241165d3ce3d09ea663a8ea568b7e46508110",
+    "merge_base_with_target":  "419241165d3ce3d09ea663a8ea568b7e46508110",
+    "current_gate":  [
+                         "4_21_CP006_POST_MERGE_ACCEPTED",
+                         "CP006_CLOSED"
+                     ],
+    "candidate_verdict":  "READY_FOR_NOVA_REVIEW",
+    "package_path":  "verification/4.21/l1gov-slice-013-closeout-readiness",
+    "review_only":  true,
+    "closes_4_21":  false,
+    "cp007_included":  false,
+    "live_runtime_private_agent_dispatch_performed":  false,
+    "deploy_config_credential_mutation":  false,
+    "prod_readiness_asserted":  false,
+    "final_pass_asserted":  false,
+    "slice_package_count":  12,
+    "child_panel_package_count":  8,
+    "screenshot_counts":  {
+                              "all_4_21_png":  65,
+                              "child_panel_png":  59,
+                              "slice012_desktop_png":  2,
+                              "cp006_visual_qa_png":  31
+                          },
+    "review_records":  [
+                           {
+                               "gate":  "CP005_PACKAGE_APPROVED",
+                               "shared_docs_commit":  "82f789d",
+                               "source":  "handoff summary",
+                               "file_reference":  null
+                           },
+                           {
+                               "gate":  "CP005_IMPLEMENTATION_REVIEW_REQUEST_CHANGES_METADATA_ONLY",
+                               "shared_docs_commit":  "3bf651e",
+                               "source":  "user handoff",
+                               "file_reference":  "/Users/alex/Nova-Jarvis-Shared/working/00-project-governance/03-pre-coding/group-a-priority/4.21-layer-1-governance-execution/review-evidence/2026-06-16_NOVA_CHILD_PANEL_CP005_IMPLEMENTATION_REVIEW.md"
+                           },
+                           {
+                               "gate":  "CP005_CORRECTION_REREVIEW_APPROVED",
+                               "shared_docs_commit":  "b603ea9",
+                               "source":  "user handoff",
+                               "file_reference":  "/Users/alex/Nova-Jarvis-Shared/working/00-project-governance/03-pre-coding/group-a-priority/4.21-layer-1-governance-execution/review-evidence/2026-06-16_NOVA_CHILD_PANEL_CP005_CORRECTION_REREVIEW.md"
+                           },
+                           {
+                               "gate":  "CP005_POST_MERGE_ACCEPTED",
+                               "shared_docs_commit":  "dd85afe",
+                               "source":  "user handoff",
+                               "file_reference":  "/Users/alex/Nova-Jarvis-Shared/working/00-project-governance/03-pre-coding/group-a-priority/4.21-layer-1-governance-execution/review-evidence/2026-06-16_NOVA_CHILD_PANEL_CP005_POST_MERGE_REVIEW.md"
+                           },
+                           {
+                               "gate":  "CP006_VISUAL_QA_APPROVED_FOR_MERGE",
+                               "shared_docs_commit":  "0615e50",
+                               "source":  "user handoff",
+                               "file_reference":  null
+                           },
+                           {
+                               "gate":  "4_21_CP006_POST_MERGE_ACCEPTED",
+                               "shared_docs_commit":  "4d1c018",
+                               "source":  "current user authorization",
+                               "file_reference":  null
+                           }
+                       ],
+    "outputs":  [
+                    "outputs/pytest-output.txt",
+                    "outputs/bundled-node-verifier-output.txt",
+                    "outputs/json-tool-output.txt",
+                    "outputs/git-diff-check-output.txt",
+                    "outputs/bom-scan-output.txt",
+                    "outputs/no-go-scan-output.txt",
+                    "outputs/scope-scan-output.txt",
+                    "outputs/commit-topology-output.txt"
+                ]
+}
