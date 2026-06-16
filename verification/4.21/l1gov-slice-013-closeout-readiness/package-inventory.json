@@ -1,0 +1,251 @@
+{
+    "generated_at_local_date":  "2026-06-16",
+    "branch":  "codex/4.21-slice013-closeout-readiness",
+    "branch_start_head":  "419241165d3ce3d09ea663a8ea568b7e46508110",
+    "target_remote_head_at_start":  "419241165d3ce3d09ea663a8ea568b7e46508110",
+    "merge_base_with_target":  "419241165d3ce3d09ea663a8ea568b7e46508110",
+    "slice_packages":  [
+                           {
+                               "package":  "l1gov-slice-001",
+                               "path":  "verification/4.21/l1gov-slice-001",
+                               "status":  "PR_READY_FOR_NOVA_REVIEW",
+                               "branch":  "",
+                               "files":  23,
+                               "screenshots":  0,
+                               "evidence_index":  true
+                           },
+                           {
+                               "package":  "l1gov-slice-002",
+                               "path":  "verification/4.21/l1gov-slice-002",
+                               "status":  "PR_READY_FOR_NOVA_REVIEW",
+                               "branch":  "",
+                               "files":  32,
+                               "screenshots":  0,
+                               "evidence_index":  true
+                           },
+                           {
+                               "package":  "l1gov-slice-003",
+                               "path":  "verification/4.21/l1gov-slice-003",
+                               "status":  "PR_READY_FOR_NOVA_REVIEW",
+                               "branch":  "",
+                               "files":  30,
+                               "screenshots":  0,
+                               "evidence_index":  true
+                           },
+                           {
+                               "package":  "l1gov-slice-004",
+                               "path":  "verification/4.21/l1gov-slice-004",
+                               "status":  "PR_READY_FOR_NOVA_REVIEW",
+                               "branch":  "",
+                               "files":  42,
+                               "screenshots":  0,
+                               "evidence_index":  true
+                           },
+                           {
+                               "package":  "l1gov-slice-005",
+                               "path":  "verification/4.21/l1gov-slice-005",
+                               "status":  "PR13 third request-changes patch evidence refreshed",
+                               "branch":  "",
+                               "files":  65,
+                               "screenshots":  0,
+                               "evidence_index":  true
+                           },
+                           {
+                               "package":  "l1gov-slice-006",
+                               "path":  "verification/4.21/l1gov-slice-006",
+                               "status":  "patch evidence generated for Nova review",
+                               "branch":  "",
+                               "files":  68,
+                               "screenshots":  0,
+                               "evidence_index":  true
+                           },
+                           {
+                               "package":  "l1gov-slice-007",
+                               "path":  "verification/4.21/l1gov-slice-007",
+                               "status":  "PR_READY_FOR_NOVA_REVIEW",
+                               "branch":  "",
+                               "files":  62,
+                               "screenshots":  0,
+                               "evidence_index":  true
+                           },
+                           {
+                               "package":  "l1gov-slice-008",
+                               "path":  "verification/4.21/l1gov-slice-008",
+                               "status":  "PR_READY_FOR_NOVA_REVIEW",
+                               "branch":  "",
+                               "files":  80,
+                               "screenshots":  0,
+                               "evidence_index":  true
+                           },
+                           {
+                               "package":  "l1gov-slice-009",
+                               "path":  "verification/4.21/l1gov-slice-009",
+                               "status":  "PR_READY_FOR_NOVA_REVIEW",
+                               "branch":  "",
+                               "files":  29,
+                               "screenshots":  0,
+                               "evidence_index":  true
+                           },
+                           {
+                               "package":  "l1gov-slice-010",
+                               "path":  "verification/4.21/l1gov-slice-010",
+                               "status":  "PR_READY_FOR_NOVA_REVIEW_EVIDENCE_PATCH",
+                               "branch":  "codex/4.21-slice010-local-app-contracts",
+                               "files":  54,
+                               "screenshots":  0,
+                               "evidence_index":  true
+                           },
+                           {
+                               "package":  "l1gov-slice-011",
+                               "path":  "verification/4.21/l1gov-slice-011",
+                               "status":  "",
+                               "branch":  "codex/4.21-slice011-dry-run-fixtures",
+                               "files":  23,
+                               "screenshots":  0,
+                               "evidence_index":  true
+                           },
+                           {
+                               "package":  "l1gov-slice-012-desktop",
+                               "path":  "verification/4.21/l1gov-slice-012-desktop",
+                               "status":  "PR_READY_FOR_NOVA_REVIEW",
+                               "branch":  "codex/4.21-slice012-desktop-app-test-surface",
+                               "files":  19,
+                               "screenshots":  2,
+                               "evidence_index":  true
+                           }
+                       ],
+    "child_panel_packages":  [
+                                 {
+                                     "package":  "child-panel-figma-implementation-cp001-shell-host",
+                                     "path":  "verification/4.21/child-panel-figma-implementation-cp001-shell-host",
+                                     "status":  "CP001_IMPLEMENTED_FOR_NOVA_REVIEW",
+                                     "branch":  "codex/4.21-child-panel-cp001-shell-host",
+                                     "source_branch":  "",
+                                     "candidate_verdict":  "",
+                                     "files":  11,
+                                     "screenshots":  3,
+                                     "evidence_index":  true
+                                 },
+                                 {
+                                     "package":  "child-panel-figma-implementation-cp002-project-panels",
+                                     "path":  "verification/4.21/child-panel-figma-implementation-cp002-project-panels",
+                                     "status":  "CP002_IMPLEMENTED_FOR_NOVA_REVIEW",
+                                     "branch":  "codex/4.21-child-panel-cp002-project-panels",
+                                     "source_branch":  "",
+                                     "candidate_verdict":  "",
+                                     "files":  14,
+                                     "screenshots":  5,
+                                     "evidence_index":  true
+                                 },
+                                 {
+                                     "package":  "child-panel-figma-implementation-cp003-agent-panels",
+                                     "path":  "verification/4.21/child-panel-figma-implementation-cp003-agent-panels",
+                                     "status":  "CP003_IMPLEMENTED_FOR_NOVA_REVIEW",
+                                     "branch":  "codex/4.21-child-panel-cp003-agent-panels",
+                                     "source_branch":  "",
+                                     "candidate_verdict":  "",
+                                     "files":  15,
+                                     "screenshots":  6,
+                                     "evidence_index":  true
+                                 },
+                                 {
+                                     "package":  "child-panel-figma-implementation-cp004-mq-panels",
+                                     "path":  "verification/4.21/child-panel-figma-implementation-cp004-mq-panels",
+                                     "status":  "CP004_IMPLEMENTED_FOR_NOVA_REVIEW",
+                                     "branch":  "codex/4.21-child-panel-cp004-mq-panels",
+                                     "source_branch":  "",
+                                     "candidate_verdict":  "",
+                                     "files":  15,
+                                     "screenshots":  6,
+                                     "evidence_index":  true
+                                 },
+                                 {
+                                     "package":  "child-panel-figma-implementation-cp005-auxiliary-surfaces",
+                                     "path":  "verification/4.21/child-panel-figma-implementation-cp005-auxiliary-surfaces",
+                                     "status":  "CP005_IMPLEMENTED_FOR_NOVA_REVIEW",
+                                     "branch":  "codex/4.21-child-panel-cp005-auxiliary-surfaces",
+                                     "source_branch":  "",
+                                     "candidate_verdict":  "",
+                                     "files":  26,
+                                     "screenshots":  8,
+                                     "evidence_index":  true
+                                 },
+                                 {
+                                     "package":  "child-panel-figma-implementation-cp005-post-merge",
+                                     "path":  "verification/4.21/child-panel-figma-implementation-cp005-post-merge",
+                                     "status":  "CP005_POST_MERGE_EVIDENCE",
+                                     "branch":  "codex/4.21-real-testproject-e2e-uat",
+                                     "source_branch":  "codex/4.21-child-panel-cp005-auxiliary-surfaces",
+                                     "candidate_verdict":  "",
+                                     "files":  10,
+                                     "screenshots":  0,
+                                     "evidence_index":  true
+                                 },
+                                 {
+                                     "package":  "child-panel-figma-implementation-cp006-post-merge",
+                                     "path":  "verification/4.21/child-panel-figma-implementation-cp006-post-merge",
+                                     "status":  "CP006_POST_MERGE_EVIDENCE",
+                                     "branch":  "codex/4.21-real-testproject-e2e-uat",
+                                     "source_branch":  "codex/4.21-child-panel-cp006-visual-qa",
+                                     "candidate_verdict":  "",
+                                     "files":  10,
+                                     "screenshots":  0,
+                                     "evidence_index":  true
+                                 },
+                                 {
+                                     "package":  "child-panel-figma-implementation-cp006-visual-qa",
+                                     "path":  "verification/4.21/child-panel-figma-implementation-cp006-visual-qa",
+                                     "status":  "CP006_READY_FOR_NOVA_REVIEW",
+                                     "branch":  "codex/4.21-child-panel-cp006-visual-qa",
+                                     "source_branch":  "",
+                                     "candidate_verdict":  "READY_FOR_NOVA_REVIEW",
+                                     "files":  50,
+                                     "screenshots":  31,
+                                     "evidence_index":  true
+                                 }
+                             ],
+    "review_records":  [
+                           {
+                               "gate":  "CP005_PACKAGE_APPROVED",
+                               "shared_docs_commit":  "82f789d",
+                               "source":  "handoff summary",
+                               "file_reference":  null
+                           },
+                           {
+                               "gate":  "CP005_IMPLEMENTATION_REVIEW_REQUEST_CHANGES_METADATA_ONLY",
+                               "shared_docs_commit":  "3bf651e",
+                               "source":  "user handoff",
+                               "file_reference":  "/Users/alex/Nova-Jarvis-Shared/working/00-project-governance/03-pre-coding/group-a-priority/4.21-layer-1-governance-execution/review-evidence/2026-06-16_NOVA_CHILD_PANEL_CP005_IMPLEMENTATION_REVIEW.md"
+                           },
+                           {
+                               "gate":  "CP005_CORRECTION_REREVIEW_APPROVED",
+                               "shared_docs_commit":  "b603ea9",
+                               "source":  "user handoff",
+                               "file_reference":  "/Users/alex/Nova-Jarvis-Shared/working/00-project-governance/03-pre-coding/group-a-priority/4.21-layer-1-governance-execution/review-evidence/2026-06-16_NOVA_CHILD_PANEL_CP005_CORRECTION_REREVIEW.md"
+                           },
+                           {
+                               "gate":  "CP005_POST_MERGE_ACCEPTED",
+                               "shared_docs_commit":  "dd85afe",
+                               "source":  "user handoff",
+                               "file_reference":  "/Users/alex/Nova-Jarvis-Shared/working/00-project-governance/03-pre-coding/group-a-priority/4.21-layer-1-governance-execution/review-evidence/2026-06-16_NOVA_CHILD_PANEL_CP005_POST_MERGE_REVIEW.md"
+                           },
+                           {
+                               "gate":  "CP006_VISUAL_QA_APPROVED_FOR_MERGE",
+                               "shared_docs_commit":  "0615e50",
+                               "source":  "user handoff",
+                               "file_reference":  null
+                           },
+                           {
+                               "gate":  "4_21_CP006_POST_MERGE_ACCEPTED",
+                               "shared_docs_commit":  "4d1c018",
+                               "source":  "current user authorization",
+                               "file_reference":  null
+                           }
+                       ],
+    "screenshot_counts":  {
+                              "all_4_21_png":  65,
+                              "child_panel_png":  59,
+                              "slice012_desktop_png":  2,
+                              "cp006_visual_qa_png":  31
+                          }
+}
