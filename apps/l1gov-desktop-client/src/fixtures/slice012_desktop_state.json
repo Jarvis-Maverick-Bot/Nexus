@@ -182,6 +182,44 @@
         "replay_execution": false
       }
     },
+    "auxiliary_surfaces": {
+      "workspace_selection_creates_authority": false,
+      "command_preview_submits_command": false,
+      "evidence_is_authority": false,
+      "no_go_bypass_allowed": false,
+      "stale_refresh_canonical_mutation": false,
+      "status_toast_command_like": false,
+      "host_close_executes_command": false,
+      "host_back_executes_command": false,
+      "workspace_picker": {
+        "mode": "desktop_window_overlay",
+        "creates_authority": false
+      },
+      "command_preview": {
+        "affects_state": false,
+        "creates_authority": false
+      },
+      "evidence_drawer": {
+        "evidence_only": true,
+        "evidence_is_authority": false
+      },
+      "no_go_dialog": {
+        "error_code": "ERR_NO_GO_BOUNDARY",
+        "bypass_allowed": false
+      },
+      "stale_projection_refresh": {
+        "states": [
+          "stale",
+          "rebuilding",
+          "current",
+          "blocked"
+        ],
+        "canonical_mutation": false
+      },
+      "status_toast": {
+        "display_only": true
+      }
+    },
     "modules": {
       "mission_control": {
         "title": "Main Cockpit",

@@ -190,6 +190,19 @@ code {
   border-left: 1px solid var(--line);
 }
 
+.operation-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.operation-panel-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .module-nav {
   display: flex;
   flex-direction: column;

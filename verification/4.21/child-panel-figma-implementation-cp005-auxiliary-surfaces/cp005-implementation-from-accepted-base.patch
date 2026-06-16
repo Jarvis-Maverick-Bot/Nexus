@@ -1,0 +1,642 @@
+diff --git a/apps/l1gov-desktop-client/scripts/verify-fixture.mjs b/apps/l1gov-desktop-client/scripts/verify-fixture.mjs
+index 1f65926..a0631de 100644
+--- a/apps/l1gov-desktop-client/scripts/verify-fixture.mjs
++++ b/apps/l1gov-desktop-client/scripts/verify-fixture.mjs
+@@ -70,6 +70,39 @@ if (fixture.display_state?.mq_management?.command_draft_preview_only !== true) {
+   throw new Error("MQ Management fixture must be command draft preview only");
+ }
+
++const auxiliary = fixture.display_state?.auxiliary_surfaces;
++if (auxiliary?.workspace_selection_creates_authority !== false) {
++  throw new Error("Auxiliary surfaces must not create workspace authority");
++}
++
++if (auxiliary?.command_preview_submits_command !== false) {
++  throw new Error("Command Preview must not submit commands");
++}
++
++if (auxiliary?.evidence_is_authority !== false || auxiliary?.evidence_drawer?.evidence_is_authority !== false) {
++  throw new Error("Evidence Drawer must remain evidence-only");
++}
++
++if (auxiliary?.no_go_bypass_allowed !== false || auxiliary?.no_go_dialog?.error_code !== "ERR_NO_GO_BOUNDARY") {
++  throw new Error("No-Go Dialog boundary is invalid");
++}
++
++if (auxiliary?.stale_refresh_canonical_mutation !== false) {
++  throw new Error("Stale Projection Refresh must not mutate canonical state");
++}
++
++if (!auxiliary?.stale_projection_refresh?.states?.includes("blocked")) {
++  throw new Error("Stale Projection Refresh states must include blocked");
++}
++
++if (
++  auxiliary?.status_toast_command_like !== false ||
++  auxiliary?.host_close_executes_command !== false ||
++  auxiliary?.host_back_executes_command !== false
++) {
++  throw new Error("Auxiliary lifecycle surfaces must not execute commands");
++}
++
+ if (!html.includes('id="create-testproject"') || !html.includes("Create TestProject")) {
+   throw new Error("real TestProject creation surface is missing");
+ }
+@@ -175,6 +208,38 @@ for (const expected of [
+   }
+ }
+
++for (const expected of [
++  "workspace_picker",
++  "command_preview",
++  "evidence_drawer",
++  "no_go_dialog",
++  "stale_projection_refresh",
++  "status_toast",
++  "renderWorkspacePickerPanel",
++  "renderCommandPreviewPanel",
++  "renderEvidenceDrawerPanel",
++  "renderNoGoDialogPanel",
++  "renderStaleProjectionPanel",
++  "renderStatusToastPanel",
++  "closeOperationPanelHost",
++  "returnToMainCockpit",
++  "showStatusToast",
++  "workspace_selection_creates_authority=false",
++  "command_preview_submits_command=false",
++  "evidence_is_authority=false",
++  "no_go_bypass_allowed=false",
++  "stale_refresh_canonical_mutation=false",
++  "status_toast_command_like=false",
++  "host_close_executes_command=false",
++  "host_back_executes_command=false",
++  "ERR_NO_GO_BOUNDARY",
++  "evidence-only"
++]) {
++  if (!mainJs.includes(expected)) {
++    throw new Error(`CP-005 auxiliary surface is missing ${expected}`);
++  }
++}
++
+ for (const expected of ["create_test_project", "read_test_project_projection", "cleanup_test_project"]) {
+   if (!mainRs.includes(expected)) {
+     throw new Error(`Tauri command is missing ${expected}`);
+diff --git a/apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json b/apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json
+index 834c6f6..fd3fd75 100644
+--- a/apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json
++++ b/apps/l1gov-desktop-client/src/fixtures/slice012_desktop_state.json
+@@ -182,6 +182,44 @@
+         "replay_execution": false
+       }
+     },
++    "auxiliary_surfaces": {
++      "workspace_selection_creates_authority": false,
++      "command_preview_submits_command": false,
++      "evidence_is_authority": false,
++      "no_go_bypass_allowed": false,
++      "stale_refresh_canonical_mutation": false,
++      "status_toast_command_like": false,
++      "host_close_executes_command": false,
++      "host_back_executes_command": false,
++      "workspace_picker": {
++        "mode": "desktop_window_overlay",
++        "creates_authority": false
++      },
++      "command_preview": {
++        "affects_state": false,
++        "creates_authority": false
++      },
++      "evidence_drawer": {
++        "evidence_only": true,
++        "evidence_is_authority": false
++      },
++      "no_go_dialog": {
++        "error_code": "ERR_NO_GO_BOUNDARY",
++        "bypass_allowed": false
++      },
++      "stale_projection_refresh": {
++        "states": [
++          "stale",
++          "rebuilding",
++          "current",
++          "blocked"
++        ],
++        "canonical_mutation": false
++      },
++      "status_toast": {
++        "display_only": true
++      }
++    },
+     "modules": {
+       "mission_control": {
+         "title": "Main Cockpit",
+diff --git a/apps/l1gov-desktop-client/src/index.html b/apps/l1gov-desktop-client/src/index.html
+index 582f8f3..b1ea29a 100644
+--- a/apps/l1gov-desktop-client/src/index.html
++++ b/apps/l1gov-desktop-client/src/index.html
+@@ -170,7 +170,13 @@
+       </section>
+
+       <aside id="operation-panel-host" class="operation-panel-host" aria-label="Operation Panel Host">
+-        <h2 id="operation-panel-title">Operation Panel Host</h2>
++        <div class="operation-panel-head">
++          <h2 id="operation-panel-title">Operation Panel Host</h2>
++          <div class="operation-panel-controls">
++            <button id="host-panel-back" class="button" type="button">Back</button>
++            <button id="host-panel-close" class="button" type="button">Close</button>
++          </div>
++        </div>
+         <p id="operation-panel-status">No command is executed from shell navigation.</p>
+         <div id="operation-panel-body" class="operation-panel-body">
+           Select Project, Agent, MQ, Workspace, or Evidence to review shell routing.
+@@ -194,6 +200,7 @@
+       <span>Freshness: <strong id="freshness-state">stale</strong></span>
+       <span>Sync: <strong id="sync-state">no projection loaded</strong></span>
+       <span>Authority: <strong>non-authoritative</strong></span>
++      <span id="status-toast-copy">Status toast display-only.</span>
+     </footer>
+
+     <dialog id="workspace-overlay" class="overlay">
+diff --git a/apps/l1gov-desktop-client/src/main.js b/apps/l1gov-desktop-client/src/main.js
+index 0dcda0f..efaf631 100644
+--- a/apps/l1gov-desktop-client/src/main.js
++++ b/apps/l1gov-desktop-client/src/main.js
+@@ -6,7 +6,12 @@ const PANEL_REGISTRY = Object.freeze({
+   main_cockpit: {
+     title: "Operation Panel Host",
+     body: "Select a shell menu item to open a child-panel placeholder. Main Cockpit and ContextEnvelope stay visible.",
+-    status: "No command is executed from shell navigation."
++    status: "No command is executed from shell navigation.",
++    actions: [
++      { label: "Command Preview", panelId: "command_preview" },
++      { label: "Stale Refresh", panelId: "stale_projection_refresh" },
++      { label: "Status Toast", panelId: "status_toast" }
++    ]
+   },
+   project_shell: {
+     title: "Project Management",
+@@ -98,17 +103,35 @@ const PANEL_REGISTRY = Object.freeze({
+   workspace_picker: {
+     title: "Workspace Picker",
+     body: "Workspace picker opens as an overlay and does not become canonical authority.",
+-    status: "Workspace rows are navigation/display only."
++    status: "Workspace rows are navigation/display only.",
++    render: renderWorkspacePickerPanel
++  },
++  command_preview: {
++    title: "Command Preview",
++    status: "Command Preview is display-only; command_preview_submits_command=false.",
++    render: renderCommandPreviewPanel
+   },
+   evidence_drawer: {
+     title: "Evidence",
+     body: "Evidence links remain display-only. Evidence does not become canonical authority.",
+-    status: "No command is executed from shell navigation."
++    status: "Evidence Drawer is evidence-only; evidence_is_authority=false.",
++    render: renderEvidenceDrawerPanel
++  },
++  no_go_dialog: {
++    title: "No-Go Dialog",
++    status: "ERR_NO_GO_BOUNDARY; no_go_bypass_allowed=false.",
++    render: renderNoGoDialogPanel
++  },
++  stale_projection_refresh: {
++    title: "Stale Projection Refresh",
++    status: "Refresh is display-state-only; stale_refresh_canonical_mutation=false.",
++    render: renderStaleProjectionPanel
+   },
+   status_toast: {
+     title: "Status Toast",
+     body: "Status toast is display-only and cannot submit commands.",
+-    status: "Display-only status surface."
++    status: "Display-only status surface.",
++    render: renderStatusToastPanel
+   }
+ });
+ const INIT_FIELDS = [
+@@ -208,6 +231,39 @@ const DEFAULT_MQ_MANAGEMENT = Object.freeze({
+     replay_execution: false
+   }
+ });
++const DEFAULT_AUXILIARY_SURFACES = Object.freeze({
++  workspace_selection_creates_authority: false,
++  command_preview_submits_command: false,
++  evidence_is_authority: false,
++  no_go_bypass_allowed: false,
++  stale_refresh_canonical_mutation: false,
++  status_toast_command_like: false,
++  host_close_executes_command: false,
++  host_back_executes_command: false,
++  workspace_picker: {
++    mode: "desktop_window_overlay",
++    creates_authority: false
++  },
++  command_preview: {
++    affects_state: false,
++    creates_authority: false
++  },
++  evidence_drawer: {
++    evidence_only: true,
++    evidence_is_authority: false
++  },
++  no_go_dialog: {
++    error_code: "ERR_NO_GO_BOUNDARY",
++    bypass_allowed: false
++  },
++  stale_projection_refresh: {
++    states: ["stale", "rebuilding", "current", "blocked"],
++    canonical_mutation: false
++  },
++  status_toast: {
++    display_only: true
++  }
++});
+
+ function normalizeFreshness(value) {
+   return ["stale", "rebuilding", "current", "blocked"].includes(value) ? value : "stale";
+@@ -262,13 +318,14 @@ function pendingRealUatState() {
+         },
+         delivery_feedback: {
+           title: "Delivery Feedback",
+-          summary: "No closeout claim is made."
++          summary: "No completion claim is made."
+         },
+         notes_evidence: {
+           title: "Notes Evidence",
+           summary: "Real UAT evidence will be written under verification/4.21/real-uat."
+         }
+       },
++      auxiliary_surfaces: DEFAULT_AUXILIARY_SURFACES,
+       workspaces: [],
+       init_status: "create_project_first",
+       init_values: {},
+@@ -312,6 +369,7 @@ function buildSurfaceState(source) {
+     projectManagement: displayState.project_management || DEFAULT_PROJECT_MANAGEMENT,
+     agentManagement: displayState.agent_management || DEFAULT_AGENT_MANAGEMENT,
+     mqManagement: displayState.mq_management || DEFAULT_MQ_MANAGEMENT,
++    auxiliarySurfaces: displayState.auxiliary_surfaces || DEFAULT_AUXILIARY_SURFACES,
+     notes: displayState.notes,
+     serviceState: displayState.service_state,
+     syncState: displayState.sync_state,
+@@ -435,7 +493,29 @@ function renderOperationPanel(panelId = activePanelId) {
+
+ function selectOperationPanel(panelId) {
+   activePanelId = panelId;
+-  renderOperationPanel(panelId);
++  const rendered = renderOperationPanel(panelId);
++  if (rendered && PANEL_REGISTRY[panelId]) {
++    showStatusToast(`${PANEL_REGISTRY[panelId].title} opened; No command is executed from shell navigation.`);
++  }
++}
++
++function returnToMainCockpit() {
++  activePanelId = "main_cockpit";
++  renderOperationPanel(activePanelId);
++  showStatusToast("Returned to Main Cockpit; No command is executed from shell navigation. host_back_executes_command=false.");
++}
++
++function closeOperationPanelHost() {
++  activePanelId = "main_cockpit";
++  renderOperationPanel(activePanelId);
++  showStatusToast("Operation Panel Host closed to Main Cockpit; No command is executed from shell navigation. host_close_executes_command=false.");
++}
++
++function showStatusToast(message = "Status toast display-only; status_toast_command_like=false.") {
++  const toast = $("status-toast-copy");
++  if (toast) {
++    toast.textContent = message;
++  }
+ }
+
+ function openWorkspacePicker() {
+@@ -453,8 +533,11 @@ function openWorkspacePicker() {
+       button.addEventListener("click", () => {
+         state.workspaceName = workspace.label;
+         state.freshness = normalizeFreshness(workspace.freshness);
++        state.contextEnvelope.project = workspace.label;
++        state.contextEnvelope.freshness = state.freshness;
+         overlay.close();
+         render();
++        showStatusToast("Workspace selection display-only; workspace_selection_creates_authority=false.");
+       });
+       return button;
+     })
+@@ -475,11 +558,84 @@ function selectModule(moduleId) {
+ }
+
+ function showCommandDraftPreview() {
++  const auxiliary = auxiliarySurfacesState();
+   $("command-draft-preview").innerHTML = `
+     <h3>Command Draft Preview</h3>
+     <p>SubmitCommandDraft preview for Governance Service review path. No canonical mutation.</p>
+-    <code>target_ref=layer1-governance, affects_state=false, source_mode=${state.sourceMode}</code>
++    <code>target_ref=layer1-governance, command_preview_submits_command=${auxiliary.command_preview_submits_command}, affects_state=${auxiliary.command_preview.affects_state}, creates_authority=${auxiliary.command_preview.creates_authority}, source_mode=${state.sourceMode}</code>
+   `;
++  showStatusToast("Command Preview display-only; command_preview_submits_command=false.");
++}
++
++function auxiliarySurfacesState() {
++  return state?.auxiliarySurfaces || DEFAULT_AUXILIARY_SURFACES;
++}
++
++function renderWorkspacePickerPanel(container) {
++  const auxiliary = auxiliarySurfacesState();
++  appendPanelParagraph(container, "Workspace Picker opens as a desktop window overlay and changes display context only.");
++  appendPanelList(container, [
++    `mode=${auxiliary.workspace_picker.mode}`,
++    `workspace_selection_creates_authority=${auxiliary.workspace_selection_creates_authority}`,
++    `creates_authority=${auxiliary.workspace_picker.creates_authority}`
++  ]);
++  renderPanelActions(container, [{ label: "Open Workspace Overlay", command: "workspace_picker_overlay" }]);
++}
++
++function renderCommandPreviewPanel(container) {
++  const auxiliary = auxiliarySurfacesState();
++  appendPanelParagraph(container, "Command Preview displays draft metadata for review and never submits a command.");
++  appendPanelList(container, [
++    `command_preview_submits_command=${auxiliary.command_preview_submits_command}`,
++    `affects_state=${auxiliary.command_preview.affects_state}`,
++    `creates_authority=${auxiliary.command_preview.creates_authority}`
++  ]);
++  renderPanelActions(container, [{ label: "Show Command Preview", command: "command_preview_display" }]);
++}
++
++function renderEvidenceDrawerPanel(container) {
++  const auxiliary = auxiliarySurfacesState();
++  appendPanelParagraph(container, "Evidence Drawer lists evidence-only references. Evidence never becomes canonical authority.");
++  appendPanelList(container, [
++    `evidence-only=${auxiliary.evidence_drawer.evidence_only}`,
++    `evidence_is_authority=${auxiliary.evidence_is_authority}`,
++    `evidence_drawer.evidence_is_authority=${auxiliary.evidence_drawer.evidence_is_authority}`
++  ]);
++  appendPanelList(container, state.notes);
++}
++
++function renderNoGoDialogPanel(container) {
++  const auxiliary = auxiliarySurfacesState();
++  appendPanelParagraph(container, "No-Go Dialog displays the blocked service boundary and provides no local override path.");
++  appendPanelList(container, [
++    `error_code=${auxiliary.no_go_dialog.error_code}`,
++    `no_go_bypass_allowed=${auxiliary.no_go_bypass_allowed}`,
++    `bypass_allowed=${auxiliary.no_go_dialog.bypass_allowed}`
++  ]);
++  renderPanelActions(container, [{ label: "Show No-Go Block", command: "no_go_dialog_block", danger: true }]);
++}
++
++function renderStaleProjectionPanel(container) {
++  const auxiliary = auxiliarySurfacesState();
++  appendPanelParagraph(container, "Stale Projection Refresh cycles display freshness states without mutating canonical records.");
++  appendPanelList(container, [
++    `states=${auxiliary.stale_projection_refresh.states.join(", ")}`,
++    `stale_refresh_canonical_mutation=${auxiliary.stale_refresh_canonical_mutation}`,
++    `canonical_mutation=${auxiliary.stale_projection_refresh.canonical_mutation}`
++  ]);
++  renderPanelActions(container, [{ label: "Cycle Display State", command: "stale_projection_cycle" }]);
++}
++
++function renderStatusToastPanel(container) {
++  const auxiliary = auxiliarySurfacesState();
++  appendPanelParagraph(container, "Status Toast reports shell lifecycle changes as display-only status copy.");
++  appendPanelList(container, [
++    `status_toast_command_like=${auxiliary.status_toast_command_like}`,
++    `display_only=${auxiliary.status_toast.display_only}`,
++    `host_close_executes_command=${auxiliary.host_close_executes_command}`,
++    `host_back_executes_command=${auxiliary.host_back_executes_command}`
++  ]);
++  renderPanelActions(container, [{ label: "Show Status Toast", command: "status_toast_display" }]);
+ }
+
+ function projectManagementState() {
+@@ -554,6 +710,21 @@ function renderPanelActions(container, actions) {
+       if (action.command === "mq_replay_evidence_preview") {
+         showMqReplayEvidencePreview();
+       }
++      if (action.command === "workspace_picker_overlay") {
++        openWorkspacePicker();
++      }
++      if (action.command === "command_preview_display") {
++        showCommandDraftPreview();
++      }
++      if (action.command === "no_go_dialog_block") {
++        showNoGoBlock();
++      }
++      if (action.command === "stale_projection_cycle") {
++        cycleStaleRefresh();
++      }
++      if (action.command === "status_toast_display") {
++        showStatusToast();
++      }
+     });
+     row.append(button);
+   }
+@@ -891,15 +1062,18 @@ function showServiceRejection() {
+ }
+
+ function showNoGoBlock() {
+-  $("service-outcome-copy").textContent = "BLOCKED ERR_NO_GO_BOUNDARY: direct UI approval is blocked and must route through Monitor/HITL.";
++  $("service-outcome-copy").textContent = "BLOCKED ERR_NO_GO_BOUNDARY: direct UI approval is blocked and must route through Monitor/HITL. no_go_bypass_allowed=false.";
+   $("service-rejection").classList.add("blocked");
++  showStatusToast("No-Go Dialog display-only; no_go_bypass_allowed=false.");
+ }
+
+ function cycleStaleRefresh() {
+   state.freshnessIndex = (state.freshnessIndex + 1) % state.freshnessCycle.length;
+   state.freshness = normalizeFreshness(state.freshnessCycle[state.freshnessIndex]);
+-  $("stale-copy").textContent = `Projection display state is ${state.freshness}. No canonical mutation.`;
++  state.contextEnvelope.freshness = state.freshness;
++  $("stale-copy").textContent = `Projection display state is ${state.freshness}. stale_refresh_canonical_mutation=false.`;
+   render();
++  showStatusToast("Projection refresh updated display state only; stale_refresh_canonical_mutation=false.");
+ }
+
+ function renderFutureIntegrationBoundary() {
+@@ -946,7 +1120,12 @@ function collectInitValues() {
+ }
+
+ function bindEvents() {
+-  $("workspace-picker").addEventListener("click", openWorkspacePicker);
++  $("host-panel-back").addEventListener("click", returnToMainCockpit);
++  $("host-panel-close").addEventListener("click", closeOperationPanelHost);
++  $("workspace-picker").addEventListener("click", () => {
++    selectOperationPanel("workspace_picker");
++    openWorkspacePicker();
++  });
+   document.querySelectorAll("[data-panel-route]").forEach((button) => {
+     button.addEventListener("click", () => selectOperationPanel(button.dataset.panelRoute));
+   });
+@@ -957,6 +1136,7 @@ function bindEvents() {
+     cleanupRealTestProject().catch((error) => setServiceError(error));
+   });
+   $("refresh-projection").addEventListener("click", () => {
++    selectOperationPanel("stale_projection_refresh");
+     loadRealProjectionState()
+       .then((loaded) => {
+         state = loaded;
+@@ -965,13 +1145,22 @@ function bindEvents() {
+       })
+       .catch(() => cycleStaleRefresh());
+   });
+-  $("draft-command-button").addEventListener("click", showCommandDraftPreview);
++  $("draft-command-button").addEventListener("click", () => {
++    selectOperationPanel("command_preview");
++    showCommandDraftPreview();
++  });
+   $("save-init-draft").addEventListener("click", () => {
+     saveProjectInitDraft().catch((error) => setServiceError(error));
+   });
+   $("draft-init-command").addEventListener("click", showInitCommandDraft);
+-  $("show-rejection").addEventListener("click", showServiceRejection);
+-  $("no-go-block").addEventListener("click", showNoGoBlock);
++  $("show-rejection").addEventListener("click", () => {
++    selectOperationPanel("no_go_dialog");
++    showServiceRejection();
++  });
++  $("no-go-block").addEventListener("click", () => {
++    selectOperationPanel("no_go_dialog");
++    showNoGoBlock();
++  });
+   document.querySelectorAll(".nav-button").forEach((button) => {
+     button.addEventListener("click", () => selectModule(button.dataset.module));
+   });
+diff --git a/apps/l1gov-desktop-client/src/styles.css b/apps/l1gov-desktop-client/src/styles.css
+index 1b65566..6e256b1 100644
+--- a/apps/l1gov-desktop-client/src/styles.css
++++ b/apps/l1gov-desktop-client/src/styles.css
+@@ -190,6 +190,19 @@ code {
+   border-left: 1px solid var(--line);
+ }
+
++.operation-panel-head {
++  display: flex;
++  align-items: flex-start;
++  justify-content: space-between;
++  gap: 10px;
++}
++
++.operation-panel-controls {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 6px;
++}
++
+ .module-nav {
+   display: flex;
+   flex-direction: column;
+diff --git a/nexus/governance/tests/test_client_desktop_surface_slice012.py b/nexus/governance/tests/test_client_desktop_surface_slice012.py
+index a3dac02..3765ab3 100644
+--- a/nexus/governance/tests/test_client_desktop_surface_slice012.py
++++ b/nexus/governance/tests/test_client_desktop_surface_slice012.py
+@@ -567,3 +567,113 @@ def test_cp004_mq_panels_do_not_add_executable_mq_or_dispatch_controls() -> None
+     assert "dispatch_execution" in main_js
+     assert "replay_execution" in main_js
+     assert "err_no_go_boundary" in main_js
++
++
++def test_cp005_auxiliary_fixture_declares_display_only_boundaries() -> None:
++    fixture = load_fixture()
++
++    auxiliary = fixture["display_state"]["auxiliary_surfaces"]
++    assert auxiliary["workspace_selection_creates_authority"] is False
++    assert auxiliary["command_preview_submits_command"] is False
++    assert auxiliary["evidence_is_authority"] is False
++    assert auxiliary["no_go_bypass_allowed"] is False
++    assert auxiliary["stale_refresh_canonical_mutation"] is False
++    assert auxiliary["status_toast_command_like"] is False
++    assert auxiliary["host_close_executes_command"] is False
++    assert auxiliary["host_back_executes_command"] is False
++
++    assert auxiliary["workspace_picker"]["mode"] == "desktop_window_overlay"
++    assert auxiliary["command_preview"]["affects_state"] is False
++    assert auxiliary["command_preview"]["creates_authority"] is False
++    assert auxiliary["evidence_drawer"]["evidence_is_authority"] is False
++    assert auxiliary["no_go_dialog"]["error_code"] == "ERR_NO_GO_BOUNDARY"
++    assert "blocked" in auxiliary["stale_projection_refresh"]["states"]
++    assert auxiliary["status_toast"]["display_only"] is True
++
++
++def test_cp005_auxiliary_surfaces_are_registered_and_have_close_back_lifecycle() -> None:
++    main_js = read_app_file("src/main.js")
++
++    for panel_id in (
++        "workspace_picker",
++        "command_preview",
++        "evidence_drawer",
++        "no_go_dialog",
++        "stale_projection_refresh",
++        "status_toast",
++    ):
++        assert panel_id in main_js
++
++    for hook in (
++        "renderWorkspacePickerPanel",
++        "renderCommandPreviewPanel",
++        "renderEvidenceDrawerPanel",
++        "renderNoGoDialogPanel",
++        "renderStaleProjectionPanel",
++        "renderStatusToastPanel",
++        "closeOperationPanelHost",
++        "returnToMainCockpit",
++        "showStatusToast",
++    ):
++        assert hook in main_js
++
++    assert "ERR_INVALID_PANEL_ROUTE" in main_js
++    assert "No command is executed from shell navigation" in main_js
++
++
++def test_cp005_auxiliary_frames_are_display_preview_or_refresh_only() -> None:
++    html = read_app_file("src/index.html")
++    main_js = read_app_file("src/main.js")
++
++    for element_id in (
++        "workspace-overlay",
++        "command-draft-preview",
++        "service-rejection",
++        "stale-refresh",
++        "status-bar",
++    ):
++        assert f'id="{element_id}"' in html
++
++    for expected_contract in (
++        "workspace_selection_creates_authority=false",
++        "command_preview_submits_command=false",
++        "evidence_is_authority=false",
++        "no_go_bypass_allowed=false",
++        "stale_refresh_canonical_mutation=false",
++        "status_toast_command_like=false",
++        "host_close_executes_command=false",
++        "host_back_executes_command=false",
++        "affects_state=false",
++        "creates_authority=false",
++        "evidence-only",
++        "ERR_NO_GO_BOUNDARY",
++    ):
++        assert expected_contract in main_js
++
++
++def test_cp005_auxiliary_surfaces_do_not_add_authority_or_execution_affordances() -> None:
++    main_js = read_app_file("src/main.js").lower()
++    html = read_app_file("src/index.html").lower()
++    combined = "\n".join((main_js, html))
++
++    forbidden_affordances = (
++        "submit canonical",
++        "make canonical",
++        "approve baseline",
++        "bypass no-go",
++        "override no-go",
++        "deploy now",
++        "closeout",
++        "execute refresh",
++        "mutate projection",
++        "submit live",
++        "dispatch now",
++        "call controller",
++    )
++
++    for affordance in forbidden_affordances:
++        assert affordance not in combined, affordance
++
++    assert "workspace_selection_creates_authority" in main_js
++    assert "command_preview_submits_command" in main_js
++    assert "stale_refresh_canonical_mutation" in main_js

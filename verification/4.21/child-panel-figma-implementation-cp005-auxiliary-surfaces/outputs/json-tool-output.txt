@@ -1,0 +1,51 @@
+{
+    "status": "CP005_IMPLEMENTED_FOR_NOVA_REVIEW",
+    "branch": "codex/4.21-child-panel-cp005-auxiliary-surfaces",
+    "accepted_base": "4ad9f6260697134f1587760a0af84a1e7003af50",
+    "implementation_head": "653426a12020b31f2827a85a68c971ff8e3069eb",
+    "head": "653426a12020b31f2827a85a68c971ff8e3069eb",
+    "verification": [
+        {
+            "command": "python -m pytest nexus/governance/tests/test_client_desktop_surface_slice012.py -q",
+            "result": "29 passed in 0.05s"
+        },
+        {
+            "command": "node scripts/verify-fixture.mjs via bundled Node",
+            "result": "slice012 desktop real UAT surface verified"
+        },
+        {
+            "command": "git diff --check",
+            "result": "exit 0; CRLF warnings only"
+        }
+    ],
+    "package_artifacts": [
+        "cp005-implementation-from-accepted-base.patch",
+        "CHANGED_FILES_SNAPSHOT.txt",
+        "NPM_PATH_LIMITATION.md",
+        "outputs/pytest-output.txt",
+        "outputs/bundled-node-verifier-output.txt",
+        "outputs/json-tool-output.txt",
+        "outputs/git-diff-check-output.txt",
+        "outputs/no-go-scan-output.txt",
+        "outputs/bom-scan-output.txt"
+    ],
+    "screenshots": [
+        "cp005-00-main-cockpit-auxiliary-actions-desktop.png",
+        "cp005-01-workspace-picker-overlay-desktop.png",
+        "cp005-02-command-preview-display-only-desktop.png",
+        "cp005-03-evidence-drawer-evidence-only-desktop.png",
+        "cp005-04-no-go-dialog-boundary-desktop.png",
+        "cp005-05-stale-projection-refresh-display-only-desktop.png",
+        "cp005-06-status-toast-display-only-desktop.png",
+        "cp005-07-host-close-back-lifecycle-desktop.png"
+    ],
+    "boundaries": {
+        "tauri_bridge_expanded": false,
+        "runtime_execution_added": false,
+        "dispatch_controller_added": false,
+        "package_manager_mutated": false,
+        "cp006_included": false,
+        "production_readiness_claimed": false,
+        "final_pass_claimed": false
+    }
+}

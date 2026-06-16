@@ -170,7 +170,13 @@
       </section>
 
       <aside id="operation-panel-host" class="operation-panel-host" aria-label="Operation Panel Host">
-        <h2 id="operation-panel-title">Operation Panel Host</h2>
+        <div class="operation-panel-head">
+          <h2 id="operation-panel-title">Operation Panel Host</h2>
+          <div class="operation-panel-controls">
+            <button id="host-panel-back" class="button" type="button">Back</button>
+            <button id="host-panel-close" class="button" type="button">Close</button>
+          </div>
+        </div>
         <p id="operation-panel-status">No command is executed from shell navigation.</p>
         <div id="operation-panel-body" class="operation-panel-body">
           Select Project, Agent, MQ, Workspace, or Evidence to review shell routing.
@@ -194,6 +200,7 @@
       <span>Freshness: <strong id="freshness-state">stale</strong></span>
       <span>Sync: <strong id="sync-state">no projection loaded</strong></span>
       <span>Authority: <strong>non-authoritative</strong></span>
+      <span id="status-toast-copy">Status toast display-only.</span>
     </footer>
 
     <dialog id="workspace-overlay" class="overlay">

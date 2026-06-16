@@ -70,6 +70,39 @@ if (fixture.display_state?.mq_management?.command_draft_preview_only !== true) {
   throw new Error("MQ Management fixture must be command draft preview only");
 }
 
+const auxiliary = fixture.display_state?.auxiliary_surfaces;
+if (auxiliary?.workspace_selection_creates_authority !== false) {
+  throw new Error("Auxiliary surfaces must not create workspace authority");
+}
+
+if (auxiliary?.command_preview_submits_command !== false) {
+  throw new Error("Command Preview must not submit commands");
+}
+
+if (auxiliary?.evidence_is_authority !== false || auxiliary?.evidence_drawer?.evidence_is_authority !== false) {
+  throw new Error("Evidence Drawer must remain evidence-only");
+}
+
+if (auxiliary?.no_go_bypass_allowed !== false || auxiliary?.no_go_dialog?.error_code !== "ERR_NO_GO_BOUNDARY") {
+  throw new Error("No-Go Dialog boundary is invalid");
+}
+
+if (auxiliary?.stale_refresh_canonical_mutation !== false) {
+  throw new Error("Stale Projection Refresh must not mutate canonical state");
+}
+
+if (!auxiliary?.stale_projection_refresh?.states?.includes("blocked")) {
+  throw new Error("Stale Projection Refresh states must include blocked");
+}
+
+if (
+  auxiliary?.status_toast_command_like !== false ||
+  auxiliary?.host_close_executes_command !== false ||
+  auxiliary?.host_back_executes_command !== false
+) {
+  throw new Error("Auxiliary lifecycle surfaces must not execute commands");
+}
+
 if (!html.includes('id="create-testproject"') || !html.includes("Create TestProject")) {
   throw new Error("real TestProject creation surface is missing");
 }
@@ -172,6 +205,38 @@ for (const expected of [
 ]) {
   if (!mainJs.includes(expected)) {
     throw new Error(`CP-004 MQ Management panel is missing ${expected}`);
+  }
+}
+
+for (const expected of [
+  "workspace_picker",
+  "command_preview",
+  "evidence_drawer",
+  "no_go_dialog",
+  "stale_projection_refresh",
+  "status_toast",
+  "renderWorkspacePickerPanel",
+  "renderCommandPreviewPanel",
+  "renderEvidenceDrawerPanel",
+  "renderNoGoDialogPanel",
+  "renderStaleProjectionPanel",
+  "renderStatusToastPanel",
+  "closeOperationPanelHost",
+  "returnToMainCockpit",
+  "showStatusToast",
+  "workspace_selection_creates_authority=false",
+  "command_preview_submits_command=false",
+  "evidence_is_authority=false",
+  "no_go_bypass_allowed=false",
+  "stale_refresh_canonical_mutation=false",
+  "status_toast_command_like=false",
+  "host_close_executes_command=false",
+  "host_back_executes_command=false",
+  "ERR_NO_GO_BOUNDARY",
+  "evidence-only"
+]) {
+  if (!mainJs.includes(expected)) {
+    throw new Error(`CP-005 auxiliary surface is missing ${expected}`);
   }
 }
 

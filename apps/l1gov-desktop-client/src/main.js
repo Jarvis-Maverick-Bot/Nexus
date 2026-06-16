@@ -6,7 +6,12 @@ const PANEL_REGISTRY = Object.freeze({
   main_cockpit: {
     title: "Operation Panel Host",
     body: "Select a shell menu item to open a child-panel placeholder. Main Cockpit and ContextEnvelope stay visible.",
-    status: "No command is executed from shell navigation."
+    status: "No command is executed from shell navigation.",
+    actions: [
+      { label: "Command Preview", panelId: "command_preview" },
+      { label: "Stale Refresh", panelId: "stale_projection_refresh" },
+      { label: "Status Toast", panelId: "status_toast" }
+    ]
   },
   project_shell: {
     title: "Project Management",
@@ -98,17 +103,35 @@ const PANEL_REGISTRY = Object.freeze({
   workspace_picker: {
     title: "Workspace Picker",
     body: "Workspace picker opens as an overlay and does not become canonical authority.",
-    status: "Workspace rows are navigation/display only."
+    status: "Workspace rows are navigation/display only.",
+    render: renderWorkspacePickerPanel
+  },
+  command_preview: {
+    title: "Command Preview",
+    status: "Command Preview is display-only; command_preview_submits_command=false.",
+    render: renderCommandPreviewPanel
   },
   evidence_drawer: {
     title: "Evidence",
     body: "Evidence links remain display-only. Evidence does not become canonical authority.",
-    status: "No command is executed from shell navigation."
+    status: "Evidence Drawer is evidence-only; evidence_is_authority=false.",
+    render: renderEvidenceDrawerPanel
+  },
+  no_go_dialog: {
+    title: "No-Go Dialog",
+    status: "ERR_NO_GO_BOUNDARY; no_go_bypass_allowed=false.",
+    render: renderNoGoDialogPanel
+  },
+  stale_projection_refresh: {
+    title: "Stale Projection Refresh",
+    status: "Refresh is display-state-only; stale_refresh_canonical_mutation=false.",
+    render: renderStaleProjectionPanel
   },
   status_toast: {
     title: "Status Toast",
     body: "Status toast is display-only and cannot submit commands.",
-    status: "Display-only status surface."
+    status: "Display-only status surface.",
+    render: renderStatusToastPanel
   }
 });
 const INIT_FIELDS = [
@@ -208,6 +231,39 @@ const DEFAULT_MQ_MANAGEMENT = Object.freeze({
     replay_execution: false
   }
 });
+const DEFAULT_AUXILIARY_SURFACES = Object.freeze({
+  workspace_selection_creates_authority: false,
+  command_preview_submits_command: false,
+  evidence_is_authority: false,
+  no_go_bypass_allowed: false,
+  stale_refresh_canonical_mutation: false,
+  status_toast_command_like: false,
+  host_close_executes_command: false,
+  host_back_executes_command: false,
+  workspace_picker: {
+    mode: "desktop_window_overlay",
+    creates_authority: false
+  },
+  command_preview: {
+    affects_state: false,
+    creates_authority: false
+  },
+  evidence_drawer: {
+    evidence_only: true,
+    evidence_is_authority: false
+  },
+  no_go_dialog: {
+    error_code: "ERR_NO_GO_BOUNDARY",
+    bypass_allowed: false
+  },
+  stale_projection_refresh: {
+    states: ["stale", "rebuilding", "current", "blocked"],
+    canonical_mutation: false
+  },
+  status_toast: {
+    display_only: true
+  }
+});
 
 function normalizeFreshness(value) {
   return ["stale", "rebuilding", "current", "blocked"].includes(value) ? value : "stale";
@@ -262,13 +318,14 @@ function pendingRealUatState() {
         },
         delivery_feedback: {
           title: "Delivery Feedback",
-          summary: "No closeout claim is made."
+          summary: "No completion claim is made."
         },
         notes_evidence: {
           title: "Notes Evidence",
           summary: "Real UAT evidence will be written under verification/4.21/real-uat."
         }
       },
+      auxiliary_surfaces: DEFAULT_AUXILIARY_SURFACES,
       workspaces: [],
       init_status: "create_project_first",
       init_values: {},
@@ -312,6 +369,7 @@ function buildSurfaceState(source) {
     projectManagement: displayState.project_management || DEFAULT_PROJECT_MANAGEMENT,
     agentManagement: displayState.agent_management || DEFAULT_AGENT_MANAGEMENT,
     mqManagement: displayState.mq_management || DEFAULT_MQ_MANAGEMENT,
+    auxiliarySurfaces: displayState.auxiliary_surfaces || DEFAULT_AUXILIARY_SURFACES,
     notes: displayState.notes,
     serviceState: displayState.service_state,
     syncState: displayState.sync_state,
@@ -435,7 +493,29 @@ function renderOperationPanel(panelId = activePanelId) {
 
 function selectOperationPanel(panelId) {
   activePanelId = panelId;
-  renderOperationPanel(panelId);
+  const rendered = renderOperationPanel(panelId);
+  if (rendered && PANEL_REGISTRY[panelId]) {
+    showStatusToast(`${PANEL_REGISTRY[panelId].title} opened; No command is executed from shell navigation.`);
+  }
+}
+
+function returnToMainCockpit() {
+  activePanelId = "main_cockpit";
+  renderOperationPanel(activePanelId);
+  showStatusToast("Returned to Main Cockpit; No command is executed from shell navigation. host_back_executes_command=false.");
+}
+
+function closeOperationPanelHost() {
+  activePanelId = "main_cockpit";
+  renderOperationPanel(activePanelId);
+  showStatusToast("Operation Panel Host closed to Main Cockpit; No command is executed from shell navigation. host_close_executes_command=false.");
+}
+
+function showStatusToast(message = "Status toast display-only; status_toast_command_like=false.") {
+  const toast = $("status-toast-copy");
+  if (toast) {
+    toast.textContent = message;
+  }
 }
 
 function openWorkspacePicker() {
@@ -453,8 +533,11 @@ function openWorkspacePicker() {
       button.addEventListener("click", () => {
         state.workspaceName = workspace.label;
         state.freshness = normalizeFreshness(workspace.freshness);
+        state.contextEnvelope.project = workspace.label;
+        state.contextEnvelope.freshness = state.freshness;
         overlay.close();
         render();
+        showStatusToast("Workspace selection display-only; workspace_selection_creates_authority=false.");
       });
       return button;
     })
@@ -475,11 +558,84 @@ function selectModule(moduleId) {
 }
 
 function showCommandDraftPreview() {
+  const auxiliary = auxiliarySurfacesState();
   $("command-draft-preview").innerHTML = `
     <h3>Command Draft Preview</h3>
     <p>SubmitCommandDraft preview for Governance Service review path. No canonical mutation.</p>
-    <code>target_ref=layer1-governance, affects_state=false, source_mode=${state.sourceMode}</code>
+    <code>target_ref=layer1-governance, command_preview_submits_command=${auxiliary.command_preview_submits_command}, affects_state=${auxiliary.command_preview.affects_state}, creates_authority=${auxiliary.command_preview.creates_authority}, source_mode=${state.sourceMode}</code>
   `;
+  showStatusToast("Command Preview display-only; command_preview_submits_command=false.");
+}
+
+function auxiliarySurfacesState() {
+  return state?.auxiliarySurfaces || DEFAULT_AUXILIARY_SURFACES;
+}
+
+function renderWorkspacePickerPanel(container) {
+  const auxiliary = auxiliarySurfacesState();
+  appendPanelParagraph(container, "Workspace Picker opens as a desktop window overlay and changes display context only.");
+  appendPanelList(container, [
+    `mode=${auxiliary.workspace_picker.mode}`,
+    `workspace_selection_creates_authority=${auxiliary.workspace_selection_creates_authority}`,
+    `creates_authority=${auxiliary.workspace_picker.creates_authority}`
+  ]);
+  renderPanelActions(container, [{ label: "Open Workspace Overlay", command: "workspace_picker_overlay" }]);
+}
+
+function renderCommandPreviewPanel(container) {
+  const auxiliary = auxiliarySurfacesState();
+  appendPanelParagraph(container, "Command Preview displays draft metadata for review and never submits a command.");
+  appendPanelList(container, [
+    `command_preview_submits_command=${auxiliary.command_preview_submits_command}`,
+    `affects_state=${auxiliary.command_preview.affects_state}`,
+    `creates_authority=${auxiliary.command_preview.creates_authority}`
+  ]);
+  renderPanelActions(container, [{ label: "Show Command Preview", command: "command_preview_display" }]);
+}
+
+function renderEvidenceDrawerPanel(container) {
+  const auxiliary = auxiliarySurfacesState();
+  appendPanelParagraph(container, "Evidence Drawer lists evidence-only references. Evidence never becomes canonical authority.");
+  appendPanelList(container, [
+    `evidence-only=${auxiliary.evidence_drawer.evidence_only}`,
+    `evidence_is_authority=${auxiliary.evidence_is_authority}`,
+    `evidence_drawer.evidence_is_authority=${auxiliary.evidence_drawer.evidence_is_authority}`
+  ]);
+  appendPanelList(container, state.notes);
+}
+
+function renderNoGoDialogPanel(container) {
+  const auxiliary = auxiliarySurfacesState();
+  appendPanelParagraph(container, "No-Go Dialog displays the blocked service boundary and provides no local override path.");
+  appendPanelList(container, [
+    `error_code=${auxiliary.no_go_dialog.error_code}`,
+    `no_go_bypass_allowed=${auxiliary.no_go_bypass_allowed}`,
+    `bypass_allowed=${auxiliary.no_go_dialog.bypass_allowed}`
+  ]);
+  renderPanelActions(container, [{ label: "Show No-Go Block", command: "no_go_dialog_block", danger: true }]);
+}
+
+function renderStaleProjectionPanel(container) {
+  const auxiliary = auxiliarySurfacesState();
+  appendPanelParagraph(container, "Stale Projection Refresh cycles display freshness states without mutating canonical records.");
+  appendPanelList(container, [
+    `states=${auxiliary.stale_projection_refresh.states.join(", ")}`,
+    `stale_refresh_canonical_mutation=${auxiliary.stale_refresh_canonical_mutation}`,
+    `canonical_mutation=${auxiliary.stale_projection_refresh.canonical_mutation}`
+  ]);
+  renderPanelActions(container, [{ label: "Cycle Display State", command: "stale_projection_cycle" }]);
+}
+
+function renderStatusToastPanel(container) {
+  const auxiliary = auxiliarySurfacesState();
+  appendPanelParagraph(container, "Status Toast reports shell lifecycle changes as display-only status copy.");
+  appendPanelList(container, [
+    `status_toast_command_like=${auxiliary.status_toast_command_like}`,
+    `display_only=${auxiliary.status_toast.display_only}`,
+    `host_close_executes_command=${auxiliary.host_close_executes_command}`,
+    `host_back_executes_command=${auxiliary.host_back_executes_command}`
+  ]);
+  renderPanelActions(container, [{ label: "Show Status Toast", command: "status_toast_display" }]);
 }
 
 function projectManagementState() {
@@ -553,6 +709,21 @@ function renderPanelActions(container, actions) {
       }
       if (action.command === "mq_replay_evidence_preview") {
         showMqReplayEvidencePreview();
+      }
+      if (action.command === "workspace_picker_overlay") {
+        openWorkspacePicker();
+      }
+      if (action.command === "command_preview_display") {
+        showCommandDraftPreview();
+      }
+      if (action.command === "no_go_dialog_block") {
+        showNoGoBlock();
+      }
+      if (action.command === "stale_projection_cycle") {
+        cycleStaleRefresh();
+      }
+      if (action.command === "status_toast_display") {
+        showStatusToast();
       }
     });
     row.append(button);
@@ -891,15 +1062,18 @@ function showServiceRejection() {
 }
 
 function showNoGoBlock() {
-  $("service-outcome-copy").textContent = "BLOCKED ERR_NO_GO_BOUNDARY: direct UI approval is blocked and must route through Monitor/HITL.";
+  $("service-outcome-copy").textContent = "BLOCKED ERR_NO_GO_BOUNDARY: direct UI approval is blocked and must route through Monitor/HITL. no_go_bypass_allowed=false.";
   $("service-rejection").classList.add("blocked");
+  showStatusToast("No-Go Dialog display-only; no_go_bypass_allowed=false.");
 }
 
 function cycleStaleRefresh() {
   state.freshnessIndex = (state.freshnessIndex + 1) % state.freshnessCycle.length;
   state.freshness = normalizeFreshness(state.freshnessCycle[state.freshnessIndex]);
-  $("stale-copy").textContent = `Projection display state is ${state.freshness}. No canonical mutation.`;
+  state.contextEnvelope.freshness = state.freshness;
+  $("stale-copy").textContent = `Projection display state is ${state.freshness}. stale_refresh_canonical_mutation=false.`;
   render();
+  showStatusToast("Projection refresh updated display state only; stale_refresh_canonical_mutation=false.");
 }
 
 function renderFutureIntegrationBoundary() {
@@ -946,7 +1120,12 @@ function collectInitValues() {
 }
 
 function bindEvents() {
-  $("workspace-picker").addEventListener("click", openWorkspacePicker);
+  $("host-panel-back").addEventListener("click", returnToMainCockpit);
+  $("host-panel-close").addEventListener("click", closeOperationPanelHost);
+  $("workspace-picker").addEventListener("click", () => {
+    selectOperationPanel("workspace_picker");
+    openWorkspacePicker();
+  });
   document.querySelectorAll("[data-panel-route]").forEach((button) => {
     button.addEventListener("click", () => selectOperationPanel(button.dataset.panelRoute));
   });
@@ -957,6 +1136,7 @@ function bindEvents() {
     cleanupRealTestProject().catch((error) => setServiceError(error));
   });
   $("refresh-projection").addEventListener("click", () => {
+    selectOperationPanel("stale_projection_refresh");
     loadRealProjectionState()
       .then((loaded) => {
         state = loaded;
@@ -965,13 +1145,22 @@ function bindEvents() {
       })
       .catch(() => cycleStaleRefresh());
   });
-  $("draft-command-button").addEventListener("click", showCommandDraftPreview);
+  $("draft-command-button").addEventListener("click", () => {
+    selectOperationPanel("command_preview");
+    showCommandDraftPreview();
+  });
   $("save-init-draft").addEventListener("click", () => {
     saveProjectInitDraft().catch((error) => setServiceError(error));
   });
   $("draft-init-command").addEventListener("click", showInitCommandDraft);
-  $("show-rejection").addEventListener("click", showServiceRejection);
-  $("no-go-block").addEventListener("click", showNoGoBlock);
+  $("show-rejection").addEventListener("click", () => {
+    selectOperationPanel("no_go_dialog");
+    showServiceRejection();
+  });
+  $("no-go-block").addEventListener("click", () => {
+    selectOperationPanel("no_go_dialog");
+    showNoGoBlock();
+  });
   document.querySelectorAll(".nav-button").forEach((button) => {
     button.addEventListener("click", () => selectModule(button.dataset.module));
   });
