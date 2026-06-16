@@ -16,6 +16,7 @@ CANONICAL_ASSIGNMENT_SUBJECT = f"{BASE_SUBJECT}.assignment"
 RUNTIME_SCOPED_ASSIGNMENT_ALIAS = f"{BASE_SUBJECT}.jarvis-runtime-001.assignment"
 WBS_7_19_15_RUN_ID = "wbs-7-19-15-2-jarvis-business-command-20260603T081653Z"
 WBS_7_19_15_ASSIGNMENT_SUBJECT = f"nexus.4_19.wbs7_19_15.{WBS_7_19_15_RUN_ID}.jarvis.assignment"
+WBS_7_19_15_DUPLICATE_REPLAY_SUBJECT = f"{WBS_7_19_15_ASSIGNMENT_SUBJECT}.duplicate_replay"
 THUNDER_RUN_ID = "wbs-7-19-15-3-thunder-codex-app-business-command-20260603T081653Z"
 THUNDER_ASSIGNMENT_SUBJECT = f"nexus.4_19.wbs7_19_15.{THUNDER_RUN_ID}.thunder_codex_app.assignment"
 
@@ -89,6 +90,18 @@ def test_candidate_ack_accepts_wbs_7_19_15_assignment_namespace():
     result = validate_candidate_assignment(
         _assignment(assignment_subject=WBS_7_19_15_ASSIGNMENT_SUBJECT),
         session=_session(allowed_subject_patterns=[WBS_7_19_15_ASSIGNMENT_SUBJECT]),
+        lease=_lease(),
+        now_at=NOW,
+    )
+
+    assert result.accepted is True
+    assert result.errors == []
+
+
+def test_candidate_ack_accepts_wbs_7_19_15_duplicate_replay_subject():
+    result = validate_candidate_assignment(
+        _assignment(assignment_subject=WBS_7_19_15_DUPLICATE_REPLAY_SUBJECT),
+        session=_session(allowed_subject_patterns=[WBS_7_19_15_DUPLICATE_REPLAY_SUBJECT]),
         lease=_lease(),
         now_at=NOW,
     )

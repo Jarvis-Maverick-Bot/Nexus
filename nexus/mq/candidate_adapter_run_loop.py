@@ -66,6 +66,9 @@ def run_candidate_adapter_loop(
         if not ack.accepted:
             return CandidateAdapterLoopResult(False, trace=trace, errors=ack.errors, payload=payload)
         trace.append("ack")
+        if ack.payload.get("duplicate_suppressed"):
+            trace.append("duplicate_replay_suppressed")
+            continue
         assignment_id = assignment["assignment_id"]
 
         progress = api.report_progress(session_path, assignment_id=assignment_id, progress_ref=progress_ref)

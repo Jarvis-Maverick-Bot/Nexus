@@ -187,6 +187,13 @@ class CandidateAdapterApi:
         subject_decision = validate_assignment_subject(assignment.assignment_subject, session.allowed_subject_patterns)
         if not subject_decision.accepted:
             return CandidateAdapterOperationResult(False, "await_assignment", errors=subject_decision.errors, session=session)
+        if session.lifecycle_state == "assigned" and not _has_matching_active_assignment(session, assignment):
+            return CandidateAdapterOperationResult(
+                False,
+                "await_assignment",
+                errors=["SESSION_ALREADY_ASSIGNED_DIFFERENT_ASSIGNMENT"],
+                session=session,
+            )
         event = map_assignment_to_candidate_event(assignment, session=session)
         return CandidateAdapterOperationResult(
             True,

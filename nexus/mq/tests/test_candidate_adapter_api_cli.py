@@ -25,6 +25,7 @@ CANONICAL_ASSIGNMENT_SUBJECT = f"{BASE_SUBJECT}.assignment"
 RUNTIME_SCOPED_ASSIGNMENT_ALIAS = f"{BASE_SUBJECT}.jarvis-runtime-001.assignment"
 WBS_7_19_15_RUN_ID = "wbs-7-19-15-2-jarvis-business-command-20260603T081653Z"
 WBS_7_19_15_ASSIGNMENT_SUBJECT = f"nexus.4_19.wbs7_19_15.{WBS_7_19_15_RUN_ID}.jarvis.assignment"
+WBS_7_19_15_DUPLICATE_REPLAY_SUBJECT = f"{WBS_7_19_15_ASSIGNMENT_SUBJECT}.duplicate_replay"
 THUNDER_RUN_ID = "wbs-7-19-15-3-thunder-codex-app-business-command-20260603T081653Z"
 THUNDER_ASSIGNMENT_SUBJECT = f"nexus.4_19.wbs7_19_15.{THUNDER_RUN_ID}.thunder_codex_app.assignment"
 
@@ -323,6 +324,29 @@ def test_candidate_ack_duplicate_same_idempotency_suppressed_without_second_even
 
     first = api.ack_assignment(tmp_path / "session.json", _assignment(), now_at=NOW)
     second = api.ack_assignment(tmp_path / "session.json", _assignment(), now_at=NOW)
+
+    assert first.accepted is True
+    assert second.accepted is True
+    assert second.payload["duplicate_suppressed"] is True
+    assert "DUPLICATE_ASSIGNMENT_SUPPRESSED" in second.errors
+    assert len(broker.published_events) == 1
+
+
+def test_candidate_ack_duplicate_replay_subject_suppresses_without_second_event(tmp_path):
+    broker = InMemoryAssignmentBroker()
+    lifecycle = InMemoryLifecycleProvider(leases={"lease-001": _lease()})
+    api = _connect_ready_api(tmp_path, broker=broker, lifecycle=lifecycle)
+    session = api.session_store.load()
+    session.allowed_subject_patterns = [
+        WBS_7_19_15_ASSIGNMENT_SUBJECT,
+        WBS_7_19_15_DUPLICATE_REPLAY_SUBJECT,
+    ]
+    api.session_store.save(session)
+
+    original = _assignment(assignment_subject=WBS_7_19_15_ASSIGNMENT_SUBJECT)
+    replay = _assignment(assignment_subject=WBS_7_19_15_DUPLICATE_REPLAY_SUBJECT)
+    first = api.ack_assignment(tmp_path / "session.json", original, now_at=NOW)
+    second = api.ack_assignment(tmp_path / "session.json", replay, now_at=NOW)
 
     assert first.accepted is True
     assert second.accepted is True
