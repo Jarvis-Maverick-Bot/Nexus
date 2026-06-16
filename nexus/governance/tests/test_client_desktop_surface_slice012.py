@@ -567,3 +567,113 @@ def test_cp004_mq_panels_do_not_add_executable_mq_or_dispatch_controls() -> None
     assert "dispatch_execution" in main_js
     assert "replay_execution" in main_js
     assert "err_no_go_boundary" in main_js
+
+
+def test_cp005_auxiliary_fixture_declares_display_only_boundaries() -> None:
+    fixture = load_fixture()
+
+    auxiliary = fixture["display_state"]["auxiliary_surfaces"]
+    assert auxiliary["workspace_selection_creates_authority"] is False
+    assert auxiliary["command_preview_submits_command"] is False
+    assert auxiliary["evidence_is_authority"] is False
+    assert auxiliary["no_go_bypass_allowed"] is False
+    assert auxiliary["stale_refresh_canonical_mutation"] is False
+    assert auxiliary["status_toast_command_like"] is False
+    assert auxiliary["host_close_executes_command"] is False
+    assert auxiliary["host_back_executes_command"] is False
+
+    assert auxiliary["workspace_picker"]["mode"] == "desktop_window_overlay"
+    assert auxiliary["command_preview"]["affects_state"] is False
+    assert auxiliary["command_preview"]["creates_authority"] is False
+    assert auxiliary["evidence_drawer"]["evidence_is_authority"] is False
+    assert auxiliary["no_go_dialog"]["error_code"] == "ERR_NO_GO_BOUNDARY"
+    assert "blocked" in auxiliary["stale_projection_refresh"]["states"]
+    assert auxiliary["status_toast"]["display_only"] is True
+
+
+def test_cp005_auxiliary_surfaces_are_registered_and_have_close_back_lifecycle() -> None:
+    main_js = read_app_file("src/main.js")
+
+    for panel_id in (
+        "workspace_picker",
+        "command_preview",
+        "evidence_drawer",
+        "no_go_dialog",
+        "stale_projection_refresh",
+        "status_toast",
+    ):
+        assert panel_id in main_js
+
+    for hook in (
+        "renderWorkspacePickerPanel",
+        "renderCommandPreviewPanel",
+        "renderEvidenceDrawerPanel",
+        "renderNoGoDialogPanel",
+        "renderStaleProjectionPanel",
+        "renderStatusToastPanel",
+        "closeOperationPanelHost",
+        "returnToMainCockpit",
+        "showStatusToast",
+    ):
+        assert hook in main_js
+
+    assert "ERR_INVALID_PANEL_ROUTE" in main_js
+    assert "No command is executed from shell navigation" in main_js
+
+
+def test_cp005_auxiliary_frames_are_display_preview_or_refresh_only() -> None:
+    html = read_app_file("src/index.html")
+    main_js = read_app_file("src/main.js")
+
+    for element_id in (
+        "workspace-overlay",
+        "command-draft-preview",
+        "service-rejection",
+        "stale-refresh",
+        "status-bar",
+    ):
+        assert f'id="{element_id}"' in html
+
+    for expected_contract in (
+        "workspace_selection_creates_authority=false",
+        "command_preview_submits_command=false",
+        "evidence_is_authority=false",
+        "no_go_bypass_allowed=false",
+        "stale_refresh_canonical_mutation=false",
+        "status_toast_command_like=false",
+        "host_close_executes_command=false",
+        "host_back_executes_command=false",
+        "affects_state=false",
+        "creates_authority=false",
+        "evidence-only",
+        "ERR_NO_GO_BOUNDARY",
+    ):
+        assert expected_contract in main_js
+
+
+def test_cp005_auxiliary_surfaces_do_not_add_authority_or_execution_affordances() -> None:
+    main_js = read_app_file("src/main.js").lower()
+    html = read_app_file("src/index.html").lower()
+    combined = "\n".join((main_js, html))
+
+    forbidden_affordances = (
+        "submit canonical",
+        "make canonical",
+        "approve baseline",
+        "bypass no-go",
+        "override no-go",
+        "deploy now",
+        "closeout",
+        "execute refresh",
+        "mutate projection",
+        "submit live",
+        "dispatch now",
+        "call controller",
+    )
+
+    for affordance in forbidden_affordances:
+        assert affordance not in combined, affordance
+
+    assert "workspace_selection_creates_authority" in main_js
+    assert "command_preview_submits_command" in main_js
+    assert "stale_refresh_canonical_mutation" in main_js
