@@ -24,8 +24,22 @@ ACCEPTED_EDC_ISSUE_IDS = {
     "EDC-ISSUE-06",
     "EDC-ISSUE-07",
 }
-PUBLICATION_STATUSES = {"draft", "published", "blocked", "deferred", "withdrawn"}
+PUBLICATION_STATUSES = {"draft", "blocked", "published", "withdrawn"}
+PUBLICATION_TRANSITIONS = {
+    "draft": {"blocked", "published", "withdrawn"},
+    "blocked": {"published", "withdrawn"},
+    "published": {"withdrawn"},
+    "withdrawn": set(),
+}
 DELIVERY_PACKET_STATUSES = {"candidate", "bounded", "ready_for_roster", "blocked", "deferred", "withdrawn"}
+DELIVERY_PACKET_TRANSITIONS = {
+    "candidate": {"bounded", "blocked", "deferred", "withdrawn"},
+    "bounded": {"ready_for_roster", "blocked", "deferred", "withdrawn"},
+    "ready_for_roster": {"blocked", "deferred", "withdrawn"},
+    "blocked": {"bounded", "deferred", "withdrawn"},
+    "deferred": {"bounded", "blocked", "withdrawn"},
+    "withdrawn": set(),
+}
 LAYER1_AUTHORITY_PREFIXES = ("nova", "alex", "layer1", "layer-1", "l1")
 SHA256_RE = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
 
@@ -177,10 +191,8 @@ def validate_publication(value: Layer1TaskPublication) -> EDCContractValidationR
     errors.extend(_validate_traceability(value.traceability))
     if value.status not in PUBLICATION_STATUSES:
         errors.append("INVALID_PUBLICATION_STATUS")
-    if value.status in {"blocked", "deferred"}:
+    if value.status == "blocked":
         errors.extend(_validate_blocker(value.blocker_evidence, "PUBLICATION"))
-    if value.status == "deferred" and value.blocker_evidence and not value.blocker_evidence.revisit_condition:
-        errors.append("DEFERRED_PUBLICATION_REQUIRES_REVISIT_CONDITION")
     return _result(errors)
 
 
@@ -194,8 +206,17 @@ def validate_publication_transition(
 ) -> EDCContractValidationResult:
     errors: list[str] = []
     explanations: dict[str, Any] = {}
-    if target_status not in PUBLICATION_STATUSES:
-        errors.append("INVALID_PUBLICATION_TARGET_STATUS")
+    errors.extend(
+        _validate_transition(
+            current_status=publication.status,
+            target_status=target_status,
+            valid_statuses=PUBLICATION_STATUSES,
+            transition_table=PUBLICATION_TRANSITIONS,
+            invalid_current_code="INVALID_PUBLICATION_STATUS",
+            invalid_target_code="INVALID_PUBLICATION_TARGET_STATUS",
+            invalid_transition_code="INVALID_PUBLICATION_TRANSITION",
+        )
+    )
     if not _is_layer1_authority(authority_actor):
         errors.append("ACTOR_NOT_LAYER1_AUTHORITY")
     if target_status == "published":
@@ -207,10 +228,6 @@ def validate_publication_transition(
             explanations.update(_blocker_explanation(blocker_evidence))
     if target_status == "withdrawn":
         errors.extend(_missing_scalar(authority_timestamp, "MISSING_AUTHORITY_TIMESTAMP"))
-    if target_status == "deferred":
-        errors.extend(_validate_blocker(blocker_evidence, "PUBLICATION"))
-        if blocker_evidence and not blocker_evidence.revisit_condition:
-            errors.append("DEFERRED_PUBLICATION_REQUIRES_REVISIT_CONDITION")
     return _result(errors, explanations=explanations)
 
 
@@ -295,8 +312,17 @@ def validate_delivery_packet_transition(
     errors: list[str] = []
     warnings: list[str] = []
     explanations: dict[str, Any] = {}
-    if target_status not in DELIVERY_PACKET_STATUSES:
-        errors.append("INVALID_DELIVERY_PACKET_TARGET_STATUS")
+    errors.extend(
+        _validate_transition(
+            current_status=packet.status,
+            target_status=target_status,
+            valid_statuses=DELIVERY_PACKET_STATUSES,
+            transition_table=DELIVERY_PACKET_TRANSITIONS,
+            invalid_current_code="INVALID_DELIVERY_PACKET_STATUS",
+            invalid_target_code="INVALID_DELIVERY_PACKET_TARGET_STATUS",
+            invalid_transition_code="INVALID_DELIVERY_PACKET_TRANSITION",
+        )
+    )
     packet_errors = validate_delivery_packet(packet, source_publication=source_publication, roadmap_item=roadmap_item).errors
     if target_status in {"bounded", "ready_for_roster"}:
         errors.extend(packet_errors)
@@ -339,6 +365,28 @@ def validate_delivery_packet_supersession(
 def stable_contract_hash(value: Any) -> str:
     encoded = json.dumps(_json_safe(value), sort_keys=True, separators=(",", ":")).encode("utf-8")
     return sha256(encoded).hexdigest()
+
+
+def _validate_transition(
+    *,
+    current_status: str,
+    target_status: str,
+    valid_statuses: set[str],
+    transition_table: dict[str, set[str]],
+    invalid_current_code: str,
+    invalid_target_code: str,
+    invalid_transition_code: str,
+) -> list[str]:
+    errors: list[str] = []
+    if current_status not in valid_statuses:
+        errors.append(invalid_current_code)
+    if target_status not in valid_statuses:
+        errors.append(invalid_target_code)
+    if errors:
+        return errors
+    if target_status not in transition_table[current_status]:
+        errors.append(invalid_transition_code)
+    return errors
 
 
 def _validate_source_authority(value: SourceAuthorityRef | None) -> list[str]:

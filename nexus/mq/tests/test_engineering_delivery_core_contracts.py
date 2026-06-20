@@ -213,6 +213,30 @@ def test_tc_l1_publish_010_non_authority_actor_cannot_publish_task():
     assert "ACTOR_NOT_LAYER1_AUTHORITY" in result.errors
 
 
+def test_tc_l1_publish_013_withdrawn_publication_cannot_reopen_as_published():
+    result = validate_publication_transition(
+        _publication(status="withdrawn"),
+        target_status="published",
+        authority_actor="nova",
+        authority_timestamp="2026-06-20T00:02:00Z",
+    )
+
+    assert result.ok is False
+    assert "INVALID_PUBLICATION_TRANSITION" in result.errors
+
+
+def test_tc_l1_publish_014_deferred_is_not_a_layer1_publication_state():
+    result = validate_publication(
+        _publication(
+            status="deferred",
+            blocker_evidence=_blocker(revisit_condition="authority source refresh"),
+        )
+    )
+
+    assert result.ok is False
+    assert "INVALID_PUBLICATION_STATUS" in result.errors
+
+
 def test_tc_l1_publish_011_publication_is_immutable_after_packet_binding():
     original = _publication(status="published", bound_delivery_packet_ids=["packet-001"])
     changed = _publication(title="Changed title", status="published", bound_delivery_packet_ids=["packet-001"])
@@ -306,6 +330,18 @@ def test_tc_rb_packet_006_bounded_to_ready_for_roster_transition_requires_roster
 
     assert result.ok is True
     assert "ROSTER_BASELINE_REQUIRED_BEFORE_DISPATCH" in result.warnings
+
+
+def test_tc_rb_packet_013_withdrawn_packet_cannot_reopen_as_bounded():
+    result = validate_delivery_packet_transition(
+        _packet(status="withdrawn"),
+        target_status="bounded",
+        source_publication=_publication(status="published"),
+        roadmap_item=_roadmap_item(),
+    )
+
+    assert result.ok is False
+    assert "INVALID_DELIVERY_PACKET_TRANSITION" in result.errors
 
 
 def test_tc_rb_packet_007_unbounded_packet_transitions_to_blocked():
