@@ -237,6 +237,40 @@ def test_tc_l1_publish_014_deferred_is_not_a_layer1_publication_state():
     assert "INVALID_PUBLICATION_STATUS" in result.errors
 
 
+def test_tc_l1_publish_015_blocked_publication_cannot_transition_to_published():
+    result = validate_publication_transition(
+        _publication(status="blocked", blocker_evidence=_blocker()),
+        target_status="published",
+        authority_actor="nova",
+        authority_timestamp="2026-06-21T00:01:00Z",
+    )
+
+    assert result.ok is False
+    assert "INVALID_PUBLICATION_TRANSITION" in result.errors
+
+
+def test_tc_l1_publish_016_blocked_publication_can_return_to_draft():
+    result = validate_publication_transition(
+        _publication(status="blocked", blocker_evidence=_blocker()),
+        target_status="draft",
+        authority_actor="nova",
+    )
+
+    assert result.ok is True
+
+
+def test_tc_l1_publish_017_draft_publication_cannot_transition_to_withdrawn():
+    result = validate_publication_transition(
+        _publication(status="draft"),
+        target_status="withdrawn",
+        authority_actor="nova",
+        authority_timestamp="2026-06-21T00:02:00Z",
+    )
+
+    assert result.ok is False
+    assert "INVALID_PUBLICATION_TRANSITION" in result.errors
+
+
 def test_tc_l1_publish_011_publication_is_immutable_after_packet_binding():
     original = _publication(status="published", bound_delivery_packet_ids=["packet-001"])
     changed = _publication(title="Changed title", status="published", bound_delivery_packet_ids=["packet-001"])

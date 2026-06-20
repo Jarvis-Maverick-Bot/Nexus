@@ -26,8 +26,8 @@ ACCEPTED_EDC_ISSUE_IDS = {
 }
 PUBLICATION_STATUSES = {"draft", "blocked", "published", "withdrawn"}
 PUBLICATION_TRANSITIONS = {
-    "draft": {"blocked", "published", "withdrawn"},
-    "blocked": {"published", "withdrawn"},
+    "draft": {"blocked", "published"},
+    "blocked": {"draft", "withdrawn"},
     "published": {"withdrawn"},
     "withdrawn": set(),
 }
