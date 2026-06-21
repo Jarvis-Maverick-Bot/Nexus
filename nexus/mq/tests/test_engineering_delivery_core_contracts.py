@@ -1643,3 +1643,155 @@ def test_tc_hitl_dialogue_014_receipt_authority_stays_layer1_or_nova():
 
     assert result.ok is False
     assert "NON_AUTHORITY_CANNOT_ISSUE_RECEIPT" in result.errors
+
+
+def _kernel_trace(**overrides):
+    data = {
+        "issue_ids": ["EDC-ISSUE-07"],
+        "prd_ids": ["PRD-KERNEL-001", "PRD-KERNEL-002", "PRD-KERNEL-003"],
+        "spec_ids": ["SPEC-KERNEL-001", "SPEC-KERNEL-002", "SPEC-KERNEL-003"],
+        "ux_surface_ids": ["UX-KERNEL-STATE", "UX-TRACEABILITY"],
+        "test_case_ids": ["TC-KERNEL-BOUNDARY-001"],
+        "future_evidence_ids": ["FUTURE-VERIFY-KERNEL-BOUNDARY"],
+    }
+    data.update(overrides)
+    return TraceabilityRef(**data)
+
+
+def _kernel_projection(**overrides):
+    package = overrides.pop("evidence_package", _evidence_package(package_state="submitted"))
+    gate_decision = overrides.pop("gate_decision", _gate_decision(evidence_package=package))
+    receipt = overrides.pop("receipt", _delivery_receipt(evidence_package=package, gate_decision=gate_decision))
+    data = {
+        "projection_id": "kernel-projection-001",
+        "projection_kind": "checkpoint",
+        "source_record_type": "GateDecision",
+        "source_record_id": gate_decision.gate_decision_id,
+        "source_record_hash": stable_contract_hash(gate_decision.to_dict()),
+        "delivery_packet_id": package.delivery_packet_id,
+        "evidence_package_id": package.evidence_package_id,
+        "checkpoint_id": "kernel-checkpoint-001",
+        "checkpoint_state": "fresh",
+        "checkpoint_source_timestamp_utc": "2026-06-22T00:40:00Z",
+        "projected_at_utc": "2026-06-22T00:41:00Z",
+        "projection_state": "visible",
+        "projection_context": "context_only",
+        "authority_absent_marker": True,
+        "authority_boundary": "layer1_nova",
+        "source_authority_ref": _evidence_ref(evidence_ref_id="kernel-source-authority"),
+        "candidate_verdict_ref": _evidence_ref(evidence_ref_id="kernel-candidate-verdict"),
+        "candidate_verdict": "EDC_PR012_SLICE006_KERNEL_PROJECTION_BOUNDARY_READY_FOR_NOVA_REVIEW",
+        "projected_gate_state": "pending",
+        "authoritative_gate_state": "accepted",
+        "projected_receipt_state": "pending_gate",
+        "authoritative_receipt_state": receipt.receipt_state,
+        "stale_projection": False,
+        "checkpoint_fresh": True,
+        "checkpoint_freshness_treated_as_gate_acceptance": False,
+        "attempts_gate_decision": False,
+        "attempts_receipt_issuance": False,
+        "mutates_authoritative_state": False,
+        "kernel_owned_gate": False,
+        "kernel_owned_receipt": False,
+        "traceability": _kernel_trace(),
+    }
+    data.update(overrides)
+    return edc_contracts.KernelProjection(**data)
+
+
+def test_tc_kernel_boundary_001_projection_state_is_visible_as_context_only():
+    projection = _kernel_projection(projection_kind="projection", projection_context="context_only")
+
+    result = edc_contracts.validate_kernel_projection(projection)
+
+    assert result.ok is True
+    assert result.explanations["projection_visibility"] == "context_only"
+    assert result.explanations["authority_label"] == "authority_absent"
+    assert result.explanations["creates_gate_decision"] is False
+
+
+def test_tc_kernel_boundary_002_checkpoint_state_is_visible_with_source_timestamp():
+    projection = _kernel_projection(projection_kind="checkpoint")
+
+    result = edc_contracts.validate_kernel_checkpoint_boundary(projection)
+
+    assert result.ok is True
+    assert result.explanations["checkpoint_visibility"] == "context_only"
+    assert result.explanations["checkpoint_source_timestamp_utc"] == "2026-06-22T00:40:00Z"
+
+
+def test_tc_kernel_boundary_003_authority_absent_marker_is_mandatory():
+    result = edc_contracts.validate_kernel_projection(_kernel_projection(authority_absent_marker=False))
+
+    assert result.ok is False
+    assert "MISSING_KERNEL_AUTHORITY_ABSENT_MARKER" in result.errors
+    assert result.explanations["authority_label"] == "missing"
+
+
+def test_tc_kernel_boundary_004_checkpoint_freshness_does_not_create_gate_decision():
+    projection = _kernel_projection(checkpoint_fresh=True, checkpoint_freshness_treated_as_gate_acceptance=True)
+
+    result = edc_contracts.validate_kernel_checkpoint_boundary(projection)
+
+    assert result.ok is False
+    assert "CHECKPOINT_FRESHNESS_CANNOT_CREATE_GATE_DECISION" in result.errors
+    assert result.explanations["gate_state_after_checkpoint"] == "pending"
+
+
+def test_tc_kernel_boundary_005_projection_cannot_issue_receipt():
+    projection = _kernel_projection(attempts_receipt_issuance=True, projected_receipt_state="issued")
+
+    result = edc_contracts.validate_kernel_receipt_boundary(projection)
+
+    assert result.ok is False
+    assert "KERNEL_PROJECTION_CANNOT_ISSUE_DELIVERY_RECEIPT" in result.errors
+    assert result.explanations["receipt_state_after_projection"] == "pending_gate"
+
+
+def test_tc_kernel_boundary_006_stale_projection_is_visible_without_authority_overwrite():
+    projection = _kernel_projection(
+        checkpoint_state="stale",
+        stale_projection=True,
+        projected_gate_state="pending",
+        authoritative_gate_state="accepted",
+        mutates_authoritative_state=False,
+    )
+
+    result = edc_contracts.validate_kernel_stale_projection(projection)
+
+    assert result.ok is True
+    assert result.explanations["stale_projection_visible"] is True
+    assert result.explanations["authority_overwrite"] is False
+    assert result.explanations["authoritative_gate_state"] == "accepted"
+
+
+def test_tc_kernel_boundary_007_hitl_dialogue_displays_separate_authority_state():
+    package = _evidence_package(package_state="submitted")
+    projection = _kernel_projection(evidence_package=package)
+    dialogue = _hitl_dialogue(
+        evidence_package=package,
+        action="inspect_evidence",
+        evidence_refs=[f"kernel-projection-hash:{projection.projection_hash()}"],
+    )
+
+    result = edc_contracts.validate_kernel_hitl_boundary(projection, dialogue=dialogue)
+
+    assert result.ok is True
+    assert result.explanations["projection_status_separate_from_human_decision"] is True
+    assert result.explanations["human_authority_required"] == "Layer 1 / Nova"
+
+
+def test_tc_kernel_boundary_008_kernel_originated_gate_action_is_redirected():
+    projection = _kernel_projection(attempts_gate_decision=True)
+
+    result = edc_contracts.validate_kernel_gate_action_redirect(
+        projection,
+        requested_action="approve_gate",
+        redirect_authority="nova",
+    )
+    explanation = edc_contracts.explain_kernel_gate_action_redirect(projection, requested_action="approve_gate")
+
+    assert result.ok is True
+    assert result.explanations["action"] == "redirect_to_layer1_nova"
+    assert result.explanations["creates_gate_decision"] is False
+    assert explanation["target_authority"] == "Layer 1 / Nova"

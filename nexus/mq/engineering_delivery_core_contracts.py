@@ -1,4 +1,4 @@
-"""Engineering Delivery Core Slice 001/002/003/004/005 contract records and validators.
+"""Engineering Delivery Core Slice 001/002/003/004/005/006 contract records and validators.
 
 This module is intentionally contract-only. It defines deterministic records and
 fail-closed validators for Layer 1 publication, DeliveryPacket intake, and
@@ -6,7 +6,8 @@ delivery-team roster eligibility, plus Layer 2 WorkItem planning and advisory
 dispatch recommendations, plus Layer 3 evidence envelope transport-state
 contracts, plus human gate and receipt authority records. It does not execute
 work, transport evidence, automate approvals, issue non-human receipts, or start
-any live process.
+any live process. Kernel projection/checkpoint records are context-only and do
+not own Layer 1 / Nova gate or receipt authority.
 """
 
 from __future__ import annotations
@@ -112,6 +113,10 @@ HITL_DIALOGUE_ACTIONS = {
     "request_revision",
     "withhold_receipt",
 }
+KERNEL_PROJECTION_KINDS = {"projection", "checkpoint"}
+KERNEL_PROJECTION_STATES = {"visible", "hidden", "stale", "superseded"}
+KERNEL_CHECKPOINT_STATES = {"fresh", "stale", "unknown", "superseded"}
+KERNEL_AUTHORITY_BOUNDARIES = {"layer1_nova"}
 LAYER1_AUTHORITY_PREFIXES = ("nova", "alex", "layer1", "layer-1", "l1")
 SHA256_RE = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
 
@@ -599,6 +604,50 @@ class DeliveryReceipt:
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+@dataclass
+class KernelProjection:
+    projection_id: str
+    projection_kind: str
+    source_record_type: str
+    source_record_id: str
+    source_record_hash: str
+    delivery_packet_id: str
+    evidence_package_id: str
+    checkpoint_id: str
+    checkpoint_state: str
+    checkpoint_source_timestamp_utc: str
+    projected_at_utc: str
+    projection_state: str
+    projection_context: str
+    authority_absent_marker: bool
+    authority_boundary: str
+    source_authority_ref: EvidenceReference | None
+    candidate_verdict_ref: EvidenceReference | None
+    candidate_verdict: str
+    projected_gate_state: str
+    authoritative_gate_state: str
+    projected_receipt_state: str
+    authoritative_receipt_state: str
+    stale_projection: bool = False
+    checkpoint_fresh: bool = False
+    checkpoint_freshness_treated_as_gate_acceptance: bool = False
+    attempts_gate_decision: bool = False
+    attempts_receipt_issuance: bool = False
+    mutates_authoritative_state: bool = False
+    kernel_owned_gate: bool = False
+    kernel_owned_receipt: bool = False
+    traceability: TraceabilityRef | None = None
+    not_gate_decision: bool = True
+    not_delivery_receipt: bool = True
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    def projection_hash(self) -> str:
+        return stable_contract_hash(self.to_dict())
 
 
 def validate_publication(value: Layer1TaskPublication) -> EDCContractValidationResult:
@@ -1848,6 +1897,105 @@ def validate_advisory_recommendation_separation(
     )
 
 
+def validate_kernel_projection(projection: KernelProjection) -> EDCContractValidationResult:
+    errors = _validate_kernel_projection_base(projection)
+    return _result(errors, explanations=_kernel_projection_explanation(projection))
+
+
+def validate_kernel_checkpoint_boundary(projection: KernelProjection) -> EDCContractValidationResult:
+    errors = _validate_kernel_projection_base(projection)
+    if projection.projection_kind != "checkpoint":
+        errors.append("KERNEL_CHECKPOINT_REQUIRES_CHECKPOINT_KIND")
+    errors.extend(_missing_scalar(projection.checkpoint_id, "MISSING_KERNEL_CHECKPOINT_ID"))
+    errors.extend(_missing_scalar(projection.checkpoint_source_timestamp_utc, "MISSING_KERNEL_CHECKPOINT_SOURCE_TIMESTAMP"))
+    if projection.checkpoint_state not in KERNEL_CHECKPOINT_STATES:
+        errors.append("INVALID_KERNEL_CHECKPOINT_STATE")
+    if projection.checkpoint_freshness_treated_as_gate_acceptance:
+        errors.append("CHECKPOINT_FRESHNESS_CANNOT_CREATE_GATE_DECISION")
+    return _result(errors, explanations=_kernel_projection_explanation(projection))
+
+
+def validate_kernel_receipt_boundary(projection: KernelProjection) -> EDCContractValidationResult:
+    errors = _validate_kernel_projection_base(projection)
+    if projection.attempts_receipt_issuance or projection.projected_receipt_state not in L3_NON_AUTHORITY_RECEIPT_STATES:
+        errors.append("KERNEL_PROJECTION_CANNOT_ISSUE_DELIVERY_RECEIPT")
+    if projection.kernel_owned_receipt:
+        errors.append("KERNEL_OWNED_RECEIPT_NOT_AUTHORIZED")
+    return _result(errors, explanations=_kernel_projection_explanation(projection))
+
+
+def validate_kernel_stale_projection(projection: KernelProjection) -> EDCContractValidationResult:
+    errors = _validate_kernel_projection_base(projection)
+    if not projection.stale_projection and projection.checkpoint_state != "stale":
+        errors.append("KERNEL_PROJECTION_NOT_STALE")
+    if projection.mutates_authoritative_state:
+        errors.append("STALE_KERNEL_PROJECTION_CANNOT_OVERWRITE_AUTHORITY")
+    return _result(errors, explanations=_kernel_projection_explanation(projection))
+
+
+def validate_kernel_hitl_boundary(
+    projection: KernelProjection,
+    *,
+    dialogue: HITLDialogueRecord,
+) -> EDCContractValidationResult:
+    errors = _validate_kernel_projection_base(projection)
+    errors.extend(validate_hitl_dialogue(dialogue).errors)
+    if projection.projection_hash() not in " ".join(dialogue.evidence_refs):
+        errors.append("HITL_DIALOGUE_MISSING_KERNEL_PROJECTION_EVIDENCE")
+    if dialogue.not_gate_decision is not True or dialogue.not_delivery_receipt is not True:
+        errors.append("HITL_DIALOGUE_MUST_REMAIN_SEPARATE_FROM_AUTHORITY")
+    explanations = _kernel_projection_explanation(projection)
+    explanations.update(
+        {
+            "dialogue_id": dialogue.dialogue_id,
+            "projection_status_separate_from_human_decision": not dialogue.human_decision_id,
+            "human_authority_required": "Layer 1 / Nova",
+        }
+    )
+    return _result(errors, explanations=explanations)
+
+
+def validate_kernel_gate_action_redirect(
+    projection: KernelProjection,
+    *,
+    requested_action: str,
+    redirect_authority: str,
+) -> EDCContractValidationResult:
+    errors = _validate_kernel_projection_base(projection, allow_gate_action=True)
+    errors.extend(_missing_scalar(requested_action, "MISSING_KERNEL_GATE_ACTION"))
+    if not projection.attempts_gate_decision:
+        errors.append("MISSING_KERNEL_ORIGINATED_GATE_ACTION")
+    if not _is_layer1_authority(redirect_authority):
+        errors.append("KERNEL_GATE_ACTION_MUST_REDIRECT_TO_LAYER1_NOVA")
+    explanations = _kernel_projection_explanation(projection)
+    explanations.update(
+        {
+            "requested_action": requested_action,
+            "action": "redirect_to_layer1_nova",
+            "redirect_authority": redirect_authority,
+            "target_authority": "Layer 1 / Nova",
+            "creates_gate_decision": False,
+        }
+    )
+    return _result(errors, explanations=explanations)
+
+
+def explain_kernel_gate_action_redirect(
+    projection: KernelProjection,
+    *,
+    requested_action: str,
+) -> dict[str, Any]:
+    return {
+        "projection_id": projection.projection_id,
+        "requested_action": requested_action,
+        "action": "redirect_to_layer1_nova",
+        "target_authority": "Layer 1 / Nova",
+        "creates_gate_decision": False,
+        "creates_delivery_receipt": False,
+        "reason": "Kernel projection/checkpoint state is context only.",
+    }
+
+
 def stable_contract_hash(value: Any) -> str:
     encoded = json.dumps(_json_safe(value), sort_keys=True, separators=(",", ":")).encode("utf-8")
     return sha256(encoded).hexdigest()
@@ -2050,6 +2198,98 @@ def _missing_package_ref(value: EvidenceReference | None, error: str) -> list[st
     if value is None:
         return [error]
     return validate_evidence_reference(value).errors
+
+
+def _validate_kernel_projection_base(
+    projection: KernelProjection,
+    *,
+    allow_gate_action: bool = False,
+) -> list[str]:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(projection.projection_id, "MISSING_KERNEL_PROJECTION_ID"))
+    errors.extend(_missing_scalar(projection.source_record_type, "MISSING_KERNEL_SOURCE_RECORD_TYPE"))
+    errors.extend(_missing_scalar(projection.source_record_id, "MISSING_KERNEL_SOURCE_RECORD_ID"))
+    errors.extend(_missing_scalar(projection.source_record_hash, "MISSING_KERNEL_SOURCE_RECORD_HASH"))
+    errors.extend(_missing_scalar(projection.delivery_packet_id, "MISSING_KERNEL_DELIVERY_PACKET_ID"))
+    errors.extend(_missing_scalar(projection.evidence_package_id, "MISSING_KERNEL_EVIDENCE_PACKAGE_ID"))
+    errors.extend(_missing_scalar(projection.projected_at_utc, "MISSING_KERNEL_PROJECTED_AT"))
+    errors.extend(_missing_scalar(projection.candidate_verdict, "MISSING_KERNEL_CANDIDATE_VERDICT"))
+    if projection.projection_kind not in KERNEL_PROJECTION_KINDS:
+        errors.append("INVALID_KERNEL_PROJECTION_KIND")
+    if projection.projection_state not in KERNEL_PROJECTION_STATES:
+        errors.append("INVALID_KERNEL_PROJECTION_STATE")
+    if projection.projection_context != "context_only":
+        errors.append("KERNEL_PROJECTION_MUST_BE_CONTEXT_ONLY")
+    if projection.authority_absent_marker is not True:
+        errors.append("MISSING_KERNEL_AUTHORITY_ABSENT_MARKER")
+    if projection.authority_boundary not in KERNEL_AUTHORITY_BOUNDARIES:
+        errors.append("INVALID_KERNEL_AUTHORITY_BOUNDARY")
+    errors.extend(_missing_package_ref(projection.source_authority_ref, "MISSING_KERNEL_SOURCE_AUTHORITY_REF"))
+    errors.extend(_missing_package_ref(projection.candidate_verdict_ref, "MISSING_KERNEL_CANDIDATE_VERDICT_REF"))
+    if projection.traceability is None:
+        errors.append("MISSING_KERNEL_TRACEABILITY")
+    else:
+        errors.extend(_validate_traceability(projection.traceability))
+        if "EDC-ISSUE-07" not in projection.traceability.issue_ids:
+            errors.append("KERNEL_TRACEABILITY_MISSING_KERNEL_ISSUE")
+    if projection.not_gate_decision is not True:
+        errors.append("KERNEL_PROJECTION_CANNOT_CREATE_GATE_DECISION")
+    if projection.not_delivery_receipt is not True:
+        errors.append("KERNEL_PROJECTION_CANNOT_ISSUE_DELIVERY_RECEIPT")
+    if projection.not_business_completion is not True:
+        errors.append("KERNEL_PROJECTION_IS_NOT_BUSINESS_COMPLETION")
+    if projection.kernel_owned_gate:
+        errors.append("KERNEL_OWNED_GATE_NOT_AUTHORIZED")
+    if projection.kernel_owned_receipt:
+        errors.append("KERNEL_OWNED_RECEIPT_NOT_AUTHORIZED")
+    if projection.attempts_gate_decision and not allow_gate_action:
+        errors.append("KERNEL_PROJECTION_CANNOT_CREATE_GATE_DECISION")
+    if projection.attempts_receipt_issuance:
+        errors.append("KERNEL_PROJECTION_CANNOT_ISSUE_DELIVERY_RECEIPT")
+    if projection.checkpoint_freshness_treated_as_gate_acceptance:
+        errors.append("CHECKPOINT_FRESHNESS_CANNOT_CREATE_GATE_DECISION")
+    if projection.mutates_authoritative_state:
+        errors.append("KERNEL_PROJECTION_CANNOT_MUTATE_AUTHORITY_STATE")
+    return errors
+
+
+def _kernel_projection_explanation(projection: KernelProjection) -> dict[str, Any]:
+    authority_label = "authority_absent" if projection.authority_absent_marker else "missing"
+    receipt_state_after_projection = (
+        projection.projected_receipt_state
+        if projection.projected_receipt_state in L3_NON_AUTHORITY_RECEIPT_STATES
+        else "pending_gate"
+    )
+    gate_state_after_checkpoint = (
+        projection.projected_gate_state
+        if not projection.checkpoint_freshness_treated_as_gate_acceptance
+        else "pending"
+    )
+    return {
+        "projection_id": projection.projection_id,
+        "projection_kind": projection.projection_kind,
+        "projection_visibility": projection.projection_context,
+        "checkpoint_visibility": projection.projection_context,
+        "checkpoint_state": projection.checkpoint_state,
+        "checkpoint_source_timestamp_utc": projection.checkpoint_source_timestamp_utc,
+        "authority_label": authority_label,
+        "authority_boundary": "Layer 1 / Nova" if projection.authority_boundary == "layer1_nova" else projection.authority_boundary,
+        "creates_gate_decision": False,
+        "creates_delivery_receipt": False,
+        "gate_state_after_checkpoint": gate_state_after_checkpoint,
+        "receipt_state_after_projection": receipt_state_after_projection,
+        "stale_projection_visible": projection.stale_projection or projection.checkpoint_state == "stale",
+        "authority_overwrite": projection.mutates_authoritative_state,
+        "projected_gate_state": projection.projected_gate_state,
+        "authoritative_gate_state": projection.authoritative_gate_state,
+        "projected_receipt_state": projection.projected_receipt_state,
+        "authoritative_receipt_state": projection.authoritative_receipt_state,
+        "candidate_verdict": projection.candidate_verdict,
+        "projection_hash": projection.projection_hash(),
+        "not_gate_decision": projection.not_gate_decision,
+        "not_delivery_receipt": projection.not_delivery_receipt,
+        "not_business_completion": projection.not_business_completion,
+    }
 
 
 def _is_layer1_authority(actor: str) -> bool:
