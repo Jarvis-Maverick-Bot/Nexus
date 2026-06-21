@@ -1146,6 +1146,26 @@ def test_tc_l3_evidence_010_evidence_available_updates_package_only():
     assert result.explanations["receipt_available"] is False
 
 
+def test_tc_l3_evidence_010_transport_state_cannot_imply_gate_or_receipt_authority():
+    receipt_issuable = edc_contracts.validate_transport_non_authority(_transport_state(receipt_state="issuable"))
+    gate_approved = edc_contracts.validate_transport_non_authority(_transport_state(gate_state="approved"))
+
+    assert receipt_issuable.ok is False
+    assert "TRANSPORT_STATUS_CANNOT_IMPLY_DELIVERY_RECEIPT_AUTHORITY" in receipt_issuable.errors
+    assert gate_approved.ok is False
+    assert "TRANSPORT_STATUS_CANNOT_IMPLY_GATE_DECISION_AUTHORITY" in gate_approved.errors
+
+
+def test_tc_l3_evidence_005_ack_state_with_issuable_receipt_fails_closed():
+    result = edc_contracts.validate_ack_not_delivery_truth(
+        _transport_state(status="acknowledged", event_type="dispatch_received", receipt_state="issuable")
+    )
+
+    assert result.ok is False
+    assert "TRANSPORT_STATUS_CANNOT_IMPLY_DELIVERY_RECEIPT_AUTHORITY" in result.errors
+    assert result.explanations["not_delivery_truth"] is True
+
+
 def test_tc_l3_evidence_011_missing_content_hash_blocks_evidence_package_inclusion():
     result = edc_contracts.validate_evidence_reference(_evidence_ref(content_sha256=""))
 

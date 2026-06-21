@@ -86,6 +86,8 @@ EVIDENCE_TRANSPORT_TRANSITIONS = {
     "superseded": set(),
     "cancelled": set(),
 }
+L3_NON_AUTHORITY_GATE_STATES = {"", "pending"}
+L3_NON_AUTHORITY_RECEIPT_STATES = {"", "pending_gate"}
 LAYER1_AUTHORITY_PREFIXES = ("nova", "alex", "layer1", "layer-1", "l1")
 SHA256_RE = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
 
@@ -1571,6 +1573,12 @@ def _validate_l3_non_authority(value: Any) -> list[str]:
         errors.append("TRANSPORT_STATUS_CANNOT_CREATE_DELIVERY_RECEIPT")
     if getattr(value, "transport_failure_is_gate_blocker", False):
         errors.append("TRANSPORT_FAILURE_IS_NOT_GATE_BLOCKER")
+    gate_state = getattr(value, "gate_state", "")
+    if gate_state not in L3_NON_AUTHORITY_GATE_STATES:
+        errors.append("TRANSPORT_STATUS_CANNOT_IMPLY_GATE_DECISION_AUTHORITY")
+    receipt_state = getattr(value, "receipt_state", "")
+    if receipt_state not in L3_NON_AUTHORITY_RECEIPT_STATES:
+        errors.append("TRANSPORT_STATUS_CANNOT_IMPLY_DELIVERY_RECEIPT_AUTHORITY")
     return errors
 
 
@@ -1589,7 +1597,9 @@ def _transport_explanation(state: EvidenceTransportState) -> dict[str, Any]:
         "package_state": "complete" if state.evidence_package_complete else "incomplete",
         "gate_state": state.gate_state,
         "receipt_state": state.receipt_state,
-        "receipt_available": state.receipt_state == "issuable",
+        "gate_state_implies_authority": state.gate_state not in L3_NON_AUTHORITY_GATE_STATES,
+        "receipt_state_implies_authority": state.receipt_state not in L3_NON_AUTHORITY_RECEIPT_STATES,
+        "receipt_available": False,
         "not_delivery_truth": state.not_delivery_truth,
         "not_gate_decision": state.not_gate_decision,
         "not_delivery_receipt": state.not_delivery_receipt,
