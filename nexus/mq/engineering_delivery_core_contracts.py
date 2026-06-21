@@ -1,11 +1,12 @@
-"""Engineering Delivery Core Slice 001/002/003/004 contract records and validators.
+"""Engineering Delivery Core Slice 001/002/003/004/005 contract records and validators.
 
 This module is intentionally contract-only. It defines deterministic records and
 fail-closed validators for Layer 1 publication, DeliveryPacket intake, and
 delivery-team roster eligibility, plus Layer 2 WorkItem planning and advisory
 dispatch recommendations, plus Layer 3 evidence envelope transport-state
-contracts. It does not execute work, transport evidence, decide gates, issue
-receipts, or start any live process.
+contracts, plus human gate and receipt authority records. It does not execute
+work, transport evidence, automate approvals, issue non-human receipts, or start
+any live process.
 """
 
 from __future__ import annotations
@@ -88,6 +89,29 @@ EVIDENCE_TRANSPORT_TRANSITIONS = {
 }
 L3_NON_AUTHORITY_GATE_STATES = {"", "pending"}
 L3_NON_AUTHORITY_RECEIPT_STATES = {"", "pending_gate"}
+EVIDENCE_PACKAGE_STATES = {"assembling", "complete", "incomplete", "submitted", "revision_required"}
+EVIDENCE_PACKAGE_TRANSITIONS = {
+    "assembling": {"complete", "incomplete"},
+    "incomplete": {"complete", "revision_required"},
+    "complete": {"submitted", "revision_required"},
+    "submitted": {"revision_required"},
+    "revision_required": {"complete"},
+}
+GATE_DECISION_OUTCOMES = {"accepted", "needs_revision", "rejected", "blocked", "deferred"}
+TERMINAL_GATE_DECISION_OUTCOMES = {"accepted", "needs_revision", "rejected", "blocked", "deferred"}
+RECEIPT_STATES = {"pending_gate", "issuable", "issued", "withheld", "void"}
+HITL_DIALOGUE_ACTIONS = {
+    "ask_why_blocked",
+    "ask_why_deferred",
+    "ask_why_needs_revision",
+    "inspect_evidence",
+    "request_clarification",
+    "approve",
+    "reject",
+    "defer",
+    "request_revision",
+    "withhold_receipt",
+}
 LAYER1_AUTHORITY_PREFIXES = ("nova", "alex", "layer1", "layer-1", "l1")
 SHA256_RE = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
 
@@ -459,6 +483,118 @@ class EvidenceTransportState:
     not_delivery_truth: bool = True
     not_gate_decision: bool = True
     not_delivery_receipt: bool = True
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class EvidencePackage:
+    evidence_package_id: str
+    delivery_packet_id: str
+    work_item_ids: list[str]
+    manifest_paths: list[str]
+    manifest_sha256: str
+    artifact_hashes: dict[str, str]
+    validation_summary_ref: EvidenceReference | None
+    evidence_index_ref: EvidenceReference | None
+    no_go_scan_ref: EvidenceReference | None
+    bom_scan_ref: EvidenceReference | None
+    json_validation_ref: EvidenceReference | None
+    source_authority_ref: EvidenceReference | None
+    candidate_verdict: str
+    package_state: str
+    traceability: TraceabilityRef | None
+    prior_package_id: str = ""
+    required_revision_scope: list[str] = field(default_factory=list)
+    not_gate_decision: bool = True
+    not_delivery_receipt: bool = True
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    def package_hash(self) -> str:
+        return stable_contract_hash(self.to_dict())
+
+
+@dataclass
+class GateDecision:
+    gate_decision_id: str
+    evidence_package_id: str
+    evidence_package_hash: str
+    decision_outcome: str
+    decision_authority: str
+    decision_reason: str
+    review_evidence_ref: str
+    decided_at_utc: str
+    human_inspection_id: str
+    advisory_recommendation_id: str = ""
+    required_revision_scope: list[str] = field(default_factory=list)
+    prior_evidence_package_id: str = ""
+    blocker_reason: str = ""
+    required_evidence: list[str] = field(default_factory=list)
+    revisit_condition: str = ""
+    creates_delivery_receipt: bool = False
+    automated_approval: bool = False
+    kernel_owned: bool = False
+    not_delivery_receipt: bool = True
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class HITLDialogueRecord:
+    dialogue_id: str
+    evidence_package_id: str
+    evidence_package_hash: str
+    human_actor: str
+    action: str
+    question: str
+    response: str
+    evidence_refs: list[str]
+    advisory_recommendation_id: str
+    human_decision_id: str
+    gate_state_before: str
+    gate_state_after: str
+    reason: str
+    created_at_utc: str
+    traceability: TraceabilityRef | None
+    revisit_condition: str = ""
+    required_evidence_delta: list[str] = field(default_factory=list)
+    prior_evidence_package_id: str = ""
+    inspected_evidence: bool = False
+    advisory_only: bool = True
+    not_gate_decision: bool = True
+    not_delivery_receipt: bool = True
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class DeliveryReceipt:
+    delivery_receipt_id: str
+    delivery_packet_id: str
+    evidence_package_id: str
+    evidence_package_hash: str
+    gate_decision_id: str
+    gate_decision_outcome: str
+    receipt_state: str
+    issued_by: str
+    issued_at_utc: str
+    receipt_summary: str
+    withheld_reason: str = ""
+    voided_by: str = ""
+    voided_at_utc: str = ""
+    void_reason: str = ""
+    prior_receipt_id: str = ""
+    non_human_issuance: bool = False
+    kernel_owned: bool = False
     not_business_completion: bool = True
 
     def to_dict(self) -> dict[str, Any]:
@@ -1331,6 +1467,387 @@ def explain_evidence_transport_state(state: EvidenceTransportState) -> dict[str,
     return _transport_explanation(state)
 
 
+def validate_evidence_package(package: EvidencePackage) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(package.evidence_package_id, "MISSING_EVIDENCE_PACKAGE_ID"))
+    errors.extend(_missing_scalar(package.delivery_packet_id, "MISSING_EVIDENCE_PACKAGE_DELIVERY_PACKET_ID"))
+    errors.extend(_missing_list(package.work_item_ids, "MISSING_EVIDENCE_PACKAGE_WORK_ITEMS"))
+    errors.extend(_missing_list(package.manifest_paths, "MISSING_EVIDENCE_PACKAGE_MANIFEST_PATHS"))
+    if not package.manifest_sha256:
+        errors.append("MISSING_EVIDENCE_PACKAGE_MANIFEST_HASH")
+    elif not SHA256_RE.match(package.manifest_sha256):
+        errors.append("INVALID_EVIDENCE_PACKAGE_MANIFEST_HASH")
+    if not package.artifact_hashes:
+        errors.append("MISSING_EVIDENCE_PACKAGE_ARTIFACT_HASHES")
+    else:
+        for artifact_path, artifact_hash in package.artifact_hashes.items():
+            if not artifact_path:
+                errors.append("MISSING_EVIDENCE_PACKAGE_ARTIFACT_PATH")
+            if not artifact_hash:
+                errors.append("MISSING_EVIDENCE_PACKAGE_ARTIFACT_HASH")
+            elif not SHA256_RE.match(artifact_hash):
+                errors.append("INVALID_EVIDENCE_PACKAGE_ARTIFACT_HASH")
+
+    errors.extend(_missing_package_ref(package.validation_summary_ref, "MISSING_EVIDENCE_PACKAGE_VALIDATION_SUMMARY"))
+    errors.extend(_missing_package_ref(package.evidence_index_ref, "MISSING_EVIDENCE_PACKAGE_INDEX"))
+    errors.extend(_missing_package_ref(package.no_go_scan_ref, "MISSING_EVIDENCE_PACKAGE_NO_GO_SCAN"))
+    errors.extend(_missing_package_ref(package.bom_scan_ref, "MISSING_EVIDENCE_PACKAGE_BOM_SCAN"))
+    errors.extend(_missing_package_ref(package.json_validation_ref, "MISSING_EVIDENCE_PACKAGE_JSON_VALIDATION"))
+    errors.extend(_missing_package_ref(package.source_authority_ref, "MISSING_EVIDENCE_PACKAGE_SOURCE_AUTHORITY"))
+    errors.extend(_missing_scalar(package.candidate_verdict, "MISSING_EVIDENCE_PACKAGE_CANDIDATE_VERDICT"))
+    if package.package_state not in EVIDENCE_PACKAGE_STATES:
+        errors.append("INVALID_EVIDENCE_PACKAGE_STATE")
+    if package.traceability is None:
+        errors.append("MISSING_EVIDENCE_PACKAGE_TRACEABILITY")
+    else:
+        errors.extend(_validate_traceability(package.traceability))
+    if package.not_gate_decision is not True:
+        errors.append("EVIDENCE_PACKAGE_IS_NOT_GATE_DECISION")
+    if package.not_delivery_receipt is not True:
+        errors.append("EVIDENCE_PACKAGE_IS_NOT_DELIVERY_RECEIPT")
+    if package.not_business_completion is not True:
+        errors.append("EVIDENCE_PACKAGE_IS_NOT_BUSINESS_COMPLETION")
+
+    missing_evidence = [
+        error
+        for error in errors
+        if error.startswith("MISSING_EVIDENCE_PACKAGE_") or error.startswith("INVALID_EVIDENCE_PACKAGE_")
+    ]
+    package_state = "incomplete" if errors else package.package_state
+    return _result(
+        errors,
+        explanations={
+            "evidence_package_id": package.evidence_package_id,
+            "delivery_packet_id": package.delivery_packet_id,
+            "package_state": package_state,
+            "manifest_sha256": package.manifest_sha256,
+            "package_hash": package.package_hash(),
+            "missing_evidence": _dedupe(missing_evidence),
+            "candidate_verdict": package.candidate_verdict,
+        },
+    )
+
+
+def validate_evidence_package_transition(
+    package: EvidencePackage,
+    *,
+    target_state: str,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    package_result = validate_evidence_package(package)
+    errors.extend(
+        _validate_transition(
+            current_status=package.package_state,
+            target_status=target_state,
+            valid_statuses=EVIDENCE_PACKAGE_STATES,
+            transition_table=EVIDENCE_PACKAGE_TRANSITIONS,
+            invalid_current_code="INVALID_EVIDENCE_PACKAGE_STATE",
+            invalid_target_code="INVALID_EVIDENCE_PACKAGE_TARGET_STATE",
+            invalid_transition_code="INVALID_EVIDENCE_PACKAGE_TRANSITION",
+        )
+    )
+    if target_state == "submitted":
+        errors.extend(package_result.errors)
+    return _result(
+        errors,
+        explanations={
+            "evidence_package_id": package.evidence_package_id,
+            "from_state": package.package_state,
+            "target_state": target_state,
+            "manifest_sha256": package.manifest_sha256,
+            "package_hash": package.package_hash(),
+        },
+    )
+
+
+def validate_gate_decision(
+    decision: GateDecision,
+    *,
+    evidence_package: EvidencePackage | None,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(decision.gate_decision_id, "MISSING_GATE_DECISION_ID"))
+    errors.extend(_missing_scalar(decision.evidence_package_id, "MISSING_GATE_DECISION_EVIDENCE_PACKAGE_ID"))
+    errors.extend(_missing_scalar(decision.evidence_package_hash, "MISSING_GATE_DECISION_EVIDENCE_PACKAGE_HASH"))
+    errors.extend(_missing_scalar(decision.decision_authority, "MISSING_GATE_DECISION_AUTHORITY"))
+    errors.extend(_missing_scalar(decision.decision_reason, "MISSING_GATE_DECISION_REASON"))
+    errors.extend(_missing_scalar(decision.review_evidence_ref, "MISSING_GATE_DECISION_REVIEW_EVIDENCE_REF"))
+    errors.extend(_missing_scalar(decision.decided_at_utc, "MISSING_GATE_DECISION_TIMESTAMP"))
+    if decision.decision_outcome not in GATE_DECISION_OUTCOMES:
+        errors.append("INVALID_GATE_DECISION_OUTCOME")
+    if not _is_layer1_authority(decision.decision_authority):
+        errors.append("GATE_DECISION_REQUIRES_LAYER1_OR_NOVA_AUTHORITY")
+    if decision.automated_approval:
+        errors.append("AUTOMATED_GATE_APPROVAL_NOT_AUTHORIZED")
+    if decision.kernel_owned:
+        errors.append("KERNEL_OWNED_GATE_NOT_AUTHORIZED")
+    if decision.creates_delivery_receipt or decision.not_delivery_receipt is not True:
+        errors.append("GATE_DECISION_CANNOT_CREATE_DELIVERY_RECEIPT")
+    if decision.not_business_completion is not True:
+        errors.append("GATE_DECISION_IS_NOT_BUSINESS_COMPLETION")
+    if decision.advisory_recommendation_id and decision.advisory_recommendation_id == decision.gate_decision_id:
+        errors.append("GATE_DECISION_MUST_BE_SEPARATE_FROM_RECOMMENDATION")
+
+    package_errors: list[str] = []
+    package_hash = ""
+    if evidence_package is None:
+        errors.append("MISSING_EVIDENCE_PACKAGE_FOR_GATE_DECISION")
+    else:
+        package_result = validate_evidence_package(evidence_package)
+        package_errors = list(package_result.errors)
+        package_hash = evidence_package.package_hash()
+        if decision.evidence_package_id and decision.evidence_package_id != evidence_package.evidence_package_id:
+            errors.append("GATE_DECISION_EVIDENCE_PACKAGE_ID_MISMATCH")
+        if decision.evidence_package_hash and decision.evidence_package_hash != package_hash:
+            errors.append("GATE_DECISION_EVIDENCE_PACKAGE_HASH_MISMATCH")
+        if package_errors or evidence_package.package_state in {"assembling", "incomplete"}:
+            errors.append("INCOMPLETE_EVIDENCE_PACKAGE_BLOCKS_GATE_DECISION")
+        if evidence_package.package_state != "submitted":
+            errors.append("EVIDENCE_PACKAGE_NOT_SUBMITTED_FOR_GATE_DECISION")
+
+    if decision.decision_outcome == "accepted":
+        errors.extend(_missing_scalar(decision.human_inspection_id, "ACCEPTED_GATE_REQUIRES_HUMAN_INSPECTION"))
+    if decision.decision_outcome == "needs_revision":
+        errors.extend(_missing_scalar(decision.prior_evidence_package_id, "NEEDS_REVISION_REQUIRES_PRIOR_EVIDENCE_PACKAGE"))
+        errors.extend(_missing_list(decision.required_revision_scope, "NEEDS_REVISION_REQUIRES_REVISION_SCOPE"))
+    if decision.decision_outcome == "blocked":
+        errors.extend(_missing_scalar(decision.blocker_reason, "BLOCKED_GATE_REQUIRES_BLOCKER_REASON"))
+        errors.extend(_missing_list(decision.required_evidence, "BLOCKED_GATE_REQUIRES_NEXT_EVIDENCE"))
+    if decision.decision_outcome == "deferred":
+        errors.extend(_missing_scalar(decision.revisit_condition, "DEFERRED_GATE_REQUIRES_REVISIT_CONDITION"))
+
+    return _result(
+        errors,
+        explanations={
+            "gate_decision_id": decision.gate_decision_id,
+            "evidence_package_id": decision.evidence_package_id,
+            "evidence_package_hash": package_hash or decision.evidence_package_hash,
+            "human_authority": decision.decision_authority if _is_layer1_authority(decision.decision_authority) else "",
+            "decision_outcome": decision.decision_outcome,
+            "terminal": decision.decision_outcome in TERMINAL_GATE_DECISION_OUTCOMES,
+            "receipt_issuable": decision.decision_outcome == "accepted" and not errors,
+            "missing_evidence": _dedupe(package_errors),
+            "prior_evidence_package_id": decision.prior_evidence_package_id,
+            "required_revision_scope": list(decision.required_revision_scope),
+            "blocker_reason": decision.blocker_reason,
+            "required_evidence": list(decision.required_evidence),
+            "revisit_condition": decision.revisit_condition,
+        },
+    )
+
+
+def validate_delivery_receipt(
+    receipt: DeliveryReceipt,
+    *,
+    gate_decision: GateDecision | None,
+    evidence_package: EvidencePackage | None,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(receipt.delivery_receipt_id, "MISSING_DELIVERY_RECEIPT_ID"))
+    errors.extend(_missing_scalar(receipt.delivery_packet_id, "MISSING_DELIVERY_RECEIPT_PACKET_ID"))
+    errors.extend(_missing_scalar(receipt.evidence_package_id, "MISSING_DELIVERY_RECEIPT_EVIDENCE_PACKAGE_ID"))
+    errors.extend(_missing_scalar(receipt.evidence_package_hash, "MISSING_DELIVERY_RECEIPT_EVIDENCE_PACKAGE_HASH"))
+    errors.extend(_missing_scalar(receipt.gate_decision_id, "MISSING_DELIVERY_RECEIPT_GATE_DECISION_ID"))
+    if receipt.receipt_state not in RECEIPT_STATES:
+        errors.append("INVALID_DELIVERY_RECEIPT_STATE")
+    if receipt.non_human_issuance:
+        errors.append("NON_HUMAN_RECEIPT_ISSUANCE_NOT_AUTHORIZED")
+    if receipt.kernel_owned:
+        errors.append("KERNEL_OWNED_RECEIPT_NOT_AUTHORIZED")
+    if receipt.not_business_completion is not True:
+        errors.append("DELIVERY_RECEIPT_IS_NOT_BUSINESS_COMPLETION")
+
+    package_hash = ""
+    if evidence_package is None:
+        errors.append("MISSING_EVIDENCE_PACKAGE_FOR_DELIVERY_RECEIPT")
+    else:
+        package_hash = evidence_package.package_hash()
+        if receipt.delivery_packet_id and receipt.delivery_packet_id != evidence_package.delivery_packet_id:
+            errors.append("DELIVERY_RECEIPT_PACKET_ID_MISMATCH")
+        if receipt.evidence_package_id and receipt.evidence_package_id != evidence_package.evidence_package_id:
+            errors.append("DELIVERY_RECEIPT_EVIDENCE_PACKAGE_ID_MISMATCH")
+        if receipt.evidence_package_hash and receipt.evidence_package_hash != package_hash:
+            errors.append("DELIVERY_RECEIPT_EVIDENCE_PACKAGE_HASH_MISMATCH")
+
+    gate_outcome = receipt.gate_decision_outcome
+    if gate_decision is None:
+        errors.append("MISSING_GATE_DECISION_FOR_DELIVERY_RECEIPT")
+    else:
+        gate_outcome = gate_decision.decision_outcome
+        if evidence_package is not None and not validate_gate_decision(gate_decision, evidence_package=evidence_package).ok:
+            errors.append("DELIVERY_RECEIPT_REQUIRES_VALID_GATE_DECISION")
+        if receipt.gate_decision_id and receipt.gate_decision_id != gate_decision.gate_decision_id:
+            errors.append("DELIVERY_RECEIPT_GATE_DECISION_ID_MISMATCH")
+        if receipt.gate_decision_outcome and receipt.gate_decision_outcome != gate_decision.decision_outcome:
+            errors.append("DELIVERY_RECEIPT_GATE_OUTCOME_MISMATCH")
+
+    receipt_requires_authority = receipt.receipt_state in {"issuable", "issued", "withheld"}
+    if receipt_requires_authority and not _is_layer1_authority(receipt.issued_by):
+        errors.append("NON_AUTHORITY_CANNOT_ISSUE_RECEIPT")
+    if receipt.receipt_state in {"issuable", "issued", "withheld"} and gate_outcome != "accepted":
+        errors.append("DELIVERY_RECEIPT_REQUIRES_ACCEPTED_GATE_DECISION")
+    if receipt.receipt_state == "issued":
+        errors.extend(_missing_scalar(receipt.issued_at_utc, "ISSUED_RECEIPT_REQUIRES_TIMESTAMP"))
+        errors.extend(_missing_scalar(receipt.receipt_summary, "ISSUED_RECEIPT_REQUIRES_SUMMARY"))
+    if receipt.receipt_state == "withheld":
+        errors.extend(_missing_scalar(receipt.withheld_reason, "WITHHELD_RECEIPT_REQUIRES_REASON"))
+    if receipt.receipt_state == "void":
+        if not _is_layer1_authority(receipt.voided_by):
+            errors.append("VOID_RECEIPT_REQUIRES_LAYER1_OR_NOVA_AUTHORITY")
+        errors.extend(_missing_scalar(receipt.voided_at_utc, "VOID_RECEIPT_REQUIRES_TIMESTAMP"))
+        errors.extend(_missing_scalar(receipt.void_reason, "VOID_RECEIPT_REQUIRES_REASON"))
+        errors.extend(_missing_scalar(receipt.prior_receipt_id, "VOID_RECEIPT_REQUIRES_PRIOR_RECEIPT"))
+
+    return _result(
+        errors,
+        explanations={
+            "delivery_receipt_id": receipt.delivery_receipt_id,
+            "gate_decision_id": receipt.gate_decision_id,
+            "evidence_package_hash": package_hash or receipt.evidence_package_hash,
+            "receipt_state": receipt.receipt_state,
+            "issued_by": receipt.issued_by,
+            "withheld_reason": receipt.withheld_reason,
+            "prior_receipt_id": receipt.prior_receipt_id,
+        },
+    )
+
+
+def validate_hitl_dialogue(
+    dialogue: HITLDialogueRecord,
+    *,
+    evidence_package: EvidencePackage | None = None,
+    gate_decision: GateDecision | None = None,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(dialogue.dialogue_id, "MISSING_HITL_DIALOGUE_ID"))
+    errors.extend(_missing_scalar(dialogue.evidence_package_id, "MISSING_HITL_EVIDENCE_PACKAGE_ID"))
+    errors.extend(_missing_scalar(dialogue.evidence_package_hash, "MISSING_HITL_EVIDENCE_PACKAGE_HASH"))
+    errors.extend(_missing_scalar(dialogue.human_actor, "MISSING_HITL_HUMAN_ACTOR"))
+    errors.extend(_missing_scalar(dialogue.created_at_utc, "MISSING_HITL_CREATED_AT"))
+    if dialogue.action not in HITL_DIALOGUE_ACTIONS:
+        errors.append("INVALID_HITL_DIALOGUE_ACTION")
+    if not _is_layer1_authority(dialogue.human_actor):
+        errors.append("HITL_DIALOGUE_REQUIRES_LAYER1_OR_NOVA_ACTOR")
+    if dialogue.traceability is None:
+        errors.append("MISSING_HITL_TRACEABILITY")
+    else:
+        errors.extend(_validate_traceability(dialogue.traceability))
+    if dialogue.advisory_only is not True:
+        errors.append("HITL_RECOMMENDATION_MUST_REMAIN_ADVISORY")
+    if dialogue.not_gate_decision is not True:
+        errors.append("HITL_DIALOGUE_IS_NOT_GATE_DECISION")
+    if dialogue.not_delivery_receipt is not True:
+        errors.append("HITL_DIALOGUE_IS_NOT_DELIVERY_RECEIPT")
+    if dialogue.not_business_completion is not True:
+        errors.append("HITL_DIALOGUE_IS_NOT_BUSINESS_COMPLETION")
+
+    if evidence_package is not None:
+        if dialogue.evidence_package_id and dialogue.evidence_package_id != evidence_package.evidence_package_id:
+            errors.append("HITL_EVIDENCE_PACKAGE_ID_MISMATCH")
+        if dialogue.evidence_package_hash and dialogue.evidence_package_hash != evidence_package.package_hash():
+            errors.append("HITL_EVIDENCE_PACKAGE_HASH_MISMATCH")
+    if gate_decision is not None and dialogue.human_decision_id:
+        if dialogue.human_decision_id != gate_decision.gate_decision_id:
+            errors.append("HITL_GATE_DECISION_ID_MISMATCH")
+
+    gate_state_changed = dialogue.gate_state_before != dialogue.gate_state_after
+    evidence_hash_visible = bool(dialogue.evidence_package_hash) and any(
+        dialogue.evidence_package_hash in evidence_ref for evidence_ref in dialogue.evidence_refs
+    )
+
+    if dialogue.action == "inspect_evidence":
+        errors.extend(_missing_list(dialogue.evidence_refs, "HITL_INSPECTION_REQUIRES_EVIDENCE_REFS"))
+    if dialogue.action == "request_clarification" and gate_state_changed:
+        errors.append("CLARIFICATION_CANNOT_CHANGE_GATE_STATE")
+    if dialogue.action == "approve":
+        errors.extend(_missing_scalar(dialogue.human_decision_id, "HITL_APPROVAL_REQUIRES_HUMAN_DECISION_ID"))
+        if not dialogue.inspected_evidence:
+            errors.append("HITL_APPROVAL_REQUIRES_PRIOR_EVIDENCE_INSPECTION")
+        if not evidence_hash_visible:
+            errors.append("HITL_APPROVAL_REQUIRES_VISIBLE_EVIDENCE_HASH")
+    if dialogue.action == "reject":
+        errors.extend(_missing_scalar(dialogue.human_decision_id, "HITL_REJECTION_REQUIRES_HUMAN_DECISION_ID"))
+        errors.extend(_missing_scalar(dialogue.reason, "HITL_REJECTION_REQUIRES_REASON"))
+    if dialogue.action == "defer":
+        errors.extend(_missing_scalar(dialogue.human_decision_id, "HITL_DEFERRAL_REQUIRES_HUMAN_DECISION_ID"))
+        errors.extend(_missing_scalar(dialogue.revisit_condition, "HITL_DEFERRAL_REQUIRES_REVISIT_CONDITION"))
+    if dialogue.action == "request_revision":
+        errors.extend(_missing_scalar(dialogue.human_decision_id, "HITL_REVISION_REQUIRES_HUMAN_DECISION_ID"))
+        errors.extend(_missing_list(dialogue.required_evidence_delta, "HITL_REVISION_REQUIRES_EVIDENCE_DELTA"))
+    if dialogue.action == "ask_why_deferred":
+        errors.extend(_missing_scalar(dialogue.revisit_condition, "HITL_DEFERRED_EXPLANATION_REQUIRES_REVISIT_CONDITION"))
+    if dialogue.action == "ask_why_needs_revision":
+        errors.extend(_missing_list(dialogue.required_evidence_delta, "HITL_REVISION_EXPLANATION_REQUIRES_EVIDENCE_DELTA"))
+        errors.extend(_missing_scalar(dialogue.prior_evidence_package_id, "HITL_REVISION_EXPLANATION_REQUIRES_PRIOR_PACKAGE"))
+    if dialogue.action == "withhold_receipt":
+        errors.extend(_missing_scalar(dialogue.reason, "HITL_WITHHOLD_RECEIPT_REQUIRES_REASON"))
+
+    return _result(
+        errors,
+        explanations={
+            "dialogue_id": dialogue.dialogue_id,
+            "human_actor": dialogue.human_actor,
+            "action": dialogue.action,
+            "evidence_package_hash": dialogue.evidence_package_hash,
+            "evidence_hash_visible": evidence_hash_visible,
+            "gate_state_changed": gate_state_changed,
+            "reason": dialogue.reason,
+            "revisit_condition": dialogue.revisit_condition,
+            "required_evidence_delta": list(dialogue.required_evidence_delta),
+            "prior_evidence_package_id": dialogue.prior_evidence_package_id,
+            "receipt_withheld": dialogue.action == "withhold_receipt" and not errors,
+        },
+    )
+
+
+def explain_hitl_dialogue(dialogue: HITLDialogueRecord) -> dict[str, Any]:
+    return {
+        "reason_code": dialogue.action.upper(),
+        "question": dialogue.question,
+        "response": dialogue.response,
+        "evidence_refs": list(dialogue.evidence_refs),
+        "revisit_condition": dialogue.revisit_condition,
+        "required_evidence_delta": list(dialogue.required_evidence_delta),
+    }
+
+
+def validate_advisory_recommendation_separation(
+    recommendation: DispatchRecommendation | None,
+    *,
+    gate_decision: GateDecision | None,
+    receipt: DeliveryReceipt | None,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    created_gate_or_receipt = False
+    advisory_only = False
+    recommendation_id = ""
+    if recommendation is None:
+        errors.append("MISSING_ADVISORY_RECOMMENDATION")
+    else:
+        recommendation_id = recommendation.dispatch_decision_id
+        advisory_only = recommendation.advisory_only is True
+        if not advisory_only:
+            errors.append("DISPATCH_RECOMMENDATION_MUST_REMAIN_ADVISORY")
+            created_gate_or_receipt = True
+        if recommendation.not_business_completion is not True:
+            errors.append("DISPATCH_RECOMMENDATION_IS_NOT_BUSINESS_COMPLETION")
+    if gate_decision is not None and recommendation_id and gate_decision.gate_decision_id == recommendation_id:
+        errors.append("ADVISORY_RECOMMENDATION_CANNOT_BE_GATE_DECISION")
+        created_gate_or_receipt = True
+    if receipt is not None and recommendation_id and receipt.delivery_receipt_id == recommendation_id:
+        errors.append("ADVISORY_RECOMMENDATION_CANNOT_BE_DELIVERY_RECEIPT")
+        created_gate_or_receipt = True
+    return _result(
+        errors,
+        explanations={
+            "recommendation_advisory_only": advisory_only,
+            "created_gate_or_receipt": created_gate_or_receipt,
+            "gate_decision_id": gate_decision.gate_decision_id if gate_decision else "",
+            "delivery_receipt_id": receipt.delivery_receipt_id if receipt else "",
+        },
+    )
+
+
 def stable_contract_hash(value: Any) -> str:
     encoded = json.dumps(_json_safe(value), sort_keys=True, separators=(",", ":")).encode("utf-8")
     return sha256(encoded).hexdigest()
@@ -1527,6 +2044,12 @@ def _missing_scalar(value: str | None, error: str) -> list[str]:
 
 def _missing_list(value: list[Any], error: str) -> list[str]:
     return [error] if not value else []
+
+
+def _missing_package_ref(value: EvidenceReference | None, error: str) -> list[str]:
+    if value is None:
+        return [error]
+    return validate_evidence_reference(value).errors
 
 
 def _is_layer1_authority(actor: str) -> bool:

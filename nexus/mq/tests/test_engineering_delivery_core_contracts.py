@@ -1184,3 +1184,462 @@ def test_tc_l3_evidence_012_content_hash_mismatch_blocks_evidence_package_inclus
     assert "EVIDENCE_CONTENT_HASH_MISMATCH" in result.errors
     assert result.explanations["inclusion_state"] == "excluded"
     assert result.explanations["evidence_package_complete"] is False
+
+
+def _gate_trace(**overrides):
+    data = {
+        "issue_ids": ["EDC-ISSUE-06"],
+        "prd_ids": ["PRD-GATE-001", "PRD-GATE-002", "PRD-GATE-003", "PRD-GATE-004"],
+        "spec_ids": ["SPEC-GATE-001", "SPEC-GATE-002", "SPEC-GATE-003"],
+        "ux_surface_ids": ["UX-GATE-RECEIPT", "UX-HITL-DIALOGUE", "UX-TRACEABILITY"],
+        "test_case_ids": ["TC-GATE-RECEIPT-001"],
+        "future_evidence_ids": ["FUTURE-VERIFY-GATE-RECEIPT"],
+    }
+    data.update(overrides)
+    return TraceabilityRef(**data)
+
+
+def _evidence_package(**overrides):
+    data = {
+        "evidence_package_id": "evidence-package-001",
+        "delivery_packet_id": "packet-001",
+        "work_item_ids": ["packet-001/work-001"],
+        "manifest_paths": ["SOURCE_DIFF.patch", "PYTEST_FOCUSED_OUTPUT.txt", "VALIDATION_SUMMARY.json"],
+        "manifest_sha256": VALID_HASH,
+        "artifact_hashes": {"SOURCE_DIFF.patch": VALID_HASH, "PYTEST_FOCUSED_OUTPUT.txt": VALID_HASH},
+        "validation_summary_ref": _evidence_ref(evidence_ref_id="validation-summary"),
+        "evidence_index_ref": _evidence_ref(evidence_ref_id="evidence-index"),
+        "no_go_scan_ref": _evidence_ref(evidence_ref_id="no-go-scan"),
+        "bom_scan_ref": _evidence_ref(evidence_ref_id="bom-scan"),
+        "json_validation_ref": _evidence_ref(evidence_ref_id="json-validation"),
+        "source_authority_ref": _evidence_ref(evidence_ref_id="source-authority"),
+        "candidate_verdict": "EDC_PR011_SLICE005_GATE_HITL_RECEIPT_READY_FOR_NOVA_REVIEW",
+        "package_state": "complete",
+        "traceability": _gate_trace(),
+    }
+    data.update(overrides)
+    return edc_contracts.EvidencePackage(**data)
+
+
+def _gate_decision(**overrides):
+    package = overrides.pop("evidence_package", _evidence_package(package_state="submitted"))
+    data = {
+        "gate_decision_id": "gate-decision-001",
+        "evidence_package_id": package.evidence_package_id,
+        "evidence_package_hash": package.package_hash(),
+        "decision_outcome": "accepted",
+        "decision_authority": "nova",
+        "decision_reason": "Evidence package meets the bounded Slice 005 gate criteria.",
+        "review_evidence_ref": "review://gate-decision-001",
+        "decided_at_utc": "2026-06-21T03:00:00Z",
+        "human_inspection_id": "hitl-inspection-001",
+    }
+    data.update(overrides)
+    return edc_contracts.GateDecision(**data)
+
+
+def _hitl_dialogue(**overrides):
+    package = overrides.pop("evidence_package", _evidence_package(package_state="submitted"))
+    data = {
+        "dialogue_id": "hitl-dialogue-001",
+        "evidence_package_id": package.evidence_package_id,
+        "evidence_package_hash": package.package_hash(),
+        "human_actor": "nova",
+        "action": "inspect_evidence",
+        "question": "Show the evidence behind this recommendation.",
+        "response": "Evidence package hash and review artifacts are visible.",
+        "evidence_refs": ["evidence-package:evidence-package-001", f"evidence-package-hash:{package.package_hash()}"],
+        "advisory_recommendation_id": "dispatch-rec::packet-001/work-001::roster-snapshot-001",
+        "human_decision_id": "",
+        "gate_state_before": "pending",
+        "gate_state_after": "pending",
+        "reason": "Evidence was inspected before human action.",
+        "created_at_utc": "2026-06-21T03:01:00Z",
+        "traceability": _gate_trace(ux_surface_ids=["UX-HITL-DIALOGUE", "UX-TRACEABILITY"]),
+    }
+    data.update(overrides)
+    return edc_contracts.HITLDialogueRecord(**data)
+
+
+def _delivery_receipt(**overrides):
+    package = overrides.pop("evidence_package", _evidence_package(package_state="submitted"))
+    gate_decision = overrides.pop("gate_decision", _gate_decision(evidence_package=package))
+    data = {
+        "delivery_receipt_id": "delivery-receipt-001",
+        "delivery_packet_id": package.delivery_packet_id,
+        "evidence_package_id": package.evidence_package_id,
+        "evidence_package_hash": package.package_hash(),
+        "gate_decision_id": gate_decision.gate_decision_id,
+        "gate_decision_outcome": gate_decision.decision_outcome,
+        "receipt_state": "issued",
+        "issued_by": "nova",
+        "issued_at_utc": "2026-06-21T03:02:00Z",
+        "receipt_summary": "Slice 005 evidence package accepted by Layer 1 / Nova authority.",
+    }
+    data.update(overrides)
+    return edc_contracts.DeliveryReceipt(**data)
+
+
+def test_tc_gate_receipt_001_package_manifest_path_field_is_mandatory():
+    result = edc_contracts.validate_evidence_package(_evidence_package(manifest_paths=[]))
+
+    assert result.ok is False
+    assert "MISSING_EVIDENCE_PACKAGE_MANIFEST_PATHS" in result.errors
+    assert result.explanations["package_state"] == "incomplete"
+
+
+def test_tc_gate_receipt_002_package_manifest_hash_field_is_mandatory():
+    result = edc_contracts.validate_evidence_package(_evidence_package(manifest_sha256="", artifact_hashes={}))
+
+    assert result.ok is False
+    assert "MISSING_EVIDENCE_PACKAGE_MANIFEST_HASH" in result.errors
+    assert "MISSING_EVIDENCE_PACKAGE_ARTIFACT_HASHES" in result.errors
+
+
+def test_tc_gate_receipt_003_validation_summary_is_required_for_package_completeness():
+    result = edc_contracts.validate_evidence_package(_evidence_package(validation_summary_ref=None))
+
+    assert result.ok is False
+    assert "MISSING_EVIDENCE_PACKAGE_VALIDATION_SUMMARY" in result.errors
+
+
+def test_tc_gate_receipt_004_no_go_category_result_is_required_for_gate_review():
+    result = edc_contracts.validate_evidence_package(_evidence_package(no_go_scan_ref=None))
+
+    assert result.ok is False
+    assert "MISSING_EVIDENCE_PACKAGE_NO_GO_SCAN" in result.errors
+
+
+def test_tc_gate_receipt_005_complete_package_transitions_to_submitted():
+    package = _evidence_package(package_state="complete")
+
+    result = edc_contracts.validate_evidence_package_transition(package, target_state="submitted")
+
+    assert result.ok is True
+    assert result.explanations["manifest_sha256"] == VALID_HASH
+
+
+def test_tc_gate_receipt_006_incomplete_package_blocks_gate_decision():
+    package = _evidence_package(package_state="incomplete", validation_summary_ref=None)
+    decision = _gate_decision(evidence_package=package)
+
+    result = edc_contracts.validate_gate_decision(decision, evidence_package=package)
+
+    assert result.ok is False
+    assert "INCOMPLETE_EVIDENCE_PACKAGE_BLOCKS_GATE_DECISION" in result.errors
+    assert "MISSING_EVIDENCE_PACKAGE_VALIDATION_SUMMARY" in result.explanations["missing_evidence"]
+
+
+def test_tc_gate_receipt_007_human_inspection_precedes_accepted_gate_outcome():
+    package = _evidence_package(package_state="submitted")
+    decision = _gate_decision(evidence_package=package, decision_outcome="accepted")
+
+    result = edc_contracts.validate_gate_decision(decision, evidence_package=package)
+
+    assert result.ok is True
+    assert result.explanations["human_authority"] == "nova"
+    assert result.explanations["evidence_package_hash"] == package.package_hash()
+
+
+def test_tc_gate_receipt_008_needs_revision_outcome_preserves_prior_evidence():
+    package = _evidence_package(package_state="submitted")
+    decision = _gate_decision(
+        evidence_package=package,
+        decision_outcome="needs_revision",
+        prior_evidence_package_id="evidence-package-000",
+        required_revision_scope=["refresh no-go scan evidence"],
+    )
+
+    result = edc_contracts.validate_gate_decision(decision, evidence_package=package)
+
+    assert result.ok is True
+    assert result.explanations["prior_evidence_package_id"] == "evidence-package-000"
+    assert result.explanations["required_revision_scope"] == ["refresh no-go scan evidence"]
+
+
+def test_tc_gate_receipt_009_rejected_outcome_records_reason_and_authority():
+    decision = _gate_decision(decision_outcome="rejected", decision_reason="Scope boundary mismatch.")
+
+    result = edc_contracts.validate_gate_decision(decision, evidence_package=_evidence_package(package_state="submitted"))
+
+    assert result.ok is True
+    assert result.explanations["terminal"] is True
+    assert result.explanations["receipt_issuable"] is False
+
+
+def test_tc_gate_receipt_010_blocked_outcome_records_blocker_and_next_evidence_need():
+    decision = _gate_decision(
+        decision_outcome="blocked",
+        blocker_reason="Missing independent no-go scan.",
+        required_evidence=["no-go scan"],
+    )
+
+    result = edc_contracts.validate_gate_decision(decision, evidence_package=_evidence_package(package_state="submitted"))
+
+    assert result.ok is True
+    assert result.explanations["blocker_reason"] == "Missing independent no-go scan."
+    assert result.explanations["required_evidence"] == ["no-go scan"]
+
+
+def test_tc_gate_receipt_011_deferred_outcome_records_revisit_condition():
+    decision = _gate_decision(decision_outcome="deferred", revisit_condition="Nova review window opens.")
+
+    result = edc_contracts.validate_gate_decision(decision, evidence_package=_evidence_package(package_state="submitted"))
+
+    assert result.ok is True
+    assert result.explanations["revisit_condition"] == "Nova review window opens."
+
+
+def test_tc_gate_receipt_012_receipt_issues_only_after_terminal_accepted_gate():
+    package = _evidence_package(package_state="submitted")
+    decision = _gate_decision(evidence_package=package, decision_outcome="accepted")
+    receipt = _delivery_receipt(evidence_package=package, gate_decision=decision)
+
+    result = edc_contracts.validate_delivery_receipt(receipt, gate_decision=decision, evidence_package=package)
+
+    assert result.ok is True
+    assert result.explanations["gate_decision_id"] == decision.gate_decision_id
+    assert result.explanations["evidence_package_hash"] == package.package_hash()
+
+
+def test_tc_gate_receipt_013_human_can_withhold_receipt_after_review():
+    receipt = _delivery_receipt(receipt_state="withheld", issued_at_utc="", withheld_reason="Awaiting operator signoff.")
+
+    result = edc_contracts.validate_delivery_receipt(
+        receipt,
+        gate_decision=_gate_decision(),
+        evidence_package=_evidence_package(package_state="submitted"),
+    )
+
+    assert result.ok is True
+    assert result.explanations["receipt_state"] == "withheld"
+    assert result.explanations["withheld_reason"] == "Awaiting operator signoff."
+
+
+def test_tc_gate_receipt_014_voided_receipt_requires_authority_and_reason():
+    receipt = _delivery_receipt(
+        receipt_state="void",
+        voided_by="nova",
+        voided_at_utc="2026-06-21T03:03:00Z",
+        void_reason="Receipt issued against superseded package.",
+        prior_receipt_id="delivery-receipt-000",
+    )
+
+    result = edc_contracts.validate_delivery_receipt(
+        receipt,
+        gate_decision=_gate_decision(),
+        evidence_package=_evidence_package(package_state="submitted"),
+    )
+
+    assert result.ok is True
+    assert result.explanations["prior_receipt_id"] == "delivery-receipt-000"
+
+
+def test_pr011_accepted_gate_rejects_automated_or_kernel_owned_decision():
+    package = _evidence_package(package_state="submitted")
+    automated = _gate_decision(evidence_package=package, automated_approval=True)
+    kernel_owned = _gate_decision(evidence_package=package, kernel_owned=True)
+
+    automated_result = edc_contracts.validate_gate_decision(automated, evidence_package=package)
+    kernel_result = edc_contracts.validate_gate_decision(kernel_owned, evidence_package=package)
+
+    assert automated_result.ok is False
+    assert "AUTOMATED_GATE_APPROVAL_NOT_AUTHORIZED" in automated_result.errors
+    assert kernel_result.ok is False
+    assert "KERNEL_OWNED_GATE_NOT_AUTHORIZED" in kernel_result.errors
+
+
+def test_pr011_receipt_rejects_non_human_or_kernel_owned_issuance():
+    package = _evidence_package(package_state="submitted")
+    decision = _gate_decision(evidence_package=package)
+    non_human = _delivery_receipt(evidence_package=package, gate_decision=decision, non_human_issuance=True)
+    kernel_owned = _delivery_receipt(evidence_package=package, gate_decision=decision, kernel_owned=True)
+
+    non_human_result = edc_contracts.validate_delivery_receipt(
+        non_human,
+        gate_decision=decision,
+        evidence_package=package,
+    )
+    kernel_result = edc_contracts.validate_delivery_receipt(
+        kernel_owned,
+        gate_decision=decision,
+        evidence_package=package,
+    )
+
+    assert non_human_result.ok is False
+    assert "NON_HUMAN_RECEIPT_ISSUANCE_NOT_AUTHORIZED" in non_human_result.errors
+    assert kernel_result.ok is False
+    assert "KERNEL_OWNED_RECEIPT_NOT_AUTHORIZED" in kernel_result.errors
+
+
+def test_pr011_accepted_gate_requires_human_inspection_id():
+    package = _evidence_package(package_state="submitted")
+    decision = _gate_decision(evidence_package=package, human_inspection_id="")
+
+    result = edc_contracts.validate_gate_decision(decision, evidence_package=package)
+
+    assert result.ok is False
+    assert "ACCEPTED_GATE_REQUIRES_HUMAN_INSPECTION" in result.errors
+
+
+def test_tc_hitl_dialogue_001_human_asks_why_blocked():
+    dialogue = _hitl_dialogue(action="ask_why_blocked", response="Blocked by missing no-go scan.", evidence_refs=["gate:block"])
+
+    result = edc_contracts.validate_hitl_dialogue(dialogue)
+    explanation = edc_contracts.explain_hitl_dialogue(dialogue)
+
+    assert result.ok is True
+    assert explanation["reason_code"] == "ASK_WHY_BLOCKED"
+    assert explanation["evidence_refs"] == ["gate:block"]
+
+
+def test_tc_hitl_dialogue_002_human_asks_why_deferred():
+    dialogue = _hitl_dialogue(
+        action="ask_why_deferred",
+        response="Deferred until Nova review window opens.",
+        revisit_condition="Nova review window opens.",
+    )
+
+    result = edc_contracts.validate_hitl_dialogue(dialogue)
+
+    assert result.ok is True
+    assert result.explanations["revisit_condition"] == "Nova review window opens."
+
+
+def test_tc_hitl_dialogue_003_human_asks_why_needs_revision():
+    dialogue = _hitl_dialogue(
+        action="ask_why_needs_revision",
+        response="Revision evidence is required.",
+        required_evidence_delta=["updated validation summary"],
+        prior_evidence_package_id="evidence-package-000",
+    )
+
+    result = edc_contracts.validate_hitl_dialogue(dialogue)
+
+    assert result.ok is True
+    assert result.explanations["required_evidence_delta"] == ["updated validation summary"]
+    assert result.explanations["prior_evidence_package_id"] == "evidence-package-000"
+
+
+def test_tc_hitl_dialogue_004_human_inspects_evidence_behind_recommendation():
+    package = _evidence_package(package_state="submitted")
+    dialogue = _hitl_dialogue(evidence_package=package, action="inspect_evidence")
+
+    result = edc_contracts.validate_hitl_dialogue(dialogue, evidence_package=package)
+
+    assert result.ok is True
+    assert result.explanations["evidence_package_hash"] == package.package_hash()
+
+
+def test_tc_hitl_dialogue_005_human_requests_clarification_without_gate_state_change():
+    dialogue = _hitl_dialogue(
+        action="request_clarification",
+        question="Clarify validation summary.",
+        gate_state_before="pending",
+        gate_state_after="pending",
+    )
+
+    result = edc_contracts.validate_hitl_dialogue(dialogue)
+
+    assert result.ok is True
+    assert result.explanations["gate_state_changed"] is False
+
+
+def test_tc_hitl_dialogue_006_human_approves_after_evidence_inspection():
+    package = _evidence_package(package_state="submitted")
+    dialogue = _hitl_dialogue(
+        evidence_package=package,
+        action="approve",
+        human_decision_id="gate-decision-001",
+        inspected_evidence=True,
+    )
+
+    result = edc_contracts.validate_hitl_dialogue(dialogue, evidence_package=package)
+
+    assert result.ok is True
+    assert result.explanations["human_actor"] == "nova"
+    assert result.explanations["evidence_package_hash"] == package.package_hash()
+
+
+def test_tc_hitl_dialogue_007_human_rejects_with_reason():
+    dialogue = _hitl_dialogue(action="reject", human_decision_id="gate-decision-002", reason="Scope mismatch.")
+
+    result = edc_contracts.validate_hitl_dialogue(dialogue)
+
+    assert result.ok is True
+    assert result.explanations["reason"] == "Scope mismatch."
+
+
+def test_tc_hitl_dialogue_008_human_defers_with_revisit_condition():
+    dialogue = _hitl_dialogue(action="defer", human_decision_id="gate-decision-003", revisit_condition="Review tomorrow.")
+
+    result = edc_contracts.validate_hitl_dialogue(dialogue)
+
+    assert result.ok is True
+    assert result.explanations["revisit_condition"] == "Review tomorrow."
+
+
+def test_tc_hitl_dialogue_009_human_requests_revision_with_evidence_delta():
+    dialogue = _hitl_dialogue(
+        action="request_revision",
+        human_decision_id="gate-decision-004",
+        required_evidence_delta=["refresh package hashes"],
+    )
+
+    result = edc_contracts.validate_hitl_dialogue(dialogue)
+
+    assert result.ok is True
+    assert result.explanations["required_evidence_delta"] == ["refresh package hashes"]
+
+
+def test_tc_hitl_dialogue_010_human_withholds_receipt():
+    dialogue = _hitl_dialogue(action="withhold_receipt", reason="Receipt held for manual signoff.")
+
+    result = edc_contracts.validate_hitl_dialogue(dialogue)
+
+    assert result.ok is True
+    assert result.explanations["receipt_withheld"] is True
+
+
+def test_tc_hitl_dialogue_011_agent_recommendation_remains_advisory():
+    result = edc_contracts.validate_advisory_recommendation_separation(
+        _dispatch_recommendation(),
+        gate_decision=None,
+        receipt=None,
+    )
+
+    assert result.ok is True
+    assert result.explanations["recommendation_advisory_only"] is True
+    assert result.explanations["created_gate_or_receipt"] is False
+
+
+def test_tc_hitl_dialogue_012_decision_record_is_separate_from_recommendation_record():
+    decision = _gate_decision(advisory_recommendation_id="dispatch-rec::packet-001/work-001::roster-snapshot-001")
+
+    result = edc_contracts.validate_gate_decision(decision, evidence_package=_evidence_package(package_state="submitted"))
+
+    assert result.ok is True
+    assert decision.gate_decision_id != decision.advisory_recommendation_id
+
+
+def test_tc_hitl_dialogue_013_evidence_hash_is_visible_before_human_action():
+    package = _evidence_package(package_state="submitted")
+    dialogue = _hitl_dialogue(evidence_package=package, action="inspect_evidence")
+
+    result = edc_contracts.validate_hitl_dialogue(dialogue, evidence_package=package)
+
+    assert result.ok is True
+    assert result.explanations["evidence_hash_visible"] is True
+
+
+def test_tc_hitl_dialogue_014_receipt_authority_stays_layer1_or_nova():
+    receipt = _delivery_receipt(issued_by="agent-thunder")
+
+    result = edc_contracts.validate_delivery_receipt(
+        receipt,
+        gate_decision=_gate_decision(),
+        evidence_package=_evidence_package(package_state="submitted"),
+    )
+
+    assert result.ok is False
+    assert "NON_AUTHORITY_CANNOT_ISSUE_RECEIPT" in result.errors
