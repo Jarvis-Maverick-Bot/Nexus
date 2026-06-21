@@ -1,9 +1,10 @@
-"""Engineering Delivery Core Slice 001/002 contract records and validators.
+"""Engineering Delivery Core Slice 001/002/003 contract records and validators.
 
 This module is intentionally contract-only. It defines deterministic records and
 fail-closed validators for Layer 1 publication, DeliveryPacket intake, and
-delivery-team roster eligibility. It does not dispatch work, transport evidence,
-decide gates, issue receipts, or start any live process.
+delivery-team roster eligibility, plus Layer 2 WorkItem planning and advisory
+dispatch recommendations. It does not execute work, transport evidence, decide
+gates, issue receipts, or start any live process.
 """
 
 from __future__ import annotations
@@ -49,6 +50,8 @@ ROSTER_STATE_TRANSITIONS = {
     "unavailable": {"registered_active", "suspended"},
     "suspended": {"registered_passive"},
 }
+WORK_ITEM_STATES = {"proposed", "ready_for_dispatch", "dispatch_blocked", "dispatch_deferred", "cancelled"}
+DISPATCH_RECOMMENDATION_STATES = {"dispatchable", "blocked", "deferred", "cancelled"}
 LAYER1_AUTHORITY_PREFIXES = ("nova", "alex", "layer1", "layer-1", "l1")
 SHA256_RE = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
 
@@ -269,6 +272,72 @@ class RosterStateTransition:
     authority_timestamp: str
     evidence_refs: list[str]
     reason: str
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class WorkItem:
+    work_item_id: str
+    delivery_packet_id: str
+    source_publication_id: str
+    work_title: str
+    work_scope: str
+    required_capabilities: list[str]
+    authority_boundary: list[str]
+    inherited_no_go_control_ids: list[str]
+    output_contract: list[str]
+    evidence_contract: list[str]
+    evidence_expectation_id: str
+    state: str
+    correlation_root_id: str
+    traceability: TraceabilityRef
+    source_issue_ids: list[str]
+    decomposition_reason: str
+    requirement_ids: list[str]
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    def work_item_hash(self) -> str:
+        return stable_contract_hash(self.to_dict())
+
+
+@dataclass
+class WorkItemDecompositionPlan:
+    decomposition_plan_id: str
+    delivery_packet_id: str
+    work_items: list[WorkItem]
+    decomposed_by: str
+    decomposed_at_utc: str
+    decomposition_order: list[str]
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class DispatchRecommendation:
+    dispatch_decision_id: str
+    work_item_id: str
+    roster_snapshot_id: str
+    eligible_agent_ids: list[str]
+    selected_agent_id: str | None
+    decision_state: str
+    eligibility_checks: list[dict[str, Any]]
+    blocked_reason: str
+    deferred_reason: str
+    decided_by: str
+    decided_at_utc: str
+    roster_snapshot_hash: str
+    work_item_hash: str
+    selected_agent_reason: str = ""
+    external_revisit_condition: str = ""
+    advisory_only: bool = True
     not_business_completion: bool = True
 
     def to_dict(self) -> dict[str, Any]:
@@ -604,6 +673,208 @@ def explain_no_eligible_agent(
         "authority_gaps": _decision_reasons(decisions, {"AUTHORITY_BOUNDARY_MISMATCH"}),
         "evidence_refs": _collect_decision_evidence(decisions),
         "advisory_only": True,
+    }
+
+
+def validate_work_item(
+    work_item: WorkItem,
+    *,
+    parent_packet: DeliveryPacket | None,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(work_item.work_item_id, "MISSING_WORK_ITEM_ID"))
+    errors.extend(_missing_scalar(work_item.delivery_packet_id, "MISSING_WORK_ITEM_PARENT_PACKET_ID"))
+    errors.extend(_missing_scalar(work_item.source_publication_id, "MISSING_WORK_ITEM_SOURCE_PUBLICATION_ID"))
+    errors.extend(_missing_scalar(work_item.work_title, "MISSING_WORK_ITEM_TITLE"))
+    errors.extend(_missing_scalar(work_item.work_scope, "MISSING_WORK_ITEM_SCOPE"))
+    errors.extend(_missing_list(work_item.required_capabilities, "MISSING_WORK_ITEM_REQUIRED_CAPABILITIES"))
+    errors.extend(_missing_list(work_item.authority_boundary, "MISSING_WORK_ITEM_AUTHORITY_BOUNDARY"))
+    errors.extend(_missing_list(work_item.inherited_no_go_control_ids, "MISSING_WORK_ITEM_NO_GO_CONTROLS"))
+    errors.extend(_missing_list(work_item.output_contract, "MISSING_WORK_ITEM_OUTPUT_CONTRACT"))
+    errors.extend(_missing_list(work_item.evidence_contract, "MISSING_WORK_ITEM_EVIDENCE_CONTRACT"))
+    errors.extend(_missing_scalar(work_item.evidence_expectation_id, "MISSING_WORK_ITEM_EVIDENCE_EXPECTATION_ID"))
+    errors.extend(_missing_scalar(work_item.correlation_root_id, "MISSING_WORK_ITEM_CORRELATION_ROOT"))
+    errors.extend(_missing_scalar(work_item.decomposition_reason, "MISSING_WORK_ITEM_DECOMPOSITION_REASON"))
+    errors.extend(_missing_list(work_item.requirement_ids, "MISSING_WORK_ITEM_REQUIREMENT_IDS"))
+    errors.extend(_validate_traceability(work_item.traceability))
+    errors.extend(_validate_accepted_issue_ids(work_item.source_issue_ids))
+    if work_item.state not in WORK_ITEM_STATES:
+        errors.append("INVALID_WORK_ITEM_STATE")
+    if parent_packet is None:
+        errors.append("MISSING_PARENT_DELIVERY_PACKET")
+        return _result(errors)
+    if work_item.delivery_packet_id and work_item.delivery_packet_id != parent_packet.packet_id:
+        errors.append("WORK_ITEM_PARENT_PACKET_ID_MISMATCH")
+    if work_item.source_publication_id and work_item.source_publication_id != parent_packet.source_publication_id:
+        errors.append("WORK_ITEM_SOURCE_AUTHORITY_NOT_INHERITED")
+    if work_item.correlation_root_id and work_item.correlation_root_id != parent_packet.packet_id:
+        errors.append("WORK_ITEM_CORRELATION_ROOT_NOT_INHERITED")
+    if work_item.evidence_expectation_id and parent_packet.evidence_expectation:
+        if work_item.evidence_expectation_id != parent_packet.evidence_expectation.expectation_id:
+            errors.append("WORK_ITEM_EVIDENCE_EXPECTATION_NOT_INHERITED")
+    missing_no_go = [
+        control_id for control_id in parent_packet.no_go_boundaries if control_id not in work_item.inherited_no_go_control_ids
+    ]
+    if missing_no_go:
+        errors.append("WORK_ITEM_NO_GO_BOUNDARY_NOT_INHERITED")
+    if any(issue_id not in parent_packet.traceability.issue_ids for issue_id in work_item.source_issue_ids):
+        errors.append("WORK_ITEM_SOURCE_ISSUE_NOT_INHERITED")
+    if any(issue_id not in parent_packet.traceability.issue_ids for issue_id in work_item.traceability.issue_ids):
+        errors.append("WORK_ITEM_TRACEABILITY_NOT_INHERITED")
+    return _result(errors)
+
+
+def validate_work_item_decomposition(
+    plan: WorkItemDecompositionPlan,
+    *,
+    parent_packet: DeliveryPacket | None,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    explanations: dict[str, Any] = {"ordering": list(plan.decomposition_order)}
+    errors.extend(_missing_scalar(plan.decomposition_plan_id, "MISSING_DECOMPOSITION_PLAN_ID"))
+    errors.extend(_missing_scalar(plan.delivery_packet_id, "MISSING_DECOMPOSITION_PACKET_ID"))
+    errors.extend(_missing_scalar(plan.decomposed_by, "MISSING_DECOMPOSITION_ACTOR"))
+    errors.extend(_missing_scalar(plan.decomposed_at_utc, "MISSING_DECOMPOSITION_TIMESTAMP"))
+    errors.extend(_missing_list(plan.work_items, "MISSING_DECOMPOSITION_WORK_ITEMS"))
+    errors.extend(_missing_list(plan.decomposition_order, "MISSING_DECOMPOSITION_ORDER"))
+    if parent_packet is None:
+        errors.append("MISSING_PARENT_DELIVERY_PACKET")
+        return _result(errors, explanations=explanations)
+    if plan.delivery_packet_id and plan.delivery_packet_id != parent_packet.packet_id:
+        errors.append("DECOMPOSITION_PACKET_ID_MISMATCH")
+    if parent_packet.status != "ready_for_roster":
+        errors.append("PACKET_NOT_READY_FOR_ROSTER")
+    if plan.decomposition_order:
+        if plan.decomposition_order[0] != "packet_validation":
+            errors.append("PACKET_VALIDATION_MUST_PRECEDE_ROSTER_EVALUATION")
+        if "roster_evaluation" in plan.decomposition_order:
+            if plan.decomposition_order.index("packet_validation") > plan.decomposition_order.index("roster_evaluation"):
+                errors.append("PACKET_VALIDATION_MUST_PRECEDE_ROSTER_EVALUATION")
+    for work_item in plan.work_items:
+        errors.extend(validate_work_item(work_item, parent_packet=parent_packet).errors)
+    return _result(errors, explanations=explanations)
+
+
+def create_dispatch_recommendation(
+    *,
+    work_item: WorkItem,
+    roster_snapshot: RosterSnapshot,
+    eligibility_result: EDCContractValidationResult,
+    decided_by: str,
+    decided_at_utc: str,
+    selected_agent_id: str | None = None,
+    selected_agent_reason: str = "",
+    external_constraint_reason: str = "",
+    external_revisit_condition: str = "",
+    advisory_only: bool = True,
+) -> DispatchRecommendation:
+    eligible_agent_ids = list(eligibility_result.explanations.get("eligible_agent_ids", []))
+    effective_selected_agent_id = selected_agent_id
+    if effective_selected_agent_id is None and eligible_agent_ids and not external_constraint_reason:
+        effective_selected_agent_id = eligible_agent_ids[0]
+    if external_constraint_reason:
+        decision_state = "deferred"
+        blocked_reason = ""
+        deferred_reason = external_constraint_reason
+        effective_selected_agent_id = None
+    elif not eligible_agent_ids and effective_selected_agent_id is None:
+        decision_state = "blocked"
+        blocked_reason = "NO_ELIGIBLE_AGENT"
+        deferred_reason = ""
+    else:
+        decision_state = "dispatchable"
+        blocked_reason = ""
+        deferred_reason = ""
+    if effective_selected_agent_id and not selected_agent_reason:
+        selected_agent_reason = f"{effective_selected_agent_id} is advisory-selected from the eligible roster baseline."
+    return DispatchRecommendation(
+        dispatch_decision_id=f"dispatch-rec::{work_item.work_item_id}::{roster_snapshot.roster_snapshot_id}",
+        work_item_id=work_item.work_item_id,
+        roster_snapshot_id=roster_snapshot.roster_snapshot_id,
+        eligible_agent_ids=eligible_agent_ids,
+        selected_agent_id=effective_selected_agent_id,
+        decision_state=decision_state,
+        eligibility_checks=list(eligibility_result.explanations.get("decisions", [])),
+        blocked_reason=blocked_reason,
+        deferred_reason=deferred_reason,
+        decided_by=decided_by,
+        decided_at_utc=decided_at_utc,
+        roster_snapshot_hash=roster_snapshot.snapshot_hash(),
+        work_item_hash=work_item.work_item_hash(),
+        selected_agent_reason=selected_agent_reason,
+        external_revisit_condition=external_revisit_condition,
+        advisory_only=advisory_only,
+    )
+
+
+def validate_dispatch_recommendation(
+    recommendation: DispatchRecommendation,
+    *,
+    work_item: WorkItem,
+    roster_snapshot: RosterSnapshot,
+    eligibility_result: EDCContractValidationResult,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(recommendation.dispatch_decision_id, "MISSING_DISPATCH_RECOMMENDATION_ID"))
+    errors.extend(_missing_scalar(recommendation.work_item_id, "MISSING_DISPATCH_WORK_ITEM_ID"))
+    errors.extend(_missing_scalar(recommendation.roster_snapshot_id, "MISSING_DISPATCH_ROSTER_SNAPSHOT_ID"))
+    errors.extend(_missing_scalar(recommendation.decided_by, "MISSING_DISPATCH_DECIDER"))
+    errors.extend(_missing_scalar(recommendation.decided_at_utc, "MISSING_DISPATCH_DECIDED_AT"))
+    errors.extend(_missing_scalar(recommendation.roster_snapshot_hash, "MISSING_DISPATCH_ROSTER_SNAPSHOT_HASH"))
+    errors.extend(_missing_scalar(recommendation.work_item_hash, "MISSING_DISPATCH_WORK_ITEM_HASH"))
+    if recommendation.decision_state not in DISPATCH_RECOMMENDATION_STATES:
+        errors.append("INVALID_DISPATCH_RECOMMENDATION_STATE")
+    if recommendation.advisory_only is not True:
+        errors.append("DISPATCH_RECOMMENDATION_MUST_REMAIN_ADVISORY")
+    if recommendation.work_item_id != work_item.work_item_id:
+        errors.append("DISPATCH_WORK_ITEM_ID_MISMATCH")
+    if recommendation.work_item_hash != work_item.work_item_hash():
+        errors.append("DISPATCH_WORK_ITEM_HASH_MISMATCH")
+    if recommendation.roster_snapshot_id != roster_snapshot.roster_snapshot_id:
+        errors.append("DISPATCH_ROSTER_SNAPSHOT_ID_MISMATCH")
+    if recommendation.roster_snapshot_hash != roster_snapshot.snapshot_hash():
+        errors.append("DISPATCH_ROSTER_SNAPSHOT_HASH_MISMATCH")
+    eligible_agent_ids = list(eligibility_result.explanations.get("eligible_agent_ids", []))
+    if recommendation.eligible_agent_ids != eligible_agent_ids:
+        errors.append("DISPATCH_ELIGIBLE_AGENT_LIST_MISMATCH")
+    if recommendation.selected_agent_id:
+        if recommendation.selected_agent_id not in eligible_agent_ids:
+            errors.append("SELECTED_AGENT_REQUIRES_ELIGIBILITY_PROOF")
+        errors.extend(_missing_scalar(recommendation.selected_agent_reason, "MISSING_SELECTED_AGENT_REASON"))
+    if not eligible_agent_ids and recommendation.decision_state not in {"blocked", "deferred"}:
+        errors.append("NO_ELIGIBLE_AGENT_REQUIRES_BLOCKED_OR_DEFERRED_RECOMMENDATION")
+    if recommendation.decision_state == "dispatchable" and not recommendation.selected_agent_id:
+        errors.append("DISPATCHABLE_RECOMMENDATION_REQUIRES_SELECTED_AGENT")
+    if recommendation.decision_state == "blocked":
+        errors.extend(_missing_scalar(recommendation.blocked_reason, "MISSING_BLOCKED_DISPATCH_REASON"))
+        if recommendation.selected_agent_id:
+            errors.append("BLOCKED_RECOMMENDATION_CANNOT_SELECT_AGENT")
+    if recommendation.decision_state == "deferred":
+        errors.extend(_missing_scalar(recommendation.deferred_reason, "MISSING_DEFERRED_DISPATCH_REASON"))
+        errors.extend(_missing_scalar(recommendation.external_revisit_condition, "MISSING_DEFERRED_DISPATCH_REVISIT_CONDITION"))
+        if recommendation.selected_agent_id:
+            errors.append("DEFERRED_RECOMMENDATION_CANNOT_SELECT_AGENT")
+    return _result(errors)
+
+
+def explain_dispatch_recommendation(recommendation: DispatchRecommendation) -> dict[str, Any]:
+    if recommendation.decision_state == "blocked":
+        reason_code = recommendation.blocked_reason or "DISPATCH_RECOMMENDATION_BLOCKED"
+    elif recommendation.decision_state == "deferred":
+        reason_code = recommendation.deferred_reason or "DISPATCH_RECOMMENDATION_DEFERRED"
+    else:
+        reason_code = recommendation.decision_state.upper()
+    return {
+        "reason_code": reason_code,
+        "decision_state": recommendation.decision_state,
+        "selected_agent_id": recommendation.selected_agent_id,
+        "eligible_agent_ids": list(recommendation.eligible_agent_ids),
+        "evidence_refs": [
+            f"work_item_hash:{recommendation.work_item_hash}",
+            f"roster_snapshot_hash:{recommendation.roster_snapshot_hash}",
+        ],
+        "advisory_only": recommendation.advisory_only,
+        "external_revisit_condition": recommendation.external_revisit_condition,
     }
 
 

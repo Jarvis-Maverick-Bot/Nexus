@@ -664,3 +664,274 @@ def test_tc_team_roster_014_human_can_ask_why_no_agent_is_eligible():
     assert "AGENT_PLANNING_VISIBLE_ONLY" in explanation["roster_state_gaps"]
     assert "MISSING_REQUIRED_CAPABILITY" in explanation["capability_gaps"]
     assert explanation["advisory_only"] is True
+
+
+def _l2_trace(**overrides):
+    data = {
+        "issue_ids": ["EDC-ISSUE-04"],
+        "prd_ids": ["PRD-L2-001", "PRD-L2-002", "PRD-L2-003", "PRD-L2-004"],
+        "spec_ids": ["SPEC-L2-001", "SPEC-L2-002", "SPEC-L2-003", "SPEC-L2-004"],
+        "ux_surface_ids": ["UX-L2-DISPATCH", "UX-TEAM-ROSTER", "UX-HITL-DIALOGUE"],
+        "test_case_ids": ["TC-L2-DISPATCH-001"],
+        "future_evidence_ids": ["FUTURE-VERIFY-L2-DISPATCH"],
+    }
+    data.update(overrides)
+    return TraceabilityRef(**data)
+
+
+def _ready_l2_packet(**overrides):
+    data = {
+        "status": "ready_for_roster",
+        "objectives": ["plan one bounded Layer 2 WorkItem"],
+        "exclusions": ["live dispatch assignment", "evidence transport", "gate decision"],
+        "no_go_boundaries": ["no_dispatch_runtime", "no_gate_decision"],
+        "traceability": _l2_trace(test_case_ids=["TC-L2-DISPATCH-001"]),
+    }
+    data.update(overrides)
+    return _packet(**data)
+
+
+def _work_item(**overrides):
+    data = {
+        "work_item_id": "packet-001/work-001",
+        "delivery_packet_id": "packet-001",
+        "source_publication_id": "pub-001",
+        "work_title": "Plan bounded WorkItem recommendation",
+        "work_scope": "contract-only Layer 2 planning record",
+        "required_capabilities": ["contracts"],
+        "authority_boundary": ["slice003"],
+        "inherited_no_go_control_ids": ["no_dispatch_runtime", "no_gate_decision"],
+        "output_contract": ["WorkItem contract record", "DispatchRecommendation contract record"],
+        "evidence_contract": ["focused pytest output", "source diff", "traceability artifact"],
+        "evidence_expectation_id": "evidence-001",
+        "state": "proposed",
+        "correlation_root_id": "packet-001",
+        "traceability": _l2_trace(),
+        "source_issue_ids": ["EDC-ISSUE-04"],
+        "decomposition_reason": "Split the DeliveryPacket into one bounded Layer 2 planning responsibility.",
+        "requirement_ids": ["PRD-L2-001", "SPEC-L2-001"],
+    }
+    data.update(overrides)
+    return edc_contracts.WorkItem(**data)
+
+
+def _decomposition_plan(*work_items, **overrides):
+    data = {
+        "decomposition_plan_id": "decomp-001",
+        "delivery_packet_id": "packet-001",
+        "work_items": list(work_items) or [_work_item()],
+        "decomposed_by": "layer2-planner",
+        "decomposed_at_utc": "2026-06-21T01:00:00Z",
+        "decomposition_order": [
+            "packet_validation",
+            "work_item_boundary_validation",
+            "roster_evaluation",
+            "advisory_recommendation",
+        ],
+    }
+    data.update(overrides)
+    return edc_contracts.WorkItemDecompositionPlan(**data)
+
+
+def _l2_roster_snapshot(**overrides):
+    data = {
+        "delivery_packet_id": "packet-001",
+        "agent_registrations": [
+            _roster_member(capability_tags=["contracts", "python"], authority_boundary=["slice003", "team_roster"])
+        ],
+    }
+    data.update(overrides)
+    return _roster_snapshot(**data)
+
+
+def _l2_eligibility_requirement(**overrides):
+    data = {
+        "required_capability_tags": ["contracts"],
+        "authority_boundary": ["slice003"],
+        "no_go_boundaries": ["no_dispatch_runtime"],
+        "traceability": _l2_trace(
+            prd_ids=["PRD-TEAM-001", "PRD-TEAM-004", "PRD-L2-002"],
+            spec_ids=["SPEC-TEAM-001", "SPEC-TEAM-004", "SPEC-L2-003"],
+            ux_surface_ids=["UX-L2-DISPATCH", "UX-TEAM-ROSTER"],
+            test_case_ids=["TC-L2-DISPATCH-006"],
+        ),
+    }
+    data.update(overrides)
+    return _eligibility_requirement(**data)
+
+
+def _eligible_result(snapshot=None):
+    return edc_contracts.evaluate_roster_eligibility(snapshot or _l2_roster_snapshot(), _l2_eligibility_requirement())
+
+
+def _dispatch_recommendation(**overrides):
+    work_item = overrides.pop("work_item", _work_item())
+    snapshot = overrides.pop("roster_snapshot", _l2_roster_snapshot())
+    eligibility_result = overrides.pop("eligibility_result", _eligible_result(snapshot))
+    data = {
+        "work_item": work_item,
+        "roster_snapshot": snapshot,
+        "eligibility_result": eligibility_result,
+        "selected_agent_id": "agent-thunder",
+        "selected_agent_reason": "agent-thunder is the only eligible registered_active member for the WorkItem.",
+        "decided_by": "layer2-planner",
+        "decided_at_utc": "2026-06-21T01:01:00Z",
+    }
+    data.update(overrides)
+    return edc_contracts.create_dispatch_recommendation(**data)
+
+
+def test_tc_l2_dispatch_001_workitem_parent_packet_id_is_mandatory():
+    result = edc_contracts.validate_work_item(_work_item(delivery_packet_id=""), parent_packet=_ready_l2_packet())
+
+    assert result.ok is False
+    assert "MISSING_WORK_ITEM_PARENT_PACKET_ID" in result.errors
+
+
+def test_tc_l2_dispatch_002_workitem_carries_inherited_issue_mapping():
+    packet = _ready_l2_packet()
+    work_item = _work_item(source_issue_ids=["EDC-ISSUE-04"], traceability=_l2_trace(issue_ids=["EDC-ISSUE-04"]))
+
+    result = edc_contracts.validate_work_item(work_item, parent_packet=packet)
+
+    assert result.ok is True
+    assert work_item.source_issue_ids == ["EDC-ISSUE-04"]
+
+
+def test_tc_l2_dispatch_003_workitem_carries_inherited_evidence_expectation():
+    packet = _ready_l2_packet()
+    work_item = _work_item(evidence_expectation_id=packet.evidence_expectation.expectation_id)
+
+    result = edc_contracts.validate_work_item(work_item, parent_packet=packet)
+
+    assert result.ok is True
+    assert work_item.evidence_contract == ["focused pytest output", "source diff", "traceability artifact"]
+
+
+def test_tc_l2_dispatch_004_decomposition_cannot_widen_packet_boundary():
+    packet = _ready_l2_packet()
+    widened = _work_item(
+        inherited_no_go_control_ids=["no_dispatch_runtime"],
+        source_issue_ids=["EDC-ISSUE-04", "EDC-ISSUE-05"],
+    )
+
+    result = edc_contracts.validate_work_item_decomposition(_decomposition_plan(widened), parent_packet=packet)
+
+    assert result.ok is False
+    assert "WORK_ITEM_NO_GO_BOUNDARY_NOT_INHERITED" in result.errors
+    assert "WORK_ITEM_SOURCE_ISSUE_NOT_INHERITED" in result.errors
+
+
+def test_tc_l2_dispatch_005_packet_validation_precedes_roster_evaluation():
+    not_ready_packet = _ready_l2_packet(status="bounded")
+
+    blocked = edc_contracts.validate_work_item_decomposition(_decomposition_plan(), parent_packet=not_ready_packet)
+    ready = edc_contracts.validate_work_item_decomposition(_decomposition_plan(), parent_packet=_ready_l2_packet())
+
+    assert blocked.ok is False
+    assert "PACKET_NOT_READY_FOR_ROSTER" in blocked.errors
+    assert ready.ok is True
+    assert ready.explanations["ordering"][0] == "packet_validation"
+
+
+def test_tc_l2_dispatch_006_roster_eligibility_precedes_selected_agent():
+    snapshot = _l2_roster_snapshot(agent_registrations=[_roster_member(registration_state="registered_passive")])
+    eligibility_result = edc_contracts.evaluate_roster_eligibility(snapshot, _l2_eligibility_requirement())
+
+    recommendation = _dispatch_recommendation(roster_snapshot=snapshot, eligibility_result=eligibility_result)
+    result = edc_contracts.validate_dispatch_recommendation(
+        recommendation,
+        work_item=_work_item(),
+        roster_snapshot=snapshot,
+        eligibility_result=eligibility_result,
+    )
+
+    assert result.ok is False
+    assert "SELECTED_AGENT_REQUIRES_ELIGIBILITY_PROOF" in result.errors
+
+
+def test_tc_l2_dispatch_007_selected_agent_records_snapshot_and_reason():
+    snapshot = _l2_roster_snapshot()
+    recommendation = _dispatch_recommendation(roster_snapshot=snapshot)
+
+    result = edc_contracts.validate_dispatch_recommendation(
+        recommendation,
+        work_item=_work_item(),
+        roster_snapshot=snapshot,
+        eligibility_result=_eligible_result(snapshot),
+    )
+
+    assert result.ok is True
+    assert recommendation.roster_snapshot_id == snapshot.roster_snapshot_id
+    assert recommendation.selected_agent_reason
+
+
+def test_tc_l2_dispatch_008_no_eligible_agent_creates_blocked_dispatch():
+    snapshot = _l2_roster_snapshot(agent_registrations=[_roster_member(registration_state="registered_passive")])
+    eligibility_result = edc_contracts.evaluate_roster_eligibility(snapshot, _l2_eligibility_requirement())
+
+    recommendation = edc_contracts.create_dispatch_recommendation(
+        work_item=_work_item(),
+        roster_snapshot=snapshot,
+        eligibility_result=eligibility_result,
+        decided_by="layer2-planner",
+        decided_at_utc="2026-06-21T01:02:00Z",
+    )
+    explanation = edc_contracts.explain_dispatch_recommendation(recommendation)
+
+    assert recommendation.decision_state == "blocked"
+    assert recommendation.selected_agent_id is None
+    assert "NO_ELIGIBLE_AGENT" in recommendation.blocked_reason
+    assert explanation["reason_code"] == "NO_ELIGIBLE_AGENT"
+
+
+def test_tc_l2_dispatch_009_temporary_external_constraint_creates_deferred_dispatch():
+    recommendation = edc_contracts.create_dispatch_recommendation(
+        work_item=_work_item(),
+        roster_snapshot=_l2_roster_snapshot(),
+        eligibility_result=_eligible_result(),
+        decided_by="layer2-planner",
+        decided_at_utc="2026-06-21T01:03:00Z",
+        external_constraint_reason="TEMPORARY_EXTERNAL_CONSTRAINT",
+        external_revisit_condition="operator clears the dependency",
+    )
+
+    assert recommendation.decision_state == "deferred"
+    assert recommendation.deferred_reason == "TEMPORARY_EXTERNAL_CONSTRAINT"
+    assert recommendation.external_revisit_condition == "operator clears the dependency"
+
+
+def test_tc_l2_dispatch_010_agent_recommendation_does_not_become_dispatch_authority():
+    recommendation = _dispatch_recommendation(advisory_only=False)
+
+    result = edc_contracts.validate_dispatch_recommendation(
+        recommendation,
+        work_item=_work_item(),
+        roster_snapshot=_l2_roster_snapshot(),
+        eligibility_result=_eligible_result(),
+    )
+
+    assert result.ok is False
+    assert "DISPATCH_RECOMMENDATION_MUST_REMAIN_ADVISORY" in result.errors
+
+
+def test_tc_l2_dispatch_011_dispatch_evidence_links_to_workitem_hash():
+    work_item = _work_item()
+    recommendation = _dispatch_recommendation(work_item=work_item)
+
+    result = edc_contracts.validate_dispatch_recommendation(
+        recommendation,
+        work_item=work_item,
+        roster_snapshot=_l2_roster_snapshot(),
+        eligibility_result=_eligible_result(),
+    )
+
+    assert result.ok is True
+    assert recommendation.work_item_hash == work_item.work_item_hash()
+
+
+def test_tc_l2_dispatch_012_dispatch_cannot_start_from_packetless_request():
+    result = edc_contracts.validate_work_item(_work_item(), parent_packet=None)
+
+    assert result.ok is False
+    assert "MISSING_PARENT_DELIVERY_PACKET" in result.errors
