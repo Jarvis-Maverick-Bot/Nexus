@@ -935,3 +935,232 @@ def test_tc_l2_dispatch_012_dispatch_cannot_start_from_packetless_request():
 
     assert result.ok is False
     assert "MISSING_PARENT_DELIVERY_PACKET" in result.errors
+
+
+def _l3_trace(**overrides):
+    data = {
+        "issue_ids": ["EDC-ISSUE-05"],
+        "prd_ids": ["PRD-L3-001", "PRD-L3-002", "PRD-L3-003", "PRD-GATE-001"],
+        "spec_ids": ["SPEC-L3-001", "SPEC-L3-002", "SPEC-L3-003", "SPEC-GATE-001"],
+        "ux_surface_ids": ["UX-L3-EVIDENCE", "UX-GATE-RECEIPT", "UX-HITL-DIALOGUE", "UX-TRACEABILITY"],
+        "test_case_ids": ["TC-L3-EVIDENCE-001"],
+        "future_evidence_ids": ["FUTURE-VERIFY-L3-EVIDENCE"],
+    }
+    data.update(overrides)
+    return TraceabilityRef(**data)
+
+
+def _evidence_ref(**overrides):
+    data = {
+        "evidence_ref_id": "evidence-ref-001",
+        "artifact_uri": "evidence://packet-001/work-001/pytest-output",
+        "content_sha256": VALID_HASH,
+        "producer": "agent-thunder",
+        "produced_at_utc": "2026-06-21T02:00:00Z",
+        "source_work_item_id": "packet-001/work-001",
+    }
+    data.update(overrides)
+    return edc_contracts.EvidenceReference(**data)
+
+
+def _evidence_envelope(**overrides):
+    data = {
+        "envelope_id": "envelope-001",
+        "correlation_root_id": "packet-001",
+        "delivery_packet_id": "packet-001",
+        "work_item_id": "packet-001/work-001",
+        "dispatch_decision_id": "dispatch-rec::packet-001/work-001::roster-snapshot-001",
+        "agent_id": "agent-thunder",
+        "event_type": "evidence_available",
+        "sequence_number": 1,
+        "idempotency_key": "idem-packet-001-work-001-seq-1",
+        "evidence_refs": [_evidence_ref()],
+        "transport_status": "created",
+        "business_status": "in_progress",
+        "created_at_utc": "2026-06-21T02:01:00Z",
+        "traceability": _l3_trace(),
+    }
+    data.update(overrides)
+    return edc_contracts.EvidenceEnvelope(**data)
+
+
+def _transport_state(**overrides):
+    data = {
+        "transport_state_id": "transport-state-001",
+        "envelope_id": "envelope-001",
+        "work_item_id": "packet-001/work-001",
+        "dispatch_decision_id": "dispatch-rec::packet-001/work-001::roster-snapshot-001",
+        "correlation_root_id": "packet-001",
+        "idempotency_key": "idem-packet-001-work-001-seq-1",
+        "sequence_number": 1,
+        "status": "created",
+        "event_type": "evidence_available",
+        "attempt_number": 1,
+        "observed_at_utc": "2026-06-21T02:02:00Z",
+    }
+    data.update(overrides)
+    return edc_contracts.EvidenceTransportState(**data)
+
+
+def test_tc_l3_evidence_001_evidence_envelope_requires_envelope_id():
+    result = edc_contracts.validate_evidence_envelope(
+        _evidence_envelope(envelope_id=""),
+        work_item=_work_item(),
+        dispatch_recommendation=_dispatch_recommendation(),
+        parent_packet=_ready_l2_packet(),
+    )
+
+    assert result.ok is False
+    assert "MISSING_EVIDENCE_ENVELOPE_ID" in result.errors
+
+
+def test_tc_l3_evidence_002_evidence_envelope_requires_parent_workitem_id():
+    result = edc_contracts.validate_evidence_envelope(
+        _evidence_envelope(work_item_id=""),
+        work_item=_work_item(),
+        dispatch_recommendation=_dispatch_recommendation(),
+        parent_packet=_ready_l2_packet(),
+    )
+
+    assert result.ok is False
+    assert "MISSING_EVIDENCE_PARENT_WORK_ITEM_ID" in result.errors
+
+
+def test_tc_l3_evidence_003_correlation_id_binds_transport_state_to_workitem():
+    work_item = _work_item()
+    envelope = _evidence_envelope(correlation_root_id=work_item.correlation_root_id)
+    state = _transport_state(correlation_root_id=envelope.correlation_root_id)
+
+    result = edc_contracts.validate_evidence_transport_state(
+        state,
+        envelope=envelope,
+        work_item=work_item,
+        dispatch_recommendation=_dispatch_recommendation(work_item=work_item),
+    )
+
+    assert result.ok is True
+    assert result.explanations["correlation_root_id"] == work_item.correlation_root_id
+    assert result.explanations["work_item_id"] == work_item.work_item_id
+
+
+def test_tc_l3_evidence_004_idempotency_key_suppresses_duplicate_envelope():
+    original = _evidence_envelope(envelope_id="envelope-original")
+    duplicate = _evidence_envelope(envelope_id="envelope-duplicate")
+
+    result = edc_contracts.evaluate_evidence_idempotency(duplicate, [original])
+
+    assert result.ok is True
+    assert result.explanations["action"] == "duplicate_ignored"
+    assert result.explanations["original_envelope_id"] == "envelope-original"
+    assert "DUPLICATE_EVIDENCE_ENVELOPE_IGNORED" in result.warnings
+
+
+def test_tc_l3_evidence_005_ack_state_is_not_delivery_truth():
+    result = edc_contracts.validate_ack_not_delivery_truth(
+        _transport_state(status="acknowledged", event_type="dispatch_received")
+    )
+
+    assert result.ok is True
+    assert result.explanations["not_delivery_truth"] is True
+    assert result.explanations["receipt_available"] is False
+
+
+def test_tc_l3_evidence_006_timeout_schedules_retry_without_package_completion():
+    envelope = _evidence_envelope(event_type="transport_timeout", transport_status="timed_out")
+    timed_out = _transport_state(
+        status="timed_out",
+        event_type="transport_timeout",
+        timeout_class="soft_timeout",
+        evidence_package_complete=False,
+    )
+    retrying = _transport_state(
+        transport_state_id="transport-state-retry",
+        status="retrying",
+        event_type="retry_scheduled",
+        attempt_number=2,
+        prior_state="timed_out",
+        prior_envelope_id="envelope-001",
+        retry_after_utc="2026-06-21T02:05:00Z",
+        evidence_package_complete=False,
+    )
+
+    result = edc_contracts.validate_evidence_transport_transition(timed_out, retrying, envelope=envelope)
+
+    assert result.ok is True
+    assert result.explanations["retry_scheduled"] is True
+    assert result.explanations["evidence_package_complete"] is False
+
+
+def test_tc_l3_evidence_007_transport_failure_is_distinct_from_gate_blocker():
+    result = edc_contracts.validate_transport_non_authority(
+        _transport_state(status="failed", event_type="transport_failed", failure_reason="TRANSPORT_UNAVAILABLE")
+    )
+
+    assert result.ok is True
+    assert result.explanations["transport_failure_is_gate_blocker"] is False
+    assert result.explanations["gate_outcome_created"] is False
+
+
+def test_tc_l3_evidence_008_replay_keeps_prior_evidence_lineage():
+    prior = _evidence_envelope(envelope_id="envelope-prior")
+    replay = _evidence_envelope(
+        envelope_id="envelope-replay",
+        replay_of_envelope_id="envelope-prior",
+        attempt_number=2,
+    )
+
+    result = edc_contracts.validate_evidence_replay_lineage(replay, prior_envelope=prior)
+
+    assert result.ok is True
+    assert result.explanations["replay_of_envelope_id"] == "envelope-prior"
+
+
+def test_tc_l3_evidence_009_supersession_marks_current_evidence_without_deleting_prior():
+    superseded = _evidence_envelope(
+        envelope_id="envelope-old",
+        transport_status="superseded",
+        superseded_by_envelope_id="envelope-current",
+    )
+    current = _evidence_envelope(envelope_id="envelope-current", supersedes_envelope_id="envelope-old")
+
+    result = edc_contracts.validate_evidence_supersession(superseded, current)
+
+    assert result.ok is True
+    assert result.explanations["visible_envelope_ids"] == ["envelope-old", "envelope-current"]
+
+
+def test_tc_l3_evidence_010_evidence_available_updates_package_only():
+    result = edc_contracts.validate_transport_non_authority(
+        _transport_state(
+            status="evidence_available",
+            event_type="evidence_available",
+            evidence_package_complete=True,
+            gate_state="pending",
+            receipt_state="pending_gate",
+        )
+    )
+
+    assert result.ok is True
+    assert result.explanations["evidence_package_complete"] is True
+    assert result.explanations["gate_state"] == "pending"
+    assert result.explanations["receipt_available"] is False
+
+
+def test_tc_l3_evidence_011_missing_content_hash_blocks_evidence_package_inclusion():
+    result = edc_contracts.validate_evidence_reference(_evidence_ref(content_sha256=""))
+
+    assert result.ok is False
+    assert "MISSING_EVIDENCE_CONTENT_HASH" in result.errors
+    assert result.explanations["inclusion_state"] == "excluded"
+    assert result.explanations["exclusion_reason"] == "missing_content_hash"
+
+
+def test_tc_l3_evidence_012_content_hash_mismatch_blocks_evidence_package_inclusion():
+    result = edc_contracts.validate_evidence_reference(
+        _evidence_ref(content_sha256="a" * 64, actual_content_sha256="b" * 64)
+    )
+
+    assert result.ok is False
+    assert "EVIDENCE_CONTENT_HASH_MISMATCH" in result.errors
+    assert result.explanations["inclusion_state"] == "excluded"
+    assert result.explanations["evidence_package_complete"] is False

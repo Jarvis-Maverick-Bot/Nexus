@@ -1,10 +1,11 @@
-"""Engineering Delivery Core Slice 001/002/003 contract records and validators.
+"""Engineering Delivery Core Slice 001/002/003/004 contract records and validators.
 
 This module is intentionally contract-only. It defines deterministic records and
 fail-closed validators for Layer 1 publication, DeliveryPacket intake, and
 delivery-team roster eligibility, plus Layer 2 WorkItem planning and advisory
-dispatch recommendations. It does not execute work, transport evidence, decide
-gates, issue receipts, or start any live process.
+dispatch recommendations, plus Layer 3 evidence envelope transport-state
+contracts. It does not execute work, transport evidence, decide gates, issue
+receipts, or start any live process.
 """
 
 from __future__ import annotations
@@ -52,6 +53,39 @@ ROSTER_STATE_TRANSITIONS = {
 }
 WORK_ITEM_STATES = {"proposed", "ready_for_dispatch", "dispatch_blocked", "dispatch_deferred", "cancelled"}
 DISPATCH_RECOMMENDATION_STATES = {"dispatchable", "blocked", "deferred", "cancelled"}
+EVIDENCE_EVENT_TYPES = {
+    "dispatch_received",
+    "work_started",
+    "progress_checkpoint",
+    "evidence_available",
+    "business_blocked",
+    "business_deferred",
+    "retry_scheduled",
+    "transport_timeout",
+    "transport_failed",
+    "work_returned",
+}
+EVIDENCE_TRANSPORT_STATUSES = {
+    "created",
+    "acknowledged",
+    "retrying",
+    "timed_out",
+    "failed",
+    "superseded",
+    "cancelled",
+    "evidence_available",
+}
+EVIDENCE_BUSINESS_STATUSES = {"not_started", "in_progress", "blocked", "deferred", "returned"}
+EVIDENCE_TRANSPORT_TRANSITIONS = {
+    "created": {"acknowledged", "timed_out", "failed", "cancelled"},
+    "acknowledged": {"evidence_available", "retrying", "timed_out", "failed", "superseded", "cancelled"},
+    "retrying": {"acknowledged", "timed_out", "failed", "cancelled"},
+    "timed_out": {"retrying", "failed", "cancelled", "superseded"},
+    "failed": {"retrying", "superseded", "cancelled"},
+    "evidence_available": {"superseded", "cancelled"},
+    "superseded": set(),
+    "cancelled": set(),
+}
 LAYER1_AUTHORITY_PREFIXES = ("nova", "alex", "layer1", "layer-1", "l1")
 SHA256_RE = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
 
@@ -338,6 +372,91 @@ class DispatchRecommendation:
     selected_agent_reason: str = ""
     external_revisit_condition: str = ""
     advisory_only: bool = True
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class EvidenceReference:
+    evidence_ref_id: str
+    artifact_uri: str
+    content_sha256: str
+    producer: str
+    produced_at_utc: str
+    source_work_item_id: str
+    actual_content_sha256: str = ""
+    inclusion_state: str = "candidate"
+    exclusion_reason: str = ""
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class EvidenceEnvelope:
+    envelope_id: str
+    correlation_root_id: str
+    delivery_packet_id: str
+    work_item_id: str
+    dispatch_decision_id: str
+    agent_id: str
+    event_type: str
+    sequence_number: int
+    idempotency_key: str
+    evidence_refs: list[EvidenceReference]
+    transport_status: str
+    business_status: str
+    created_at_utc: str
+    traceability: TraceabilityRef | None
+    attempt_number: int = 1
+    evidence_package_complete: bool = False
+    replay_of_envelope_id: str = ""
+    supersedes_envelope_id: str = ""
+    superseded_by_envelope_id: str = ""
+    creates_gate_decision: bool = False
+    creates_delivery_receipt: bool = False
+    not_delivery_truth: bool = True
+    not_gate_decision: bool = True
+    not_delivery_receipt: bool = True
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    def envelope_hash(self) -> str:
+        return stable_contract_hash(self.to_dict())
+
+
+@dataclass
+class EvidenceTransportState:
+    transport_state_id: str
+    envelope_id: str
+    work_item_id: str
+    dispatch_decision_id: str
+    correlation_root_id: str
+    idempotency_key: str
+    sequence_number: int
+    status: str
+    event_type: str
+    attempt_number: int
+    observed_at_utc: str
+    prior_state: str = ""
+    prior_envelope_id: str = ""
+    timeout_class: str = ""
+    failure_reason: str = ""
+    retry_after_utc: str = ""
+    evidence_package_complete: bool = False
+    gate_state: str = "pending"
+    receipt_state: str = "pending_gate"
+    gate_decision_created: bool = False
+    delivery_receipt_created: bool = False
+    transport_failure_is_gate_blocker: bool = False
+    not_delivery_truth: bool = True
+    not_gate_decision: bool = True
+    not_delivery_receipt: bool = True
     not_business_completion: bool = True
 
     def to_dict(self) -> dict[str, Any]:
@@ -878,6 +997,338 @@ def explain_dispatch_recommendation(recommendation: DispatchRecommendation) -> d
     }
 
 
+def validate_evidence_reference(
+    reference: EvidenceReference,
+    *,
+    expected_content_sha256: str = "",
+    source_work_item_id: str = "",
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(reference.evidence_ref_id, "MISSING_EVIDENCE_REF_ID"))
+    errors.extend(_missing_scalar(reference.artifact_uri, "MISSING_EVIDENCE_ARTIFACT_URI"))
+    errors.extend(_missing_scalar(reference.producer, "MISSING_EVIDENCE_PRODUCER"))
+    errors.extend(_missing_scalar(reference.produced_at_utc, "MISSING_EVIDENCE_PRODUCED_AT"))
+    errors.extend(_missing_scalar(reference.source_work_item_id, "MISSING_EVIDENCE_SOURCE_WORK_ITEM_ID"))
+    if not reference.content_sha256:
+        errors.append("MISSING_EVIDENCE_CONTENT_HASH")
+    elif not SHA256_RE.match(reference.content_sha256):
+        errors.append("INVALID_EVIDENCE_CONTENT_HASH")
+
+    observed_hash = expected_content_sha256 or reference.actual_content_sha256
+    if reference.content_sha256 and observed_hash:
+        if not SHA256_RE.match(observed_hash):
+            errors.append("INVALID_OBSERVED_EVIDENCE_CONTENT_HASH")
+        elif _normal_sha256(reference.content_sha256) != _normal_sha256(observed_hash):
+            errors.append("EVIDENCE_CONTENT_HASH_MISMATCH")
+
+    if source_work_item_id and reference.source_work_item_id and reference.source_work_item_id != source_work_item_id:
+        errors.append("EVIDENCE_SOURCE_WORK_ITEM_MISMATCH")
+
+    exclusion_reason = ""
+    if "MISSING_EVIDENCE_CONTENT_HASH" in errors:
+        exclusion_reason = "missing_content_hash"
+    elif "EVIDENCE_CONTENT_HASH_MISMATCH" in errors:
+        exclusion_reason = "content_hash_mismatch"
+    elif errors:
+        exclusion_reason = "invalid_evidence_reference"
+    return _result(
+        errors,
+        explanations={
+            "inclusion_state": "excluded" if errors else "included",
+            "exclusion_reason": exclusion_reason,
+            "evidence_package_complete": not errors,
+            "source_work_item_id": reference.source_work_item_id,
+        },
+    )
+
+
+def validate_evidence_envelope(
+    envelope: EvidenceEnvelope,
+    *,
+    work_item: WorkItem | None,
+    dispatch_recommendation: DispatchRecommendation | None,
+    parent_packet: DeliveryPacket | None,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(envelope.envelope_id, "MISSING_EVIDENCE_ENVELOPE_ID"))
+    errors.extend(_missing_scalar(envelope.correlation_root_id, "MISSING_EVIDENCE_CORRELATION_ROOT_ID"))
+    errors.extend(_missing_scalar(envelope.delivery_packet_id, "MISSING_EVIDENCE_PARENT_PACKET_ID"))
+    errors.extend(_missing_scalar(envelope.work_item_id, "MISSING_EVIDENCE_PARENT_WORK_ITEM_ID"))
+    errors.extend(_missing_scalar(envelope.dispatch_decision_id, "MISSING_EVIDENCE_DISPATCH_RECOMMENDATION_ID"))
+    errors.extend(_missing_scalar(envelope.agent_id, "MISSING_EVIDENCE_AGENT_ID"))
+    errors.extend(_missing_scalar(envelope.idempotency_key, "MISSING_EVIDENCE_IDEMPOTENCY_KEY"))
+    errors.extend(_missing_scalar(envelope.created_at_utc, "MISSING_EVIDENCE_CREATED_AT"))
+    errors.extend(_missing_list(envelope.evidence_refs, "MISSING_EVIDENCE_REFS"))
+    if envelope.event_type not in EVIDENCE_EVENT_TYPES:
+        errors.append("INVALID_EVIDENCE_EVENT_TYPE")
+    if envelope.transport_status not in EVIDENCE_TRANSPORT_STATUSES:
+        errors.append("INVALID_EVIDENCE_TRANSPORT_STATUS")
+    if envelope.business_status not in EVIDENCE_BUSINESS_STATUSES:
+        errors.append("INVALID_EVIDENCE_BUSINESS_STATUS")
+    if envelope.sequence_number < 1:
+        errors.append("INVALID_EVIDENCE_SEQUENCE_NUMBER")
+    if envelope.attempt_number < 1:
+        errors.append("INVALID_EVIDENCE_ATTEMPT_NUMBER")
+
+    if parent_packet is None:
+        errors.append("MISSING_PARENT_DELIVERY_PACKET")
+    elif envelope.delivery_packet_id and envelope.delivery_packet_id != parent_packet.packet_id:
+        errors.append("EVIDENCE_PARENT_PACKET_ID_MISMATCH")
+
+    if work_item is None:
+        errors.append("MISSING_PARENT_WORK_ITEM")
+    else:
+        if envelope.work_item_id and envelope.work_item_id != work_item.work_item_id:
+            errors.append("EVIDENCE_WORK_ITEM_ID_MISMATCH")
+        if envelope.delivery_packet_id and envelope.delivery_packet_id != work_item.delivery_packet_id:
+            errors.append("EVIDENCE_WORK_ITEM_PACKET_ID_MISMATCH")
+        if envelope.correlation_root_id and envelope.correlation_root_id != work_item.correlation_root_id:
+            errors.append("EVIDENCE_CORRELATION_ROOT_MISMATCH")
+
+    if dispatch_recommendation is None:
+        errors.append("MISSING_DISPATCH_RECOMMENDATION")
+    else:
+        if envelope.dispatch_decision_id and envelope.dispatch_decision_id != dispatch_recommendation.dispatch_decision_id:
+            errors.append("EVIDENCE_DISPATCH_RECOMMENDATION_ID_MISMATCH")
+        if envelope.work_item_id and envelope.work_item_id != dispatch_recommendation.work_item_id:
+            errors.append("EVIDENCE_DISPATCH_WORK_ITEM_ID_MISMATCH")
+        if dispatch_recommendation.selected_agent_id and envelope.agent_id != dispatch_recommendation.selected_agent_id:
+            errors.append("EVIDENCE_AGENT_ID_MISMATCH")
+
+    if envelope.traceability is None:
+        errors.append("MISSING_EVIDENCE_TRACEABILITY")
+    else:
+        errors.extend(_validate_traceability(envelope.traceability))
+        if "EDC-ISSUE-05" not in envelope.traceability.issue_ids:
+            errors.append("EVIDENCE_TRACEABILITY_MISSING_L3_ISSUE")
+
+    for reference in envelope.evidence_refs:
+        errors.extend(validate_evidence_reference(reference, source_work_item_id=envelope.work_item_id).errors)
+
+    errors.extend(_validate_l3_non_authority(envelope))
+    if envelope.transport_status == "acknowledged" and envelope.evidence_package_complete:
+        errors.append("ACKNOWLEDGEMENT_IS_NOT_DELIVERY_TRUTH")
+
+    return _result(errors, explanations=_envelope_explanation(envelope, work_item, dispatch_recommendation))
+
+
+def validate_evidence_transport_state(
+    state: EvidenceTransportState,
+    *,
+    envelope: EvidenceEnvelope | None,
+    work_item: WorkItem | None,
+    dispatch_recommendation: DispatchRecommendation | None,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(state.transport_state_id, "MISSING_EVIDENCE_TRANSPORT_STATE_ID"))
+    errors.extend(_missing_scalar(state.envelope_id, "MISSING_EVIDENCE_TRANSPORT_ENVELOPE_ID"))
+    errors.extend(_missing_scalar(state.work_item_id, "MISSING_EVIDENCE_TRANSPORT_WORK_ITEM_ID"))
+    errors.extend(_missing_scalar(state.dispatch_decision_id, "MISSING_EVIDENCE_TRANSPORT_DISPATCH_ID"))
+    errors.extend(_missing_scalar(state.correlation_root_id, "MISSING_EVIDENCE_TRANSPORT_CORRELATION_ROOT_ID"))
+    errors.extend(_missing_scalar(state.idempotency_key, "MISSING_EVIDENCE_TRANSPORT_IDEMPOTENCY_KEY"))
+    errors.extend(_missing_scalar(state.observed_at_utc, "MISSING_EVIDENCE_TRANSPORT_OBSERVED_AT"))
+    if state.status not in EVIDENCE_TRANSPORT_STATUSES:
+        errors.append("INVALID_EVIDENCE_TRANSPORT_STATUS")
+    if state.event_type not in EVIDENCE_EVENT_TYPES:
+        errors.append("INVALID_EVIDENCE_TRANSPORT_EVENT_TYPE")
+    if state.sequence_number < 1:
+        errors.append("INVALID_EVIDENCE_TRANSPORT_SEQUENCE_NUMBER")
+    if state.attempt_number < 1:
+        errors.append("INVALID_EVIDENCE_TRANSPORT_ATTEMPT_NUMBER")
+
+    if envelope is None:
+        errors.append("MISSING_EVIDENCE_ENVELOPE")
+    else:
+        if state.envelope_id and state.envelope_id != envelope.envelope_id:
+            errors.append("EVIDENCE_TRANSPORT_ENVELOPE_ID_MISMATCH")
+        if state.work_item_id and state.work_item_id != envelope.work_item_id:
+            errors.append("EVIDENCE_TRANSPORT_WORK_ITEM_ID_MISMATCH")
+        if state.dispatch_decision_id and state.dispatch_decision_id != envelope.dispatch_decision_id:
+            errors.append("EVIDENCE_TRANSPORT_DISPATCH_ID_MISMATCH")
+        if state.correlation_root_id and state.correlation_root_id != envelope.correlation_root_id:
+            errors.append("EVIDENCE_TRANSPORT_CORRELATION_ROOT_MISMATCH")
+        if state.idempotency_key and state.idempotency_key != envelope.idempotency_key:
+            errors.append("EVIDENCE_TRANSPORT_IDEMPOTENCY_KEY_MISMATCH")
+        if state.sequence_number != envelope.sequence_number:
+            errors.append("EVIDENCE_TRANSPORT_SEQUENCE_NUMBER_MISMATCH")
+
+    if work_item is None:
+        errors.append("MISSING_PARENT_WORK_ITEM")
+    elif state.work_item_id and state.work_item_id != work_item.work_item_id:
+        errors.append("EVIDENCE_TRANSPORT_PARENT_WORK_ITEM_MISMATCH")
+
+    if dispatch_recommendation is None:
+        errors.append("MISSING_DISPATCH_RECOMMENDATION")
+    elif state.dispatch_decision_id and state.dispatch_decision_id != dispatch_recommendation.dispatch_decision_id:
+        errors.append("EVIDENCE_TRANSPORT_DISPATCH_RECOMMENDATION_MISMATCH")
+
+    if state.status == "timed_out":
+        errors.extend(_missing_scalar(state.timeout_class, "MISSING_EVIDENCE_TIMEOUT_CLASS"))
+    if state.status == "failed":
+        errors.extend(_missing_scalar(state.failure_reason, "MISSING_EVIDENCE_TRANSPORT_FAILURE_REASON"))
+
+    errors.extend(_validate_l3_non_authority(state))
+    if state.status == "acknowledged" and state.evidence_package_complete:
+        errors.append("ACKNOWLEDGEMENT_IS_NOT_DELIVERY_TRUTH")
+
+    return _result(errors, explanations=_transport_explanation(state))
+
+
+def validate_evidence_transport_transition(
+    previous_state: EvidenceTransportState,
+    next_state: EvidenceTransportState,
+    *,
+    envelope: EvidenceEnvelope,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(
+        _validate_transition(
+            current_status=previous_state.status,
+            target_status=next_state.status,
+            valid_statuses=EVIDENCE_TRANSPORT_STATUSES,
+            transition_table=EVIDENCE_TRANSPORT_TRANSITIONS,
+            invalid_current_code="INVALID_EVIDENCE_TRANSPORT_STATUS",
+            invalid_target_code="INVALID_EVIDENCE_TRANSPORT_TARGET_STATUS",
+            invalid_transition_code="INVALID_EVIDENCE_TRANSPORT_TRANSITION",
+        )
+    )
+    if next_state.envelope_id != envelope.envelope_id:
+        errors.append("EVIDENCE_TRANSPORT_ENVELOPE_ID_MISMATCH")
+    if next_state.work_item_id != previous_state.work_item_id:
+        errors.append("EVIDENCE_TRANSPORT_WORK_ITEM_ID_CHANGED")
+    if next_state.correlation_root_id != previous_state.correlation_root_id:
+        errors.append("EVIDENCE_TRANSPORT_CORRELATION_ROOT_CHANGED")
+    if next_state.idempotency_key != previous_state.idempotency_key:
+        errors.append("EVIDENCE_TRANSPORT_IDEMPOTENCY_KEY_CHANGED")
+    if next_state.sequence_number != previous_state.sequence_number:
+        errors.append("EVIDENCE_TRANSPORT_SEQUENCE_NUMBER_CHANGED")
+    if next_state.status in {"retrying", "superseded"}:
+        errors.extend(_missing_scalar(next_state.prior_envelope_id, "MISSING_EVIDENCE_TRANSPORT_LINEAGE"))
+        errors.extend(_missing_scalar(next_state.prior_state, "MISSING_EVIDENCE_TRANSPORT_PRIOR_STATE"))
+        if next_state.prior_state and next_state.prior_state != previous_state.status:
+            errors.append("EVIDENCE_TRANSPORT_PRIOR_STATE_MISMATCH")
+        if next_state.prior_envelope_id and next_state.prior_envelope_id != previous_state.envelope_id:
+            errors.append("EVIDENCE_TRANSPORT_PRIOR_ENVELOPE_MISMATCH")
+    if next_state.status == "retrying":
+        if next_state.attempt_number <= previous_state.attempt_number:
+            errors.append("EVIDENCE_RETRY_REQUIRES_INCREMENTED_ATTEMPT")
+        errors.extend(_missing_scalar(next_state.retry_after_utc, "MISSING_EVIDENCE_RETRY_AFTER"))
+    if next_state.status == "timed_out":
+        errors.extend(_missing_scalar(next_state.timeout_class, "MISSING_EVIDENCE_TIMEOUT_CLASS"))
+    if next_state.status == "failed":
+        errors.extend(_missing_scalar(next_state.failure_reason, "MISSING_EVIDENCE_TRANSPORT_FAILURE_REASON"))
+    errors.extend(_validate_l3_non_authority(next_state))
+    if next_state.status == "acknowledged" and next_state.evidence_package_complete:
+        errors.append("ACKNOWLEDGEMENT_IS_NOT_DELIVERY_TRUTH")
+    return _result(errors, explanations=_transport_explanation(next_state))
+
+
+def evaluate_evidence_idempotency(
+    candidate: EvidenceEnvelope,
+    existing_envelopes: list[EvidenceEnvelope],
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(candidate.idempotency_key, "MISSING_EVIDENCE_IDEMPOTENCY_KEY"))
+    if errors:
+        return _result(errors)
+    for existing in existing_envelopes:
+        if (
+            existing.idempotency_key == candidate.idempotency_key
+            and existing.work_item_id == candidate.work_item_id
+            and existing.sequence_number == candidate.sequence_number
+        ):
+            return _result(
+                [],
+                warnings=["DUPLICATE_EVIDENCE_ENVELOPE_IGNORED"],
+                explanations={
+                    "action": "duplicate_ignored",
+                    "original_envelope_id": existing.envelope_id,
+                    "duplicate_envelope_id": candidate.envelope_id,
+                    "idempotency_key": candidate.idempotency_key,
+                },
+            )
+    return _result(
+        [],
+        explanations={
+            "action": "accepted",
+            "original_envelope_id": "",
+            "idempotency_key": candidate.idempotency_key,
+        },
+    )
+
+
+def validate_ack_not_delivery_truth(state: EvidenceTransportState) -> EDCContractValidationResult:
+    errors: list[str] = []
+    if state.status != "acknowledged":
+        errors.append("EVIDENCE_TRANSPORT_STATE_NOT_ACKNOWLEDGED")
+    if state.evidence_package_complete or state.not_delivery_truth is not True:
+        errors.append("ACKNOWLEDGEMENT_IS_NOT_DELIVERY_TRUTH")
+    errors.extend(_validate_l3_non_authority(state))
+    return _result(errors, explanations=_transport_explanation(state))
+
+
+def validate_transport_non_authority(state: EvidenceTransportState) -> EDCContractValidationResult:
+    errors = _validate_l3_non_authority(state)
+    if state.status == "acknowledged" and state.evidence_package_complete:
+        errors.append("ACKNOWLEDGEMENT_IS_NOT_DELIVERY_TRUTH")
+    return _result(errors, explanations=_transport_explanation(state))
+
+
+def validate_evidence_replay_lineage(
+    envelope: EvidenceEnvelope,
+    *,
+    prior_envelope: EvidenceEnvelope | None,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    if prior_envelope is None:
+        errors.append("MISSING_REPLAY_PRIOR_ENVELOPE")
+    else:
+        errors.extend(_missing_scalar(envelope.replay_of_envelope_id, "MISSING_REPLAY_LINEAGE"))
+        if envelope.replay_of_envelope_id and envelope.replay_of_envelope_id != prior_envelope.envelope_id:
+            errors.append("REPLAY_PRIOR_ENVELOPE_MISMATCH")
+        if envelope.work_item_id != prior_envelope.work_item_id:
+            errors.append("REPLAY_WORK_ITEM_ID_MISMATCH")
+        if envelope.idempotency_key != prior_envelope.idempotency_key:
+            errors.append("REPLAY_IDEMPOTENCY_KEY_MISMATCH")
+        if envelope.attempt_number <= prior_envelope.attempt_number:
+            errors.append("REPLAY_REQUIRES_INCREMENTED_ATTEMPT")
+    return _result(
+        errors,
+        explanations={
+            "replay_of_envelope_id": envelope.replay_of_envelope_id,
+            "current_envelope_id": envelope.envelope_id,
+            "prior_envelope_hash": prior_envelope.envelope_hash() if prior_envelope else "",
+        },
+    )
+
+
+def validate_evidence_supersession(
+    superseded_envelope: EvidenceEnvelope,
+    current_envelope: EvidenceEnvelope,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    if superseded_envelope.transport_status != "superseded":
+        errors.append("PRIOR_EVIDENCE_ENVELOPE_NOT_SUPERSEDED")
+    if superseded_envelope.superseded_by_envelope_id != current_envelope.envelope_id:
+        errors.append("SUPERSEDED_ENVELOPE_CURRENT_POINTER_MISMATCH")
+    if current_envelope.supersedes_envelope_id != superseded_envelope.envelope_id:
+        errors.append("CURRENT_ENVELOPE_SUPERSESSION_POINTER_MISMATCH")
+    if current_envelope.work_item_id != superseded_envelope.work_item_id:
+        errors.append("SUPERSESSION_WORK_ITEM_ID_MISMATCH")
+    return _result(
+        errors,
+        explanations={
+            "superseded_envelope_id": superseded_envelope.envelope_id,
+            "current_envelope_id": current_envelope.envelope_id,
+            "visible_envelope_ids": [superseded_envelope.envelope_id, current_envelope.envelope_id],
+        },
+    )
+
+
+def explain_evidence_transport_state(state: EvidenceTransportState) -> dict[str, Any]:
+    return _transport_explanation(state)
+
+
 def stable_contract_hash(value: Any) -> str:
     encoded = json.dumps(_json_safe(value), sort_keys=True, separators=(",", ":")).encode("utf-8")
     return sha256(encoded).hexdigest()
@@ -1102,6 +1553,73 @@ def _dedupe(values: list[str]) -> list[str]:
         if value and value not in deduped:
             deduped.append(value)
     return deduped
+
+
+def _normal_sha256(value: str) -> str:
+    return value.removeprefix("sha256:").lower()
+
+
+def _validate_l3_non_authority(value: Any) -> list[str]:
+    errors: list[str] = []
+    if getattr(value, "creates_gate_decision", False) or getattr(value, "gate_decision_created", False):
+        errors.append("TRANSPORT_STATUS_CANNOT_CREATE_GATE_DECISION")
+    if getattr(value, "creates_delivery_receipt", False) or getattr(value, "delivery_receipt_created", False):
+        errors.append("TRANSPORT_STATUS_CANNOT_CREATE_DELIVERY_RECEIPT")
+    if getattr(value, "not_gate_decision", True) is not True:
+        errors.append("TRANSPORT_STATUS_CANNOT_CREATE_GATE_DECISION")
+    if getattr(value, "not_delivery_receipt", True) is not True:
+        errors.append("TRANSPORT_STATUS_CANNOT_CREATE_DELIVERY_RECEIPT")
+    if getattr(value, "transport_failure_is_gate_blocker", False):
+        errors.append("TRANSPORT_FAILURE_IS_NOT_GATE_BLOCKER")
+    return errors
+
+
+def _transport_explanation(state: EvidenceTransportState) -> dict[str, Any]:
+    return {
+        "transport_state_id": state.transport_state_id,
+        "envelope_id": state.envelope_id,
+        "work_item_id": state.work_item_id,
+        "dispatch_decision_id": state.dispatch_decision_id,
+        "correlation_root_id": state.correlation_root_id,
+        "status": state.status,
+        "event_type": state.event_type,
+        "attempt_number": state.attempt_number,
+        "retry_scheduled": state.status == "retrying",
+        "evidence_package_complete": state.evidence_package_complete,
+        "package_state": "complete" if state.evidence_package_complete else "incomplete",
+        "gate_state": state.gate_state,
+        "receipt_state": state.receipt_state,
+        "receipt_available": state.receipt_state == "issuable",
+        "not_delivery_truth": state.not_delivery_truth,
+        "not_gate_decision": state.not_gate_decision,
+        "not_delivery_receipt": state.not_delivery_receipt,
+        "gate_outcome_created": state.gate_decision_created,
+        "transport_failure_is_gate_blocker": state.transport_failure_is_gate_blocker,
+        "prior_state": state.prior_state,
+        "prior_envelope_id": state.prior_envelope_id,
+    }
+
+
+def _envelope_explanation(
+    envelope: EvidenceEnvelope,
+    work_item: WorkItem | None,
+    dispatch_recommendation: DispatchRecommendation | None,
+) -> dict[str, Any]:
+    return {
+        "envelope_id": envelope.envelope_id,
+        "work_item_id": envelope.work_item_id,
+        "work_item_hash": work_item.work_item_hash() if work_item else "",
+        "delivery_packet_id": envelope.delivery_packet_id,
+        "dispatch_decision_id": envelope.dispatch_decision_id,
+        "dispatch_recommendation_id": dispatch_recommendation.dispatch_decision_id if dispatch_recommendation else "",
+        "correlation_root_id": envelope.correlation_root_id,
+        "idempotency_key": envelope.idempotency_key,
+        "sequence_number": envelope.sequence_number,
+        "evidence_package_complete": envelope.evidence_package_complete,
+        "not_delivery_truth": envelope.not_delivery_truth,
+        "not_gate_decision": envelope.not_gate_decision,
+        "not_delivery_receipt": envelope.not_delivery_receipt,
+    }
 
 
 def _json_safe(value: Any) -> Any:
