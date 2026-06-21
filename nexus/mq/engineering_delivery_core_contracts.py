@@ -1,9 +1,9 @@
-"""Engineering Delivery Core Slice 001 contract records and validators.
+"""Engineering Delivery Core Slice 001/002 contract records and validators.
 
 This module is intentionally contract-only. It defines deterministic records and
-fail-closed validators for Layer 1 publication plus DeliveryPacket intake. It
-does not dispatch work, transport evidence, decide gates, issue receipts, or
-start any live process.
+fail-closed validators for Layer 1 publication, DeliveryPacket intake, and
+delivery-team roster eligibility. It does not dispatch work, transport evidence,
+decide gates, issue receipts, or start any live process.
 """
 
 from __future__ import annotations
@@ -39,6 +39,15 @@ DELIVERY_PACKET_TRANSITIONS = {
     "blocked": {"bounded", "deferred", "withdrawn"},
     "deferred": {"bounded", "blocked", "withdrawn"},
     "withdrawn": set(),
+}
+ROSTER_STATES = {"registered_active", "registered_passive", "unavailable", "suspended", "unregistered"}
+ROSTER_SNAPSHOT_STATES = {"captured", "stale", "superseded", "invalid"}
+ROSTER_STATE_TRANSITIONS = {
+    "unregistered": {"registered_passive"},
+    "registered_passive": {"registered_active", "suspended"},
+    "registered_active": {"unavailable", "suspended"},
+    "unavailable": {"registered_active", "suspended"},
+    "suspended": {"registered_passive"},
 }
 LAYER1_AUTHORITY_PREFIXES = ("nova", "alex", "layer1", "layer-1", "l1")
 SHA256_RE = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
@@ -177,6 +186,93 @@ class DeliveryPacket:
 
     def contract_fields(self) -> dict[str, Any]:
         return self.to_dict()
+
+
+@dataclass
+class RosterMember:
+    agent_id: str
+    display_name: str
+    registration_state: str
+    capability_tags: list[str]
+    authority_boundary: list[str]
+    source_authority_ref: SourceAuthorityRef | None
+    state_reason: str
+    state_changed_by: str
+    state_changed_at_utc: str
+    execution_mode: str = ""
+    adapter_type: str = ""
+    runtime_capabilities: list[str] = field(default_factory=list)
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class RosterSnapshot:
+    roster_snapshot_id: str
+    delivery_packet_id: str
+    captured_at_utc: str
+    source_registry_ref: SourceAuthorityRef | None
+    agent_registrations: list[RosterMember]
+    eligibility_policy_version: str
+    snapshot_state: str
+    supersedes_snapshot_id: str = ""
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    def snapshot_hash(self) -> str:
+        return stable_contract_hash(self.to_dict())
+
+
+@dataclass
+class RosterEligibilityRequirement:
+    requirement_id: str
+    delivery_packet_id: str
+    required_capability_tags: list[str]
+    authority_boundary: list[str]
+    no_go_boundaries: list[str]
+    traceability: TraceabilityRef
+    required_snapshot_state: str = "captured"
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class RosterEligibilityDecision:
+    decision_id: str
+    agent_id: str
+    eligible: bool
+    roster_snapshot_id: str
+    roster_snapshot_hash: str
+    matched_capabilities: list[str]
+    matched_authority_boundary: list[str]
+    exclusion_reasons: list[str]
+    evidence_refs: list[str]
+    advisory_only: bool = True
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class RosterStateTransition:
+    agent_id: str
+    from_state: str
+    to_state: str
+    authority_actor: str
+    authority_timestamp: str
+    evidence_refs: list[str]
+    reason: str
+    not_business_completion: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
 
 
 def validate_publication(value: Layer1TaskPublication) -> EDCContractValidationResult:
@@ -362,9 +458,228 @@ def validate_delivery_packet_supersession(
     return _result(["PACKET_HASH_CHANGED_WITHOUT_SUPERSESSION"])
 
 
+def validate_roster_member(member: RosterMember) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(member.agent_id, "MISSING_ROSTER_AGENT_ID"))
+    errors.extend(_missing_scalar(member.display_name, "MISSING_ROSTER_DISPLAY_NAME"))
+    errors.extend(_validate_source_authority(member.source_authority_ref))
+    errors.extend(_missing_scalar(member.state_reason, "MISSING_ROSTER_STATE_REASON"))
+    errors.extend(_missing_scalar(member.state_changed_by, "MISSING_ROSTER_STATE_CHANGED_BY"))
+    errors.extend(_missing_scalar(member.state_changed_at_utc, "MISSING_ROSTER_STATE_CHANGED_AT"))
+    if member.registration_state not in ROSTER_STATES:
+        errors.append("INVALID_ROSTER_STATE")
+    if member.registration_state != "unregistered":
+        errors.extend(_missing_list(member.capability_tags, "MISSING_ROSTER_CAPABILITY_TAGS"))
+    if member.registration_state == "registered_active":
+        errors.extend(_missing_list(member.authority_boundary, "MISSING_ROSTER_AUTHORITY_BOUNDARY"))
+    return _result(errors)
+
+
+def validate_roster_snapshot(snapshot: RosterSnapshot) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(snapshot.roster_snapshot_id, "MISSING_ROSTER_SNAPSHOT_ID"))
+    errors.extend(_missing_scalar(snapshot.delivery_packet_id, "MISSING_ROSTER_DELIVERY_PACKET_ID"))
+    errors.extend(_missing_scalar(snapshot.captured_at_utc, "MISSING_ROSTER_CAPTURED_AT"))
+    errors.extend(_validate_source_authority(snapshot.source_registry_ref))
+    errors.extend(_missing_list(snapshot.agent_registrations, "MISSING_ROSTER_AGENT_REGISTRATIONS"))
+    errors.extend(_missing_scalar(snapshot.eligibility_policy_version, "MISSING_ROSTER_POLICY_VERSION"))
+    if snapshot.snapshot_state not in ROSTER_SNAPSHOT_STATES:
+        errors.append("INVALID_ROSTER_SNAPSHOT_STATE")
+    for member in snapshot.agent_registrations:
+        errors.extend(validate_roster_member(member).errors)
+    return _result(errors)
+
+
+def validate_roster_eligibility_requirement(requirement: RosterEligibilityRequirement) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(requirement.requirement_id, "MISSING_ROSTER_REQUIREMENT_ID"))
+    errors.extend(_missing_scalar(requirement.delivery_packet_id, "MISSING_ROSTER_REQUIREMENT_PACKET_ID"))
+    errors.extend(_missing_list(requirement.required_capability_tags, "MISSING_REQUIRED_CAPABILITY_TAGS"))
+    errors.extend(_missing_list(requirement.authority_boundary, "MISSING_REQUIRED_AUTHORITY_BOUNDARY"))
+    errors.extend(_missing_list(requirement.no_go_boundaries, "MISSING_ROSTER_NO_GO_BOUNDARIES"))
+    errors.extend(_validate_traceability(requirement.traceability))
+    if requirement.required_snapshot_state != "captured":
+        errors.append("INVALID_REQUIRED_ROSTER_SNAPSHOT_STATE")
+    return _result(errors)
+
+
+def validate_roster_state_transition(transition: RosterStateTransition) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(transition.agent_id, "MISSING_ROSTER_TRANSITION_AGENT_ID"))
+    errors.extend(_missing_scalar(transition.authority_actor, "MISSING_ROSTER_TRANSITION_AUTHORITY"))
+    errors.extend(_missing_scalar(transition.authority_timestamp, "MISSING_ROSTER_TRANSITION_TIMESTAMP"))
+    errors.extend(_missing_scalar(transition.reason, "MISSING_ROSTER_TRANSITION_REASON"))
+    errors.extend(_missing_list(transition.evidence_refs, "MISSING_ROSTER_TRANSITION_EVIDENCE"))
+    errors.extend(
+        _validate_transition(
+            current_status=transition.from_state,
+            target_status=transition.to_state,
+            valid_statuses=ROSTER_STATES,
+            transition_table=ROSTER_STATE_TRANSITIONS,
+            invalid_current_code="INVALID_ROSTER_FROM_STATE",
+            invalid_target_code="INVALID_ROSTER_TO_STATE",
+            invalid_transition_code="INVALID_ROSTER_STATE_TRANSITION",
+        )
+    )
+    return _result(errors)
+
+
+def evaluate_roster_eligibility(
+    snapshot: RosterSnapshot | None,
+    requirement: RosterEligibilityRequirement,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    explanations: dict[str, Any] = {
+        "eligible_agent_ids": [],
+        "decisions": [],
+        "advisory_only": True,
+    }
+    errors.extend(validate_roster_eligibility_requirement(requirement).errors)
+    if snapshot is None:
+        errors.append("MISSING_ROSTER_SNAPSHOT")
+        errors.append("NO_ELIGIBLE_AGENT")
+        return _result(errors, explanations=explanations)
+
+    errors.extend(validate_roster_snapshot(snapshot).errors)
+    snapshot_hash = snapshot.snapshot_hash()
+    explanations["roster_snapshot_hash"] = snapshot_hash
+    if snapshot.delivery_packet_id and requirement.delivery_packet_id and snapshot.delivery_packet_id != requirement.delivery_packet_id:
+        errors.append("ROSTER_REQUIREMENT_PACKET_MISMATCH")
+    if snapshot.snapshot_state != requirement.required_snapshot_state:
+        errors.append("ROSTER_SNAPSHOT_NOT_CURRENT")
+        errors.append("NO_ELIGIBLE_AGENT")
+        return _result(errors, explanations=explanations)
+
+    for member in snapshot.agent_registrations:
+        decision = _evaluate_roster_member(snapshot, snapshot_hash, member, requirement)
+        explanations["decisions"].append(decision.to_dict())
+        if decision.eligible:
+            explanations["eligible_agent_ids"].append(decision.agent_id)
+    if not explanations["eligible_agent_ids"]:
+        errors.append("NO_ELIGIBLE_AGENT")
+    return _result(errors, explanations=explanations)
+
+
+def validate_roster_eligibility_decision(
+    decision: RosterEligibilityDecision,
+    snapshot: RosterSnapshot,
+) -> EDCContractValidationResult:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(decision.decision_id, "MISSING_ROSTER_DECISION_ID"))
+    errors.extend(_missing_scalar(decision.agent_id, "MISSING_ROSTER_DECISION_AGENT_ID"))
+    errors.extend(_missing_scalar(decision.roster_snapshot_id, "MISSING_ROSTER_DECISION_SNAPSHOT_ID"))
+    errors.extend(_missing_scalar(decision.roster_snapshot_hash, "MISSING_ROSTER_DECISION_SNAPSHOT_HASH"))
+    errors.extend(_missing_list(decision.evidence_refs, "MISSING_ROSTER_DECISION_EVIDENCE"))
+    if decision.roster_snapshot_id != snapshot.roster_snapshot_id:
+        errors.append("ROSTER_DECISION_SNAPSHOT_ID_MISMATCH")
+    if decision.roster_snapshot_hash != snapshot.snapshot_hash():
+        errors.append("ROSTER_SNAPSHOT_HASH_MISMATCH")
+    if decision.eligible and decision.exclusion_reasons:
+        errors.append("ELIGIBLE_ROSTER_DECISION_HAS_EXCLUSIONS")
+    if not decision.eligible and not decision.exclusion_reasons:
+        errors.append("INELIGIBLE_ROSTER_DECISION_REQUIRES_REASON")
+    if decision.advisory_only is not True:
+        errors.append("ROSTER_DECISION_MUST_REMAIN_ADVISORY")
+    return _result(errors)
+
+
+def explain_no_eligible_agent(
+    snapshot: RosterSnapshot | None,
+    requirement: RosterEligibilityRequirement,
+) -> dict[str, Any]:
+    result = evaluate_roster_eligibility(snapshot, requirement)
+    decisions = result.explanations.get("decisions", [])
+    roster_state_reasons = {
+        "AGENT_PLANNING_VISIBLE_ONLY",
+        "AGENT_UNAVAILABLE",
+        "AGENT_SUSPENDED",
+        "AGENT_UNREGISTERED",
+    }
+    return {
+        "reason_code": "NO_ELIGIBLE_AGENT" if not result.explanations.get("eligible_agent_ids") else "ELIGIBLE_AGENT_AVAILABLE",
+        "human_readable_reason": "No registered_active agent satisfied roster state, capability, and authority requirements.",
+        "eligible_agent_ids": list(result.explanations.get("eligible_agent_ids", [])),
+        "roster_state_gaps": _decision_reasons(decisions, roster_state_reasons),
+        "capability_gaps": _decision_reasons(decisions, {"MISSING_REQUIRED_CAPABILITY"}),
+        "authority_gaps": _decision_reasons(decisions, {"AUTHORITY_BOUNDARY_MISMATCH"}),
+        "evidence_refs": _collect_decision_evidence(decisions),
+        "advisory_only": True,
+    }
+
+
 def stable_contract_hash(value: Any) -> str:
     encoded = json.dumps(_json_safe(value), sort_keys=True, separators=(",", ":")).encode("utf-8")
     return sha256(encoded).hexdigest()
+
+
+def _evaluate_roster_member(
+    snapshot: RosterSnapshot,
+    snapshot_hash: str,
+    member: RosterMember,
+    requirement: RosterEligibilityRequirement,
+) -> RosterEligibilityDecision:
+    exclusion_reasons: list[str] = []
+    matched_capabilities: list[str] = []
+    matched_authority_boundary: list[str] = []
+
+    if member.registration_state == "unregistered":
+        exclusion_reasons.append("AGENT_UNREGISTERED")
+    elif member.registration_state == "suspended":
+        exclusion_reasons.append("AGENT_SUSPENDED")
+    elif member.registration_state == "registered_passive":
+        exclusion_reasons.append("AGENT_PLANNING_VISIBLE_ONLY")
+    elif member.registration_state == "unavailable":
+        exclusion_reasons.append("AGENT_UNAVAILABLE")
+
+    if not exclusion_reasons:
+        missing_capabilities = [tag for tag in requirement.required_capability_tags if tag not in member.capability_tags]
+        if missing_capabilities:
+            exclusion_reasons.append("MISSING_REQUIRED_CAPABILITY")
+        else:
+            matched_capabilities = list(requirement.required_capability_tags)
+
+        missing_authority = [boundary for boundary in requirement.authority_boundary if boundary not in member.authority_boundary]
+        if missing_authority:
+            exclusion_reasons.append("AUTHORITY_BOUNDARY_MISMATCH")
+        else:
+            matched_authority_boundary = list(requirement.authority_boundary)
+
+        if any(boundary in member.authority_boundary for boundary in requirement.no_go_boundaries):
+            exclusion_reasons.append("NO_GO_BOUNDARY_CONFLICT")
+
+    return RosterEligibilityDecision(
+        decision_id=f"eligibility::{snapshot.roster_snapshot_id}::{member.agent_id}",
+        agent_id=member.agent_id,
+        eligible=not exclusion_reasons,
+        roster_snapshot_id=snapshot.roster_snapshot_id,
+        roster_snapshot_hash=snapshot_hash,
+        matched_capabilities=matched_capabilities,
+        matched_authority_boundary=matched_authority_boundary,
+        exclusion_reasons=exclusion_reasons,
+        evidence_refs=[
+            f"roster_snapshot:{snapshot.roster_snapshot_id}",
+            f"roster_snapshot_hash:{snapshot_hash}",
+            f"roster_member:{member.agent_id}",
+        ],
+    )
+
+
+def _decision_reasons(decisions: list[dict[str, Any]], allowed_reasons: set[str]) -> list[str]:
+    found: list[str] = []
+    for decision in decisions:
+        for reason in decision.get("exclusion_reasons", []):
+            if reason in allowed_reasons and reason not in found:
+                found.append(reason)
+    return found
+
+
+def _collect_decision_evidence(decisions: list[dict[str, Any]]) -> list[str]:
+    evidence_refs: list[str] = []
+    for decision in decisions:
+        for evidence_ref in decision.get("evidence_refs", []):
+            if evidence_ref not in evidence_refs:
+                evidence_refs.append(evidence_ref)
+    return evidence_refs
 
 
 def _validate_transition(

@@ -1,3 +1,4 @@
+from nexus.mq import engineering_delivery_core_contracts as edc_contracts
 from nexus.mq.engineering_delivery_core_contracts import (
     BlockerEvidence,
     DeliveryPacket,
@@ -121,6 +122,70 @@ def _packet(**overrides):
     }
     data.update(overrides)
     return DeliveryPacket(**data)
+
+
+def _roster_member(**overrides):
+    data = {
+        "agent_id": "agent-thunder",
+        "display_name": "Thunder",
+        "registration_state": "registered_active",
+        "capability_tags": ["contracts", "python"],
+        "authority_boundary": ["slice002", "team_roster"],
+        "source_authority_ref": _source(authority_id="roster-src-001"),
+        "state_reason": "Activated for bounded contract work.",
+        "state_changed_by": "nova",
+        "state_changed_at_utc": "2026-06-21T00:00:00Z",
+    }
+    data.update(overrides)
+    return edc_contracts.RosterMember(**data)
+
+
+def _roster_snapshot(**overrides):
+    data = {
+        "roster_snapshot_id": "roster-snapshot-001",
+        "delivery_packet_id": "packet-001",
+        "captured_at_utc": "2026-06-21T00:01:00Z",
+        "source_registry_ref": _source(authority_id="registry-src-001"),
+        "agent_registrations": [_roster_member()],
+        "eligibility_policy_version": "SPEC-TEAM-003-v0.1",
+        "snapshot_state": "captured",
+    }
+    data.update(overrides)
+    return edc_contracts.RosterSnapshot(**data)
+
+
+def _eligibility_requirement(**overrides):
+    data = {
+        "requirement_id": "eligibility-req-001",
+        "delivery_packet_id": "packet-001",
+        "required_capability_tags": ["contracts"],
+        "authority_boundary": ["slice002"],
+        "no_go_boundaries": ["no_dispatch_runtime"],
+        "traceability": _trace(
+            issue_ids=["EDC-ISSUE-03", "EDC-ISSUE-04"],
+            prd_ids=["PRD-TEAM-002"],
+            spec_ids=["SPEC-TEAM-003"],
+            ux_surface_ids=["UX-TEAM-ROSTER"],
+            test_case_ids=["TC-TEAM-ROSTER-001"],
+            future_evidence_ids=["FUTURE-VERIFY-TEAM-ELIGIBILITY"],
+        ),
+    }
+    data.update(overrides)
+    return edc_contracts.RosterEligibilityRequirement(**data)
+
+
+def _roster_transition(**overrides):
+    data = {
+        "agent_id": "agent-thunder",
+        "from_state": "registered_passive",
+        "to_state": "registered_active",
+        "authority_actor": "nova",
+        "authority_timestamp": "2026-06-21T00:02:00Z",
+        "evidence_refs": ["registry://agent-thunder/activation"],
+        "reason": "Authorized activation.",
+    }
+    data.update(overrides)
+    return edc_contracts.RosterStateTransition(**data)
 
 
 def test_tc_l1_publish_001_source_authority_reference_field_rejects_blank_value():
@@ -447,3 +512,155 @@ def test_tc_rb_packet_012_packet_status_is_visible_in_ux_surface():
 
     assert data["status"] == "bounded"
     assert "UX-RB-PACKET" in data["traceability"]["ux_surface_ids"]
+
+
+def test_tc_team_roster_001_roster_snapshot_is_required_before_eligibility_evaluation():
+    result = edc_contracts.evaluate_roster_eligibility(None, _eligibility_requirement())
+
+    assert result.ok is False
+    assert "MISSING_ROSTER_SNAPSHOT" in result.errors
+    assert result.explanations["eligible_agent_ids"] == []
+
+
+def test_tc_team_roster_002_registered_active_state_can_enter_eligibility_pool():
+    result = edc_contracts.evaluate_roster_eligibility(_roster_snapshot(), _eligibility_requirement())
+
+    assert result.ok is True
+    assert result.explanations["eligible_agent_ids"] == ["agent-thunder"]
+    assert result.explanations["decisions"][0]["eligible"] is True
+
+
+def test_tc_team_roster_003_registered_passive_state_is_planning_visible_only():
+    snapshot = _roster_snapshot(agent_registrations=[_roster_member(registration_state="registered_passive")])
+
+    result = edc_contracts.evaluate_roster_eligibility(snapshot, _eligibility_requirement())
+
+    assert result.ok is False
+    assert result.explanations["decisions"][0]["agent_id"] == "agent-thunder"
+    assert "AGENT_PLANNING_VISIBLE_ONLY" in result.explanations["decisions"][0]["exclusion_reasons"]
+
+
+def test_tc_team_roster_004_unavailable_state_excludes_otherwise_matching_member():
+    snapshot = _roster_snapshot(agent_registrations=[_roster_member(registration_state="unavailable")])
+
+    result = edc_contracts.evaluate_roster_eligibility(snapshot, _eligibility_requirement())
+
+    assert result.ok is False
+    assert "AGENT_UNAVAILABLE" in result.explanations["decisions"][0]["exclusion_reasons"]
+
+
+def test_tc_team_roster_005_suspended_state_excludes_member_from_all_dispatch_eligibility():
+    snapshot = _roster_snapshot(agent_registrations=[_roster_member(registration_state="suspended")])
+
+    result = edc_contracts.evaluate_roster_eligibility(snapshot, _eligibility_requirement())
+
+    assert result.ok is False
+    assert "AGENT_SUSPENDED" in result.explanations["decisions"][0]["exclusion_reasons"]
+
+
+def test_tc_team_roster_006_unregistered_identity_cannot_be_selected():
+    snapshot = _roster_snapshot(
+        agent_registrations=[_roster_member(registration_state="unregistered", capability_tags=[], authority_boundary=[])]
+    )
+
+    result = edc_contracts.evaluate_roster_eligibility(snapshot, _eligibility_requirement())
+
+    assert result.ok is False
+    reasons = result.explanations["decisions"][0]["exclusion_reasons"]
+    assert "AGENT_UNREGISTERED" in reasons
+    assert "MISSING_REQUIRED_CAPABILITY" not in reasons
+
+
+def test_tc_team_roster_007_capability_match_is_required_for_active_member():
+    result = edc_contracts.evaluate_roster_eligibility(
+        _roster_snapshot(),
+        _eligibility_requirement(required_capability_tags=["contracts", "python"]),
+    )
+
+    assert result.ok is True
+    assert result.explanations["decisions"][0]["matched_capabilities"] == ["contracts", "python"]
+
+
+def test_tc_team_roster_008_capability_mismatch_blocks_active_member():
+    result = edc_contracts.evaluate_roster_eligibility(
+        _roster_snapshot(),
+        _eligibility_requirement(required_capability_tags=["contracts", "rust"]),
+    )
+
+    assert result.ok is False
+    assert "MISSING_REQUIRED_CAPABILITY" in result.explanations["decisions"][0]["exclusion_reasons"]
+    assert result.explanations["eligible_agent_ids"] == []
+
+
+def test_tc_team_roster_009_authority_band_match_is_required():
+    result = edc_contracts.evaluate_roster_eligibility(
+        _roster_snapshot(),
+        _eligibility_requirement(authority_boundary=["slice002", "team_roster"]),
+    )
+
+    assert result.ok is True
+    assert result.explanations["decisions"][0]["matched_authority_boundary"] == ["slice002", "team_roster"]
+
+
+def test_tc_team_roster_010_authority_mismatch_prevents_dispatch_even_with_capability_match():
+    result = edc_contracts.evaluate_roster_eligibility(
+        _roster_snapshot(),
+        _eligibility_requirement(authority_boundary=["slice003"]),
+    )
+
+    assert result.ok is False
+    assert "AUTHORITY_BOUNDARY_MISMATCH" in result.explanations["decisions"][0]["exclusion_reasons"]
+
+
+def test_tc_team_roster_011_roster_snapshot_hash_binds_eligibility_decision():
+    snapshot = _roster_snapshot()
+
+    result = edc_contracts.evaluate_roster_eligibility(snapshot, _eligibility_requirement())
+    decision = edc_contracts.RosterEligibilityDecision(**result.explanations["decisions"][0])
+
+    assert decision.roster_snapshot_hash == snapshot.snapshot_hash()
+    assert edc_contracts.validate_roster_eligibility_decision(decision, snapshot).ok is True
+
+
+def test_tc_team_roster_012_roster_state_transition_requires_evidence_pointer():
+    missing_evidence = edc_contracts.validate_roster_state_transition(_roster_transition(evidence_refs=[]))
+    allowed_transition = edc_contracts.validate_roster_state_transition(_roster_transition())
+    direct_activation = edc_contracts.validate_roster_state_transition(
+        _roster_transition(
+            from_state="unregistered",
+            to_state="registered_active",
+            evidence_refs=["registry://agent-thunder/registration-and-activation"],
+        )
+    )
+
+    assert missing_evidence.ok is False
+    assert "MISSING_ROSTER_TRANSITION_EVIDENCE" in missing_evidence.errors
+    assert allowed_transition.ok is True
+    assert direct_activation.ok is False
+    assert "INVALID_ROSTER_STATE_TRANSITION" in direct_activation.errors
+
+
+def test_tc_team_roster_013_stale_roster_snapshot_is_rejected():
+    result = edc_contracts.evaluate_roster_eligibility(
+        _roster_snapshot(snapshot_state="stale"),
+        _eligibility_requirement(),
+    )
+
+    assert result.ok is False
+    assert "ROSTER_SNAPSHOT_NOT_CURRENT" in result.errors
+
+
+def test_tc_team_roster_014_human_can_ask_why_no_agent_is_eligible():
+    snapshot = _roster_snapshot(
+        agent_registrations=[
+            _roster_member(agent_id="agent-passive", registration_state="registered_passive"),
+            _roster_member(agent_id="agent-active", capability_tags=["docs"], authority_boundary=["slice002"]),
+        ]
+    )
+
+    explanation = edc_contracts.explain_no_eligible_agent(snapshot, _eligibility_requirement(required_capability_tags=["python"]))
+
+    assert explanation["reason_code"] == "NO_ELIGIBLE_AGENT"
+    assert "AGENT_PLANNING_VISIBLE_ONLY" in explanation["roster_state_gaps"]
+    assert "MISSING_REQUIRED_CAPABILITY" in explanation["capability_gaps"]
+    assert explanation["advisory_only"] is True
