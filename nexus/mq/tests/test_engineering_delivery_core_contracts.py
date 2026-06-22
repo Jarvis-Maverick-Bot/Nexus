@@ -1795,3 +1795,346 @@ def test_tc_kernel_boundary_008_kernel_originated_gate_action_is_redirected():
     assert result.explanations["action"] == "redirect_to_layer1_nova"
     assert result.explanations["creates_gate_decision"] is False
     assert explanation["target_authority"] == "Layer 1 / Nova"
+
+
+ALL_PRD_IDS = [
+    "PRD-L1-001",
+    "PRD-L1-002",
+    "PRD-L1-003",
+    "PRD-RB-001",
+    "PRD-RB-002",
+    "PRD-RB-003",
+    "PRD-TEAM-001",
+    "PRD-TEAM-002",
+    "PRD-TEAM-003",
+    "PRD-TEAM-004",
+    "PRD-L2-001",
+    "PRD-L2-002",
+    "PRD-L2-003",
+    "PRD-L2-004",
+    "PRD-L3-001",
+    "PRD-L3-002",
+    "PRD-L3-003",
+    "PRD-GATE-001",
+    "PRD-GATE-002",
+    "PRD-GATE-003",
+    "PRD-GATE-004",
+    "PRD-KERNEL-001",
+    "PRD-KERNEL-002",
+    "PRD-KERNEL-003",
+    "PRD-NOGO-001",
+    "PRD-NOGO-002",
+    "PRD-NOGO-003",
+]
+
+
+ALL_SPEC_IDS = [
+    "SPEC-L1-001",
+    "SPEC-L1-002",
+    "SPEC-L1-003",
+    "SPEC-RB-001",
+    "SPEC-RB-002",
+    "SPEC-RB-003",
+    "SPEC-TEAM-001",
+    "SPEC-TEAM-002",
+    "SPEC-TEAM-003",
+    "SPEC-TEAM-004",
+    "SPEC-L2-001",
+    "SPEC-L2-002",
+    "SPEC-L2-003",
+    "SPEC-L2-004",
+    "SPEC-L3-001",
+    "SPEC-L3-002",
+    "SPEC-L3-003",
+    "SPEC-GATE-001",
+    "SPEC-GATE-002",
+    "SPEC-GATE-003",
+    "SPEC-KERNEL-001",
+    "SPEC-KERNEL-002",
+    "SPEC-KERNEL-003",
+    "SPEC-NOGO-001",
+    "SPEC-NOGO-002",
+    "SPEC-NOGO-003",
+    "SPEC-NOGO-004",
+    "SPEC-NOGO-005",
+    "SPEC-NOGO-006",
+    "SPEC-NOGO-007",
+    "SPEC-NOGO-008",
+    "SPEC-NOGO-009",
+    "SPEC-NOGO-010",
+    "SPEC-NOGO-011",
+]
+
+
+ALL_UX_SURFACE_IDS = [
+    "UX-L1-PUBLISH",
+    "UX-RB-PACKET",
+    "UX-TEAM-ROSTER",
+    "UX-L2-DISPATCH",
+    "UX-L3-EVIDENCE",
+    "UX-GATE-RECEIPT",
+    "UX-HITL-DIALOGUE",
+    "UX-KERNEL-STATE",
+    "UX-NOGO-SCAN",
+    "UX-TRACEABILITY",
+]
+
+
+PR013_TEST_IDS = [
+    "TC-NOGO-001",
+    "TC-NOGO-002",
+    "TC-NOGO-003",
+    "TC-NOGO-004",
+    "TC-NOGO-005",
+    "TC-NOGO-006",
+    "TC-NOGO-007",
+    "TC-NOGO-008",
+    "TC-TRACEABILITY-001",
+    "TC-TRACEABILITY-002",
+    "TC-TRACEABILITY-003",
+    "TC-TRACEABILITY-004",
+    "TC-TRACEABILITY-005",
+    "TC-TRACEABILITY-006",
+    "TC-TRACEABILITY-007",
+    "TC-TRACEABILITY-008",
+]
+
+
+def _nogo_trace(**overrides):
+    data = {
+        "issue_ids": [
+            "EDC-ISSUE-01",
+            "EDC-ISSUE-02",
+            "EDC-ISSUE-03",
+            "EDC-ISSUE-04",
+            "EDC-ISSUE-05",
+            "EDC-ISSUE-06",
+            "EDC-ISSUE-07",
+        ],
+        "prd_ids": ["PRD-NOGO-001", "PRD-NOGO-002", "PRD-NOGO-003"],
+        "spec_ids": ["SPEC-NOGO-001", "SPEC-NOGO-002", "SPEC-NOGO-003"],
+        "ux_surface_ids": ["UX-NOGO-SCAN", "UX-TRACEABILITY", "UX-HITL-DIALOGUE"],
+        "test_case_ids": ["TC-NOGO-001"],
+        "future_evidence_ids": ["FUTURE-VERIFY-NOGO-SCAN"],
+    }
+    data.update(overrides)
+    return TraceabilityRef(**data)
+
+
+def _no_go_scan(**overrides):
+    data = {
+        "scan_id": "no-go-scan-001",
+        "scanned_artifact_id": "review-artifact-001",
+        "scanned_text": "bounded PR013 control evidence only",
+        "declared_blocked_categories": [],
+        "no_go_control_ids": ["SPEC-NOGO-001"],
+        "scan_state": "clean",
+        "source_authority_ref": _evidence_ref(evidence_ref_id="nogo-source-authority"),
+        "candidate_verdict_ref": _evidence_ref(evidence_ref_id="nogo-candidate-verdict"),
+        "candidate_verdict": "EDC_PR013_SLICE007_NOGO_TRACEABILITY_CONTROLS_READY_FOR_NOVA_REVIEW",
+        "claimed_green_verdict": False,
+        "claimed_pass": False,
+        "claimed_readiness_approval": False,
+        "claimed_formal_exit": False,
+        "claimed_production_ready": False,
+        "claimed_release_ready": False,
+        "authorizes_future_task": False,
+        "cleanup_archive_delete_requested": False,
+        "repository_mutation_requested": False,
+        "creates_gate_decision": False,
+        "creates_delivery_receipt": False,
+        "automated_reviewer_authority": False,
+        "context_only": True,
+        "not_business_completion": True,
+        "traceability": _nogo_trace(),
+    }
+    data.update(overrides)
+    return edc_contracts.NoGoControlScan(**data)
+
+
+def _issue_coverage():
+    return {
+        issue_id: {
+            "prd_ids": ["PRD-NOGO-001"],
+            "spec_ids": ["SPEC-NOGO-001"],
+            "ux_surface_ids": ["UX-TRACEABILITY"],
+            "test_case_ids": ["TC-TRACEABILITY-001"],
+        }
+        for issue_id in [
+            "EDC-ISSUE-01",
+            "EDC-ISSUE-02",
+            "EDC-ISSUE-03",
+            "EDC-ISSUE-04",
+            "EDC-ISSUE-05",
+            "EDC-ISSUE-06",
+            "EDC-ISSUE-07",
+        ]
+    }
+
+
+def _traceability_check(**overrides):
+    data = {
+        "coverage_check_id": "traceability-check-001",
+        "required_prd_ids": list(ALL_PRD_IDS),
+        "mapped_prd_ids": list(ALL_PRD_IDS),
+        "required_spec_ids": list(ALL_SPEC_IDS),
+        "mapped_spec_ids": list(ALL_SPEC_IDS),
+        "required_ux_surface_ids": list(ALL_UX_SURFACE_IDS),
+        "mapped_ux_surface_ids": list(ALL_UX_SURFACE_IDS),
+        "required_test_case_ids": list(PR013_TEST_IDS),
+        "mapped_test_case_ids": list(PR013_TEST_IDS),
+        "required_future_evidence_ids": ["FUTURE-VERIFY-TRACEABILITY", "FUTURE-VERIFY-NOGO-SCAN"],
+        "mapped_future_evidence_ids": ["FUTURE-VERIFY-TRACEABILITY", "FUTURE-VERIFY-NOGO-SCAN"],
+        "issue_coverage": _issue_coverage(),
+        "na_mappings": {},
+        "catalog_test_case_ids": list(PR013_TEST_IDS),
+        "matrix_test_case_ids": list(PR013_TEST_IDS),
+        "baseline_test_case_ids": ["TC-L1-PUBLISH-001", "TC-KERNEL-BOUNDARY-008"],
+        "current_test_case_ids": ["TC-L1-PUBLISH-001", "TC-KERNEL-BOUNDARY-008", *PR013_TEST_IDS],
+        "coverage_state": "complete",
+        "source_authority_ref": _evidence_ref(evidence_ref_id="traceability-source-authority"),
+        "candidate_verdict_ref": _evidence_ref(evidence_ref_id="traceability-candidate-verdict"),
+        "candidate_verdict": "EDC_PR013_SLICE007_NOGO_TRACEABILITY_CONTROLS_READY_FOR_NOVA_REVIEW",
+        "authorizes_future_task": False,
+        "cleanup_archive_delete_requested": False,
+        "green_verdict_claimed": False,
+        "context_only": True,
+        "not_business_completion": True,
+        "traceability": _nogo_trace(test_case_ids=["TC-TRACEABILITY-001"]),
+    }
+    data.update(overrides)
+    return edc_contracts.TraceabilityCoverageCheck(**data)
+
+
+def test_tc_nogo_001_blocked_source_change_category_triggers_revision_required_state():
+    result = edc_contracts.validate_no_go_control_scan(
+        _no_go_scan(scanned_text="artifact claims implemented in nexus source")
+    )
+
+    assert result.ok is False
+    assert "NO_GO_BLOCKED_CATEGORY_DETECTED" in result.errors
+    assert "blocked_source_change" in result.explanations["blocked_categories"]
+    assert result.explanations["control_state"] == "revision_required"
+
+
+def test_tc_nogo_002_blocked_live_service_category_triggers_revision_required_state():
+    result = edc_contracts.validate_no_go_control_scan(_no_go_scan(scanned_text="start live runtime service"))
+
+    assert result.ok is False
+    assert "blocked_live_service" in result.explanations["blocked_categories"]
+
+
+def test_tc_nogo_003_blocked_broker_or_port_category_triggers_revision_required_state():
+    result = edc_contracts.validate_no_go_control_scan(_no_go_scan(scanned_text="start broker on port 4222"))
+
+    assert result.ok is False
+    assert "blocked_broker_or_port" in result.explanations["blocked_categories"]
+
+
+def test_tc_nogo_004_blocked_formal_exercise_category_triggers_revision_required_state():
+    result = edc_contracts.validate_no_go_control_scan(_no_go_scan(scanned_text="formal acceptance exercise exit claim"))
+
+    assert result.ok is False
+    assert "blocked_formal_exercise" in result.explanations["blocked_categories"]
+
+
+def test_tc_nogo_005_blocked_launch_category_triggers_revision_required_state():
+    result = edc_contracts.validate_no_go_control_scan(_no_go_scan(scanned_text="release readiness claim"))
+
+    assert result.ok is False
+    assert "blocked_launch_claim" in result.explanations["blocked_categories"]
+
+
+def test_tc_nogo_006_blocked_downstream_packet_category_triggers_revision_required_state():
+    result = edc_contracts.validate_no_go_control_scan(_no_go_scan(scanned_text="authorize future downstream packet"))
+
+    assert result.ok is False
+    assert "blocked_downstream_packet" in result.explanations["blocked_categories"]
+
+
+def test_tc_nogo_007_blocked_cleanup_category_triggers_revision_required_state():
+    result = edc_contracts.validate_no_go_control_scan(
+        _no_go_scan(scanned_text="cleanup archive delete source evidence")
+    )
+
+    assert result.ok is False
+    assert "blocked_cleanup_action" in result.explanations["blocked_categories"]
+
+
+def test_tc_nogo_008_blocked_readiness_and_green_verdict_categories_trigger_revision_required_state():
+    result = edc_contracts.validate_no_go_control_scan(
+        _no_go_scan(scanned_text="readiness approval with green verdict", claimed_green_verdict=True)
+    )
+
+    assert result.ok is False
+    assert "blocked_readiness_claim" in result.explanations["blocked_categories"]
+    assert "blocked_green_verdict_claim" in result.explanations["blocked_categories"]
+    assert "NO_GO_CONTROL_CANNOT_CREATE_GREEN_VERDICT" in result.errors
+
+
+def test_tc_traceability_001_all_prd_requirements_have_mapped_tests():
+    result = edc_contracts.validate_traceability_mapping_coverage(_traceability_check())
+
+    assert result.ok is True
+    assert result.explanations["unmapped_prd_ids"] == []
+    assert result.explanations["mapped_prd_count"] == 27
+
+
+def test_tc_traceability_002_all_spec_contracts_have_mapped_tests():
+    result = edc_contracts.validate_traceability_mapping_coverage(_traceability_check())
+
+    assert result.ok is True
+    assert result.explanations["unmapped_spec_ids"] == []
+    assert result.explanations["mapped_spec_count"] == 34
+
+
+def test_tc_traceability_003_all_ten_ux_surfaces_have_mapped_tests():
+    result = edc_contracts.validate_traceability_mapping_coverage(_traceability_check())
+
+    assert result.ok is True
+    assert result.explanations["mapped_ux_surface_count"] == 10
+    assert "UX-HITL-DIALOGUE" in result.explanations["mapped_ux_surface_ids"]
+
+
+def test_tc_traceability_004_each_edc_issue_maps_to_prd_spec_ux_and_test_cases():
+    result = edc_contracts.validate_traceability_issue_coverage(_traceability_check())
+
+    assert result.ok is True
+    assert result.explanations["unmapped_issue_ids"] == []
+
+
+def test_tc_traceability_005_future_verification_placeholders_are_mapped_but_not_executed():
+    result = edc_contracts.validate_future_evidence_placeholders(_traceability_check())
+
+    assert result.ok is True
+    assert result.explanations["future_placeholders_mapped"] is True
+    assert result.explanations["future_execution_claimed"] is False
+
+
+def test_tc_traceability_006_explicit_na_reason_is_required_when_executable_test_is_invalid():
+    missing_reason = _traceability_check(na_mappings={"TC-FUTURE-ONLY": ""})
+    with_reason = _traceability_check(na_mappings={"TC-FUTURE-ONLY": "future runtime surface is not authorized"})
+
+    missing_result = edc_contracts.validate_na_reason_coverage(missing_reason)
+    valid_result = edc_contracts.validate_na_reason_coverage(with_reason)
+
+    assert missing_result.ok is False
+    assert "NA_MAPPING_REQUIRES_REASON" in missing_result.errors
+    assert valid_result.ok is True
+
+
+def test_tc_traceability_007_catalog_and_matrix_test_ids_are_identical():
+    result = edc_contracts.validate_catalog_matrix_consistency(_traceability_check())
+
+    assert result.ok is True
+    assert result.explanations["catalog_matrix_match"] is True
+
+
+def test_tc_traceability_008_revision_expands_baseline_seed_without_dropping_accepted_coverage():
+    check = _traceability_check(current_test_case_ids=[*["TC-L1-PUBLISH-001", "TC-KERNEL-BOUNDARY-008"], *PR013_TEST_IDS])
+
+    result = edc_contracts.validate_traceability_revision_expansion(check)
+
+    assert result.ok is True
+    assert result.explanations["baseline_coverage_preserved"] is True
+    assert result.explanations["current_test_case_count"] == 18

@@ -1,4 +1,4 @@
-"""Engineering Delivery Core Slice 001/002/003/004/005/006 contract records and validators.
+"""Engineering Delivery Core Slice 001/002/003/004/005/006/007 contract records and validators.
 
 This module is intentionally contract-only. It defines deterministic records and
 fail-closed validators for Layer 1 publication, DeliveryPacket intake, and
@@ -7,7 +7,9 @@ dispatch recommendations, plus Layer 3 evidence envelope transport-state
 contracts, plus human gate and receipt authority records. It does not execute
 work, transport evidence, automate approvals, issue non-human receipts, or start
 any live process. Kernel projection/checkpoint records are context-only and do
-not own Layer 1 / Nova gate or receipt authority.
+not own Layer 1 / Nova gate or receipt authority. No-go and traceability control
+records are review context only and do not create acceptance, authorization, gate
+decisions, receipts, repository mutation, or cleanup/archive workflows.
 """
 
 from __future__ import annotations
@@ -117,6 +119,41 @@ KERNEL_PROJECTION_KINDS = {"projection", "checkpoint"}
 KERNEL_PROJECTION_STATES = {"visible", "hidden", "stale", "superseded"}
 KERNEL_CHECKPOINT_STATES = {"fresh", "stale", "unknown", "superseded"}
 KERNEL_AUTHORITY_BOUNDARIES = {"layer1_nova"}
+NO_GO_CONTROL_IDS = {
+    "SPEC-NOGO-001",
+    "SPEC-NOGO-002",
+    "SPEC-NOGO-003",
+    "SPEC-NOGO-004",
+    "SPEC-NOGO-005",
+    "SPEC-NOGO-006",
+    "SPEC-NOGO-007",
+    "SPEC-NOGO-008",
+    "SPEC-NOGO-009",
+    "SPEC-NOGO-010",
+    "SPEC-NOGO-011",
+}
+NO_GO_BLOCKED_CATEGORIES = {
+    "blocked_source_change",
+    "blocked_live_service",
+    "blocked_broker_or_port",
+    "blocked_formal_exercise",
+    "blocked_launch_claim",
+    "blocked_downstream_packet",
+    "blocked_cleanup_action",
+    "blocked_readiness_claim",
+    "blocked_green_verdict_claim",
+}
+NO_GO_CATEGORY_TERMS = {
+    "blocked_source_change": ("implemented in nexus", "nexus source", "nexus/engineering_delivery"),
+    "blocked_live_service": ("live runtime", "live service", "private-live", "cross-layer execution"),
+    "blocked_broker_or_port": ("broker", "port 4222", "port 7422", "nats"),
+    "blocked_formal_exercise": ("formal acceptance exercise", "formal exercise", "uat", "uat exit"),
+    "blocked_launch_claim": ("release readiness", "release ready", "production readiness", "launch claim"),
+    "blocked_downstream_packet": ("future downstream packet", "future task authorization", "authorize future", "cp-007"),
+    "blocked_cleanup_action": ("cleanup", "archive", "delete"),
+    "blocked_readiness_claim": ("readiness approval", "pass ready", "uat exit"),
+    "blocked_green_verdict_claim": ("green verdict", "greenlit", "auto accepted"),
+}
 LAYER1_AUTHORITY_PREFIXES = ("nova", "alex", "layer1", "layer-1", "l1")
 SHA256_RE = re.compile(r"^(?:sha256:)?[0-9a-fA-F]{64}$")
 
@@ -647,6 +684,78 @@ class KernelProjection:
         return asdict(self)
 
     def projection_hash(self) -> str:
+        return stable_contract_hash(self.to_dict())
+
+
+@dataclass
+class NoGoControlScan:
+    scan_id: str
+    scanned_artifact_id: str
+    scanned_text: str
+    declared_blocked_categories: list[str]
+    no_go_control_ids: list[str]
+    scan_state: str
+    source_authority_ref: EvidenceReference | None
+    candidate_verdict_ref: EvidenceReference | None
+    candidate_verdict: str
+    claimed_green_verdict: bool = False
+    claimed_pass: bool = False
+    claimed_readiness_approval: bool = False
+    claimed_formal_exit: bool = False
+    claimed_production_ready: bool = False
+    claimed_release_ready: bool = False
+    authorizes_future_task: bool = False
+    cleanup_archive_delete_requested: bool = False
+    repository_mutation_requested: bool = False
+    creates_gate_decision: bool = False
+    creates_delivery_receipt: bool = False
+    automated_reviewer_authority: bool = False
+    context_only: bool = True
+    not_business_completion: bool = True
+    traceability: TraceabilityRef | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    def scan_hash(self) -> str:
+        return stable_contract_hash(self.to_dict())
+
+
+@dataclass
+class TraceabilityCoverageCheck:
+    coverage_check_id: str
+    required_prd_ids: list[str]
+    mapped_prd_ids: list[str]
+    required_spec_ids: list[str]
+    mapped_spec_ids: list[str]
+    required_ux_surface_ids: list[str]
+    mapped_ux_surface_ids: list[str]
+    required_test_case_ids: list[str]
+    mapped_test_case_ids: list[str]
+    required_future_evidence_ids: list[str]
+    mapped_future_evidence_ids: list[str]
+    issue_coverage: dict[str, dict[str, list[str]]]
+    na_mappings: dict[str, str]
+    catalog_test_case_ids: list[str]
+    matrix_test_case_ids: list[str]
+    baseline_test_case_ids: list[str]
+    current_test_case_ids: list[str]
+    coverage_state: str
+    source_authority_ref: EvidenceReference | None
+    candidate_verdict_ref: EvidenceReference | None
+    candidate_verdict: str
+    authorizes_future_task: bool = False
+    cleanup_archive_delete_requested: bool = False
+    green_verdict_claimed: bool = False
+    future_execution_claimed: bool = False
+    context_only: bool = True
+    not_business_completion: bool = True
+    traceability: TraceabilityRef | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    def coverage_hash(self) -> str:
         return stable_contract_hash(self.to_dict())
 
 
@@ -1996,6 +2105,148 @@ def explain_kernel_gate_action_redirect(
     }
 
 
+def validate_no_go_control_scan(scan: NoGoControlScan) -> EDCContractValidationResult:
+    errors = _validate_no_go_scan_base(scan)
+    blocked_categories = _classify_no_go_categories(scan)
+    if blocked_categories:
+        errors.append("NO_GO_BLOCKED_CATEGORY_DETECTED")
+    if scan.claimed_green_verdict or scan.claimed_pass or scan.claimed_readiness_approval:
+        errors.append("NO_GO_CONTROL_CANNOT_CREATE_GREEN_VERDICT")
+    if scan.claimed_formal_exit or scan.claimed_production_ready or scan.claimed_release_ready:
+        errors.append("NO_GO_CONTROL_CANNOT_CREATE_READINESS_OR_RELEASE_CLAIM")
+    if scan.authorizes_future_task:
+        errors.append("NO_GO_CONTROL_CANNOT_AUTHORIZE_FUTURE_TASK")
+    if scan.cleanup_archive_delete_requested or scan.repository_mutation_requested:
+        errors.append("NO_GO_CONTROL_CANNOT_MUTATE_REPOSITORY")
+    if scan.creates_gate_decision:
+        errors.append("NO_GO_CONTROL_CANNOT_CREATE_GATE_DECISION")
+    if scan.creates_delivery_receipt:
+        errors.append("NO_GO_CONTROL_CANNOT_CREATE_DELIVERY_RECEIPT")
+    if scan.automated_reviewer_authority:
+        errors.append("NO_GO_CONTROL_CANNOT_CREATE_REVIEWER_AUTHORITY")
+    return _result(errors, explanations=_no_go_scan_explanation(scan, blocked_categories, errors))
+
+
+def explain_no_go_blocked_categories(scan: NoGoControlScan) -> dict[str, Any]:
+    categories = _classify_no_go_categories(scan)
+    return {
+        "scan_id": scan.scan_id,
+        "blocked_categories": categories,
+        "control_state": "revision_required" if categories else "clean",
+        "context_only": scan.context_only,
+    }
+
+
+def validate_traceability_mapping_coverage(check: TraceabilityCoverageCheck) -> EDCContractValidationResult:
+    errors = _validate_traceability_check_base(check)
+    unmapped_prd_ids = _missing_required_ids(check.required_prd_ids, check.mapped_prd_ids)
+    unmapped_spec_ids = _missing_required_ids(check.required_spec_ids, check.mapped_spec_ids)
+    unmapped_ux_surface_ids = _missing_required_ids(check.required_ux_surface_ids, check.mapped_ux_surface_ids)
+    unmapped_test_case_ids = _missing_required_ids(check.required_test_case_ids, check.mapped_test_case_ids)
+    if unmapped_prd_ids:
+        errors.append("MISSING_PRD_TRACEABILITY_MAPPING")
+    if unmapped_spec_ids:
+        errors.append("MISSING_SPEC_TRACEABILITY_MAPPING")
+    if unmapped_ux_surface_ids:
+        errors.append("MISSING_UX_TRACEABILITY_MAPPING")
+    if unmapped_test_case_ids:
+        errors.append("MISSING_TEST_TRACEABILITY_MAPPING")
+    return _result(errors, explanations=_traceability_explanation(check))
+
+
+def validate_traceability_issue_coverage(check: TraceabilityCoverageCheck) -> EDCContractValidationResult:
+    errors = _validate_traceability_check_base(check)
+    unmapped_issue_ids: list[str] = []
+    for issue_id in ACCEPTED_EDC_ISSUE_IDS:
+        coverage = check.issue_coverage.get(issue_id, {})
+        if not coverage.get("prd_ids") or not coverage.get("spec_ids") or not coverage.get("ux_surface_ids") or not coverage.get("test_case_ids"):
+            unmapped_issue_ids.append(issue_id)
+    if unmapped_issue_ids:
+        errors.append("MISSING_ISSUE_TRACEABILITY_MAPPING")
+    explanations = _traceability_explanation(check)
+    explanations["unmapped_issue_ids"] = unmapped_issue_ids
+    return _result(errors, explanations=explanations)
+
+
+def validate_future_evidence_placeholders(check: TraceabilityCoverageCheck) -> EDCContractValidationResult:
+    errors = _validate_traceability_check_base(check)
+    missing_future_evidence_ids = _missing_required_ids(check.required_future_evidence_ids, check.mapped_future_evidence_ids)
+    if missing_future_evidence_ids:
+        errors.append("MISSING_FUTURE_EVIDENCE_PLACEHOLDER")
+    if check.future_execution_claimed:
+        errors.append("FUTURE_EVIDENCE_PLACEHOLDER_CANNOT_CLAIM_EXECUTION")
+    explanations = _traceability_explanation(check)
+    explanations.update(
+        {
+            "missing_future_evidence_ids": missing_future_evidence_ids,
+            "future_placeholders_mapped": not missing_future_evidence_ids,
+            "future_execution_claimed": check.future_execution_claimed,
+        }
+    )
+    return _result(errors, explanations=explanations)
+
+
+def validate_na_reason_coverage(check: TraceabilityCoverageCheck) -> EDCContractValidationResult:
+    errors = _validate_traceability_check_base(check)
+    missing_reason_ids = [mapping_id for mapping_id, reason in check.na_mappings.items() if not str(reason).strip()]
+    if missing_reason_ids:
+        errors.append("NA_MAPPING_REQUIRES_REASON")
+    explanations = _traceability_explanation(check)
+    explanations["na_missing_reason_ids"] = missing_reason_ids
+    return _result(errors, explanations=explanations)
+
+
+def validate_catalog_matrix_consistency(check: TraceabilityCoverageCheck) -> EDCContractValidationResult:
+    errors = _validate_traceability_check_base(check)
+    missing_from_matrix = _missing_required_ids(check.catalog_test_case_ids, check.matrix_test_case_ids)
+    missing_from_catalog = _missing_required_ids(check.matrix_test_case_ids, check.catalog_test_case_ids)
+    if missing_from_matrix or missing_from_catalog:
+        errors.append("CATALOG_MATRIX_TEST_IDS_MISMATCH")
+    explanations = _traceability_explanation(check)
+    explanations.update(
+        {
+            "catalog_matrix_match": not missing_from_matrix and not missing_from_catalog,
+            "missing_from_matrix": missing_from_matrix,
+            "missing_from_catalog": missing_from_catalog,
+        }
+    )
+    return _result(errors, explanations=explanations)
+
+
+def validate_traceability_revision_expansion(check: TraceabilityCoverageCheck) -> EDCContractValidationResult:
+    errors = _validate_traceability_check_base(check)
+    dropped_baseline_ids = _missing_required_ids(check.baseline_test_case_ids, check.current_test_case_ids)
+    if dropped_baseline_ids:
+        errors.append("REVISION_DROPPED_ACCEPTED_BASELINE_COVERAGE")
+    if len(set(check.current_test_case_ids)) <= len(set(check.baseline_test_case_ids)):
+        errors.append("REVISION_DID_NOT_EXPAND_BASELINE_COVERAGE")
+    explanations = _traceability_explanation(check)
+    explanations.update(
+        {
+            "baseline_coverage_preserved": not dropped_baseline_ids,
+            "dropped_baseline_test_case_ids": dropped_baseline_ids,
+            "current_test_case_count": len(set(check.current_test_case_ids)),
+            "baseline_test_case_count": len(set(check.baseline_test_case_ids)),
+        }
+    )
+    return _result(errors, explanations=explanations)
+
+
+def validate_traceability_control_boundary(check: TraceabilityCoverageCheck) -> EDCContractValidationResult:
+    errors = _validate_traceability_check_base(check)
+    return _result(errors, explanations=_traceability_explanation(check))
+
+
+def explain_traceability_gaps(check: TraceabilityCoverageCheck) -> dict[str, Any]:
+    explanations = _traceability_explanation(check)
+    explanations["unmapped_issue_ids"] = [
+        issue_id
+        for issue_id in ACCEPTED_EDC_ISSUE_IDS
+        if not check.issue_coverage.get(issue_id, {}).get("test_case_ids")
+    ]
+    return explanations
+
+
 def stable_contract_hash(value: Any) -> str:
     encoded = json.dumps(_json_safe(value), sort_keys=True, separators=(",", ":")).encode("utf-8")
     return sha256(encoded).hexdigest()
@@ -2198,6 +2449,135 @@ def _missing_package_ref(value: EvidenceReference | None, error: str) -> list[st
     if value is None:
         return [error]
     return validate_evidence_reference(value).errors
+
+
+def _classify_no_go_categories(scan: NoGoControlScan) -> list[str]:
+    text = (scan.scanned_text or "").lower()
+    categories = [category for category in scan.declared_blocked_categories if category in NO_GO_BLOCKED_CATEGORIES]
+    for category, terms in NO_GO_CATEGORY_TERMS.items():
+        if any(term in text for term in terms) and category not in categories:
+            categories.append(category)
+    if (scan.claimed_green_verdict or scan.claimed_pass) and "blocked_green_verdict_claim" not in categories:
+        categories.append("blocked_green_verdict_claim")
+    if (
+        scan.claimed_readiness_approval
+        or scan.claimed_formal_exit
+        or scan.claimed_production_ready
+        or scan.claimed_release_ready
+    ) and "blocked_readiness_claim" not in categories:
+        categories.append("blocked_readiness_claim")
+    if scan.authorizes_future_task and "blocked_downstream_packet" not in categories:
+        categories.append("blocked_downstream_packet")
+    if (
+        scan.cleanup_archive_delete_requested or scan.repository_mutation_requested
+    ) and "blocked_cleanup_action" not in categories:
+        categories.append("blocked_cleanup_action")
+    return categories
+
+
+def _validate_no_go_scan_base(scan: NoGoControlScan) -> list[str]:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(scan.scan_id, "MISSING_NO_GO_SCAN_ID"))
+    errors.extend(_missing_scalar(scan.scanned_artifact_id, "MISSING_NO_GO_SCANNED_ARTIFACT_ID"))
+    errors.extend(_missing_scalar(scan.scanned_text, "MISSING_NO_GO_SCANNED_TEXT"))
+    errors.extend(_missing_list(scan.no_go_control_ids, "MISSING_NO_GO_CONTROL_IDS"))
+    for control_id in scan.no_go_control_ids:
+        if control_id not in NO_GO_CONTROL_IDS:
+            errors.append("UNKNOWN_NO_GO_CONTROL_ID")
+    for category in scan.declared_blocked_categories:
+        if category not in NO_GO_BLOCKED_CATEGORIES:
+            errors.append("UNKNOWN_NO_GO_BLOCKED_CATEGORY")
+    errors.extend(_missing_package_ref(scan.source_authority_ref, "MISSING_NO_GO_SOURCE_AUTHORITY_REF"))
+    errors.extend(_missing_package_ref(scan.candidate_verdict_ref, "MISSING_NO_GO_CANDIDATE_VERDICT_REF"))
+    errors.extend(_missing_scalar(scan.candidate_verdict, "MISSING_NO_GO_CANDIDATE_VERDICT"))
+    if scan.traceability is None:
+        errors.append("MISSING_NO_GO_TRACEABILITY")
+    else:
+        errors.extend(_validate_traceability(scan.traceability))
+    if scan.context_only is not True:
+        errors.append("NO_GO_CONTROL_MUST_BE_CONTEXT_ONLY")
+    if scan.not_business_completion is not True:
+        errors.append("NO_GO_CONTROL_IS_NOT_BUSINESS_COMPLETION")
+    return errors
+
+
+def _no_go_scan_explanation(
+    scan: NoGoControlScan,
+    blocked_categories: list[str],
+    errors: list[str],
+) -> dict[str, Any]:
+    return {
+        "scan_id": scan.scan_id,
+        "scanned_artifact_id": scan.scanned_artifact_id,
+        "blocked_categories": list(blocked_categories),
+        "control_state": "revision_required" if blocked_categories or errors else scan.scan_state,
+        "context_only": scan.context_only,
+        "creates_green_verdict": False,
+        "authorizes_future_task": False,
+        "repository_mutation": False,
+        "candidate_verdict": scan.candidate_verdict,
+        "scan_hash": scan.scan_hash(),
+    }
+
+
+def _validate_traceability_check_base(check: TraceabilityCoverageCheck) -> list[str]:
+    errors: list[str] = []
+    errors.extend(_missing_scalar(check.coverage_check_id, "MISSING_TRACEABILITY_COVERAGE_CHECK_ID"))
+    errors.extend(_missing_list(check.required_prd_ids, "MISSING_REQUIRED_PRD_IDS"))
+    errors.extend(_missing_list(check.required_spec_ids, "MISSING_REQUIRED_SPEC_IDS"))
+    errors.extend(_missing_list(check.required_ux_surface_ids, "MISSING_REQUIRED_UX_SURFACE_IDS"))
+    errors.extend(_missing_list(check.required_test_case_ids, "MISSING_REQUIRED_TEST_CASE_IDS"))
+    errors.extend(_missing_package_ref(check.source_authority_ref, "MISSING_TRACEABILITY_SOURCE_AUTHORITY_REF"))
+    errors.extend(_missing_package_ref(check.candidate_verdict_ref, "MISSING_TRACEABILITY_CANDIDATE_VERDICT_REF"))
+    errors.extend(_missing_scalar(check.candidate_verdict, "MISSING_TRACEABILITY_CANDIDATE_VERDICT"))
+    if check.traceability is None:
+        errors.append("MISSING_TRACEABILITY_CONTROL_TRACEABILITY")
+    else:
+        errors.extend(_validate_traceability(check.traceability))
+    if check.context_only is not True:
+        errors.append("TRACEABILITY_CONTROL_MUST_BE_CONTEXT_ONLY")
+    if check.not_business_completion is not True:
+        errors.append("TRACEABILITY_CONTROL_IS_NOT_BUSINESS_COMPLETION")
+    if check.green_verdict_claimed:
+        errors.append("TRACEABILITY_CONTROL_CANNOT_CREATE_GREEN_VERDICT")
+    if check.authorizes_future_task:
+        errors.append("TRACEABILITY_CONTROL_CANNOT_AUTHORIZE_FUTURE_TASK")
+    if check.cleanup_archive_delete_requested:
+        errors.append("TRACEABILITY_CONTROL_CANNOT_MUTATE_REPOSITORY")
+    return errors
+
+
+def _missing_required_ids(required_ids: list[str], mapped_ids: list[str]) -> list[str]:
+    mapped = set(mapped_ids)
+    return [required_id for required_id in required_ids if required_id not in mapped]
+
+
+def _traceability_explanation(check: TraceabilityCoverageCheck) -> dict[str, Any]:
+    unmapped_prd_ids = _missing_required_ids(check.required_prd_ids, check.mapped_prd_ids)
+    unmapped_spec_ids = _missing_required_ids(check.required_spec_ids, check.mapped_spec_ids)
+    unmapped_ux_surface_ids = _missing_required_ids(check.required_ux_surface_ids, check.mapped_ux_surface_ids)
+    unmapped_test_case_ids = _missing_required_ids(check.required_test_case_ids, check.mapped_test_case_ids)
+    return {
+        "coverage_check_id": check.coverage_check_id,
+        "coverage_state": "incomplete" if (
+            unmapped_prd_ids or unmapped_spec_ids or unmapped_ux_surface_ids or unmapped_test_case_ids
+        ) else check.coverage_state,
+        "unmapped_prd_ids": unmapped_prd_ids,
+        "unmapped_spec_ids": unmapped_spec_ids,
+        "unmapped_ux_surface_ids": unmapped_ux_surface_ids,
+        "unmapped_test_case_ids": unmapped_test_case_ids,
+        "mapped_prd_count": len(set(check.mapped_prd_ids)),
+        "mapped_spec_count": len(set(check.mapped_spec_ids)),
+        "mapped_ux_surface_count": len(set(check.mapped_ux_surface_ids)),
+        "mapped_test_case_count": len(set(check.mapped_test_case_ids)),
+        "mapped_ux_surface_ids": list(check.mapped_ux_surface_ids),
+        "context_only": check.context_only,
+        "authorizes_future_task": False,
+        "creates_green_verdict": False,
+        "repository_mutation": False,
+        "candidate_verdict": check.candidate_verdict,
+        "coverage_hash": check.coverage_hash(),
+    }
 
 
 def _validate_kernel_projection_base(
