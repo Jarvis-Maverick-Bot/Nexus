@@ -83,7 +83,8 @@ for (const [internalId, githubNumber] of [
   ["EDC-PR-003", 29],
   ["EDC-PR-004", 30],
   ["EDC-PR-005", 31],
-  ["EDC-PR-006", 32]
+  ["EDC-PR-006", 32],
+  ["EDC-PR-007", 33]
 ]) {
   const mapping = byId.get(internalId);
   requireTrue(Boolean(mapping), `missing PR mapping for ${internalId}`);
@@ -96,8 +97,9 @@ requireTrue(!mappings.some((mapping) => mapping.baseline_role === "uat_baseline"
 
 const edc007 = byId.get("EDC-PR-007");
 requireTrue(Boolean(edc007), "missing EDC-PR-007 mapping");
-requireTrue(edc007.github_pr_number === null && edc007.github_pr_label === "TBD", "EDC-PR-007 GitHub PR must remain TBD");
+requireTrue(edc007.github_pr_number === 33 && edc007.github_pr_label === "#33", "EDC-PR-007 GitHub PR must map to #33");
 requireTrue(edc007.branch === "codex/edc-pr-007-desktop-workbench-shell", "EDC-PR-007 branch mapping is invalid");
+requireTrue(edc007.status === "draft_pr_open", "EDC-PR-007 GitHub PR status must be draft_pr_open");
 requireTrue(edc007.worktree?.endsWith(".worktrees\\edc-pr-007-desktop-workbench-shell"), "EDC-PR-007 worktree mapping is invalid");
 requireTrue(edc007.base_commit === "d6a8b55", "EDC-PR-007 base commit must be d6a8b55");
 

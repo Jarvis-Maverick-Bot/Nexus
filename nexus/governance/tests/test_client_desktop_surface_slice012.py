@@ -83,7 +83,9 @@ def test_workbench_fixture_maps_edc_ids_separately_from_github_pr_numbers() -> N
 
     by_id = {mapping["internal_id"]: mapping for mapping in mappings}
     assert by_id["EDC-PR-006"]["github_pr_number"] == 32
-    assert by_id["EDC-PR-007"]["github_pr_number"] is None
+    assert by_id["EDC-PR-007"]["github_pr_number"] == 33
+    assert by_id["EDC-PR-007"]["github_pr_label"] == "#33"
+    assert by_id["EDC-PR-007"]["status"] == "draft_pr_open"
     assert by_id["EDC-PR-007"]["branch"] == "codex/edc-pr-007-desktop-workbench-shell"
     assert by_id["EDC-PR-007"]["base_commit"] == "d6a8b55"
     assert by_id["EDC-PR-004"]["baseline_role"] == "superseded_prototype"

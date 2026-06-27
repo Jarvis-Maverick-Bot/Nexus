@@ -47,7 +47,7 @@
     {"internal_id": "EDC-PR-004", "github_pr_number": 30, "github_pr_label": "#30", "branch": "codex/edc-pr-004-desktop-delivery-board", "status": "draft_pr_open", "baseline_role": "superseded_prototype"},
     {"internal_id": "EDC-PR-005", "github_pr_number": 31, "github_pr_label": "#31", "branch": "codex/edc-pr-005-owner-uat-closeout", "status": "draft_pr_open", "baseline_role": "superseded_prototype"},
     {"internal_id": "EDC-PR-006", "github_pr_number": 32, "github_pr_label": "#32", "branch": "codex/edc-pr-006-ux-reset-workbench", "status": "draft_pr_open", "baseline_role": "active_ux_reset"},
-    {"internal_id": "EDC-PR-007", "github_pr_number": null, "github_pr_label": "TBD", "branch": "codex/edc-pr-007-desktop-workbench-shell", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-007-desktop-workbench-shell", "base_commit": "d6a8b55", "status": "implementation_in_review", "baseline_role": "current_shell_slice"}
+    {"internal_id": "EDC-PR-007", "github_pr_number": 33, "github_pr_label": "#33", "branch": "codex/edc-pr-007-desktop-workbench-shell", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-007-desktop-workbench-shell", "base_commit": "d6a8b55", "status": "draft_pr_open", "baseline_role": "current_shell_slice"}
   ],
   "views": [
     {"id": "work_items", "label": "Work Items", "title": "Work Items", "purpose": "Scan work item board/list state; detailed implementation belongs to the next slice.", "implementation_pr": "EDC-PR-008", "readiness_state": "shell_only", "nav_target": "work_items", "navigation_semantics": "stateful_view_switch", "safety_state": "summary_only"},
