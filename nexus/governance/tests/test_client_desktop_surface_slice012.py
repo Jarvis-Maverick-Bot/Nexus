@@ -26,6 +26,19 @@ REQUIRED_WORK_ITEM_IDS = (
     "EDC-PR-010",
 )
 
+REQUIRED_AGENT_ROLES = (
+    "codex_planning",
+    "codex_execution",
+    "reviewer_reducer",
+    "owner_uat",
+)
+
+REQUIRED_RUNTIME_WORKTREE_IDS = (
+    "EDC-PR-006",
+    "EDC-PR-007",
+    "EDC-PR-008",
+    "EDC-PR-009",
+)
 REQUIRED_TASK_CARD_FIELDS = (
     "goal",
     "scope_summary",
@@ -144,7 +157,7 @@ def test_workbench_first_screen_and_renderer_use_real_view_switching() -> None:
     assert "Nexus Agent Coding Team Workbench" in html
     assert "Nexus L1 Governance UX Test Surface" not in html
     assert "L1GOV-SLICE-012" not in html
-    assert "fetch(\"./fixtures/edc_workbench_shell_state.json\")" in main_js
+    assert 'fetch("./fixtures/edc_workbench_shell_state.json")' in main_js
     assert "activeViewId" in main_js
     assert "renderActiveView" in main_js
     assert "renderWorkItemsBoard" in main_js
@@ -153,7 +166,7 @@ def test_workbench_first_screen_and_renderer_use_real_view_switching() -> None:
     assert "selectView" in main_js
     assert "scrollIntoView" not in main_js
     assert "location.hash" not in main_js
-    assert "href=\"#" not in html
+    assert 'href="#' not in html
 
     for view_id in REQUIRED_VIEW_IDS:
         assert f'data-view-id="{view_id}"' in html
@@ -165,7 +178,7 @@ def test_workbench_fixture_contains_work_item_board_and_detail_records() -> None
     by_id = {item["internal_id"]: item for item in work_items}
 
     assert tuple(by_id) == REQUIRED_WORK_ITEM_IDS
-    assert fixture["selected_work_item_id"] == "EDC-PR-008"
+    assert fixture["selected_work_item_id"] == "EDC-PR-009"
 
     for item in work_items:
         assert re.fullmatch(r"EDC-PR-\d{3}", item["internal_id"])
@@ -188,7 +201,12 @@ def test_workbench_fixture_contains_work_item_board_and_detail_records() -> None
     assert by_id["EDC-PR-008"]["branch"] == "codex/edc-pr-008-work-items-surface"
     assert by_id["EDC-PR-008"]["worktree"].endswith(".worktrees\\edc-pr-008-work-items-surface")
     assert by_id["EDC-PR-008"]["base_commit"] == "e14d71e"
-    assert by_id["EDC-PR-009"]["lane"] == "planned"
+    assert by_id["EDC-PR-009"]["lane"] == "in_progress"
+    assert by_id["EDC-PR-009"]["github_pr_number"] is None
+    assert by_id["EDC-PR-009"]["github_pr_label"] == "TBD"
+    assert by_id["EDC-PR-009"]["branch"] == "codex/edc-pr-009-agents-runtime-worktrees"
+    assert by_id["EDC-PR-009"]["worktree"].endswith(".worktrees\\edc-pr-009-agents-runtime-worktrees")
+    assert by_id["EDC-PR-009"]["base_commit"] == "a2a9778"
     assert by_id["EDC-PR-010"]["owner_uat_state"] == "awaiting_owner"
 
 
@@ -224,6 +242,82 @@ def test_workbench_work_items_and_detail_have_distinct_render_targets() -> None:
     assert "button.innerHTML" not in main_js
     assert "append(topRow, title, stateMeta, branchMeta)" in main_js
 
+
+def test_workbench_fixture_contains_agent_team_records_and_boundaries() -> None:
+    fixture = load_fixture()
+    agents = fixture["agents"]
+    by_role = {agent["role_id"]: agent for agent in agents}
+
+    assert tuple(by_role) == REQUIRED_AGENT_ROLES
+    assert by_role["codex_planning"]["current_assignment_id"] == "EDC-PR-009-planning-review"
+    assert by_role["codex_execution"]["current_assignment_id"] == "EDC-PR-009-implementation"
+    assert by_role["reviewer_reducer"]["reducer_owner_for"] == ["EDC-PR-009"]
+    assert by_role["owner_uat"]["availability"] == "after_edc_pr_010"
+
+    for agent in agents:
+        assert agent["display_name"]
+        assert agent["authority_note"]
+        assert agent["allowed_actions"]
+        assert agent["forbidden_actions"]
+        assert "live_dispatch" in agent["forbidden_actions"]
+        assert "credential_access" in agent["forbidden_actions"]
+        assert "private_session_access" in agent["forbidden_actions"]
+
+    assert "owner_uat_acceptance" not in by_role["codex_execution"]["allowed_actions"]
+    assert "automated_validation" not in by_role["owner_uat"]["allowed_actions"]
+
+
+def test_workbench_fixture_contains_runtime_worktree_records_and_nats_boundary() -> None:
+    fixture = load_fixture()
+    runtime_records = fixture["runtime_worktrees"]
+    by_id = {record["internal_id"]: record for record in runtime_records}
+
+    assert tuple(by_id) == REQUIRED_RUNTIME_WORKTREE_IDS
+    assert by_id["EDC-PR-008"]["github_pr_number"] == 34
+    assert by_id["EDC-PR-009"]["github_pr_number"] is None
+    assert by_id["EDC-PR-009"]["github_pr_label"] == "TBD"
+    assert by_id["EDC-PR-009"]["branch"] == "codex/edc-pr-009-agents-runtime-worktrees"
+    assert by_id["EDC-PR-009"]["worktree"].endswith(".worktrees\\edc-pr-009-agents-runtime-worktrees")
+    assert by_id["EDC-PR-009"]["base_commit"] == "a2a9778"
+    assert by_id["EDC-PR-009"]["current_slice"] is True
+
+    for record in runtime_records:
+        assert record["runtime_authorization_state"] in {"hold", "not_required"}
+        assert record["startup_allowed"] is False
+        assert record["dependency_install_allowed"] is False
+        assert record["broker_mutation_allowed"] is False
+        assert record["live_dispatch_allowed"] is False
+        assert record["cleanup_allowed"] is False
+        assert record["safety_state"] in {"inspection_only", "runtime_hold"}
+
+    nats = fixture["nats_boundary"]
+    assert nats["local_test"]["nats"] == "127.0.0.1:7422"
+    assert nats["local_test"]["monitor"] == "http://127.0.0.1:8422/varz"
+    assert nats["local_test"]["use_allowed"] is False
+    assert nats["openclaw_live"]["nats"] == "127.0.0.1:4222"
+    assert nats["openclaw_live"]["use_allowed"] is False
+    assert nats["openclaw_live"]["mutation_allowed"] is False
+
+
+def test_workbench_agents_and_runtime_views_have_dedicated_render_targets() -> None:
+    html = read_app_file("src/index.html")
+    main_js = read_app_file("src/main.js")
+
+    for element_id in (
+        "agents-region",
+        "agent-team-list",
+        "runtime-worktrees-region",
+        "runtime-worktree-list",
+        "nats-boundary",
+    ):
+        assert f'id="{element_id}"' in html
+
+    assert "renderAgentsView" in main_js
+    assert "renderRuntimeWorktreesView" in main_js
+    assert '$("agents-region").hidden = regionName !== "agents"' in main_js
+    assert '$("runtime-worktrees-region").hidden = regionName !== "runtime_worktrees"' in main_js
+    assert "state.agentsByRole" in main_js
+    assert "state.runtimeWorktreesById" in main_js
 
 def test_workbench_shell_exposes_global_context_and_blocked_authority() -> None:
     html = read_app_file("src/index.html")
