@@ -122,9 +122,9 @@ requireTrue(edc008.worktree?.endsWith(".worktrees\\edc-pr-008-work-items-surface
 requireTrue(edc008.base_commit === "e14d71e", "EDC-PR-008 base commit must be e14d71e");
 const edc009 = byId.get("EDC-PR-009");
 requireTrue(Boolean(edc009), "missing EDC-PR-009 mapping");
-requireTrue(edc009.github_pr_number === null && edc009.github_pr_label === "TBD", "EDC-PR-009 GitHub PR must remain TBD");
+requireTrue(edc009.github_pr_number === 35 && edc009.github_pr_label === "#35", "EDC-PR-009 GitHub PR must map to #35");
 requireTrue(edc009.branch === "codex/edc-pr-009-agents-runtime-worktrees", "EDC-PR-009 branch mapping is invalid");
-requireTrue(edc009.status === "implementation_in_review", "EDC-PR-009 status must be implementation_in_review");
+requireTrue(edc009.status === "draft_pr_open", "EDC-PR-009 status must be draft_pr_open");
 requireTrue(edc009.worktree?.endsWith(".worktrees\\edc-pr-009-agents-runtime-worktrees"), "EDC-PR-009 worktree mapping is invalid");
 requireTrue(edc009.base_commit === "a2a9778", "EDC-PR-009 base commit must be a2a9778");
 
@@ -150,9 +150,9 @@ requireTrue(workItemsById.get("EDC-PR-008")?.github_pr_number === 34, "EDC-PR-00
 requireTrue(workItemsById.get("EDC-PR-008")?.github_pr_label === "#34", "EDC-PR-008 work item must show PR #34");
 requireTrue(workItemsById.get("EDC-PR-008")?.branch === "codex/edc-pr-008-work-items-surface", "EDC-PR-008 work item branch is invalid");
 requireTrue(workItemsById.get("EDC-PR-008")?.worktree?.endsWith(".worktrees\\edc-pr-008-work-items-surface"), "EDC-PR-008 work item worktree is invalid");
-requireTrue(workItemsById.get("EDC-PR-009")?.github_pr_number === null, "EDC-PR-009 work item must keep PR TBD");
-requireTrue(workItemsById.get("EDC-PR-009")?.github_pr_label === "TBD", "EDC-PR-009 work item label must remain TBD");
-requireTrue(workItemsById.get("EDC-PR-009")?.lane === "in_progress", "EDC-PR-009 work item must be in progress");
+requireTrue(workItemsById.get("EDC-PR-009")?.github_pr_number === 35, "EDC-PR-009 work item must map to GitHub PR #35");
+requireTrue(workItemsById.get("EDC-PR-009")?.github_pr_label === "#35", "EDC-PR-009 work item label must show PR #35");
+requireTrue(workItemsById.get("EDC-PR-009")?.lane === "draft_pr_open", "EDC-PR-009 work item must be draft PR open");
 requireTrue(workItemsById.get("EDC-PR-009")?.branch === "codex/edc-pr-009-agents-runtime-worktrees", "EDC-PR-009 work item branch is invalid");
 requireTrue(workItemsById.get("EDC-PR-009")?.worktree?.endsWith(".worktrees\\edc-pr-009-agents-runtime-worktrees"), "EDC-PR-009 work item worktree is invalid");
 requireTrue(workItemsById.get("EDC-PR-009")?.base_commit === "a2a9778", "EDC-PR-009 work item base is invalid");
@@ -190,7 +190,8 @@ for (const record of runtimeWorktrees) {
   requireTrue(record.live_dispatch_allowed === false, `${record.internal_id} must block live dispatch`);
   requireTrue(record.cleanup_allowed === false, `${record.internal_id} must block cleanup`);
 }
-requireTrue(runtimeById.get("EDC-PR-009")?.github_pr_number === null, "EDC-PR-009 runtime worktree must keep PR TBD");
+requireTrue(runtimeById.get("EDC-PR-009")?.github_pr_number === 35, "EDC-PR-009 runtime worktree must map to GitHub PR #35");
+requireTrue(runtimeById.get("EDC-PR-009")?.github_pr_label === "#35", "EDC-PR-009 runtime worktree label must show PR #35");
 requireTrue(runtimeById.get("EDC-PR-009")?.current_slice === true, "EDC-PR-009 runtime worktree must be current slice");
 requireTrue(runtimeById.get("EDC-PR-009")?.base_commit === "a2a9778", "EDC-PR-009 runtime worktree base is invalid");
 

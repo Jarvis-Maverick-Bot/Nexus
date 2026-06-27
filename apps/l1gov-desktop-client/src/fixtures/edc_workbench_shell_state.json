@@ -50,7 +50,7 @@
     {"internal_id": "EDC-PR-006", "github_pr_number": 32, "github_pr_label": "#32", "branch": "codex/edc-pr-006-ux-reset-workbench", "status": "draft_pr_open", "baseline_role": "active_ux_reset"},
     {"internal_id": "EDC-PR-007", "github_pr_number": 33, "github_pr_label": "#33", "branch": "codex/edc-pr-007-desktop-workbench-shell", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-007-desktop-workbench-shell", "base_commit": "d6a8b55", "status": "draft_pr_open", "baseline_role": "active_shell_slice"},
     {"internal_id": "EDC-PR-008", "github_pr_number": 34, "github_pr_label": "#34", "branch": "codex/edc-pr-008-work-items-surface", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-008-work-items-surface", "base_commit": "e14d71e", "status": "draft_pr_open", "baseline_role": "active_work_items_slice"},
-    {"internal_id": "EDC-PR-009", "github_pr_number": null, "github_pr_label": "TBD", "branch": "codex/edc-pr-009-agents-runtime-worktrees", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-009-agents-runtime-worktrees", "base_commit": "a2a9778", "status": "implementation_in_review", "baseline_role": "current_agents_runtime_slice"}
+    {"internal_id": "EDC-PR-009", "github_pr_number": 35, "github_pr_label": "#35", "branch": "codex/edc-pr-009-agents-runtime-worktrees", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-009-agents-runtime-worktrees", "base_commit": "a2a9778", "status": "draft_pr_open", "baseline_role": "current_agents_runtime_slice"}
   ],
   "views": [
     {"id": "work_items", "label": "Work Items", "title": "Work Items", "purpose": "Scan EDC work items by lane, branch, PR mapping, evidence, and UAT-safe readiness.", "implementation_pr": "EDC-PR-008", "readiness_state": "implemented", "nav_target": "work_items", "navigation_semantics": "stateful_view_switch", "safety_state": "fixture_read_model"},
@@ -150,20 +150,20 @@
     {
       "internal_id": "EDC-PR-009",
       "title": "Agents, Runtime, And Worktree Surface",
-      "status": "running",
-      "lane": "in_progress",
-      "readiness_state": "in_review",
+      "status": "review",
+      "lane": "draft_pr_open",
+      "readiness_state": "validated",
       "evidence_state": "not_run_by_scope",
       "owner_uat_state": "not_ready",
       "runtime_authorization_state": "hold",
-      "github_pr_number": null,
-      "github_pr_label": "TBD",
+      "github_pr_number": 35,
+      "github_pr_label": "#35",
       "branch": "codex/edc-pr-009-agents-runtime-worktrees",
       "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-009-agents-runtime-worktrees",
       "base_commit": "a2a9778",
       "assignee": "Codex Execution",
       "reviewer": "Codex Planning",
-      "blockers": ["GitHub PR mapping is TBD until Planning creates the draft PR."],
+      "blockers": [],
       "residual_risks": ["Runtime and worktree controls must remain inspection-only unless a future task authorizes named commands."],
       "task_card": {
         "goal": "Implement Agents, Runtime, and Worktree surfaces in the Workbench shell.",
@@ -255,7 +255,7 @@
     {"internal_id": "EDC-PR-006", "github_pr_number": 32, "github_pr_label": "#32", "branch": "codex/edc-pr-006-ux-reset-workbench", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-006-ux-reset-workbench", "base_commit": "a87d06e", "head_commit": "d6a8b55", "current_slice": false, "cleanliness": "not_inspected_in_this_fixture", "validation_state": "docs_validated", "runtime_authorization_state": "not_required", "safety_state": "inspection_only", "startup_allowed": false, "dependency_install_allowed": false, "broker_mutation_allowed": false, "live_dispatch_allowed": false, "cleanup_allowed": false},
     {"internal_id": "EDC-PR-007", "github_pr_number": 33, "github_pr_label": "#33", "branch": "codex/edc-pr-007-desktop-workbench-shell", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-007-desktop-workbench-shell", "base_commit": "d6a8b55", "head_commit": "e14d71e", "current_slice": false, "cleanliness": "not_inspected_in_this_fixture", "validation_state": "shell_validated", "runtime_authorization_state": "not_required", "safety_state": "inspection_only", "startup_allowed": false, "dependency_install_allowed": false, "broker_mutation_allowed": false, "live_dispatch_allowed": false, "cleanup_allowed": false},
     {"internal_id": "EDC-PR-008", "github_pr_number": 34, "github_pr_label": "#34", "branch": "codex/edc-pr-008-work-items-surface", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-008-work-items-surface", "base_commit": "e14d71e", "head_commit": "a2a9778", "current_slice": false, "cleanliness": "accepted_by_planning", "validation_state": "work_items_validated", "runtime_authorization_state": "hold", "safety_state": "inspection_only", "startup_allowed": false, "dependency_install_allowed": false, "broker_mutation_allowed": false, "live_dispatch_allowed": false, "cleanup_allowed": false},
-    {"internal_id": "EDC-PR-009", "github_pr_number": null, "github_pr_label": "TBD", "branch": "codex/edc-pr-009-agents-runtime-worktrees", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-009-agents-runtime-worktrees", "base_commit": "a2a9778", "head_commit": "fixture_pending", "current_slice": true, "cleanliness": "implementation_in_progress", "validation_state": "pending_execution_validation", "runtime_authorization_state": "hold", "safety_state": "runtime_hold", "startup_allowed": false, "dependency_install_allowed": false, "broker_mutation_allowed": false, "live_dispatch_allowed": false, "cleanup_allowed": false}
+    {"internal_id": "EDC-PR-009", "github_pr_number": 35, "github_pr_label": "#35", "branch": "codex/edc-pr-009-agents-runtime-worktrees", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-009-agents-runtime-worktrees", "base_commit": "a2a9778", "head_commit": "752908c", "current_slice": true, "cleanliness": "accepted_by_planning", "validation_state": "agents_runtime_validated", "runtime_authorization_state": "hold", "safety_state": "runtime_hold", "startup_allowed": false, "dependency_install_allowed": false, "broker_mutation_allowed": false, "live_dispatch_allowed": false, "cleanup_allowed": false}
   ],
   "nats_boundary": {
     "local_test": {"nats": "127.0.0.1:7422", "monitor": "http://127.0.0.1:8422/varz", "use_allowed": false, "mutation_allowed": false, "note": "Dedicated Nexus local-test NATS reference only; this slice does not start or mutate it."},

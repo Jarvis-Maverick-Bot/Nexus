@@ -201,9 +201,9 @@ def test_workbench_fixture_contains_work_item_board_and_detail_records() -> None
     assert by_id["EDC-PR-008"]["branch"] == "codex/edc-pr-008-work-items-surface"
     assert by_id["EDC-PR-008"]["worktree"].endswith(".worktrees\\edc-pr-008-work-items-surface")
     assert by_id["EDC-PR-008"]["base_commit"] == "e14d71e"
-    assert by_id["EDC-PR-009"]["lane"] == "in_progress"
-    assert by_id["EDC-PR-009"]["github_pr_number"] is None
-    assert by_id["EDC-PR-009"]["github_pr_label"] == "TBD"
+    assert by_id["EDC-PR-009"]["lane"] == "draft_pr_open"
+    assert by_id["EDC-PR-009"]["github_pr_number"] == 35
+    assert by_id["EDC-PR-009"]["github_pr_label"] == "#35"
     assert by_id["EDC-PR-009"]["branch"] == "codex/edc-pr-009-agents-runtime-worktrees"
     assert by_id["EDC-PR-009"]["worktree"].endswith(".worktrees\\edc-pr-009-agents-runtime-worktrees")
     assert by_id["EDC-PR-009"]["base_commit"] == "a2a9778"
@@ -274,8 +274,8 @@ def test_workbench_fixture_contains_runtime_worktree_records_and_nats_boundary()
 
     assert tuple(by_id) == REQUIRED_RUNTIME_WORKTREE_IDS
     assert by_id["EDC-PR-008"]["github_pr_number"] == 34
-    assert by_id["EDC-PR-009"]["github_pr_number"] is None
-    assert by_id["EDC-PR-009"]["github_pr_label"] == "TBD"
+    assert by_id["EDC-PR-009"]["github_pr_number"] == 35
+    assert by_id["EDC-PR-009"]["github_pr_label"] == "#35"
     assert by_id["EDC-PR-009"]["branch"] == "codex/edc-pr-009-agents-runtime-worktrees"
     assert by_id["EDC-PR-009"]["worktree"].endswith(".worktrees\\edc-pr-009-agents-runtime-worktrees")
     assert by_id["EDC-PR-009"]["base_commit"] == "a2a9778"
