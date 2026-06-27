@@ -39,6 +39,47 @@ REQUIRED_RUNTIME_WORKTREE_IDS = (
     "EDC-PR-008",
     "EDC-PR-009",
 )
+
+REQUIRED_EVIDENCE_RUN_IDS = (
+    "EDC-PR-006",
+    "EDC-PR-007",
+    "EDC-PR-008",
+    "EDC-PR-009",
+    "EDC-PR-010",
+)
+
+REQUIRED_PR_STACK_IDS = (
+    "EDC-PR-001",
+    "EDC-PR-002",
+    "EDC-PR-003",
+    "EDC-PR-004",
+    "EDC-PR-005",
+    "EDC-PR-006",
+    "EDC-PR-007",
+    "EDC-PR-008",
+    "EDC-PR-009",
+    "EDC-PR-010",
+)
+
+REQUIRED_ATTENTION_IDS = (
+    "owner_uat_needed",
+    "merge_blocked",
+    "runtime_startup_separate_authorization",
+    "dependency_install_not_authorized",
+    "broker_nats_mutation_blocked",
+    "live_dispatch_blocked",
+    "edc_pr_010_pr_mapping_tbd",
+)
+
+REQUIRED_BOUNDARY_IDS = (
+    "planning_execution_role_boundary",
+    "openclaw_private_material_exclusion",
+    "nexus_local_test_vs_openclaw_live_nats",
+    "worktree_location_policy",
+    "evidence_before_claim",
+    "pr_mapping_separation",
+    "no_owner_uat_automation",
+)
 REQUIRED_TASK_CARD_FIELDS = (
     "goal",
     "scope_summary",
@@ -178,7 +219,7 @@ def test_workbench_fixture_contains_work_item_board_and_detail_records() -> None
     by_id = {item["internal_id"]: item for item in work_items}
 
     assert tuple(by_id) == REQUIRED_WORK_ITEM_IDS
-    assert fixture["selected_work_item_id"] == "EDC-PR-009"
+    assert fixture["selected_work_item_id"] == "EDC-PR-010"
 
     for item in work_items:
         assert re.fullmatch(r"EDC-PR-\d{3}", item["internal_id"])
@@ -400,3 +441,103 @@ def test_workbench_app_ignores_local_toolchain_and_build_outputs() -> None:
         ".tmp-render/",
     ):
         assert pattern in gitignore
+
+
+def test_workbench_fixture_contains_evidence_run_records_and_gates() -> None:
+    fixture = load_fixture()
+    records = fixture["evidence_runs"]
+    by_id = {record["internal_id"]: record for record in records}
+
+    assert tuple(by_id) == REQUIRED_EVIDENCE_RUN_IDS
+    assert by_id["EDC-PR-010"]["github_pr_number"] is None
+    assert by_id["EDC-PR-010"]["github_pr_label"] == "TBD"
+    assert by_id["EDC-PR-010"]["status"] == "not_run"
+    assert by_id["EDC-PR-010"]["evidence_state"] == "not_run_by_scope"
+    assert by_id["EDC-PR-010"]["not_run_reason"]
+
+    for record in records:
+        assert re.fullmatch(r"EDC-PR-\d{3}", record["internal_id"])
+        assert record["command"]
+        assert record["status"] in {"passed", "not_run"}
+        assert record["evidence_state"] in {"present", "not_run_by_scope"}
+        if record["status"] == "passed":
+            assert record["evidence_ref"]
+        if record["evidence_state"] == "not_run_by_scope":
+            assert record["not_run_reason"]
+
+
+def test_workbench_fixture_contains_pr_uat_closeout_without_acceptance_claims() -> None:
+    fixture = load_fixture()
+    pr_stack = fixture["pr_stack"]
+    by_id = {record["internal_id"]: record for record in pr_stack}
+    owner = fixture["owner_uat_decision"]
+    recommendation = fixture["closeout_recommendation"]
+
+    assert tuple(by_id) == REQUIRED_PR_STACK_IDS
+    assert by_id["EDC-PR-004"]["baseline_role"] == "superseded_prototype"
+    assert by_id["EDC-PR-005"]["baseline_role"] == "superseded_prototype"
+    assert by_id["EDC-PR-009"]["github_pr_number"] == 35
+    assert by_id["EDC-PR-010"]["github_pr_number"] is None
+    assert by_id["EDC-PR-010"]["github_pr_label"] == "TBD"
+    assert by_id["EDC-PR-010"]["status"] == "implementation_in_review"
+    assert all(str(record["internal_id"]) != str(record["github_pr_number"]) for record in pr_stack)
+    assert all(record["baseline_role"] != "uat_baseline" for record in pr_stack)
+
+    assert owner["state"] == "awaiting_owner"
+    assert owner["decision_ref"] == ""
+    assert owner["acceptance_claimed"] is False
+    assert owner["uat_pass_claimed"] is False
+    assert recommendation["state"] == "prepared_blocked_awaiting_owner"
+    assert recommendation["merge_ready"] is False
+    assert recommendation["production_ready"] is False
+    assert recommendation["live_ready"] is False
+    assert recommendation["closeout_accepted"] is False
+
+
+def test_workbench_fixture_contains_inbox_attention_and_settings_boundaries() -> None:
+    fixture = load_fixture()
+    attention = {item["id"]: item for item in fixture["inbox_attention"]}
+    boundaries = {item["id"]: item for item in fixture["settings_boundaries"]}
+
+    assert tuple(attention) == REQUIRED_ATTENTION_IDS
+    assert tuple(boundaries) == REQUIRED_BOUNDARY_IDS
+    for item in attention.values():
+        assert item["state"] in {"blocked", "hold", "needs_owner", "needs_planning"}
+        assert item["read_only"] is True
+    for boundary in boundaries.values():
+        assert boundary["summary"]
+        assert boundary["allowed"]
+        assert boundary["blocked"]
+
+    assert boundaries["openclaw_private_material_exclusion"]["blocked"]
+    assert boundaries["nexus_local_test_vs_openclaw_live_nats"]["local_test_nats"] == "127.0.0.1:7422"
+    assert boundaries["nexus_local_test_vs_openclaw_live_nats"]["openclaw_live_nats"] == "127.0.0.1:4222"
+    assert boundaries["nexus_local_test_vs_openclaw_live_nats"]["openclaw_live_mutable"] is False
+
+
+def test_workbench_closeout_views_have_dedicated_render_targets() -> None:
+    html = read_app_file("src/index.html")
+    main_js = read_app_file("src/main.js")
+
+    for element_id in (
+        "evidence-runs-region",
+        "evidence-run-list",
+        "pr-uat-closeout-region",
+        "pr-stack-list",
+        "owner-uat-decision",
+        "closeout-recommendation",
+        "inbox-attention-region",
+        "attention-list",
+        "settings-boundaries-region",
+        "boundary-list",
+    ):
+        assert f'id="{element_id}"' in html
+
+    assert "renderEvidenceRunsView" in main_js
+    assert "renderPrUatCloseoutView" in main_js
+    assert "renderInboxAttentionView" in main_js
+    assert "renderSettingsBoundariesView" in main_js
+    assert '$("evidence-runs-region").hidden = regionName !== "evidence_runs"' in main_js
+    assert '$("pr-uat-closeout-region").hidden = regionName !== "pr_uat_closeout"' in main_js
+    assert '$("inbox-attention-region").hidden = regionName !== "inbox_attention"' in main_js
+    assert '$("settings-boundaries-region").hidden = regionName !== "settings_boundaries"' in main_js

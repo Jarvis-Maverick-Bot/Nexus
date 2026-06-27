@@ -1,12 +1,12 @@
 # Nexus Agent Coding Team Workbench
 
-Slice: `EDC-PR-009`
+Slice: `EDC-PR-010`
 
 This is the Windows-first desktop Workbench surface for the Nexus Agent Coding Team Workbench. It uses deterministic fixture data and does not connect to any daemon, controller, transport, route, private agent, broker, NATS endpoint, or canonical state writer.
 
 ## Runtime Boundary
 
-EDC-PR-009 does not authorize desktop startup, dependency installation, Tauri dev/build, Cargo commands, broker/NATS mutation, live dispatch, merge approval, owner UAT acceptance, UAT PASS, production readiness, or live readiness.
+EDC-PR-010 does not authorize desktop startup, dependency installation, Tauri dev/build, Cargo commands, broker/NATS mutation, live dispatch, merge approval, owner UAT acceptance, UAT PASS, production readiness, or live readiness.
 
 The surface is fixture-only and non-authoritative. Repository docs, task cards, validation evidence, GitHub PR mappings, and owner decisions remain authoritative.
 
@@ -23,7 +23,7 @@ The first screen identifies `Nexus Agent Coding Team Workbench` and provides rea
 - Inbox / Attention
 - Settings / Boundaries
 
-EDC-PR-008 implemented the Work Items board/list and selected Work Item Detail read model. EDC-PR-009 implements the Agents/Team and Runtime/Worktrees read-model views, including assignment boundaries, worktree inspection, runtime hold state, and NATS boundary notes. Evidence/Runs, PR/UAT Closeout, Inbox/Attention, and Settings/Boundaries remain shallow placeholders for EDC-PR-010.
+EDC-PR-008 implemented the Work Items board/list and selected Work Item Detail read model. EDC-PR-009 implemented the Agents/Team and Runtime/Worktrees read-model views, including assignment boundaries, worktree inspection, runtime hold state, and NATS boundary notes. EDC-PR-010 implements Evidence/Runs, PR/UAT Closeout, Inbox/Attention, and Settings/Boundaries as fixture-backed read-model views for Planning review and later Alex manual UAT.
 
 ## Launch Notes
 

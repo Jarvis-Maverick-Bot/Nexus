@@ -32,7 +32,7 @@ GitHub PR numbers are external identifiers assigned by GitHub and must be record
 | `EDC-PR-007` | #33 | `codex/edc-pr-007-desktop-workbench-shell` | Desktop workspace shell and real navigation | Draft PR open |
 | `EDC-PR-008` | #34 | `codex/edc-pr-008-work-items-surface` | Work items board/list/detail surface | Draft PR open |
 | `EDC-PR-009` | #35 | `codex/edc-pr-009-agents-runtime-worktrees` | Agents, runtime, and worktree surface | Draft PR open |
-| `EDC-PR-010` | TBD | TBD | Evidence, PR/UAT closeout, and final UAT startup readiness | Planned |
+| `EDC-PR-010` | TBD | `codex/edc-pr-010-evidence-uat-closeout` | Evidence, PR/UAT closeout, and final UAT startup readiness | Implementation in review |
 
 ## Proposed PR Sequence
 

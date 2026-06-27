@@ -59,6 +59,10 @@ function buildShellState(fixture) {
   const workItems = fixture.work_items ?? [];
   const agents = fixture.agents ?? [];
   const runtimeWorktrees = fixture.runtime_worktrees ?? [];
+  const evidenceRuns = fixture.evidence_runs ?? [];
+  const prStack = fixture.pr_stack ?? [];
+  const inboxAttention = fixture.inbox_attention ?? [];
+  const settingsBoundaries = fixture.settings_boundaries ?? [];
   const workItemsById = byId(workItems, "internal_id");
   const selectedWorkItemId = workItemsById[fixture.selected_work_item_id]
     ? fixture.selected_work_item_id
@@ -75,7 +79,17 @@ function buildShellState(fixture) {
     agents,
     agentsByRole: byId(agents, "role_id"),
     runtimeWorktrees,
-    runtimeWorktreesById: byId(runtimeWorktrees, "internal_id")
+    runtimeWorktreesById: byId(runtimeWorktrees, "internal_id"),
+    evidenceRuns,
+    evidenceRunsById: byId(evidenceRuns, "internal_id"),
+    prStack,
+    prStackById: byId(prStack, "internal_id"),
+    ownerUatDecision: fixture.owner_uat_decision,
+    closeoutRecommendation: fixture.closeout_recommendation,
+    inboxAttention,
+    inboxAttentionById: byId(inboxAttention),
+    settingsBoundaries,
+    settingsBoundariesById: byId(settingsBoundaries)
   };
 }
 
@@ -306,11 +320,118 @@ function renderNatsBoundary() {
   live.textContent = `OpenClaw live NATS: ${boundary.openclaw_live.nats}; use ${boundary.openclaw_live.use_allowed ? "allowed" : "blocked"}; mutation ${boundary.openclaw_live.mutation_allowed ? "allowed" : "blocked"}. ${boundary.openclaw_live.note}`;
   $("nats-boundary").replaceChildren(local, live);
 }
+
+function renderEvidenceRunsView() {
+  const cards = state.evidenceRuns.map((record) => {
+    const card = document.createElement("article");
+    const heading = document.createElement("h3");
+    const command = document.createElement("p");
+    const evidence = document.createElement("p");
+    const summary = document.createElement("p");
+    const reason = document.createElement("p");
+
+    card.className = "panel evidence-card";
+    heading.textContent = `${record.internal_id} ${record.github_pr_label || "TBD"}`;
+    command.textContent = `Command: ${record.command}; status: ${labelize(record.status)}; exit: ${record.exit_code ?? "n/a"}.`;
+    evidence.textContent = `Evidence: ${labelize(record.evidence_state)}; ref: ${record.evidence_ref || "scope exemption only"}.`;
+    summary.textContent = record.summary;
+    reason.textContent = record.not_run_reason ? `Not-run reason: ${record.not_run_reason}` : "Executed validation record.";
+    card.append(heading, command, evidence, summary, reason);
+    return card;
+  });
+
+  $("evidence-run-list").replaceChildren(...cards);
+}
+
+function renderPrUatCloseoutView() {
+  const stackCards = state.prStack.map((record) => {
+    const card = document.createElement("article");
+    const heading = document.createElement("h3");
+    const status = document.createElement("p");
+    const gate = document.createElement("p");
+
+    card.className = `panel pr-card ${record.baseline_role === "superseded_prototype" ? "superseded" : ""}`;
+    heading.textContent = `${record.internal_id} -> ${record.github_pr_label || "TBD"}`;
+    status.textContent = `Status: ${labelize(record.status)}; role: ${labelize(record.baseline_role)}.`;
+    gate.textContent = `Evidence gate: ${labelize(record.evidence_gate)}.`;
+    card.append(heading, status, gate);
+    return card;
+  });
+
+  const owner = state.ownerUatDecision;
+  const recommendation = state.closeoutRecommendation;
+  const ownerTitle = document.createElement("h3");
+  const ownerState = document.createElement("p");
+  const ownerRef = document.createElement("p");
+  const recommendationTitle = document.createElement("h3");
+  const recommendationState = document.createElement("p");
+  const recommendationBlockers = document.createElement("ul");
+
+  ownerTitle.textContent = "Owner UAT Decision";
+  ownerState.textContent = `State: ${labelize(owner.state)}; manual only: ${owner.manual_only ? "yes" : "no"}; no automated acceptance.`;
+  ownerRef.textContent = `Decision ref: ${owner.decision_ref || "not recorded"}. ${owner.notes}`;
+  recommendationTitle.textContent = "Closeout Recommendation";
+  recommendationState.textContent = `State: ${labelize(recommendation.state)}; merge ready: ${recommendation.merge_ready ? "yes" : "no"}; production ready: ${recommendation.production_ready ? "yes" : "no"}; live ready: ${recommendation.live_ready ? "yes" : "no"}.`;
+  recommendationBlockers.className = "compact-list";
+  recommendationBlockers.replaceChildren(...createTextList(recommendation.blockers));
+
+  $("pr-stack-list").replaceChildren(...stackCards);
+  $("owner-uat-decision").replaceChildren(ownerTitle, ownerState, ownerRef);
+  $("closeout-recommendation").replaceChildren(recommendationTitle, recommendationState, recommendationBlockers);
+}
+
+function renderInboxAttentionView() {
+  const cards = state.inboxAttention.map((item) => {
+    const card = document.createElement("article");
+    const heading = document.createElement("h3");
+    const stateLine = document.createElement("p");
+    const detail = document.createElement("p");
+
+    card.className = `panel attention-card ${item.state}`;
+    heading.textContent = item.label;
+    stateLine.textContent = `State: ${labelize(item.state)}; read only: ${item.read_only ? "yes" : "no"}.`;
+    detail.textContent = item.detail;
+    card.append(heading, stateLine, detail);
+    return card;
+  });
+
+  $("attention-list").replaceChildren(...cards);
+}
+
+function renderSettingsBoundariesView() {
+  const cards = state.settingsBoundaries.map((boundary) => {
+    const card = document.createElement("article");
+    const heading = document.createElement("h3");
+    const summary = document.createElement("p");
+    const allowedTitle = document.createElement("strong");
+    const allowed = document.createElement("ul");
+    const blockedTitle = document.createElement("strong");
+    const blocked = document.createElement("ul");
+
+    card.className = "panel boundary-card";
+    heading.textContent = labelize(boundary.id);
+    summary.textContent = boundary.summary;
+    allowedTitle.textContent = "Allowed";
+    blockedTitle.textContent = "Blocked";
+    allowed.className = "compact-list";
+    blocked.className = "compact-list";
+    allowed.replaceChildren(...createTextList(boundary.allowed));
+    blocked.replaceChildren(...createTextList(boundary.blocked));
+    card.append(heading, summary, allowedTitle, allowed, blockedTitle, blocked);
+    return card;
+  });
+
+  $("boundary-list").replaceChildren(...cards);
+}
 function showRegion(regionName) {
   $("work-items-region").hidden = regionName !== "work_items";
   $("work-item-detail-region").hidden = regionName !== "work_item_detail";
   $("agents-region").hidden = regionName !== "agents";
   $("runtime-worktrees-region").hidden = regionName !== "runtime_worktrees";
+  $("evidence-runs-region").hidden = regionName !== "evidence_runs";
+  $("pr-uat-closeout-region").hidden = regionName !== "pr_uat_closeout";
+  $("inbox-attention-region").hidden = regionName !== "inbox_attention";
+  $("settings-boundaries-region").hidden = regionName !== "settings_boundaries";
   $("placeholder-region").hidden = regionName !== "placeholder";
 }
 
@@ -337,11 +458,31 @@ function renderActiveView() {
     renderRuntimeWorktreesView();
     return;
   }
+  if (state.activeViewId === "evidence_runs") {
+    showRegion("evidence_runs");
+    renderEvidenceRunsView();
+    return;
+  }
+  if (state.activeViewId === "pr_uat_closeout") {
+    showRegion("pr_uat_closeout");
+    renderPrUatCloseoutView();
+    return;
+  }
+  if (state.activeViewId === "inbox_attention") {
+    showRegion("inbox_attention");
+    renderInboxAttentionView();
+    return;
+  }
+  if (state.activeViewId === "settings_boundaries") {
+    showRegion("settings_boundaries");
+    renderSettingsBoundariesView();
+    return;
+  }
 
   showRegion("placeholder");
   $("view-owner").textContent = view.implementation_pr;
   $("view-safety").textContent = labelize(view.safety_state);
-  $("view-boundary").textContent = `${view.title} remains ${labelize(view.readiness_state)} in EDC-PR-009. Full workflow content belongs to ${view.implementation_pr}.`;
+  $("view-boundary").textContent = `${view.title} remains ${labelize(view.readiness_state)} in EDC-PR-010. Full workflow content belongs to ${view.implementation_pr}.`;
 }
 
 function selectWorkItem(workItemId) {
@@ -393,6 +534,10 @@ window.edcWorkbenchShellSurface = {
   renderNavigation,
   renderAgentsView,
   renderRuntimeWorktreesView,
+  renderEvidenceRunsView,
+  renderPrUatCloseoutView,
+  renderInboxAttentionView,
+  renderSettingsBoundariesView,
   renderWorkItemDetail,
   renderWorkItemsBoard,
   selectView,

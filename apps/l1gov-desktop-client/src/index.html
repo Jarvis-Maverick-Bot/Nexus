@@ -12,7 +12,7 @@
         <span class="mark">NX</span>
         <div>
           <h1>Nexus Agent Coding Team Workbench</h1>
-          <p>Fixture-only Agents and Runtime/Worktrees read model for EDC-PR-009. Owner UAT waits until EDC-PR-010.</p>
+          <p>Fixture-only Evidence, PR/UAT Closeout, Inbox, and Settings read model for EDC-PR-010. Owner UAT remains manual and awaiting Alex.</p>
         </div>
       </div>
       <div id="authority-chips" class="chip-row" aria-label="Authority boundaries">
@@ -32,15 +32,15 @@
       </div>
       <div>
         <span>Branch</span>
-        <strong id="branch-context">codex/edc-pr-009-agents-runtime-worktrees</strong>
+        <strong id="branch-context">codex/edc-pr-010-evidence-uat-closeout</strong>
       </div>
       <div>
         <span>Worktree</span>
-        <strong id="worktree-context">.worktrees\edc-pr-009-agents-runtime-worktrees</strong>
+        <strong id="worktree-context">.worktrees\edc-pr-010-evidence-uat-closeout</strong>
       </div>
       <div>
         <span>Sequence</span>
-        <strong id="internal-sequence">EDC-PR-009</strong>
+        <strong id="internal-sequence">EDC-PR-010</strong>
       </div>
     </section>
 
@@ -144,6 +144,40 @@
           </div>
           <div id="runtime-worktree-list" class="runtime-worktree-list" aria-label="Runtime worktree records"></div>
           <section id="nats-boundary" class="nats-boundary" aria-label="NATS boundary"></section>
+        </div>
+
+        <div id="evidence-runs-region" class="evidence-runs-region" hidden>
+          <div class="section-title">
+            <h3>Evidence / Runs</h3>
+            <p>Validation records distinguish executed evidence from documented scope exemptions.</p>
+          </div>
+          <div id="evidence-run-list" class="evidence-run-list" aria-label="Evidence and run records"></div>
+        </div>
+
+        <div id="pr-uat-closeout-region" class="pr-uat-closeout-region" hidden>
+          <div class="section-title">
+            <h3>PR / UAT Closeout</h3>
+            <p>PR mappings, evidence gates, and owner decision intake remain separate from automated validation.</p>
+          </div>
+          <div id="pr-stack-list" class="pr-stack-list" aria-label="PR stack records"></div>
+          <section id="owner-uat-decision" class="decision-panel" aria-label="Owner UAT decision"></section>
+          <section id="closeout-recommendation" class="decision-panel" aria-label="Closeout recommendation"></section>
+        </div>
+
+        <div id="inbox-attention-region" class="inbox-attention-region" hidden>
+          <div class="section-title">
+            <h3>Inbox / Attention</h3>
+            <p>Read-only attention states collect owner, PR mapping, runtime, dependency, broker, and dispatch blockers.</p>
+          </div>
+          <div id="attention-list" class="attention-list" aria-label="Attention records"></div>
+        </div>
+
+        <div id="settings-boundaries-region" class="settings-boundaries-region" hidden>
+          <div class="section-title">
+            <h3>Settings / Boundaries</h3>
+            <p>Durable governance and safety boundaries are inspectable without storing secrets or private session data.</p>
+          </div>
+          <div id="boundary-list" class="boundary-list" aria-label="Settings boundary records"></div>
         </div>
         <div id="placeholder-region" class="view-grid">
           <article class="panel">
