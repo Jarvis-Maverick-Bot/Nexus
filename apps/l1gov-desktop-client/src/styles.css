@@ -319,6 +319,27 @@ button {
   overflow-wrap: anywhere;
 }
 
+
+.agent-card,
+.runtime-card {
+  display: grid;
+  gap: 8px;
+}
+
+.runtime-card.current {
+  border-color: var(--blue);
+}
+
+.nats-boundary {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
 .compact-list {
   display: grid;
   gap: 6px;

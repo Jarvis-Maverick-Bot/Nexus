@@ -57,6 +57,8 @@ function buildShellState(fixture) {
   }
 
   const workItems = fixture.work_items ?? [];
+  const agents = fixture.agents ?? [];
+  const runtimeWorktrees = fixture.runtime_worktrees ?? [];
   const workItemsById = byId(workItems, "internal_id");
   const selectedWorkItemId = workItemsById[fixture.selected_work_item_id]
     ? fixture.selected_work_item_id
@@ -69,7 +71,11 @@ function buildShellState(fixture) {
     views,
     viewsById: byId(views),
     workItems,
-    workItemsById
+    workItemsById,
+    agents,
+    agentsByRole: byId(agents, "role_id"),
+    runtimeWorktrees,
+    runtimeWorktreesById: byId(runtimeWorktrees, "internal_id")
   };
 }
 
@@ -235,9 +241,76 @@ function renderWorkItemDetail() {
   $("detail-blocker-list").replaceChildren(...createTextList(item.blockers));
 }
 
+function renderAgentsView() {
+  const cards = Object.values(state.agentsByRole).map((agent) => {
+    const card = document.createElement("article");
+    const heading = document.createElement("h3");
+    const assignment = document.createElement("p");
+    const readiness = document.createElement("p");
+    const note = document.createElement("p");
+    const allowedTitle = document.createElement("strong");
+    const allowed = document.createElement("ul");
+    const forbiddenTitle = document.createElement("strong");
+    const forbidden = document.createElement("ul");
+
+    card.className = "panel agent-card";
+    heading.textContent = agent.display_name;
+    assignment.textContent = `Assignment: ${agent.current_assignment_id}; availability: ${labelize(agent.availability)}.`;
+    readiness.textContent = `Readiness: ${labelize(agent.readiness_state)}.`;
+    note.textContent = agent.authority_note;
+    allowedTitle.textContent = "Allowed";
+    forbiddenTitle.textContent = "Forbidden";
+    allowed.className = "compact-list";
+    forbidden.className = "compact-list";
+    allowed.replaceChildren(...createTextList(agent.allowed_actions.map(labelize)));
+    forbidden.replaceChildren(...createTextList(agent.forbidden_actions.map(labelize)));
+
+    card.append(heading, assignment, readiness, note, allowedTitle, allowed, forbiddenTitle, forbidden);
+    return card;
+  });
+
+  $("agent-team-list").replaceChildren(...cards);
+}
+
+function renderRuntimeWorktreesView() {
+  const records = Object.values(state.runtimeWorktreesById).map((record) => {
+    const card = document.createElement("article");
+    const heading = document.createElement("h3");
+    const mapping = document.createElement("p");
+    const branch = document.createElement("p");
+    const worktree = document.createElement("p");
+    const stateLine = document.createElement("p");
+    const authority = document.createElement("p");
+
+    card.className = `panel runtime-card ${record.current_slice ? "current" : ""}`;
+    heading.textContent = `${record.internal_id} ${record.current_slice ? "(current)" : ""}`;
+    mapping.textContent = `GitHub PR: ${record.github_pr_label}; validation: ${labelize(record.validation_state)}.`;
+    branch.textContent = `Branch: ${record.branch}; base: ${record.base_commit}; head: ${record.head_commit}.`;
+    worktree.textContent = `Worktree: ${record.worktree}`;
+    stateLine.textContent = `Cleanliness: ${labelize(record.cleanliness)}; safety: ${labelize(record.safety_state)}.`;
+    authority.textContent = `Runtime: ${labelize(record.runtime_authorization_state)}; startup ${record.startup_allowed ? "allowed" : "blocked"}; dependency install ${record.dependency_install_allowed ? "allowed" : "blocked"}; broker/NATS mutation ${record.broker_mutation_allowed ? "allowed" : "blocked"}; dispatch ${record.live_dispatch_allowed ? "allowed" : "blocked"}; cleanup ${record.cleanup_allowed ? "allowed" : "blocked"}.`;
+
+    card.append(heading, mapping, branch, worktree, stateLine, authority);
+    return card;
+  });
+
+  $("runtime-worktree-list").replaceChildren(...records);
+  renderNatsBoundary();
+}
+
+function renderNatsBoundary() {
+  const boundary = state.fixture.nats_boundary;
+  const local = document.createElement("p");
+  const live = document.createElement("p");
+  local.textContent = `Local-test NATS: ${boundary.local_test.nats}; monitor: ${boundary.local_test.monitor}; use ${boundary.local_test.use_allowed ? "allowed" : "blocked"}; mutation ${boundary.local_test.mutation_allowed ? "allowed" : "blocked"}. ${boundary.local_test.note}`;
+  live.textContent = `OpenClaw live NATS: ${boundary.openclaw_live.nats}; use ${boundary.openclaw_live.use_allowed ? "allowed" : "blocked"}; mutation ${boundary.openclaw_live.mutation_allowed ? "allowed" : "blocked"}. ${boundary.openclaw_live.note}`;
+  $("nats-boundary").replaceChildren(local, live);
+}
 function showRegion(regionName) {
   $("work-items-region").hidden = regionName !== "work_items";
   $("work-item-detail-region").hidden = regionName !== "work_item_detail";
+  $("agents-region").hidden = regionName !== "agents";
+  $("runtime-worktrees-region").hidden = regionName !== "runtime_worktrees";
   $("placeholder-region").hidden = regionName !== "placeholder";
 }
 
@@ -254,11 +327,21 @@ function renderActiveView() {
     renderWorkItemDetail();
     return;
   }
+  if (state.activeViewId === "agents") {
+    showRegion("agents");
+    renderAgentsView();
+    return;
+  }
+  if (state.activeViewId === "runtime_worktrees") {
+    showRegion("runtime_worktrees");
+    renderRuntimeWorktreesView();
+    return;
+  }
 
   showRegion("placeholder");
   $("view-owner").textContent = view.implementation_pr;
   $("view-safety").textContent = labelize(view.safety_state);
-  $("view-boundary").textContent = `${view.title} remains ${labelize(view.readiness_state)} in EDC-PR-008. Full workflow content belongs to ${view.implementation_pr}.`;
+  $("view-boundary").textContent = `${view.title} remains ${labelize(view.readiness_state)} in EDC-PR-009. Full workflow content belongs to ${view.implementation_pr}.`;
 }
 
 function selectWorkItem(workItemId) {
@@ -308,6 +391,8 @@ window.edcWorkbenchShellSurface = {
   normalizeViewId,
   renderActiveView,
   renderNavigation,
+  renderAgentsView,
+  renderRuntimeWorktreesView,
   renderWorkItemDetail,
   renderWorkItemsBoard,
   selectView,

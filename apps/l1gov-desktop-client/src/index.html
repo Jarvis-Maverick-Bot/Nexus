@@ -12,7 +12,7 @@
         <span class="mark">NX</span>
         <div>
           <h1>Nexus Agent Coding Team Workbench</h1>
-          <p>Fixture-only Work Items read model for EDC-PR-008. Owner UAT waits until EDC-PR-010.</p>
+          <p>Fixture-only Agents and Runtime/Worktrees read model for EDC-PR-009. Owner UAT waits until EDC-PR-010.</p>
         </div>
       </div>
       <div id="authority-chips" class="chip-row" aria-label="Authority boundaries">
@@ -32,15 +32,15 @@
       </div>
       <div>
         <span>Branch</span>
-        <strong id="branch-context">codex/edc-pr-008-work-items-surface</strong>
+        <strong id="branch-context">codex/edc-pr-009-agents-runtime-worktrees</strong>
       </div>
       <div>
         <span>Worktree</span>
-        <strong id="worktree-context">.worktrees\edc-pr-008-work-items-surface</strong>
+        <strong id="worktree-context">.worktrees\edc-pr-009-agents-runtime-worktrees</strong>
       </div>
       <div>
         <span>Sequence</span>
-        <strong id="internal-sequence">EDC-PR-008</strong>
+        <strong id="internal-sequence">EDC-PR-009</strong>
       </div>
     </section>
 
@@ -129,6 +129,22 @@
           </div>
         </div>
 
+        <div id="agents-region" class="agents-region" hidden>
+          <div class="section-title">
+            <h3>Team / Assignment Boundaries</h3>
+            <p>Roles are fixture-backed accountability records. No live assignment, dispatch, credential, or private-session action is available.</p>
+          </div>
+          <div id="agent-team-list" class="agent-team-list" aria-label="Agent team roles"></div>
+        </div>
+
+        <div id="runtime-worktrees-region" class="runtime-worktrees-region" hidden>
+          <div class="section-title">
+            <h3>Runtime / Worktree Inspection</h3>
+            <p>Project worktrees are inspection-only. Runtime startup, dependency install, broker mutation, dispatch, and cleanup remain blocked.</p>
+          </div>
+          <div id="runtime-worktree-list" class="runtime-worktree-list" aria-label="Runtime worktree records"></div>
+          <section id="nats-boundary" class="nats-boundary" aria-label="NATS boundary"></section>
+        </div>
         <div id="placeholder-region" class="view-grid">
           <article class="panel">
             <h3>Implementation Owner</h3>
