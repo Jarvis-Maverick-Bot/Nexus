@@ -1,105 +1,137 @@
-# Nexus Agent Coding Team Delivery Console UX Spec
+# Nexus Agent Coding Team Workbench UX Spec
 
 Date: 2026-06-27
-Branch: `codex/edc-governance-desktop`
-Internal PR: `EDC-PR-001`
+Branch: `codex/edc-pr-006-ux-reset-workbench`
+Internal PR: `EDC-PR-006`
 
 ## Source Reference
 
 Figma file: https://www.figma.com/design/eDUWZ0Mbl9aaJLsv6aXEtT
 
-This file is a visual reference for the Agent Coding Team Delivery Console. Durable Nexus product decisions live in repo docs and task cards; Figma frames do not override current owner instruction, repo facts, file boundaries, validation evidence, or safety policy.
+This file remains a visual reference. Durable Nexus product decisions live in repo docs and task cards. Figma frames do not override current owner instruction, repo facts, file boundaries, validation evidence, or safety policy.
 
-| Frame | Node ID | Product surface | Likely implementation slice |
+The Figma frames still provide useful surface intent, but EDC-PR-006 supersedes the prior single-board implementation split.
+
+| Frame | Node ID | Product surface intent | New implementation interpretation |
 | --- | --- | --- | --- |
-| `00 UX Map` | `1:2` | UX map, navigation model, authority/runtime guardrails | `EDC-PR-001` spec alignment; later implementation reference |
-| `01 Delivery Board` | `1:60` | Delivery board, project summary, work lanes, attention rail | `EDC-PR-004` desktop delivery board MVP |
-| `02 Work Item Detail` | `1:181` | Task card detail, readiness checks, assignment/report actions | `EDC-PR-002` domain contracts; `EDC-PR-003` handoff loop |
-| `03 Agent Team And Runtime` | `1:272` | Agent registry, runtime authorization, handoff/runtime panels | `EDC-PR-002` domain contracts; `EDC-PR-003` handoff loop |
-| `04 UAT And PR Closeout` | `1:361` | PR mapping, evidence gate, owner UAT decision | `EDC-PR-005` owner UAT closeout |
+| `00 UX Map` | `1:2` | UX map, navigation model, authority/runtime guardrails | Workbench shell IA and safety model reference |
+| `01 Delivery Board` | `1:60` | Delivery board, project summary, work lanes, attention rail | Work Items board/list view, not the entire app |
+| `02 Work Item Detail` | `1:181` | Task card detail, readiness checks, assignment/report actions | Separate Work Item Detail view |
+| `03 Agent Team And Runtime` | `1:272` | Agent registry, runtime authorization, handoff/runtime panels | Separate Agents and Runtime/Worktrees views |
+| `04 UAT And PR Closeout` | `1:361` | PR mapping, evidence gate, owner UAT decision | Separate PR/UAT Closeout view with Evidence/Runs support |
 
 ## Product Intent
 
-Nexus is the Agent Coding Team Delivery Console: a local-first project delivery workspace where Codex Planning, Codex Execution, owner UAT, and review/reducer roles move bounded work through planning, isolated execution, validation, review, PR mapping, UAT decision intake, and closeout.
+Nexus is the Agent Coding Team Workbench: a local-first project delivery workspace where Codex Planning, Codex Execution, reviewer/reducer roles, and Alex owner UAT move bounded work through planning, isolated execution, validation, review, PR mapping, owner decision intake, and closeout.
 
-The console is not a production-readiness claim, an autonomous runtime approval surface, a replacement for owner UAT, or an OpenClaw private-session dependency. It is the visible operating layer for scope, authorization, assignment, evidence, blockers, and closeout state.
+The Workbench is not a production-readiness claim, an autonomous runtime approval surface, a replacement for owner UAT, or an OpenClaw private-session dependency. It is the visible operating layer for scope, authorization, assignment, evidence, blockers, and closeout state.
+
+## EDC-PR-006 UX Reset
+
+EDC-PR-004 / GitHub PR #30 and EDC-PR-005 / GitHub PR #31 are superseded as UX implementation baseline. They compressed too many workflows into one overloaded page and did not create clear reviewable page boundaries.
+
+The replacement architecture is a Multica-style workbench IA adapted to Nexus constraints:
+
+- persistent workspace shell;
+- explicit navigation;
+- separate views for different operator jobs;
+- visible agent/work/runtime state;
+- durable work item detail;
+- evidence-before-claim;
+- owner UAT separated from automated validation.
+
+Multica is a product/IA reference only. Do not copy its Next.js, Go, Postgres, deployment, service architecture, or code.
 
 ## Primary Users And Operating Mode
 
 - Planning: creates durable work items and complete Execution task cards with background, goal, scope, non-goals, file boundaries, acceptance criteria, validation commands, risks, and write-back location.
 - Execution: works only from explicit task cards in named branches/worktrees, reports changed files, validation commands/results, blockers, residual risk, and PR readiness.
-- Owner/UAT: reviews outcomes, authorizes runtime startup when needed, records acceptance/rejection separately from automated validation, and controls final UAT/closeout decisions.
+- Owner/UAT: reviews outcomes after EDC-PR-010, authorizes runtime startup when needed, records acceptance/rejection separately from automated validation, and controls final UAT/closeout decisions.
 - Reviewer/reducer: compares evidence, review feedback, and parallel-agent outputs; owns fan-in decisions when multiple agents or branches are active.
 
-Operating mode is bounded and local-first. The current task packet takes priority over broad memory retrieval. Runtime startup, dependency installation, live dispatch, broker mutation, and owner UAT claims require explicit owner authorization.
+Operating mode is bounded and local-first. The current task packet takes priority over broad memory retrieval. Runtime startup, dependency installation, live dispatch, broker mutation, merge, cleanup, and owner UAT claims require explicit owner authorization.
 
 ## Information Architecture
 
-- Delivery Board: project summary, internal delivery ID, staged/active work counts, GitHub PR mapping, work lanes, validation chips, and attention items.
-- Work Item Detail: full task-card surface, readiness checklist, validation/report summary, assignment action, and block action.
-- Agent Team/Runtime: agent roles, availability, current assignment, allowed actions, editable scope, runtime hold/authorization state, and handoff status.
-- Evidence/Runs: execution runs, worktree path, branch, files touched, commands run, command results, blockers, and stale/missing evidence flags.
-- PR/UAT Closeout: internal-to-GitHub PR mapping, evidence gates, review state, owner UAT decision options, and closeout recommendation state.
+### Workspace Shell / Navigation
 
-Navigation should expose Delivery Board, Work Items, Agents, Runs, Evidence, PR/UAT, and Settings. Settings is not an implementation priority unless needed to support project selection or explicit authorization boundaries.
+The shell is the first screen structure. It must show project identity, local path, current internal sequence, branch/worktree context, global authorization/status chips, primary navigation, and urgent attention state.
+
+Navigation must change real views/pages. It must not be a single page with scroll anchors pretending to be sections.
+
+### Work Items Board / List
+
+Purpose: scan planned, assigned, running, review, blocked, UAT, done, failed, and cancelled work.
+
+Must show internal `EDC-PR-###` ID separately from GitHub PR number, title, status, lane, assignee, branch/worktree, evidence state, owner UAT state, runtime authorization state, blocker chips, attention flags, and an entry point to Work Item Detail.
+
+### Work Item Detail
+
+Purpose: inspect and review a single task card and execution report.
+
+Must show background, goal, scope, non-goals, file boundaries, acceptance criteria, validation commands, risks, write-back location, readiness checklist, assignment/run state, changed files, validation report, and explicit blocked/not-authorized actions.
+
+### Agents / Team
+
+Purpose: see accountable roles and assignment boundaries.
+
+Must show Codex Planning, Codex Execution, reviewer/reducer, and Alex owner UAT roles; availability; current assignment; allowed actions; forbidden actions; last report; blockers; and reducer ownership for fan-out work.
+
+### Runtime / Worktrees
+
+Purpose: inspect execution environment without implying runtime authorization.
+
+Must show named worktree path, branch, base, dirty/staged state summary, runtime authorization state, named command only when explicitly authorized, and blocked startup/dependency/broker/dispatch states.
+
+### Evidence / Runs
+
+Purpose: make evidence-before-claim visible.
+
+Must show run records, command results, timestamps/refs when available, evidence state, changed files, completion report refs, and stale/missing evidence warnings.
+
+Evidence states: `missing`, `stale`, `present`, `failed`, `not_run_by_scope`.
+
+### PR / UAT Closeout
+
+Purpose: close the loop without conflating automated validation and owner UAT.
+
+Must show internal-to-GitHub PR mapping, evidence gates per internal PR, owner UAT decision state, closeout recommendation state, and merge/UAT PASS/production/live readiness blocked until owner authority exists.
+
+Owner UAT must not be requested before EDC-PR-010 is ready.
+
+### Inbox / Attention
+
+Purpose: give operators a focused review queue.
+
+Must include runtime startup hold, dependency install not authorized, live dispatch blocked, broker/NATS mutation blocked, owner UAT not accepted, missing reducer, stale/missing evidence, scope mismatch, and PR mapping gaps.
+
+### Settings / Boundaries
+
+Purpose: expose project and safety boundaries when needed.
+
+Settings may include project root, allowed validation commands, local-test service ports, and explicit no-go surfaces. It must not store secrets or private session data.
 
 ## Workflow Model
 
 1. Planning creates or updates a work item from current repo facts and accepted reference inputs.
 2. Planning emits a complete Execution task card with explicit file boundaries, validation commands, risks, and write-back location.
-3. Owner or reducer confirms the task is ready, assigns Execution, and records the branch/worktree boundary.
-4. Execution works in the named isolated worktree and does not start runtime, install dependencies, mutate brokers, or broaden scope unless the task card authorizes it.
+3. Reviewer/reducer confirms the task is ready, assigns Execution, and records the branch/worktree boundary.
+4. Execution works in the named isolated worktree and does not start runtime, install dependencies, mutate brokers, dispatch, or broaden scope unless the task card authorizes it.
 5. Execution writes back changed files, validation commands, command results, blockers, residual risk, and PR readiness.
 6. Reviewer/reducer checks evidence-before-claim, resolves fan-in/merge-order concerns, and moves the item to review or blocked state.
-7. If review is accepted, the work item enters owner UAT only when owner observation or owner-provided results are available.
-8. Closeout records PR mapping, evidence gate status, owner UAT decision, and next task recommendation without claiming production readiness.
+7. PR mapping is updated when GitHub creates an external PR number.
+8. Owner UAT starts only after EDC-PR-010 is ready and Alex authorizes the review. Automated validation remains separate from owner acceptance.
+9. Closeout records PR mapping, evidence gate status, owner UAT decision, and next task recommendation without claiming production readiness.
 
 ## Core State Model
 
-Work item status:
+Work item status: `Draft`, `Ready`, `Assigned`, `Running`, `Blocked`, `Review`, `UAT`, `Done`, `Failed`, `Cancelled`.
 
-- `Draft`: incomplete planning material or missing authority.
-- `Ready`: complete task card and validation boundary are present.
-- `Assigned`: named Execution agent and worktree/branch are selected.
-- `Running`: Execution has started within the authorized boundary.
-- `Blocked`: policy, authority, tool, validation, certainty, timeout, runtime, or dependency boundary prevents progress.
-- `Review`: Execution reported results and evidence is ready for reviewer/reducer inspection.
-- `UAT`: owner-facing review is authorized and awaiting owner decision.
-- `Done`: owner/reviewer closeout criteria are satisfied for the bounded task only.
-- `Failed`: validation or review failed and no immediate retry path is active.
-- `Cancelled`: owner/reducer stopped the work item.
+Runtime authorization state: `not_required`, `hold`, `authorized_for_named_command`, `blocked_by_policy`.
 
-Readiness state:
+Owner UAT state: `not_ready`, `awaiting_owner`, `accepted_by_owner`, `rejected_by_owner`, `not_applicable`.
 
-- task card complete;
-- file boundary explicit;
-- validation commands explicit;
-- branch/worktree boundary explicit;
-- runtime/dependency side effects authorized or explicitly out of scope;
-- reviewer/reducer owner identified when parallel work exists.
-
-Runtime authorization state:
-
-- `not_required`: task is docs/design/model-only and requires no runtime startup.
-- `hold`: runtime command exists but must not be run yet.
-- `authorized_for_named_command`: owner authorized a specific command and side-effect boundary.
-- `blocked_by_policy`: requested action violates current safety or scope rules.
-
-Owner UAT state:
-
-- `not_ready`: review/evidence is incomplete.
-- `awaiting_owner`: owner observation or result is needed.
-- `accepted_by_owner`: owner explicitly accepted the bounded outcome.
-- `rejected_by_owner`: owner rejected or requested revision.
-- `not_applicable`: task has no owner-facing UAT requirement.
-
-Evidence state:
-
-- `missing`: no validation result or documented reason exists.
-- `stale`: validation predates relevant changes.
-- `present`: command/result or documented reason is attached.
-- `failed`: command ran and failed.
-- `not_run_by_scope`: task did not authorize or require executable validation.
+Evidence state: `missing`, `stale`, `present`, `failed`, `not_run_by_scope`.
 
 PR mapping state separates internal `EDC-PR-###` identifiers from GitHub PR numbers. GitHub PR numbers are external mappings only and must not become the internal delivery sequence.
 
@@ -107,69 +139,38 @@ PR mapping state separates internal `EDC-PR-###` identifiers from GitHub PR numb
 
 The UI must show these states explicitly rather than hiding unavailable actions:
 
-- runtime hold: a command exists but runtime startup is not authorized;
-- not authorized: owner authorization is missing for runtime, dependency, broker, dispatch, branch, merge, or cleanup action;
-- blocked by policy: requested scope touches secrets, private sessions, caches, logs, sqlite databases, generated auth material, or other prohibited surfaces;
-- no owner UAT yet: automated validation may exist, but owner acceptance has not been provided;
-- missing reducer: parallel/multi-agent work has no named fan-in owner;
-- stale evidence: validation exists but no longer covers current changes;
-- scope mismatch: requested edit falls outside the task card file boundary.
-
-## Frame Intent And Surface Notes
-
-### 00 UX Map
-
-Intent: orient the product around project delivery, not governance-only display. The frame shows the global navigation, project path/branch context, authority/runtime pills, and a map of delivery board, work item detail, agent team, run timeline, PR closeout, and reference-boundary concepts.
-
-Implementation meaning: use this as the IA guardrail for later slices. It does not require a separate map screen in the MVP unless it helps onboarding or review.
-
-### 01 Delivery Board
-
-Intent: show project status, internal delivery identifier, staged docs/work count, PR mapping, lane-based work state, validation chips, and attention items. The board should make blocked or unauthorized work visible.
-
-Implementation meaning: desktop MVP should start here once contracts and handoff records exist. It needs read models for project summary, lanes, work cards, validation chips, and right-rail attention items.
-
-### 02 Work Item Detail
-
-Intent: expose the complete task card and the side-panel readiness/reporting state. The visible sections match the Execution task-card contract: background, goal, scope, non-goals, file boundaries, acceptance criteria, validation commands, risks, and write-back location.
-
-Implementation meaning: domain contracts must validate task-card completeness before desktop assignment actions are meaningful. Assignment and block actions should write durable state, not just UI state.
-
-### 03 Agent Team And Runtime
-
-Intent: show agents as accountable delivery roles with status, assignment, scope, and allowed actions. Runtime state is separate from agent identity and must surface authorization/hold conditions.
-
-Implementation meaning: implement agent/run/runtime state as inspectable records before adding any runtime command bridge. Runtime panels should support hold/not-authorized states from the start.
-
-### 04 UAT And PR Closeout
-
-Intent: map internal delivery items to GitHub PRs, show evidence gate state, and collect owner UAT decisions without treating Codex validation as owner acceptance.
-
-Implementation meaning: closeout should depend on evidence state and owner decision state. GitHub PR creation, merge, close, or UAT PASS claims remain outside Codex authority unless separately authorized.
+- runtime hold;
+- missing owner authorization for runtime, dependency, broker, dispatch, branch, merge, cleanup, or UAT action;
+- blocked by policy for secrets, private sessions, caches, logs, sqlite databases, generated auth material, cookies, SSH keys, or other prohibited surfaces;
+- no owner UAT yet;
+- missing reducer;
+- stale evidence;
+- scope mismatch.
 
 ## Implementation Split Recommendation
 
-- `EDC-PR-002`: define durable delivery domain contracts for project, work item, task card, agent, assignment, run, validation/evidence, PR mapping, runtime authorization, and owner UAT state.
-- `EDC-PR-003`: define Planning-to-Execution and Execution-to-Planning handoff records, including task-card emission, completion report write-back, blocker reporting, and evidence freshness rules.
-- `EDC-PR-004`: implement desktop Delivery Board MVP against the durable read model: project summary, lanes, work cards, validation chips, attention rail, and visible blocked/hold states.
-- `EDC-PR-005`: implement owner UAT and PR closeout views: PR mapping, evidence gate, owner decision intake, and closeout recommendation.
+- `EDC-PR-006`: docs-only UX reset and PR stack replan from EDC-PR-003/#29.
+- `EDC-PR-007`: desktop workspace shell and real navigation.
+- `EDC-PR-008`: Work Items board/list and Work Item Detail surfaces.
+- `EDC-PR-009`: Agents, runtime, and worktree surfaces.
+- `EDC-PR-010`: Evidence/Runs, PR/UAT closeout, final startup readiness, and owner UAT preparation.
 
-Do not begin desktop implementation until the domain and handoff records can provide stable data. Do not add runtime startup or live dispatch in the board MVP.
+Do not begin owner UAT before EDC-PR-010. Do not add runtime startup or live dispatch unless a future task card explicitly authorizes the named command and side-effect boundary.
 
 ## Open UX Questions
 
-- Should the MVP include a separate `00 UX Map` screen, or should it remain a planning/reference artifact only?
-- What is the smallest useful run timeline surface: a dedicated Runs view, a work-item side panel, or both?
-- Which attention items belong in the Delivery Board right rail for the first implementation: blocked work, stale evidence, missing UAT, missing reducer, runtime hold, PR mapping gaps, or all of these?
+- Should Work Items default to lane board, dense list, or split board/list toggle for the MVP?
+- Should Work Item Detail be a route/page or a persistent split view from the board?
+- What is the smallest useful run timeline surface for EDC-PR-010?
 - How should owner UAT decisions be recorded when Alex provides results outside the desktop app?
-- What fields are required for reviewer/reducer closeout beyond validation evidence and owner UAT state?
 - How much GitHub PR metadata should be read automatically versus entered as explicit mapping fields in repo docs?
+- Which settings belong in the first UAT-ready build versus docs-only boundaries?
 
 ## Implementation Risks
 
-- Figma is visual intent, not source authority; later implementation must inspect current code and repo docs before editing product surfaces.
-- Over-specifying UI behavior before domain contracts exist could create display-only panels with no durable state behind them.
+- Reusing PR #30/#31 UI too directly could recreate the overloaded single-screen failure.
 - Runtime controls can imply unsafe authority if hold/not-authorized states are not first-class.
 - Owner UAT can be blurred with automated validation unless the state model keeps them separate.
 - Internal `EDC-PR-###` identifiers can be confused with GitHub PR numbers unless mapping is consistently displayed.
 - Parallel-agent workflow can create merge-order and ownership ambiguity unless reducer and editable-scope fields are required early.
+- Multica-inspired IA can become stack copying unless future task cards keep Nexus/Tauri/local-first constraints explicit.

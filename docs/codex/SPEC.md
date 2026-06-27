@@ -1,18 +1,26 @@
-# Nexus Agent Coding Team Delivery Console Spec
+# Nexus Agent Coding Team Workbench Spec
 
 Date: 2026-06-27
-Branch: `codex/edc-governance-desktop`
-Internal PR: `EDC-PR-001`
+Branch: `codex/edc-pr-006-ux-reset-workbench`
+Internal PR: `EDC-PR-006`
 
 ## Product Intent
 
-Nexus should become a local-first Agent Coding Team Delivery Console for real project delivery work. The desktop client should move beyond governance fixture display and become the visible operating surface for planning, execution assignment, validation, PR review, UAT decision intake, and delivery closeout.
+Nexus should become a local-first Agent Coding Team Workbench for real project delivery work. The desktop client should move beyond governance fixture display and beyond the rejected single-screen delivery board/closeout prototype.
 
-EDC is the engineering delivery control system for this workflow. It governs scope, task cards, worktree boundaries, validation evidence, PR mapping, and closeout decisions.
+The Workbench is the visible operating surface for planning, execution assignment, validation, PR review, owner UAT decision intake, and delivery closeout. EDC governs scope, task cards, worktree boundaries, validation evidence, PR mapping, and closeout decisions.
+
+## Reset Decision
+
+EDC-PR-004 / GitHub PR #30 and EDC-PR-005 / GitHub PR #31 are not UAT-accepted product UX. They overloaded one screen with delivery board, details, agent/runtime state, evidence, PR/UAT closeout, and blocked commands. They are superseded as the implementation baseline.
+
+The next implementation base is EDC-PR-003 / GitHub PR #29, `codex/edc-pr-003-codex-handoff-loop`, because it preserves durable delivery contracts and the handoff loop without inheriting the failed desktop UX direction.
 
 ## UX Specification
 
-The durable UX specification for this target lives in `docs/codex/UX_SPEC.md`. It records the Figma frame mapping, product surfaces, workflow model, state model, no-go/safety states, implementation split, open UX questions, and risks. This spec should reference `UX_SPEC.md` rather than duplicating frame-level details.
+The durable UX specification lives in `docs/codex/UX_SPEC.md`. The EDC-PR-006 replan rationale lives in `docs/codex/UX_REPLAN_EDC_PR_006.md`.
+
+Implementation task cards should reference these docs rather than reviving the rejected PR #30/#31 single-screen design.
 
 ## Functional Requirements
 
@@ -21,53 +29,57 @@ The durable UX specification for this target lives in `docs/codex/UX_SPEC.md`. I
 - Nexus repo remains the authority for source, tests, delivery state, and task execution.
 - Shared Docs may provide historical governance/design/evidence context.
 - SecondBrain may provide curated reference patterns only when cited in `docs/codex/SECOND_BRAIN_REFERENCE_MAP.md`.
-- SecondBrain reference notes do not create scope without acceptance into the current Nexus target, scope, spec, task card, or owner instruction.
+- Multica is an IA/product reference only and does not authorize copying its Next.js, Go, Postgres, deployment, service architecture, or code.
 
-### 1. Delivery Project
+### 1. Workbench Shell
 
-- A project record identifies the local repository root, default base branch, active delivery branch, validation entry points, and evidence locations.
-- The MVP may support one active project at a time.
-- Project records must not include secrets, credentials, private sessions, cache paths, or logs as source-of-truth context.
+- The desktop experience must have a workspace shell with stable navigation.
+- Primary navigation must move between real views/pages, not scroll anchors on one long screen.
+- The shell shows project identity, branch/worktree context, internal delivery sequence, authorization boundary, and high-priority attention state.
 
 ### 2. Work Items
 
 - A work item is the durable delivery unit.
 - Required fields: internal ID, title, background, goal, scope, non-goals, file boundaries, acceptance criteria, validation commands, risks, write-back location, status, owner, assigned agent, branch, GitHub PR mapping, and UAT state.
+- Work Items board/list and Work Item Detail are separate surfaces.
 - Initial statuses: `Draft`, `Ready`, `Assigned`, `Running`, `Blocked`, `Review`, `UAT`, `Done`, `Failed`, `Cancelled`.
-- Work items must start from a current task packet before broad reference-memory retrieval.
-- Work items must support blocked/deferred outcomes for missing authority, missing tools, failed validation, uncertainty, timeout, or runtime mismatch.
 
 ### 3. Agent Registry
 
-- Initial roles: Codex Planning, Codex Execution, and Alex owner UAT.
-- An agent record must expose role, availability, current assignment, last report, blockers, and allowed actions.
-- Codex Planning may create task cards and review reports.
-- Codex Execution may implement explicitly assigned task cards in the named branch/worktree.
+- Initial roles: Codex Planning, Codex Execution, reviewer/reducer, and Alex owner UAT.
+- Agent records expose role, availability, current assignment, last report, blockers, allowed actions, and forbidden actions.
+- Codex Planning creates task cards and reviews reports.
+- Codex Execution implements explicit task cards in named branches/worktrees.
 - Owner UAT remains a human decision and cannot be self-authorized by Codex.
 - Multi-agent fan-out requires explicit reducer ownership before work starts.
-- Parallel agent execution requires editable-scope boundaries, shared-resource lock or handoff rules, and dependency-aware merge order.
 
-### 4. Runtime And Worktree Execution
+### 4. Runtime And Worktrees
 
 - Execution tasks use isolated project worktrees by default.
 - Runtime startup, dependency installation, live dispatch, and broker mutation require explicit owner authorization.
+- Runtime/worktree state is a separate view from agent identity.
 - Each run records start state, branch, worktree path, files touched, validation commands, command results, blockers, and completion report.
-- The system must distinguish "task prepared", "execution started", "validation passed", "review accepted", and "UAT accepted".
-- Runtime identity, state, events, delivery handling, failure handling, and coordination must be modeled before role/persona abstractions are added.
+- The system distinguishes task prepared, execution started, validation passed, review accepted, owner UAT accepted, and closeout accepted.
 
-### 5. Desktop Console
+### 5. Evidence And Runs
 
-- The first useful desktop surface should show delivery state, not marketing or governance-only fixture panels.
-- Required MVP views: backlog/work items, active runs, agents, validation/evidence, branch/PR mapping, and UAT state.
-- The UI must label blocked or unauthorized actions as blocked behavior, not hidden failures.
-- Operator surfaces are read-and-command views over authoritative delivery state, not separate sources of truth.
+- Evidence/Runs is a first-class view.
+- Completion claims require fresh validation evidence or a documented reason validation was not run.
+- Missing, stale, failed, or scope-exempt validation must be visible.
+- Evidence is non-secret durable state; it must not include credentials, private sessions, logs, caches, sqlite databases, cookies, SSH keys, or auth tokens.
 
-### 6. PR And Evidence Mapping
+### 6. PR And UAT Closeout
 
 - Internal delivery identifiers use `EDC-PR-###`.
 - GitHub PR numbers are external mappings recorded after GitHub creates them.
-- Completion claims require fresh validation evidence or a documented reason validation was not run.
-- Owner UAT notes must be separated from Codex automated checks.
+- PR/UAT closeout is a separate view from the work item board.
+- Owner UAT notes and decisions are separate from Codex automated checks.
+- The next owner UAT checkpoint is after EDC-PR-010, not PR #31.
+
+### 7. Inbox / Attention
+
+- Inbox/Attention surfaces blocked work, stale evidence, missing owner UAT, runtime hold, dependency install not authorized, live dispatch blocked, broker mutation blocked, missing reducer, and scope mismatches.
+- Attention state should drive review and rework without implying Codex can self-authorize unsafe actions.
 
 ## Non-Functional Requirements
 
@@ -81,29 +93,31 @@ The durable UX specification for this target lives in `docs/codex/UX_SPEC.md`. I
 - Prefer structured, inspectable state and validation outputs over prose-only status.
 - External tools, frameworks, and agent platforms require license, privacy, network, credential, sandbox, and output-behavior review before use.
 
-## Acceptance Criteria For EDC-PR-001
+## Acceptance Criteria For EDC-PR-006
 
-- A fresh reviewer can understand the Agent Coding Team Delivery Console target from `docs/codex/TARGET.md`, `SCOPE.md`, `SPEC.md`, and `PR_PLAN.md`.
-- A fresh reviewer can identify which Shared Docs / SecondBrain reference inputs influenced the design.
-- The PR sequence uses internal `EDC-PR-###` identifiers and records GitHub PR numbers only as mappings.
-- The closed GitHub PR #22 is mapped as `EDC-PR-000` and marked superseded.
-- `EDC-PR-002` is defined as the first implementation slice, not started in this planning reset.
-- `docs/codex/UX_SPEC.md` captures the Figma UX intent and maps it to future implementation slices.
-- Planning reset changes do not touch product code, dependencies, package locks, runtime startup, generated files, or evidence cleanup.
+- A fresh reviewer can understand why EDC-PR-004/#30 and EDC-PR-005/#31 were superseded as UX implementation baseline.
+- Docs identify EDC-PR-003/#29 as the new implementation base.
+- The product target is `Nexus Agent Coding Team Workbench`.
+- The next UAT baseline is EDC-PR-010, not #31.
+- `docs/codex/UX_SPEC.md` defines a multi-view workbench architecture.
+- `docs/codex/PR_PLAN.md` separates internal `EDC-PR-###` IDs from GitHub PR numbers and replans EDC-PR-006..010.
+- Planning reset changes do not touch product code, dependencies, package locks, runtime startup, generated files, cleanup, or secrets.
 
 ## Validation Commands
 
 Planning-doc-only changes:
 
 ```powershell
+git status --short --branch
 git diff --check
+git diff -- docs/codex/TARGET.md docs/codex/SCOPE.md docs/codex/SPEC.md docs/codex/UX_SPEC.md docs/codex/PR_PLAN.md docs/codex/UX_REPLAN_EDC_PR_006.md
 ```
 
-Expected implementation validations, selected by touched surface:
+Expected implementation validations for later slices, selected by touched surface:
 
 ```powershell
 python -m pytest nexus/governance/tests
 npm test --prefix apps/l1gov-desktop-client
 ```
 
-Desktop startup/Tauri commands are future-authorized-only unless Alex explicitly asks Codex to start the app.
+Desktop startup, Tauri, Cargo, pnpm dev, dependency installation, broker/NATS mutation, and live dispatch require explicit future task-card authorization.

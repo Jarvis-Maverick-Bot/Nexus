@@ -1,61 +1,53 @@
-# Nexus Agent Coding Team Delivery Console Target
+# Nexus Agent Coding Team Workbench Target
 
 Date: 2026-06-27
-Branch: `codex/edc-governance-desktop`
-Internal PR: `EDC-PR-001`
-Base: `origin/master` at `35e64b842ca41feacc97df8ca3c52e48fed72cf2`
+Branch: `codex/edc-pr-006-ux-reset-workbench`
+Internal PR: `EDC-PR-006`
+Base: `codex/edc-pr-003-codex-handoff-loop` at `a87d06efe85384b22f04ebc7b017870dc1bf8902`
 
 ## Branch Decision
 
-This branch supersedes GitHub PR #22, `edc-governance-desktop: L1 Governance Desktop UAT`, whose head was `4797ae15a266878ec491fa04d701dea2f98497bc`.
+EDC-PR-006 resets the Nexus desktop UX direction after Alex rejected the EDC-PR-004 / GitHub PR #30 and EDC-PR-005 / GitHub PR #31 desktop direction.
 
-GitHub PR #22 is recorded as `EDC-PR-000` and is not the new EDC delivery baseline. It added some local test-bridge code, but the dominant branch shape was evidence-heavy and display-only. The new branch starts from `origin/master` and defines the next product-oriented EDC target.
+PR #30 and PR #31 collapsed delivery board, work item detail, agents/runtime, evidence/runs, PR/UAT closeout, and blocked command state into one overloaded screen. They are draft PR prototypes that may be mined for fixture/verifier ideas, but they are not UAT-accepted and are not the new desktop implementation baseline.
+
+The accepted continuation base is EDC-PR-003 / GitHub PR #29, `codex/edc-pr-003-codex-handoff-loop`, because it preserves the durable delivery contracts and handoff loop without inheriting the rejected desktop UX.
 
 ## Target Outcome
 
-Build the first credible Nexus Agent Coding Team Delivery Console: a local-first project delivery workspace where human owners and Codex agents can plan, execute, validate, review, and close out software delivery work.
+Build the first credible Nexus Agent Coding Team Workbench: a local-first desktop workspace where human owners and Codex agents can plan, execute, validate, review, and close out software delivery work through clear views instead of a single overloaded board.
 
 The target experience is:
 
-1. Alex can open a Nexus desktop delivery workspace for a real local project.
-2. The workspace shows backlog items, active runs, agents, branch/PR status, validation evidence, and UAT gates.
-3. Codex Planning can create bounded Execution task cards with explicit scope, non-goals, file boundaries, validation commands, and write-back locations.
-4. Codex Execution can work in isolated project worktrees, report changed files, validation evidence, blockers, branch state, and PR readiness.
-5. Owner UAT remains a separate manual acceptance step and is never replaced by local automated checks.
-6. EDC remains the engineering delivery control layer for scope, validation, PR mapping, and closeout; it is not a claim of production readiness.
-
-## Success Definition
-
-EDC success means a bounded project delivery path is demonstrably usable by the owner: a task can move from planning to isolated execution, validation, review, PR tracking, UAT decision intake, and closeout without relying on OpenClaw private context.
-
-It does not mean production readiness, live dispatch, default-on runtime control, private agent invocation, deployment, external adoption, autonomous merge authority, or final product acceptance.
+1. Alex can open a Nexus desktop workbench for a real local project.
+2. The shell provides stable navigation and page boundaries for Work Items, Work Item Detail, Agents, Runtime/Worktrees, Evidence/Runs, PR/UAT Closeout, Inbox/Attention, and Settings/Boundaries.
+3. Codex Planning creates bounded task cards with explicit scope, non-goals, file boundaries, validation commands, risks, and write-back locations.
+4. Codex Execution works in isolated project worktrees and reports changed files, validation evidence, blockers, branch state, and PR readiness.
+5. Owner UAT remains a separate manual acceptance step and is never replaced by automated validation.
+6. The next owner UAT baseline is EDC-PR-010, not PR #31.
 
 ## Product Positioning
 
-Nexus should become an Agent Coding Team tool, not only a governance evidence viewer.
+Nexus should become an Agent Coding Team Workbench, not only a governance evidence viewer and not a single-screen delivery dashboard.
 
-Reference direction from Multica and SecondBrain-curated agent workflow notes:
+Multica is a product and information-architecture reference only: persistent workspaces, visible issues/tasks, agent activity, runtime boundaries, and reviewable progress. Nexus must translate those product patterns into the existing Nexus local-first/Tauri/repo-governed architecture. Do not copy Multica's Next.js, Go, Postgres, deployment, or service stack.
 
-- agents are assignable delivery teammates;
-- work is represented by durable issues/tasks, not private chat memory;
-- runtime execution and workspace isolation are explicit;
-- agent progress, blockers, comments, and completion claims are visible;
-- owner review and UAT are first-class gates.
-- multi-agent fan-out requires a named reducer/final owner;
-- parallel agent work requires editable-scope boundaries, handoff rules, and merge-order visibility;
-- current task packets take priority over broad shared-brain retrieval.
+## Success Definition
 
-Nexus should translate those product ideas into the existing Nexus architecture instead of copying Multica's stack.
+EDC success means a bounded project delivery path is demonstrably usable by the owner: work moves from planning to isolated execution, validation, review, PR tracking, owner UAT decision intake, and closeout with clear boundaries and evidence.
 
-The current reference intake is tracked in `docs/codex/SECOND_BRAIN_REFERENCE_MAP.md`. That map is advisory design input only; Nexus repo facts and Alex's current instruction remain authoritative.
+It does not mean production readiness, live dispatch, default-on runtime control, private agent invocation, deployment, external adoption, autonomous merge authority, or final product acceptance.
 
 ## Superseded Material
 
-The old GitHub PR #22 / `EDC-PR-000` branch may be mined for lessons only:
+The following branches are reference-only:
 
-- useful references: local test state shape, command bridge idea, relevant desktop self-checks;
-- do not carry forward wholesale: display-only panel sprawl, evidence package mass, closeout assertions, old EDC numbering, or UAT PASS language.
+- EDC-PR-000 / GitHub PR #22: superseded L1 Governance Desktop UAT attempt.
+- EDC-PR-004 / GitHub PR #30: overloaded single-screen Desktop Delivery Board prototype.
+- EDC-PR-005 / GitHub PR #31: overloaded single-screen Owner UAT Closeout prototype.
+
+Do not treat these branches as the UAT baseline. Useful fixture safety checks, verifier assertions, and blocked-state language may be reused after review.
 
 ## Immediate Next Decision
 
-Complete `EDC-PR-001` as a planning reset, then execute `EDC-PR-002` as the first implementation slice only after Alex confirms the revised target, scope, spec, and PR plan.
+Complete EDC-PR-006 as a docs-only UX reset and PR stack replan. EDC-PR-007 through EDC-PR-010 should then rebuild the desktop workbench in separate, reviewable implementation slices, with owner UAT only after EDC-PR-010 is ready.
