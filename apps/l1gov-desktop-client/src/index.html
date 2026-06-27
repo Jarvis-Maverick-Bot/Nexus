@@ -19,12 +19,13 @@
         <button class="button blocked" type="button" disabled>Start runtime blocked</button>
         <button class="button blocked" type="button" disabled>Dispatch blocked</button>
         <button class="button blocked" type="button" disabled>Owner UAT not accepted</button>
+        <button class="button blocked" type="button" disabled>Merge blocked</button>
       </div>
     </header>
 
     <section class="workspace-strip" aria-label="Project context">
       <span id="project-name">Nexus</span>
-      <span id="sequence-chip" class="chip active">EDC-PR-004</span>
+      <span id="sequence-chip" class="chip active">EDC-PR-005</span>
       <span id="fixture-chip" class="chip warning">fixture-only</span>
       <span id="authority-chip" class="chip danger">non-authoritative</span>
       <span id="dispatch-chip" class="chip danger">live dispatch blocked</span>
@@ -39,15 +40,15 @@
           </article>
           <article class="summary-item wide">
             <span>Active branch / worktree</span>
-            <strong id="branch-worktree">codex/edc-pr-004-desktop-delivery-board</strong>
+            <strong id="branch-worktree">codex/edc-pr-005-owner-uat-closeout</strong>
           </article>
           <article class="summary-item">
             <span>Draft PR mappings</span>
-            <strong id="draft-prs">#27 #28 #29</strong>
+            <strong id="draft-prs">#27 #28 #29 #30</strong>
           </article>
           <article class="summary-item">
-            <span>EDC-PR-004 PR</span>
-            <strong id="current-pr">#30</strong>
+            <span>EDC-PR-005 PR</span>
+            <strong id="current-pr">#31</strong>
           </article>
         </div>
 
@@ -86,6 +87,31 @@
             <div id="run-list" class="run-list"></div>
           </article>
 
+
+          <article class="panel closeout-panel" id="pr-uat-closeout" aria-label="PR / UAT">
+            <div class="panel-headline">
+              <h2>PR / UAT Closeout</h2>
+              <span class="chip danger" id="closeout-state">blocked awaiting owner</span>
+            </div>
+            <div class="closeout-grid">
+              <section>
+                <h3>PR Stack</h3>
+                <div id="closeout-pr-stack" class="mapping-list"></div>
+              </section>
+              <section>
+                <h3>Evidence Gate</h3>
+                <div id="evidence-gate-list" class="evidence-gate-list"></div>
+              </section>
+              <section>
+                <h3>Owner Decision</h3>
+                <div id="owner-decision-list" class="decision-list"></div>
+              </section>
+              <section>
+                <h3>Closeout Recommendation</h3>
+                <div id="closeout-recommendation" class="recommendation"></div>
+              </section>
+            </div>
+          </article>
           <article class="panel" id="blocked-actions">
             <div class="panel-headline">
               <h2>Blocked Commands</h2>

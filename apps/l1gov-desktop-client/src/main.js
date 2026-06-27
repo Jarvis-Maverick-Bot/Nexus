@@ -1,6 +1,6 @@
 // Legacy Slice 012 verifier compatibility keeps these strings visible: fetch("./fixtures/slice012_desktop_state.json"); buildSurfaceState(fixture)
 let state;
-let selectedWorkItemId = "EDC-PR-004";
+let selectedWorkItemId = "EDC-PR-005";
 
 const $ = (id) => document.getElementById(id);
 
@@ -55,7 +55,7 @@ function render() {
   $("repo-path").textContent = state.project.repo_path;
   $("branch-worktree").textContent = `${state.project.active_branch} / ${state.project.active_worktree}`;
   $("draft-prs").textContent = state.pr_mappings
-    .filter((mapping) => [27, 28, 29].includes(mapping.github_pr_number))
+    .filter((mapping) => [27, 28, 29, 30].includes(mapping.github_pr_number))
     .map((mapping) => mapping.github_pr_label)
     .join(" ");
   const currentMapping = state.pr_mappings.find((mapping) => mapping.internal_id === state.project.current_internal_sequence);
@@ -65,6 +65,7 @@ function render() {
   renderDetail(selectedWorkItemId);
   renderAgents();
   renderRuns();
+  renderCloseout();
   renderBlockedActions();
   renderAttention();
 }
@@ -172,6 +173,58 @@ function renderRuns() {
   }));
 }
 
+
+function renderCloseout() {
+  const closeout = state.closeout;
+  if (!closeout) return;
+  $("closeout-state").textContent = closeout.state.replaceAll("_", " ");
+  $("closeout-state").className = `chip ${normalizeChipState(closeout.state)}`;
+  $("closeout-pr-stack").replaceChildren(...state.pr_mappings.map((mapping) => {
+    const item = document.createElement("article");
+    item.className = "mapping-row";
+    item.innerHTML = `
+      <strong>${escapeHtml(mapping.internal_id)}</strong>
+      <span>GitHub ${escapeHtml(mapping.github_pr_label)} | ${escapeHtml(mapping.branch)}</span>
+      ${chip(mapping.status, mapping.status)}
+    `;
+    return item;
+  }));
+  $("evidence-gate-list").replaceChildren(...closeout.evidence_gates.map((gate) => {
+    const item = document.createElement("article");
+    item.className = "gate-row";
+    item.innerHTML = `
+      <strong>${escapeHtml(gate.internal_id)} <span>${escapeHtml(gate.github_pr_label)}</span></strong>
+      <span>Validation ${escapeHtml(gate.automated_validation_state)}</span>
+      <span>Owner UAT ${escapeHtml(gate.owner_uat_state)}</span>
+      ${chip(gate.gate_state, gate.gate_state)}
+    `;
+    return item;
+  }));
+  const decision = closeout.owner_decision;
+  $("owner-decision-list").innerHTML = `
+    <dl class="compact-list">
+      <dt>Owner</dt><dd>${escapeHtml(decision.owner_ref)}</dd>
+      <dt>State</dt><dd>${chip(decision.state, decision.state)}</dd>
+      <dt>Decision ref</dt><dd>${decision.decision_ref ? escapeHtml(decision.decision_ref) : "Not recorded"}</dd>
+      <dt>Template</dt><dd><code>${escapeHtml(decision.notes_ref)}</code></dd>
+      <dt>Validation boundary</dt><dd>${decision.automated_validation_is_owner_acceptance ? "Invalid" : "Automated validation is not owner acceptance"}</dd>
+    </dl>
+    <div class="decision-buttons">
+      ${decision.disabled_options.map((option) => `<button class="blocked-action" type="button" disabled><strong>${escapeHtml(option)}</strong><span>Manual owner decision required.</span></button>`).join("")}
+    </div>
+  `;
+  $("closeout-recommendation").innerHTML = `
+    <p>${escapeHtml(closeout.recommendation.summary)}</p>
+    <dl class="compact-list">
+      <dt>State</dt><dd>${chip(closeout.recommendation.state, closeout.recommendation.state)}</dd>
+      <dt>Merge</dt><dd>${closeout.recommendation.merge_ready ? "Ready" : "Blocked"}</dd>
+      <dt>UAT pass</dt><dd>${closeout.recommendation.uat_pass_claimed ? "Claimed" : "Not claimed"}</dd>
+      <dt>Release readiness</dt><dd>${closeout.recommendation.production_readiness_claimed ? "Claimed" : "Blocked"}</dd>
+      <dt>Live readiness</dt><dd>${closeout.recommendation.live_ready_claimed ? "Claimed" : "Blocked"}</dd>
+      <dt>Blockers</dt><dd>${renderInlineList(closeout.recommendation.blockers)}</dd>
+    </dl>
+  `;
+}
 function renderBlockedActions() {
   $("action-list").replaceChildren(...state.disabled_actions.map((action) => {
     const button = document.createElement("button");
@@ -240,5 +293,6 @@ window.edcDeliveryBoardSurface = {
   renderDetail,
   renderAgents,
   renderRuns,
+  renderCloseout,
   renderAttention
 };

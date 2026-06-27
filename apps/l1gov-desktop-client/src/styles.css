@@ -448,3 +448,71 @@ code {
 .compat-fixture {
   display: none;
 }
+
+.closeout-panel {
+  grid-column: 1 / -1;
+}
+
+.closeout-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.closeout-grid section {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fbfcfc;
+}
+
+.closeout-grid h3 {
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.mapping-list,
+.evidence-gate-list,
+.decision-list,
+.recommendation,
+.decision-buttons {
+  display: grid;
+  gap: 7px;
+}
+
+.mapping-row,
+.gate-row {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.mapping-row span,
+.gate-row span,
+.recommendation p {
+  color: var(--muted);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.decision-buttons {
+  margin-top: 8px;
+}
+
+@media (max-width: 1180px) {
+  .closeout-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .closeout-grid {
+    grid-template-columns: 1fr;
+  }
+}

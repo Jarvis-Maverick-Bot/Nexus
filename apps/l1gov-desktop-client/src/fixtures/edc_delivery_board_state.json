@@ -16,19 +16,20 @@
     "docs/codex/SCOPE.md",
     "docs/codex/UX_SPEC.md",
     "docs/codex/PR_PLAN.md",
+    "docs/codex/UAT_CLOSEOUT_PLAN.md",
     "nexus/governance/delivery_contracts.py",
     "nexus/governance/handoff_records.py"
   ],
   "project": {
     "name": "Nexus Agent Coding Team Delivery Console",
     "repo_path": "D:\\Projects\\Nexus",
-    "active_branch": "codex/edc-pr-004-desktop-delivery-board",
-    "active_worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-004-desktop-delivery-board",
-    "current_internal_sequence": "EDC-PR-004",
-    "base_branch": "codex/edc-pr-003-codex-handoff-loop",
+    "active_branch": "codex/edc-pr-005-owner-uat-closeout",
+    "active_worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-005-owner-uat-closeout",
+    "current_internal_sequence": "EDC-PR-005",
+    "base_branch": "codex/edc-pr-004-desktop-delivery-board",
     "mode": "fixture_read_model",
     "sync_state": "offline fixture",
-    "review_state": "implementation fixture in progress"
+    "review_state": "owner UAT closeout preparation"
   },
   "pr_mappings": [
     {
@@ -58,18 +59,25 @@
       "github_pr_label": "#30",
       "branch": "codex/edc-pr-004-desktop-delivery-board",
       "status": "draft_pr_open"
+    },
+    {
+      "internal_id": "EDC-PR-005",
+      "github_pr_number": 31,
+      "github_pr_label": "#31",
+      "branch": "codex/edc-pr-005-owner-uat-closeout",
+      "status": "draft_pr_open"
     }
   ],
   "lanes": [
     {
       "id": "accepted_review",
       "label": "Accepted / Review",
-      "work_item_ids": ["EDC-PR-001", "EDC-PR-002", "EDC-PR-003"]
+      "work_item_ids": ["EDC-PR-001", "EDC-PR-002", "EDC-PR-003", "EDC-PR-004"]
     },
     {
       "id": "active_execution",
       "label": "Active Execution",
-      "work_item_ids": ["EDC-PR-004"]
+      "work_item_ids": ["EDC-PR-005"]
     },
     {
       "id": "blocked_attention",
@@ -144,8 +152,8 @@
     {
       "internal_id": "EDC-PR-004",
       "title": "Desktop Delivery Board MVP",
-      "status": "running",
-      "lane": "active_execution",
+      "status": "review",
+      "lane": "accepted_review",
       "github_pr_number": 30,
       "branch": "codex/edc-pr-004-desktop-delivery-board",
       "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-004-desktop-delivery-board",
@@ -160,14 +168,43 @@
       "editable_scope": ["apps/l1gov-desktop-client/src/**", "apps/l1gov-desktop-client/scripts/verify-fixture.mjs", "docs/codex/PR_PLAN.md"],
       "validation": {
         "state": "present",
-        "summary": "fixture verifier and governance tests required before review"
+        "summary": "fixture verifier and governance tests passed"
       },
       "evidence_state": "present",
       "owner_uat_state": "not_ready",
       "runtime_authorization_state": "hold",
-      "handoff_report": "Execution in named worktree; draft PR #30 open",
+      "handoff_report": "Draft PR #30 open; fixture board remains non-authoritative",
       "residual_risks": ["Display-only board is not persistence, command routing, or owner UAT intake"],
       "blockers": ["Owner UAT not accepted"]
+    },
+    {
+      "internal_id": "EDC-PR-005",
+      "title": "Owner UAT And PR Closeout Surface",
+      "status": "running",
+      "lane": "active_execution",
+      "github_pr_number": 31,
+      "branch": "codex/edc-pr-005-owner-uat-closeout",
+      "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-005-owner-uat-closeout",
+      "task_card_boundary": [
+        "apps/l1gov-desktop-client/src/index.html",
+        "apps/l1gov-desktop-client/src/main.js",
+        "apps/l1gov-desktop-client/src/styles.css",
+        "apps/l1gov-desktop-client/src/fixtures/edc_delivery_board_state.json",
+        "apps/l1gov-desktop-client/scripts/verify-fixture.mjs",
+        "docs/codex/PR_PLAN.md",
+        "docs/codex/UAT_CLOSEOUT_PLAN.md"
+      ],
+      "editable_scope": ["apps/l1gov-desktop-client/src/**", "apps/l1gov-desktop-client/scripts/verify-fixture.mjs", "docs/codex/PR_PLAN.md", "docs/codex/UAT_CLOSEOUT_PLAN.md"],
+      "validation": {
+        "state": "present",
+        "summary": "fixture verifier and governance tests are required before Planning review"
+      },
+      "evidence_state": "present",
+      "owner_uat_state": "awaiting_owner",
+      "runtime_authorization_state": "hold",
+      "handoff_report": "Owner UAT closeout preparation in named worktree; draft PR #31 open",
+      "residual_risks": ["Owner review template is not a completed acceptance record", "Closeout cannot be accepted without explicit owner decision"],
+      "blockers": ["Owner UAT decision missing", "Merge blocked", "UAT pass blocked"]
     }
   ],
   "agents": [
@@ -175,7 +212,7 @@
       "id": "codex-planning",
       "role": "Codex Planning",
       "availability": "reviewing",
-      "current_assignment": "EDC-PR-004 planning review",
+      "current_assignment": "EDC-PR-005 planning review",
       "allowed_actions": ["inspect repo state", "maintain docs/codex", "create task cards", "review reports"],
       "blocked_actions": ["edit product code", "self-authorize runtime startup"]
     },
@@ -183,41 +220,42 @@
       "id": "codex-execution",
       "role": "Codex Execution",
       "availability": "assigned",
-      "current_assignment": "EDC-PR-004",
+      "current_assignment": "EDC-PR-005",
       "allowed_actions": ["edit fixture UI", "run verifier", "run governance tests"],
-      "blocked_actions": ["tauri dev", "pnpm dev", "cargo", "broker mutation", "live dispatch"]
+      "blocked_actions": ["tauri dev", "pnpm dev", "cargo", "broker mutation", "live dispatch", "claim owner UAT"]
     },
     {
       "id": "alex-owner-uat",
       "role": "Alex Owner UAT",
-      "availability": "not_requested",
-      "current_assignment": "No owner UAT for fixture-only slice yet",
-      "allowed_actions": ["authorize startup later", "accept or reject owner UAT"],
-      "blocked_actions": ["Codex cannot claim owner acceptance"]
+      "availability": "awaiting_manual_review",
+      "current_assignment": "Owner decision not provided; use docs/codex/UAT_CLOSEOUT_PLAN.md when Alex reviews",
+      "allowed_actions": ["authorize startup later", "accept or reject owner UAT", "request rework"],
+      "blocked_actions": ["Codex cannot claim owner acceptance", "automated validation is not owner acceptance"]
     },
     {
       "id": "reviewer-reducer",
       "role": "Reviewer / Reducer",
       "availability": "available",
       "current_assignment": "Planning cached diff review after Execution report",
-      "allowed_actions": ["compare evidence", "request rework", "recommend closeout"],
+      "allowed_actions": ["compare evidence", "request rework", "recommend closeout after owner decision"],
       "blocked_actions": ["merge without owner approval", "treat fixture as canonical state"]
     }
   ],
   "runs": [
     {
-      "run_id": "run-edc-pr-004-fixture-ui",
-      "work_item_id": "EDC-PR-004",
+      "run_id": "run-edc-pr-005-closeout-fixture",
+      "work_item_id": "EDC-PR-005",
       "status": "running",
-      "branch": "codex/edc-pr-004-desktop-delivery-board",
-      "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-004-desktop-delivery-board",
+      "branch": "codex/edc-pr-005-owner-uat-closeout",
+      "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-005-owner-uat-closeout",
       "changed_files_expected": [
         "apps/l1gov-desktop-client/src/index.html",
         "apps/l1gov-desktop-client/src/main.js",
         "apps/l1gov-desktop-client/src/styles.css",
         "apps/l1gov-desktop-client/src/fixtures/edc_delivery_board_state.json",
         "apps/l1gov-desktop-client/scripts/verify-fixture.mjs",
-        "docs/codex/PR_PLAN.md"
+        "docs/codex/PR_PLAN.md",
+        "docs/codex/UAT_CLOSEOUT_PLAN.md"
       ],
       "validation_commands": [
         "node apps/l1gov-desktop-client/scripts/verify-fixture.mjs",
@@ -228,6 +266,76 @@
       "completion_report_ref": "Planning thread 019f07b2-8968-7891-bd41-aed6f25a651c"
     }
   ],
+  "closeout": {
+    "surface_title": "PR / UAT Closeout",
+    "state": "blocked_awaiting_owner",
+    "review_stack": ["EDC-PR-001", "EDC-PR-002", "EDC-PR-003", "EDC-PR-004", "EDC-PR-005"],
+    "evidence_gates": [
+      {
+        "internal_id": "EDC-PR-001",
+        "github_pr_label": "#27",
+        "automated_validation_state": "present",
+        "owner_uat_state": "not_applicable",
+        "gate_state": "reviewable"
+      },
+      {
+        "internal_id": "EDC-PR-002",
+        "github_pr_label": "#28",
+        "automated_validation_state": "present",
+        "owner_uat_state": "not_applicable",
+        "gate_state": "reviewable"
+      },
+      {
+        "internal_id": "EDC-PR-003",
+        "github_pr_label": "#29",
+        "automated_validation_state": "present",
+        "owner_uat_state": "not_applicable",
+        "gate_state": "reviewable"
+      },
+      {
+        "internal_id": "EDC-PR-004",
+        "github_pr_label": "#30",
+        "automated_validation_state": "present",
+        "owner_uat_state": "not_ready",
+        "gate_state": "awaiting_owner_review"
+      },
+      {
+        "internal_id": "EDC-PR-005",
+        "github_pr_label": "#31",
+        "automated_validation_state": "present",
+        "owner_uat_state": "awaiting_owner",
+        "gate_state": "awaiting_owner_review"
+      }
+    ],
+    "owner_decision": {
+      "state": "awaiting_owner",
+      "decision_ref": "",
+      "owner_ref": "Alex",
+      "notes_ref": "docs/codex/UAT_CLOSEOUT_PLAN.md",
+      "automated_validation_is_owner_acceptance": false,
+      "disabled_options": ["Accept owner UAT", "Reject owner UAT", "Request rework"]
+    },
+    "recommendation": {
+      "state": "blocked_awaiting_owner",
+      "summary": "Prepare owner review only; closeout remains blocked until Alex records an explicit owner decision.",
+      "merge_ready": false,
+      "uat_pass_claimed": false,
+      "production_readiness_claimed": false,
+      "live_ready_claimed": false,
+      "closeout_accepted": false,
+      "blockers": ["Owner UAT decision missing", "Merge blocked", "UAT pass blocked", "Runtime startup not authorized"]
+    },
+    "no_go_states": [
+      "merge_blocked",
+      "uat_pass_blocked",
+      "production_readiness_blocked",
+      "runtime_startup_hold",
+      "dependency_install_not_authorized",
+      "broker_nats_mutation_blocked",
+      "live_dispatch_blocked",
+      "closeout_blocked_awaiting_owner"
+    ]
+  },
   "attention_states": [
     {
       "id": "runtime_hold",
@@ -239,7 +347,13 @@
       "id": "dependency_install_not_authorized",
       "label": "Dependency install not authorized",
       "severity": "blocked",
-      "description": "No dependency install or package update is allowed in EDC-PR-004."
+      "description": "No dependency install or package update is allowed in EDC-PR-005."
+    },
+    {
+      "id": "broker_nats_mutation_blocked",
+      "label": "Broker/NATS mutation blocked",
+      "severity": "blocked",
+      "description": "The closeout fixture cannot mutate brokers, NATS, controllers, or runtime transports."
     },
     {
       "id": "live_dispatch_blocked",
@@ -253,7 +367,30 @@
       "severity": "hold",
       "description": "Automated validation is separate from Alex owner acceptance."
     },
-
+    {
+      "id": "merge_blocked",
+      "label": "Merge blocked",
+      "severity": "blocked",
+      "description": "No merge recommendation is available until owner review is recorded."
+    },
+    {
+      "id": "uat_pass_blocked",
+      "label": "UAT pass blocked",
+      "severity": "blocked",
+      "description": "No owner UAT pass may be claimed from this fixture."
+    },
+    {
+      "id": "production_readiness_blocked",
+      "label": "Production readiness blocked",
+      "severity": "blocked",
+      "description": "This local read model does not claim release or live readiness."
+    },
+    {
+      "id": "closeout_blocked_awaiting_owner",
+      "label": "Closeout blocked awaiting owner",
+      "severity": "hold",
+      "description": "Closeout remains blocked until Alex records a manual decision."
+    },
     {
       "id": "scope_evidence_gate",
       "label": "Scope and evidence gate",
@@ -281,6 +418,14 @@
     {
       "label": "Accept owner UAT",
       "reason": "Only Alex can provide owner UAT acceptance."
+    },
+    {
+      "label": "Claim UAT pass",
+      "reason": "No UAT pass can be claimed without explicit owner decision."
+    },
+    {
+      "label": "Mark closeout accepted",
+      "reason": "Closeout acceptance is blocked awaiting owner review."
     }
   ]
 }
