@@ -24,7 +24,7 @@ Nexus is a mixed repository:
 
 Branch `codex/edc-governance-desktop` is the planning reset branch for `EDC-PR-001`.
 
-The next Nexus product target is the Agent Coding Team Delivery Console: a local-first project delivery workspace where Codex Planning, Codex Execution, and owner UAT can move work through bounded task cards, isolated worktrees, validation evidence, PR review, and delivery closeout.
+The next Nexus product target is the Agent Coding Team Workbench: a local-first project delivery workspace where Codex Planning, Codex Execution, and owner UAT can move work through bounded task cards, isolated worktrees, validation evidence, PR review, and delivery closeout.
 
 Internal delivery identifiers use `EDC-PR-###`. GitHub pull request numbers are external system identifiers and must be recorded as mappings in `docs/codex/PR_PLAN.md`; do not use GitHub PR numbers as the internal work sequence.
 

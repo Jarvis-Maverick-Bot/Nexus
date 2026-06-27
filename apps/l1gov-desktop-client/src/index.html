@@ -3,118 +3,107 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus L1 Governance UX Test Surface</title>
+    <title>Nexus Agent Coding Team Workbench</title>
     <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
     <header class="topbar">
       <div class="identity">
-        <span class="mark">L1</span>
+        <span class="mark">NX</span>
         <div>
-          <h1>Nexus L1 Governance UX Test Surface</h1>
-        <p>Kernel and Governance Service remain authority.</p>
+          <h1>Nexus Agent Coding Team Workbench</h1>
+          <p>Fixture-only shell read model for EDC-PR-007. Owner UAT waits until EDC-PR-010.</p>
         </div>
       </div>
-      <div class="top-actions">
-        <button id="workspace-picker" class="button primary" type="button">Workspace</button>
-        <button id="refresh-projection" class="button" type="button">Refresh projection</button>
+      <div id="authority-chips" class="chip-row" aria-label="Authority boundaries">
+        <span class="chip blocked">Runtime hold</span>
+        <span class="chip blocked">Live dispatch blocked</span>
       </div>
     </header>
 
-    <section class="workspace-strip" aria-label="Workspace status">
-      <span id="workspace-name">4.21 Layer 1 Governance</span>
-      <span id="freshness-chip" class="chip current">current</span>
-      <span class="chip">desktop preview</span>
-      <span id="service-chip" class="chip">service fixture only</span>
-      <span class="chip">no canonical mutation</span>
+    <section class="context-strip" aria-label="Project context">
+      <div>
+        <span>Project</span>
+        <strong id="project-name">Nexus Agent Coding Team Workbench</strong>
+      </div>
+      <div>
+        <span>Path</span>
+        <strong id="project-path">D:\Projects\Nexus</strong>
+      </div>
+      <div>
+        <span>Branch</span>
+        <strong id="branch-context">codex/edc-pr-007-desktop-workbench-shell</strong>
+      </div>
+      <div>
+        <span>Worktree</span>
+        <strong id="worktree-context">.worktrees\edc-pr-007-desktop-workbench-shell</strong>
+      </div>
+      <div>
+        <span>Sequence</span>
+        <strong id="internal-sequence">EDC-PR-007</strong>
+      </div>
     </section>
 
-    <main class="shell">
-      <nav id="module-navigation" class="module-nav" aria-label="Module navigation">
-        <button class="nav-button active" type="button" data-module="mission_control">Mission Control</button>
-        <button class="nav-button" type="button" data-module="standardization">Standardization</button>
-        <button class="nav-button" type="button" data-module="monitor_hitl">Monitor/HITL</button>
-        <button class="nav-button" type="button" data-module="delivery_feedback">Delivery Feedback</button>
-        <button class="nav-button" type="button" data-module="notes_evidence">Notes Evidence</button>
+    <main class="workbench-shell">
+      <nav id="workbench-navigation" class="workbench-nav" aria-label="Workbench navigation">
+        <button class="nav-button active" type="button" data-view-id="work_items">Work Items</button>
+        <button class="nav-button" type="button" data-view-id="work_item_detail">Work Item Detail</button>
+        <button class="nav-button" type="button" data-view-id="agents">Agents</button>
+        <button class="nav-button" type="button" data-view-id="runtime_worktrees">Runtime / Worktrees</button>
+        <button class="nav-button" type="button" data-view-id="evidence_runs">Evidence / Runs</button>
+        <button class="nav-button" type="button" data-view-id="pr_uat_closeout">PR / UAT Closeout</button>
+        <button class="nav-button" type="button" data-view-id="inbox_attention">Inbox / Attention</button>
+        <button class="nav-button" type="button" data-view-id="settings_boundaries">Settings / Boundaries</button>
       </nav>
 
-      <section id="mission-control" class="mission-control" aria-label="Mission Control">
-        <div class="section-head">
+      <section id="active-view" class="active-view" aria-live="polite">
+        <div class="view-head">
           <div>
-            <h2 id="active-module-title">Mission Control</h2>
-            <p id="active-module-summary">Projection freshness and review flow.</p>
+            <span id="view-kicker" class="kicker">EDC-PR-008</span>
+            <h2 id="view-title">Work Items</h2>
+            <p id="view-purpose">Loading fixture-backed shell view.</p>
           </div>
-          <button id="draft-command-button" class="button primary" type="button">Draft Command</button>
+          <span id="view-readiness" class="status-chip">shell only</span>
         </div>
-
-        <div class="metrics-grid">
-          <article class="metric">
-            <span>Accepted Slices</span>
-            <strong id="accepted-slices">11</strong>
+        <div class="view-grid">
+          <article class="panel">
+            <h3>Implementation Owner</h3>
+            <p id="view-owner">EDC-PR-008</p>
           </article>
-          <article class="metric">
-            <span>Active Slice</span>
-            <strong id="active-slice">L1GOV-SLICE-012</strong>
+          <article class="panel">
+            <h3>Safety State</h3>
+            <p id="view-safety">Summary only</p>
           </article>
-          <article class="metric">
-            <span>Blocked Items</span>
-            <strong id="blocked-items">0</strong>
-          </article>
-        </div>
-
-        <div class="review-grid">
-          <article id="command-draft-preview" class="panel">
-            <h3>Command Draft Preview</h3>
-            <p>Select Draft Command to preview the Governance Service route shape.</p>
-          </article>
-          <article id="service-rejection" class="panel">
-            <h3>Service Outcome</h3>
-            <p id="service-outcome-copy">No command has been submitted. Fixture outcomes only.</p>
-            <div class="button-row">
-              <button id="show-rejection" class="button" type="button">Show Rejection</button>
-              <button id="no-go-block" class="button danger" type="button">Show No-Go Block</button>
-            </div>
-          </article>
-          <article id="stale-refresh" class="panel">
-            <h3>Stale Refresh Display</h3>
-            <p id="stale-copy">Refresh controls update display state only.</p>
-          </article>
-          <article id="notes-evidence" class="panel">
-            <h3>Notes Evidence Frame</h3>
-            <ul id="notes-list"></ul>
+          <article class="panel wide">
+            <h3>Boundary</h3>
+            <p id="view-boundary">This PR implements shell navigation only. Detailed workflows remain in EDC-PR-008..010.</p>
           </article>
         </div>
       </section>
 
-      <aside id="inspector" class="inspector" aria-label="Inspector">
-        <h2>Inspector</h2>
-        <dl>
-          <dt>Projection</dt>
-          <dd id="inspector-projection">ProjectionSnapshot:mission-control:aa2ff2ad</dd>
-          <dt>Authority</dt>
-          <dd>Kernel and Governance Service remain authority</dd>
-          <dt>Future integration</dt>
-          <dd id="future-boundary">disabled future boundary</dd>
-        </dl>
+      <aside class="inspector" aria-label="Workbench inspector">
+        <section>
+          <h2>PR Mapping</h2>
+          <ul id="pr-mapping-list" class="mapping-list"></ul>
+        </section>
+        <section>
+          <h2>Base Decision</h2>
+          <p id="base-decision">Continue from EDC-PR-006 / #32 and EDC-PR-003 / #29 lineage.</p>
+          <p id="superseded-note">#30 and #31 are superseded prototypes, not the UAT baseline.</p>
+        </section>
+        <section>
+          <h2>Safety Boundaries</h2>
+          <ul id="safety-list" class="safety-list"></ul>
+        </section>
       </aside>
     </main>
 
-    <footer id="status-bar" class="status-bar">
-      <span>Service: <strong id="service-state">fixture only</strong></span>
-      <span>Freshness: <strong id="freshness-state">current</strong></span>
-      <span>Sync: <strong id="sync-state">offline fixture</strong></span>
-      <span>Authority: <strong>non-authoritative</strong></span>
+    <footer class="status-bar">
+      <span>Fixture: <strong id="fixture-state">fixture-only</strong></span>
+      <span>Authority: <strong id="authority-state">non-authoritative</strong></span>
+      <span>Runtime: <strong id="runtime-state">runtime hold</strong></span>
+      <span>UAT: <strong id="uat-state">after EDC-PR-010</strong></span>
     </footer>
-
-    <dialog id="workspace-overlay" class="overlay">
-      <form method="dialog" class="overlay-panel">
-        <header class="panel-head">
-          <h2>Workspace Picker</h2>
-          <button class="icon-button" value="cancel" aria-label="Close workspace picker">x</button>
-        </header>
-        <div id="workspace-list" class="workspace-list"></div>
-      </form>
-    </dialog>
 
     <script type="module" src="./main.js"></script>
   </body>
