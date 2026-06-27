@@ -68,7 +68,6 @@ REQUIRED_ATTENTION_IDS = (
     "dependency_install_not_authorized",
     "broker_nats_mutation_blocked",
     "live_dispatch_blocked",
-    "edc_pr_010_pr_mapping_tbd",
 )
 
 REQUIRED_BOUNDARY_IDS = (
@@ -165,6 +164,9 @@ def test_workbench_fixture_maps_edc_ids_separately_from_github_pr_numbers() -> N
     assert by_id["EDC-PR-008"]["status"] == "draft_pr_open"
     assert by_id["EDC-PR-008"]["branch"] == "codex/edc-pr-008-work-items-surface"
     assert by_id["EDC-PR-008"]["base_commit"] == "e14d71e"
+    assert by_id["EDC-PR-010"]["github_pr_number"] == 36
+    assert by_id["EDC-PR-010"]["github_pr_label"] == "#36"
+    assert by_id["EDC-PR-010"]["status"] == "draft_pr_open"
     assert by_id["EDC-PR-004"]["baseline_role"] == "superseded_prototype"
     assert by_id["EDC-PR-005"]["baseline_role"] == "superseded_prototype"
     assert all(mapping["baseline_role"] != "uat_baseline" for mapping in mappings)
@@ -248,6 +250,8 @@ def test_workbench_fixture_contains_work_item_board_and_detail_records() -> None
     assert by_id["EDC-PR-009"]["branch"] == "codex/edc-pr-009-agents-runtime-worktrees"
     assert by_id["EDC-PR-009"]["worktree"].endswith(".worktrees\\edc-pr-009-agents-runtime-worktrees")
     assert by_id["EDC-PR-009"]["base_commit"] == "a2a9778"
+    assert by_id["EDC-PR-010"]["github_pr_number"] == 36
+    assert by_id["EDC-PR-010"]["github_pr_label"] == "#36"
     assert by_id["EDC-PR-010"]["owner_uat_state"] == "awaiting_owner"
 
 
@@ -449,8 +453,8 @@ def test_workbench_fixture_contains_evidence_run_records_and_gates() -> None:
     by_id = {record["internal_id"]: record for record in records}
 
     assert tuple(by_id) == REQUIRED_EVIDENCE_RUN_IDS
-    assert by_id["EDC-PR-010"]["github_pr_number"] is None
-    assert by_id["EDC-PR-010"]["github_pr_label"] == "TBD"
+    assert by_id["EDC-PR-010"]["github_pr_number"] == 36
+    assert by_id["EDC-PR-010"]["github_pr_label"] == "#36"
     assert by_id["EDC-PR-010"]["status"] == "not_run"
     assert by_id["EDC-PR-010"]["evidence_state"] == "not_run_by_scope"
     assert by_id["EDC-PR-010"]["not_run_reason"]
@@ -477,9 +481,9 @@ def test_workbench_fixture_contains_pr_uat_closeout_without_acceptance_claims() 
     assert by_id["EDC-PR-004"]["baseline_role"] == "superseded_prototype"
     assert by_id["EDC-PR-005"]["baseline_role"] == "superseded_prototype"
     assert by_id["EDC-PR-009"]["github_pr_number"] == 35
-    assert by_id["EDC-PR-010"]["github_pr_number"] is None
-    assert by_id["EDC-PR-010"]["github_pr_label"] == "TBD"
-    assert by_id["EDC-PR-010"]["status"] == "implementation_in_review"
+    assert by_id["EDC-PR-010"]["github_pr_number"] == 36
+    assert by_id["EDC-PR-010"]["github_pr_label"] == "#36"
+    assert by_id["EDC-PR-010"]["status"] == "draft_pr_open"
     assert all(str(record["internal_id"]) != str(record["github_pr_number"]) for record in pr_stack)
     assert all(record["baseline_role"] != "uat_baseline" for record in pr_stack)
 

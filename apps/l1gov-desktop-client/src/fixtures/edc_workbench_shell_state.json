@@ -51,7 +51,7 @@
     {"internal_id": "EDC-PR-007", "github_pr_number": 33, "github_pr_label": "#33", "branch": "codex/edc-pr-007-desktop-workbench-shell", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-007-desktop-workbench-shell", "base_commit": "d6a8b55", "status": "draft_pr_open", "baseline_role": "active_shell_slice"},
     {"internal_id": "EDC-PR-008", "github_pr_number": 34, "github_pr_label": "#34", "branch": "codex/edc-pr-008-work-items-surface", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-008-work-items-surface", "base_commit": "e14d71e", "status": "draft_pr_open", "baseline_role": "active_work_items_slice"},
     {"internal_id": "EDC-PR-009", "github_pr_number": 35, "github_pr_label": "#35", "branch": "codex/edc-pr-009-agents-runtime-worktrees", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-009-agents-runtime-worktrees", "base_commit": "a2a9778", "status": "draft_pr_open", "baseline_role": "active_agents_runtime_slice"},
-    {"internal_id": "EDC-PR-010", "github_pr_number": null, "github_pr_label": "TBD", "branch": "codex/edc-pr-010-evidence-uat-closeout", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-010-evidence-uat-closeout", "base_commit": "68eca33", "status": "implementation_in_review", "baseline_role": "current_evidence_closeout_slice"}
+    {"internal_id": "EDC-PR-010", "github_pr_number": 36, "github_pr_label": "#36", "branch": "codex/edc-pr-010-evidence-uat-closeout", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-010-evidence-uat-closeout", "base_commit": "68eca33", "status": "draft_pr_open", "baseline_role": "current_evidence_closeout_slice"}
   ],
   "views": [
     {"id": "work_items", "label": "Work Items", "title": "Work Items", "purpose": "Scan EDC work items by lane, branch, PR mapping, evidence, and UAT-safe readiness.", "implementation_pr": "EDC-PR-008", "readiness_state": "implemented", "nav_target": "work_items", "navigation_semantics": "stateful_view_switch", "safety_state": "fixture_read_model"},
@@ -185,14 +185,14 @@
       "evidence_state": "not_run_by_scope",
       "owner_uat_state": "awaiting_owner",
       "runtime_authorization_state": "hold",
-      "github_pr_number": null,
-      "github_pr_label": "TBD",
+      "github_pr_number": 36,
+      "github_pr_label": "#36",
       "branch": "codex/edc-pr-010-evidence-uat-closeout",
       "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-010-evidence-uat-closeout",
       "base_commit": "68eca33",
       "assignee": "Codex Execution",
       "reviewer": "Codex Planning / Alex owner UAT after Planning review",
-      "blockers": ["GitHub PR #36 is TBD until Planning creates the draft PR.", "Owner UAT decision is awaiting Alex manual review."],
+      "blockers": ["Owner UAT decision is awaiting Alex manual review."],
       "residual_risks": ["Owner UAT must remain separate from automated validation and cannot be claimed by Codex."],
       "task_card": {
         "goal": "Implement Evidence/Runs, PR/UAT closeout, Inbox/Attention, and Settings/Boundaries surfaces.",
@@ -263,7 +263,7 @@
     {"internal_id": "EDC-PR-007", "github_pr_number": 33, "github_pr_label": "#33", "command": "node apps/l1gov-desktop-client/scripts/verify-fixture.mjs", "status": "passed", "exit_code": 0, "evidence_state": "present", "evidence_ref": "Planning validation for PR #33", "summary": "Workbench shell verifier and desktop tests passed.", "not_run_reason": ""},
     {"internal_id": "EDC-PR-008", "github_pr_number": 34, "github_pr_label": "#34", "command": "python -m pytest nexus/governance/tests/test_client_desktop_surface_slice012.py -q", "status": "passed", "exit_code": 0, "evidence_state": "present", "evidence_ref": "Planning validation for PR #34", "summary": "Work Items and Detail surface tests passed.", "not_run_reason": ""},
     {"internal_id": "EDC-PR-009", "github_pr_number": 35, "github_pr_label": "#35", "command": "python -m pytest nexus/governance/tests/test_client_desktop_surface_slice012.py -q", "status": "passed", "exit_code": 0, "evidence_state": "present", "evidence_ref": "Planning validation for PR #35", "summary": "Agents and Runtime/Worktrees surface tests passed.", "not_run_reason": ""},
-    {"internal_id": "EDC-PR-010", "github_pr_number": null, "github_pr_label": "TBD", "command": "Owner UAT manual review", "status": "not_run", "exit_code": null, "evidence_state": "not_run_by_scope", "evidence_ref": "", "summary": "Owner UAT waits for Planning review and PR creation.", "not_run_reason": "Alex manual owner review has not started yet."}
+    {"internal_id": "EDC-PR-010", "github_pr_number": 36, "github_pr_label": "#36", "command": "Owner UAT manual review", "status": "not_run", "exit_code": null, "evidence_state": "not_run_by_scope", "evidence_ref": "", "summary": "Owner UAT waits for Alex manual review after PR #36 creation.", "not_run_reason": "Alex manual owner review has not started yet."}
   ],
   "pr_stack": [
     {"internal_id": "EDC-PR-001", "github_pr_number": 27, "github_pr_label": "#27", "status": "draft_pr_open", "baseline_role": "active_foundation", "evidence_gate": "present"},
@@ -275,18 +275,17 @@
     {"internal_id": "EDC-PR-007", "github_pr_number": 33, "github_pr_label": "#33", "status": "draft_pr_open", "baseline_role": "active_stack", "evidence_gate": "present"},
     {"internal_id": "EDC-PR-008", "github_pr_number": 34, "github_pr_label": "#34", "status": "draft_pr_open", "baseline_role": "active_stack", "evidence_gate": "present"},
     {"internal_id": "EDC-PR-009", "github_pr_number": 35, "github_pr_label": "#35", "status": "draft_pr_open", "baseline_role": "active_stack", "evidence_gate": "present"},
-    {"internal_id": "EDC-PR-010", "github_pr_number": null, "github_pr_label": "TBD", "status": "implementation_in_review", "baseline_role": "current_evidence_closeout_slice", "evidence_gate": "not_run_by_scope"}
+    {"internal_id": "EDC-PR-010", "github_pr_number": 36, "github_pr_label": "#36", "status": "draft_pr_open", "baseline_role": "current_evidence_closeout_slice", "evidence_gate": "not_run_by_scope"}
   ],
   "owner_uat_decision": {"state": "awaiting_owner", "owner": "Alex", "decision_ref": "", "acceptance_claimed": false, "uat_pass_claimed": false, "manual_only": true, "notes": "Prepared for Alex manual review after Planning accepts EDC-PR-010."},
-  "closeout_recommendation": {"state": "prepared_blocked_awaiting_owner", "merge_ready": false, "production_ready": false, "live_ready": false, "closeout_accepted": false, "blockers": ["Owner decision is awaiting manual review.", "GitHub PR #36 is TBD until Planning creates the draft PR.", "Runtime startup requires separate explicit authorization."]},
+  "closeout_recommendation": {"state": "prepared_blocked_awaiting_owner", "merge_ready": false, "production_ready": false, "live_ready": false, "closeout_accepted": false, "blockers": ["Owner decision is awaiting manual review.", "Runtime startup requires separate explicit authorization."]},
   "inbox_attention": [
     {"id": "owner_uat_needed", "label": "Owner UAT needed", "state": "needs_owner", "read_only": true, "detail": "Alex owner decision is awaiting manual review after Planning accepts the stack."},
     {"id": "merge_blocked", "label": "Merge blocked", "state": "blocked", "read_only": true, "detail": "No merge authority is present in this read model."},
     {"id": "runtime_startup_separate_authorization", "label": "Runtime startup separately authorized", "state": "hold", "read_only": true, "detail": "Desktop/runtime startup is not part of EDC-PR-010 execution."},
     {"id": "dependency_install_not_authorized", "label": "Dependency install not authorized", "state": "blocked", "read_only": true, "detail": "No dependency install or package update is authorized."},
     {"id": "broker_nats_mutation_blocked", "label": "Broker/NATS mutation blocked", "state": "blocked", "read_only": true, "detail": "Nexus local-test NATS and OpenClaw live NATS are display-only references here."},
-    {"id": "live_dispatch_blocked", "label": "Live dispatch blocked", "state": "blocked", "read_only": true, "detail": "No live agent dispatch or controller activation is available."},
-    {"id": "edc_pr_010_pr_mapping_tbd", "label": "EDC-PR-010 PR mapping TBD", "state": "needs_planning", "read_only": true, "detail": "GitHub PR #36 is TBD until Planning creates the draft PR."}
+    {"id": "live_dispatch_blocked", "label": "Live dispatch blocked", "state": "blocked", "read_only": true, "detail": "No live agent dispatch or controller activation is available."}
   ],
   "settings_boundaries": [
     {"id": "planning_execution_role_boundary", "summary": "Planning creates task cards and reviews reports; Execution implements explicit scope only.", "allowed": ["Planning docs", "Execution task cards", "completion reports"], "blocked": ["Planning product-code edits", "Execution scope broadening"]},
