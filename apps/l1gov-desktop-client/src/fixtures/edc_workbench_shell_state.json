@@ -49,7 +49,7 @@
     {"internal_id": "EDC-PR-005", "github_pr_number": 31, "github_pr_label": "#31", "branch": "codex/edc-pr-005-owner-uat-closeout", "status": "draft_pr_open", "baseline_role": "superseded_prototype"},
     {"internal_id": "EDC-PR-006", "github_pr_number": 32, "github_pr_label": "#32", "branch": "codex/edc-pr-006-ux-reset-workbench", "status": "draft_pr_open", "baseline_role": "active_ux_reset"},
     {"internal_id": "EDC-PR-007", "github_pr_number": 33, "github_pr_label": "#33", "branch": "codex/edc-pr-007-desktop-workbench-shell", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-007-desktop-workbench-shell", "base_commit": "d6a8b55", "status": "draft_pr_open", "baseline_role": "active_shell_slice"},
-    {"internal_id": "EDC-PR-008", "github_pr_number": null, "github_pr_label": "TBD", "branch": "codex/edc-pr-008-work-items-surface", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-008-work-items-surface", "base_commit": "e14d71e", "status": "implementation_in_review", "baseline_role": "current_work_items_slice"}
+    {"internal_id": "EDC-PR-008", "github_pr_number": 34, "github_pr_label": "#34", "branch": "codex/edc-pr-008-work-items-surface", "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-008-work-items-surface", "base_commit": "e14d71e", "status": "draft_pr_open", "baseline_role": "current_work_items_slice"}
   ],
   "views": [
     {"id": "work_items", "label": "Work Items", "title": "Work Items", "purpose": "Scan EDC work items by lane, branch, PR mapping, evidence, and UAT-safe readiness.", "implementation_pr": "EDC-PR-008", "readiness_state": "implemented", "nav_target": "work_items", "navigation_semantics": "stateful_view_switch", "safety_state": "fixture_read_model"},
@@ -121,20 +121,20 @@
     {
       "internal_id": "EDC-PR-008",
       "title": "Work Items Board/List/Detail Surface",
-      "status": "running",
-      "lane": "in_progress",
-      "readiness_state": "in_review",
-      "evidence_state": "not_run_by_scope",
+      "status": "review",
+      "lane": "draft_pr_open",
+      "readiness_state": "validated",
+      "evidence_state": "present",
       "owner_uat_state": "not_ready",
       "runtime_authorization_state": "hold",
-      "github_pr_number": null,
-      "github_pr_label": "TBD",
+      "github_pr_number": 34,
+      "github_pr_label": "#34",
       "branch": "codex/edc-pr-008-work-items-surface",
       "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-008-work-items-surface",
       "base_commit": "e14d71e",
       "assignee": "Codex Execution",
       "reviewer": "Codex Planning",
-      "blockers": ["GitHub PR mapping is TBD until Planning creates the draft PR."],
+      "blockers": [],
       "residual_risks": ["The board/detail data is deterministic fixture state, not canonical mutation authority.", "Agents, runtime, evidence, and PR/UAT views remain shallow until EDC-PR-009/010."],
       "task_card": {
         "goal": "Implement Work Items board/list and Work Item Detail surfaces inside the Workbench shell.",

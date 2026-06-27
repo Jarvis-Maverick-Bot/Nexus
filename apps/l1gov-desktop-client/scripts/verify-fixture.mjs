@@ -97,7 +97,8 @@ for (const [internalId, githubNumber] of [
   ["EDC-PR-004", 30],
   ["EDC-PR-005", 31],
   ["EDC-PR-006", 32],
-  ["EDC-PR-007", 33]
+  ["EDC-PR-007", 33],
+  ["EDC-PR-008", 34]
 ]) {
   const mapping = byId.get(internalId);
   requireTrue(Boolean(mapping), `missing PR mapping for ${internalId}`);
@@ -110,9 +111,9 @@ requireTrue(!mappings.some((mapping) => mapping.baseline_role === "uat_baseline"
 
 const edc008 = byId.get("EDC-PR-008");
 requireTrue(Boolean(edc008), "missing EDC-PR-008 mapping");
-requireTrue(edc008.github_pr_number === null && edc008.github_pr_label === "TBD", "EDC-PR-008 GitHub PR must remain TBD");
+requireTrue(edc008.github_pr_number === 34 && edc008.github_pr_label === "#34", "EDC-PR-008 GitHub PR must map to #34");
 requireTrue(edc008.branch === "codex/edc-pr-008-work-items-surface", "EDC-PR-008 branch mapping is invalid");
-requireTrue(edc008.status === "implementation_in_review", "EDC-PR-008 status must be implementation_in_review");
+requireTrue(edc008.status === "draft_pr_open", "EDC-PR-008 status must be draft_pr_open");
 requireTrue(edc008.worktree?.endsWith(".worktrees\\edc-pr-008-work-items-surface"), "EDC-PR-008 worktree mapping is invalid");
 requireTrue(edc008.base_commit === "e14d71e", "EDC-PR-008 base commit must be e14d71e");
 
@@ -134,8 +135,8 @@ for (const item of workItems) {
     requireTrue(Array.isArray(value) ? value.length > 0 : Boolean(value), `${item.internal_id} missing task-card field: ${field}`);
   }
 }
-requireTrue(workItemsById.get("EDC-PR-008")?.github_pr_number === null, "EDC-PR-008 work item must not have a GitHub PR number yet");
-requireTrue(workItemsById.get("EDC-PR-008")?.github_pr_label === "TBD", "EDC-PR-008 work item must show PR TBD");
+requireTrue(workItemsById.get("EDC-PR-008")?.github_pr_number === 34, "EDC-PR-008 work item must map to GitHub PR #34");
+requireTrue(workItemsById.get("EDC-PR-008")?.github_pr_label === "#34", "EDC-PR-008 work item must show PR #34");
 requireTrue(workItemsById.get("EDC-PR-008")?.branch === "codex/edc-pr-008-work-items-surface", "EDC-PR-008 work item branch is invalid");
 requireTrue(workItemsById.get("EDC-PR-008")?.worktree?.endsWith(".worktrees\\edc-pr-008-work-items-surface"), "EDC-PR-008 work item worktree is invalid");
 requireTrue(workItemsById.get("EDC-PR-010")?.owner_uat_state === "awaiting_owner", "EDC-PR-010 must keep owner UAT awaiting owner");

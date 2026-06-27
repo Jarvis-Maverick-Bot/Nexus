@@ -106,9 +106,9 @@ def test_workbench_fixture_maps_edc_ids_separately_from_github_pr_numbers() -> N
     assert by_id["EDC-PR-007"]["status"] == "draft_pr_open"
     assert by_id["EDC-PR-007"]["branch"] == "codex/edc-pr-007-desktop-workbench-shell"
     assert by_id["EDC-PR-007"]["base_commit"] == "d6a8b55"
-    assert by_id["EDC-PR-008"]["github_pr_number"] is None
-    assert by_id["EDC-PR-008"]["github_pr_label"] == "TBD"
-    assert by_id["EDC-PR-008"]["status"] == "implementation_in_review"
+    assert by_id["EDC-PR-008"]["github_pr_number"] == 34
+    assert by_id["EDC-PR-008"]["github_pr_label"] == "#34"
+    assert by_id["EDC-PR-008"]["status"] == "draft_pr_open"
     assert by_id["EDC-PR-008"]["branch"] == "codex/edc-pr-008-work-items-surface"
     assert by_id["EDC-PR-008"]["base_commit"] == "e14d71e"
     assert by_id["EDC-PR-004"]["baseline_role"] == "superseded_prototype"
@@ -183,8 +183,8 @@ def test_workbench_fixture_contains_work_item_board_and_detail_records() -> None
 
     assert by_id["EDC-PR-006"]["github_pr_number"] == 32
     assert by_id["EDC-PR-007"]["github_pr_number"] == 33
-    assert by_id["EDC-PR-008"]["github_pr_number"] is None
-    assert by_id["EDC-PR-008"]["github_pr_label"] == "TBD"
+    assert by_id["EDC-PR-008"]["github_pr_number"] == 34
+    assert by_id["EDC-PR-008"]["github_pr_label"] == "#34"
     assert by_id["EDC-PR-008"]["branch"] == "codex/edc-pr-008-work-items-surface"
     assert by_id["EDC-PR-008"]["worktree"].endswith(".worktrees\\edc-pr-008-work-items-surface")
     assert by_id["EDC-PR-008"]["base_commit"] == "e14d71e"
