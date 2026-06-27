@@ -21,7 +21,7 @@ GitHub PR numbers are external identifiers assigned by GitHub and must be record
 | --- | ---: | --- | --- | --- |
 | `EDC-PR-000` | #22 | `codex/4.21-real-testproject-e2e-uat` | Superseded L1 Governance Desktop UAT attempt | Closed / superseded |
 | `EDC-PR-001` | #27 | `codex/edc-governance-desktop` | Planning reset for Agent Coding Team Delivery Console | Draft PR open |
-| `EDC-PR-002` | TBD | TBD | Delivery domain contracts | Planned |
+| `EDC-PR-002` | TBD | `codex/edc-pr-002-delivery-domain-contracts` | Delivery domain contracts | In progress |
 | `EDC-PR-003` | TBD | TBD | Codex execution handoff loop | Planned |
 | `EDC-PR-004` | TBD | TBD | Desktop delivery board MVP | Planned |
 | `EDC-PR-005` | TBD | TBD | Owner UAT closeout | Planned |
