@@ -18,6 +18,24 @@ REQUIRED_VIEW_IDS = (
     "settings_boundaries",
 )
 
+REQUIRED_WORK_ITEM_IDS = (
+    "EDC-PR-006",
+    "EDC-PR-007",
+    "EDC-PR-008",
+    "EDC-PR-009",
+    "EDC-PR-010",
+)
+
+REQUIRED_TASK_CARD_FIELDS = (
+    "goal",
+    "scope_summary",
+    "non_goals",
+    "editable_boundary",
+    "validation_commands",
+    "risks",
+    "write_back_location",
+)
+
 REQUIRED_DESKTOP_FILES = (
     "package.json",
     "package-lock.json",
@@ -88,6 +106,11 @@ def test_workbench_fixture_maps_edc_ids_separately_from_github_pr_numbers() -> N
     assert by_id["EDC-PR-007"]["status"] == "draft_pr_open"
     assert by_id["EDC-PR-007"]["branch"] == "codex/edc-pr-007-desktop-workbench-shell"
     assert by_id["EDC-PR-007"]["base_commit"] == "d6a8b55"
+    assert by_id["EDC-PR-008"]["github_pr_number"] == 34
+    assert by_id["EDC-PR-008"]["github_pr_label"] == "#34"
+    assert by_id["EDC-PR-008"]["status"] == "draft_pr_open"
+    assert by_id["EDC-PR-008"]["branch"] == "codex/edc-pr-008-work-items-surface"
+    assert by_id["EDC-PR-008"]["base_commit"] == "e14d71e"
     assert by_id["EDC-PR-004"]["baseline_role"] == "superseded_prototype"
     assert by_id["EDC-PR-005"]["baseline_role"] == "superseded_prototype"
     assert all(mapping["baseline_role"] != "uat_baseline" for mapping in mappings)
@@ -101,7 +124,13 @@ def test_workbench_fixture_has_required_views_without_hash_navigation() -> None:
     assert view_ids == REQUIRED_VIEW_IDS
     for view in views:
         assert view["implementation_pr"] in {"EDC-PR-008", "EDC-PR-009", "EDC-PR-010"}
-        assert view["readiness_state"] in {"planned", "blocked_until_later_slice", "shell_only"}
+        assert view["readiness_state"] in {
+            "implemented",
+            "in_review",
+            "planned",
+            "blocked_until_later_slice",
+            "shell_only",
+        }
         assert view["nav_target"] == view["id"]
         assert not view["nav_target"].startswith("#")
         assert "anchor" not in view["navigation_semantics"]
@@ -118,6 +147,9 @@ def test_workbench_first_screen_and_renderer_use_real_view_switching() -> None:
     assert "fetch(\"./fixtures/edc_workbench_shell_state.json\")" in main_js
     assert "activeViewId" in main_js
     assert "renderActiveView" in main_js
+    assert "renderWorkItemsBoard" in main_js
+    assert "renderWorkItemDetail" in main_js
+    assert "selectWorkItem" in main_js
     assert "selectView" in main_js
     assert "scrollIntoView" not in main_js
     assert "location.hash" not in main_js
@@ -125,6 +157,72 @@ def test_workbench_first_screen_and_renderer_use_real_view_switching() -> None:
 
     for view_id in REQUIRED_VIEW_IDS:
         assert f'data-view-id="{view_id}"' in html
+
+
+def test_workbench_fixture_contains_work_item_board_and_detail_records() -> None:
+    fixture = load_fixture()
+    work_items = fixture["work_items"]
+    by_id = {item["internal_id"]: item for item in work_items}
+
+    assert tuple(by_id) == REQUIRED_WORK_ITEM_IDS
+    assert fixture["selected_work_item_id"] == "EDC-PR-008"
+
+    for item in work_items:
+        assert re.fullmatch(r"EDC-PR-\d{3}", item["internal_id"])
+        assert str(item["internal_id"]) != str(item["github_pr_number"])
+        assert item["status"] in {"review", "running", "planned"}
+        assert item["lane"] in {"draft_pr_open", "in_progress", "planned"}
+        assert item["readiness_state"] in {"validated", "in_review", "planned", "blocked"}
+        assert item["evidence_state"] in {"present", "not_run_by_scope", "missing"}
+        assert item["owner_uat_state"] in {"not_applicable", "not_ready", "awaiting_owner"}
+        assert item["runtime_authorization_state"] in {"not_required", "hold"}
+
+        task_card = item["task_card"]
+        for field in REQUIRED_TASK_CARD_FIELDS:
+            assert task_card[field], f"{item['internal_id']} missing task card {field}"
+
+    assert by_id["EDC-PR-006"]["github_pr_number"] == 32
+    assert by_id["EDC-PR-007"]["github_pr_number"] == 33
+    assert by_id["EDC-PR-008"]["github_pr_number"] == 34
+    assert by_id["EDC-PR-008"]["github_pr_label"] == "#34"
+    assert by_id["EDC-PR-008"]["branch"] == "codex/edc-pr-008-work-items-surface"
+    assert by_id["EDC-PR-008"]["worktree"].endswith(".worktrees\\edc-pr-008-work-items-surface")
+    assert by_id["EDC-PR-008"]["base_commit"] == "e14d71e"
+    assert by_id["EDC-PR-009"]["lane"] == "planned"
+    assert by_id["EDC-PR-010"]["owner_uat_state"] == "awaiting_owner"
+
+
+def test_workbench_work_items_and_detail_have_distinct_render_targets() -> None:
+    html = read_app_file("src/index.html")
+    main_js = read_app_file("src/main.js")
+
+    for element_id in (
+        "work-items-region",
+        "work-item-board",
+        "work-item-detail-region",
+        "detail-internal-id",
+        "detail-goal",
+        "detail-scope",
+        "detail-boundaries",
+        "detail-validation",
+        "detail-evidence",
+        "detail-pr-mapping",
+        "detail-risk-list",
+        "detail-writeback",
+    ):
+        assert f'id="{element_id}"' in html
+
+    assert "selectedWorkItemId" in main_js
+    assert "state.selectedWorkItemId = workItemId" in main_js
+    assert "data-work-item-id" in main_js
+    assert "state.workItemsById[state.selectedWorkItemId]" in main_js
+    assert '$("work-items-region").hidden = regionName !== "work_items"' in main_js
+    assert '$("work-item-detail-region").hidden = regionName !== "work_item_detail"' in main_js
+    assert '$("placeholder-region").hidden = regionName !== "placeholder"' in main_js
+    assert '! ["work_items", "work_item_detail"].includes(regionName)' not in main_js
+    assert '!["work_items", "work_item_detail"].includes(regionName)' not in main_js
+    assert "button.innerHTML" not in main_js
+    assert "append(topRow, title, stateMeta, branchMeta)" in main_js
 
 
 def test_workbench_shell_exposes_global_context_and_blocked_authority() -> None:

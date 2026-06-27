@@ -12,7 +12,7 @@
         <span class="mark">NX</span>
         <div>
           <h1>Nexus Agent Coding Team Workbench</h1>
-          <p>Fixture-only shell read model for EDC-PR-007. Owner UAT waits until EDC-PR-010.</p>
+          <p>Fixture-only Work Items read model for EDC-PR-008. Owner UAT waits until EDC-PR-010.</p>
         </div>
       </div>
       <div id="authority-chips" class="chip-row" aria-label="Authority boundaries">
@@ -32,15 +32,15 @@
       </div>
       <div>
         <span>Branch</span>
-        <strong id="branch-context">codex/edc-pr-007-desktop-workbench-shell</strong>
+        <strong id="branch-context">codex/edc-pr-008-work-items-surface</strong>
       </div>
       <div>
         <span>Worktree</span>
-        <strong id="worktree-context">.worktrees\edc-pr-007-desktop-workbench-shell</strong>
+        <strong id="worktree-context">.worktrees\edc-pr-008-work-items-surface</strong>
       </div>
       <div>
         <span>Sequence</span>
-        <strong id="internal-sequence">EDC-PR-007</strong>
+        <strong id="internal-sequence">EDC-PR-008</strong>
       </div>
     </section>
 
@@ -61,11 +61,75 @@
           <div>
             <span id="view-kicker" class="kicker">EDC-PR-008</span>
             <h2 id="view-title">Work Items</h2>
-            <p id="view-purpose">Loading fixture-backed shell view.</p>
+            <p id="view-purpose">Loading fixture-backed work item view.</p>
           </div>
-          <span id="view-readiness" class="status-chip">shell only</span>
+          <span id="view-readiness" class="status-chip">in review</span>
         </div>
-        <div class="view-grid">
+
+        <div id="work-items-region" class="work-items-region" hidden>
+          <div class="section-title">
+            <h3>Board / List</h3>
+            <p>Internal EDC IDs stay separate from GitHub PR numbers. Selecting a row updates the detail read model.</p>
+          </div>
+          <div id="work-item-board" class="work-item-board" aria-label="Work item board"></div>
+        </div>
+
+        <div id="work-item-detail-region" class="work-item-detail-region" hidden>
+          <div class="detail-head">
+            <div>
+              <span id="detail-internal-id" class="kicker">EDC-PR-008</span>
+              <h3 id="detail-title">Work Item Detail</h3>
+              <p id="detail-summary">Selected task-card boundary and readiness state.</p>
+            </div>
+            <span id="detail-pr-mapping" class="status-chip">#34</span>
+          </div>
+          <div class="detail-grid">
+            <article class="panel">
+              <h3>Goal</h3>
+              <p id="detail-goal"></p>
+            </article>
+            <article class="panel">
+              <h3>Scope</h3>
+              <p id="detail-scope"></p>
+            </article>
+            <article class="panel">
+              <h3>Non-goals</h3>
+              <p id="detail-non-goals"></p>
+            </article>
+            <article class="panel">
+              <h3>Branch / Worktree</h3>
+              <p id="detail-branch"></p>
+              <p id="detail-worktree"></p>
+            </article>
+            <article class="panel wide">
+              <h3>Editable Boundary</h3>
+              <ul id="detail-boundaries" class="compact-list"></ul>
+            </article>
+            <article class="panel">
+              <h3>Validation</h3>
+              <ul id="detail-validation" class="compact-list"></ul>
+            </article>
+            <article class="panel">
+              <h3>Evidence / UAT</h3>
+              <p id="detail-evidence"></p>
+              <p id="detail-uat"></p>
+            </article>
+            <article class="panel">
+              <h3>Residual Risks</h3>
+              <ul id="detail-risk-list" class="compact-list"></ul>
+            </article>
+            <article class="panel">
+              <h3>Blockers</h3>
+              <ul id="detail-blocker-list" class="compact-list"></ul>
+            </article>
+            <article class="panel wide">
+              <h3>Write-back</h3>
+              <p id="detail-writeback"></p>
+            </article>
+          </div>
+        </div>
+
+        <div id="placeholder-region" class="view-grid">
           <article class="panel">
             <h3>Implementation Owner</h3>
             <p id="view-owner">EDC-PR-008</p>
@@ -76,7 +140,7 @@
           </article>
           <article class="panel wide">
             <h3>Boundary</h3>
-            <p id="view-boundary">This PR implements shell navigation only. Detailed workflows remain in EDC-PR-008..010.</p>
+            <p id="view-boundary">Later workflows remain in EDC-PR-009..010.</p>
           </article>
         </div>
       </section>
