@@ -42,7 +42,7 @@ for (const mapping of mappings) {
   requireTrue(String(mapping.internal_id) !== String(mapping.github_pr_number), `PR mapping confuses internal and GitHub id: ${mapping.internal_id}`);
 }
 
-for (const githubNumber of [27, 28, 29]) {
+for (const githubNumber of [27, 28, 29, 30]) {
   requireTrue(
     mappings.some((mapping) => mapping.github_pr_number === githubNumber),
     `missing GitHub PR #${githubNumber} mapping`
@@ -51,7 +51,7 @@ for (const githubNumber of [27, 28, 29]) {
 
 const edc004 = mappings.find((mapping) => mapping.internal_id === "EDC-PR-004");
 requireTrue(Boolean(edc004), "missing EDC-PR-004 PR mapping");
-requireTrue(edc004.github_pr_number === null && edc004.github_pr_label === "TBD", "EDC-PR-004 GitHub PR must remain TBD");
+requireTrue(edc004.github_pr_number === 30 && edc004.github_pr_label === "#30", "EDC-PR-004 GitHub PR must map to #30");
 requireTrue(edc004.branch === "codex/edc-pr-004-desktop-delivery-board", "EDC-PR-004 branch mapping is invalid");
 
 const activeItem = workItems.find((item) => item.internal_id === "EDC-PR-004");
@@ -65,7 +65,6 @@ for (const requiredAttention of [
   "live_dispatch_blocked",
   "owner_uat_not_accepted",
   "dependency_install_not_authorized",
-  "edc_pr_004_pr_mapping_gap",
   "scope_evidence_gate"
 ]) {
   requireTrue(attentionIds.has(requiredAttention), `missing attention state: ${requiredAttention}`);

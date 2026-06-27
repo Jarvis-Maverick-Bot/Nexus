@@ -54,10 +54,10 @@
     },
     {
       "internal_id": "EDC-PR-004",
-      "github_pr_number": null,
-      "github_pr_label": "TBD",
+      "github_pr_number": 30,
+      "github_pr_label": "#30",
       "branch": "codex/edc-pr-004-desktop-delivery-board",
-      "status": "not_created"
+      "status": "draft_pr_open"
     }
   ],
   "lanes": [
@@ -146,7 +146,7 @@
       "title": "Desktop Delivery Board MVP",
       "status": "running",
       "lane": "active_execution",
-      "github_pr_number": null,
+      "github_pr_number": 30,
       "branch": "codex/edc-pr-004-desktop-delivery-board",
       "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-004-desktop-delivery-board",
       "task_card_boundary": [
@@ -165,9 +165,9 @@
       "evidence_state": "present",
       "owner_uat_state": "not_ready",
       "runtime_authorization_state": "hold",
-      "handoff_report": "Execution in named worktree; GitHub PR TBD until Planning creates it",
+      "handoff_report": "Execution in named worktree; draft PR #30 open",
       "residual_risks": ["Display-only board is not persistence, command routing, or owner UAT intake"],
-      "blockers": ["GitHub PR mapping gap for EDC-PR-004", "Owner UAT not accepted"]
+      "blockers": ["Owner UAT not accepted"]
     }
   ],
   "agents": [
@@ -253,12 +253,7 @@
       "severity": "hold",
       "description": "Automated validation is separate from Alex owner acceptance."
     },
-    {
-      "id": "edc_pr_004_pr_mapping_gap",
-      "label": "EDC-PR-004 PR mapping TBD",
-      "severity": "attention",
-      "description": "Internal ID is EDC-PR-004; GitHub PR number remains TBD until Planning creates it."
-    },
+
     {
       "id": "scope_evidence_gate",
       "label": "Scope and evidence gate",
