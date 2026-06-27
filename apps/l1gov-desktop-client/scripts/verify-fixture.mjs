@@ -44,7 +44,7 @@ for (const mapping of mappings) {
   requireTrue(String(mapping.internal_id) !== String(mapping.github_pr_number), `PR mapping confuses internal and GitHub id: ${mapping.internal_id}`);
 }
 
-for (const githubNumber of [27, 28, 29, 30]) {
+for (const githubNumber of [27, 28, 29, 30, 31]) {
   requireTrue(
     mappings.some((mapping) => mapping.github_pr_number === githubNumber),
     `missing GitHub PR #${githubNumber} mapping`
@@ -58,9 +58,9 @@ requireTrue(edc004.branch === "codex/edc-pr-004-desktop-delivery-board", "EDC-PR
 
 const edc005 = mappings.find((mapping) => mapping.internal_id === "EDC-PR-005");
 requireTrue(Boolean(edc005), "missing EDC-PR-005 PR mapping");
-requireTrue(edc005.github_pr_number === null && edc005.github_pr_label === "TBD", "EDC-PR-005 GitHub PR must remain TBD");
+requireTrue(edc005.github_pr_number === 31 && edc005.github_pr_label === "#31", "EDC-PR-005 GitHub PR must map to #31");
 requireTrue(edc005.branch === "codex/edc-pr-005-owner-uat-closeout", "EDC-PR-005 branch mapping is invalid");
-requireTrue(edc005.status === "not_created", "EDC-PR-005 GitHub PR must not be marked open yet");
+requireTrue(edc005.status === "draft_pr_open", "EDC-PR-005 GitHub PR must be draft PR open");
 
 const activeItem = workItems.find((item) => item.internal_id === "EDC-PR-005");
 requireTrue(Boolean(activeItem), "missing EDC-PR-005 work item");

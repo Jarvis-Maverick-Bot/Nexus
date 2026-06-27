@@ -24,7 +24,7 @@ Reviewed PRs:
 | EDC-PR-002 | #28 | codex/edc-pr-002-delivery-domain-contracts | not reviewed by owner in this template |
 | EDC-PR-003 | #29 | codex/edc-pr-003-codex-handoff-loop | not reviewed by owner in this template |
 | EDC-PR-004 | #30 | codex/edc-pr-004-desktop-delivery-board | not reviewed by owner in this template |
-| EDC-PR-005 | TBD | codex/edc-pr-005-owner-uat-closeout | not reviewed by owner in this template |
+| EDC-PR-005 | #31 | codex/edc-pr-005-owner-uat-closeout | not reviewed by owner in this template |
 
 Reviewed branch/worktree:
 
@@ -86,4 +86,4 @@ Until Alex records an explicit owner decision:
 Current recommendation state: blocked_awaiting_owner
 Reason: owner UAT decision has not been recorded.
 
-Recommended next action: Planning should review the EDC-PR-005 fixture/read-model and, if accepted, create/update the GitHub PR mapping. Owner UAT can only proceed after Alex explicitly authorizes the review mode and records observations or a decision.
+Recommended next action: Planning should review the EDC-PR-005 fixture/read-model with draft PR #31 mapped. Owner UAT can only proceed after Alex explicitly authorizes the review mode and records observations or a decision.

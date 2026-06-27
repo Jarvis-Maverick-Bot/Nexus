@@ -24,7 +24,7 @@ GitHub PR numbers are external identifiers assigned by GitHub and must be record
 | `EDC-PR-002` | #28 | `codex/edc-pr-002-delivery-domain-contracts` | Delivery domain contracts | Draft PR open |
 | `EDC-PR-003` | #29 | `codex/edc-pr-003-codex-handoff-loop` | Codex execution handoff loop | Draft PR open |
 | `EDC-PR-004` | #30 | `codex/edc-pr-004-desktop-delivery-board` | Desktop delivery board MVP | Draft PR open |
-| `EDC-PR-005` | TBD | `codex/edc-pr-005-owner-uat-closeout` | Owner UAT closeout | Implementation in review |
+| `EDC-PR-005` | #31 | `codex/edc-pr-005-owner-uat-closeout` | Owner UAT closeout | Draft PR open |
 
 ## Proposed PR Sequence
 
