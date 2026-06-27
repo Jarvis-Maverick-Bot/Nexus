@@ -25,8 +25,20 @@ function normalizeViewId(viewId) {
   return REQUIRED_VIEW_IDS.includes(viewId) ? viewId : REQUIRED_VIEW_IDS[0];
 }
 
-function byId(records) {
-  return Object.fromEntries(records.map((record) => [record.id, record]));
+function byId(records, key = "id") {
+  return Object.fromEntries(records.map((record) => [record[key], record]));
+}
+
+function labelize(value) {
+  return String(value ?? "").replaceAll("_", " ");
+}
+
+function createTextList(items) {
+  return (items?.length ? items : ["None recorded"]).map((text) => {
+    const item = document.createElement("li");
+    item.textContent = text;
+    return item;
+  });
 }
 
 function buildShellState(fixture) {
@@ -44,11 +56,20 @@ function buildShellState(fixture) {
     }
   }
 
+  const workItems = fixture.work_items ?? [];
+  const workItemsById = byId(workItems, "internal_id");
+  const selectedWorkItemId = workItemsById[fixture.selected_work_item_id]
+    ? fixture.selected_work_item_id
+    : workItems[0]?.internal_id;
+
   return {
     fixture,
     activeViewId: REQUIRED_VIEW_IDS[0],
+    selectedWorkItemId,
     views,
-    viewsById: byId(views)
+    viewsById: byId(views),
+    workItems,
+    workItemsById
   };
 }
 
@@ -93,8 +114,13 @@ function renderPrMappings() {
   $("pr-mapping-list").replaceChildren(
     ...state.fixture.pr_mappings.map((mapping) => {
       const item = document.createElement("li");
-      const githubLabel = mapping.github_pr_label || "TBD";
-      item.innerHTML = `<span>${mapping.internal_id}</span><strong>${githubLabel}</strong><em>${mapping.baseline_role}</em>`;
+      const id = document.createElement("span");
+      const github = document.createElement("strong");
+      const role = document.createElement("em");
+      id.textContent = mapping.internal_id;
+      github.textContent = mapping.github_pr_label || "TBD";
+      role.textContent = mapping.baseline_role;
+      item.append(id, github, role);
       if (mapping.baseline_role === "superseded_prototype") {
         item.classList.add("superseded");
       }
@@ -107,7 +133,11 @@ function renderSafetyBoundaries() {
   $("safety-list").replaceChildren(
     ...state.fixture.safety_boundaries.map((boundary) => {
       const item = document.createElement("li");
-      item.innerHTML = `<strong>${boundary.label}</strong><span>${boundary.detail}</span>`;
+      const label = document.createElement("strong");
+      const detail = document.createElement("span");
+      label.textContent = boundary.label;
+      detail.textContent = boundary.detail;
+      item.append(label, detail);
       return item;
     })
   );
@@ -127,15 +157,115 @@ function renderNavigation() {
   });
 }
 
+function renderWorkItemsBoard() {
+  const lanes = [
+    ["draft_pr_open", "Draft PR open"],
+    ["in_progress", "In progress"],
+    ["planned", "Planned"]
+  ];
+
+  const laneNodes = lanes.map(([laneId, label]) => {
+    const lane = document.createElement("section");
+    lane.className = "work-lane";
+    const heading = document.createElement("h3");
+    heading.textContent = label;
+    const list = document.createElement("div");
+    list.className = "work-card-list";
+
+    const items = state.workItems.filter((item) => item.lane === laneId);
+    for (const workItem of items) {
+      const button = document.createElement("button");
+      const isSelected = workItem.internal_id === state.selectedWorkItemId;
+      const topRow = document.createElement("span");
+      const internalId = document.createElement("strong");
+      const githubLabel = document.createElement("em");
+      const title = document.createElement("span");
+      const stateMeta = document.createElement("span");
+      const branchMeta = document.createElement("span");
+
+      button.type = "button";
+      button.className = `work-card ${isSelected ? "selected" : ""}`;
+      button.setAttribute("data-work-item-id", workItem.internal_id);
+      button.setAttribute("aria-pressed", isSelected ? "true" : "false");
+
+      topRow.className = "work-card-top";
+      internalId.textContent = workItem.internal_id;
+      githubLabel.textContent = workItem.github_pr_label;
+      topRow.append(internalId, githubLabel);
+
+      title.className = "work-card-title";
+      title.textContent = workItem.title;
+
+      stateMeta.className = "work-card-meta";
+      stateMeta.textContent = `${labelize(workItem.status)} / ${labelize(workItem.readiness_state)} / ${labelize(workItem.evidence_state)}`;
+
+      branchMeta.className = "work-card-meta";
+      branchMeta.textContent = workItem.branch;
+
+      button.append(topRow, title, stateMeta, branchMeta);
+      button.addEventListener("click", () => selectWorkItem(workItem.internal_id));
+      list.append(button);
+    }
+
+    lane.append(heading, list);
+    return lane;
+  });
+
+  $("work-item-board").replaceChildren(...laneNodes);
+}
+function renderWorkItemDetail() {
+  const item = state.workItemsById[state.selectedWorkItemId] ?? state.workItems[0];
+  if (!item) return;
+
+  $("detail-internal-id").textContent = item.internal_id;
+  $("detail-title").textContent = item.title;
+  $("detail-summary").textContent = `${labelize(item.status)} / ${labelize(item.readiness_state)} / owner UAT ${labelize(item.owner_uat_state)}`;
+  $("detail-pr-mapping").textContent = `${item.internal_id} -> ${item.github_pr_label || "TBD"}`;
+  $("detail-goal").textContent = item.task_card.goal;
+  $("detail-scope").textContent = item.task_card.scope_summary;
+  $("detail-non-goals").textContent = item.task_card.non_goals;
+  $("detail-branch").textContent = `Branch: ${item.branch}`;
+  $("detail-worktree").textContent = `Worktree: ${item.worktree}`;
+  $("detail-evidence").textContent = `Evidence: ${labelize(item.evidence_state)}; runtime authorization: ${labelize(item.runtime_authorization_state)}.`;
+  $("detail-uat").textContent = `Owner UAT: ${labelize(item.owner_uat_state)}; no owner acceptance recorded.`;
+  $("detail-writeback").textContent = item.task_card.write_back_location;
+  $("detail-boundaries").replaceChildren(...createTextList(item.task_card.editable_boundary));
+  $("detail-validation").replaceChildren(...createTextList(item.task_card.validation_commands));
+  $("detail-risk-list").replaceChildren(...createTextList(item.residual_risks));
+  $("detail-blocker-list").replaceChildren(...createTextList(item.blockers));
+}
+
+function showRegion(regionName) {
+  $("work-items-region").hidden = regionName !== "work_items";
+  $("work-item-detail-region").hidden = regionName !== "work_item_detail";
+  $("placeholder-region").hidden = regionName !== "placeholder";
+}
+
 function renderActiveView() {
   const view = state.viewsById[state.activeViewId];
   $("view-kicker").textContent = view.implementation_pr;
   $("view-title").textContent = view.title;
   $("view-purpose").textContent = view.purpose;
+  $("view-readiness").textContent = labelize(view.readiness_state);
+
+  if (["work_items", "work_item_detail"].includes(state.activeViewId)) {
+    showRegion(state.activeViewId);
+    renderWorkItemsBoard();
+    renderWorkItemDetail();
+    return;
+  }
+
+  showRegion("placeholder");
   $("view-owner").textContent = view.implementation_pr;
-  $("view-safety").textContent = view.safety_state.replaceAll("_", " ");
-  $("view-readiness").textContent = view.readiness_state.replaceAll("_", " ");
-  $("view-boundary").textContent = `${view.title} is ${view.readiness_state.replaceAll("_", " ")} in EDC-PR-007. Full workflow content belongs to ${view.implementation_pr}.`;
+  $("view-safety").textContent = labelize(view.safety_state);
+  $("view-boundary").textContent = `${view.title} remains ${labelize(view.readiness_state)} in EDC-PR-008. Full workflow content belongs to ${view.implementation_pr}.`;
+}
+
+function selectWorkItem(workItemId) {
+  if (!state.workItemsById[workItemId]) return;
+  state.selectedWorkItemId = workItemId;
+  renderWorkItemsBoard();
+  renderWorkItemDetail();
 }
 
 function selectView(viewId) {
@@ -178,5 +308,8 @@ window.edcWorkbenchShellSurface = {
   normalizeViewId,
   renderActiveView,
   renderNavigation,
-  selectView
+  renderWorkItemDetail,
+  renderWorkItemsBoard,
+  selectView,
+  selectWorkItem
 };

@@ -30,7 +30,7 @@ GitHub PR numbers are external identifiers assigned by GitHub and must be record
 | `EDC-PR-005` | #31 | `codex/edc-pr-005-owner-uat-closeout` | Owner UAT closeout prototype | Draft PR open / superseded UX prototype, not UAT baseline |
 | `EDC-PR-006` | #32 | `codex/edc-pr-006-ux-reset-workbench` | Multica-style UX reset and PR stack replan | Draft PR open |
 | `EDC-PR-007` | #33 | `codex/edc-pr-007-desktop-workbench-shell` | Desktop workspace shell and real navigation | Draft PR open |
-| `EDC-PR-008` | TBD | TBD | Work items board/list/detail surface | Planned |
+| `EDC-PR-008` | TBD | `codex/edc-pr-008-work-items-surface` | Work items board/list/detail surface | Implementation in review |
 | `EDC-PR-009` | TBD | TBD | Agents, runtime, and worktree surface | Planned |
 | `EDC-PR-010` | TBD | TBD | Evidence, PR/UAT closeout, and final UAT startup readiness | Planned |
 

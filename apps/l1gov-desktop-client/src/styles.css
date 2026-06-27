@@ -96,7 +96,8 @@ p,
 li,
 span,
 strong,
-em {
+em,
+button {
   font-size: 13px;
 }
 
@@ -104,7 +105,10 @@ em {
 .view-head p,
 .panel p,
 .inspector p,
-.safety-list span {
+.safety-list span,
+.section-title p,
+.detail-head p,
+.work-card-meta {
   color: var(--muted);
   line-height: 1.35;
   overflow-wrap: anywhere;
@@ -211,7 +215,8 @@ em {
   padding: 18px;
 }
 
-.view-head {
+.view-head,
+.detail-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -219,11 +224,13 @@ em {
   margin-bottom: 16px;
 }
 
-.view-head > div {
+.view-head > div,
+.detail-head > div {
   min-width: 0;
 }
 
-.view-grid {
+.view-grid,
+.detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
@@ -231,7 +238,7 @@ em {
 
 .panel {
   min-width: 0;
-  min-height: 130px;
+  min-height: 120px;
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -240,6 +247,83 @@ em {
 
 .panel.wide {
   grid-column: 1 / -1;
+}
+
+.section-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.work-items-region,
+.work-item-detail-region {
+  margin-top: 16px;
+}
+
+.work-items-region[hidden],
+.work-item-detail-region[hidden],
+.view-grid[hidden] {
+  display: none;
+}
+
+.work-item-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.work-lane {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.work-card-list {
+  display: grid;
+  gap: 8px;
+}
+
+.work-card {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.work-card.selected,
+.work-card:focus-visible {
+  border-color: var(--blue);
+  outline: 2px solid #c7dcff;
+}
+
+.work-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.work-card-title {
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.compact-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
 }
 
 .inspector {
@@ -296,7 +380,9 @@ em {
   .topbar,
   .context-strip,
   .status-bar,
-  .view-head {
+  .view-head,
+  .detail-head,
+  .section-title {
     align-items: stretch;
     flex-direction: column;
   }
@@ -315,7 +401,9 @@ em {
     border-bottom: 1px solid var(--line);
   }
 
-  .view-grid {
+  .view-grid,
+  .detail-grid,
+  .work-item-board {
     grid-template-columns: 1fr;
   }
 }
