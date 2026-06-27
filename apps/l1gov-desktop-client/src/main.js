@@ -1,138 +1,163 @@
 let state;
 
+const REQUIRED_VIEW_IDS = [
+  "work_items",
+  "work_item_detail",
+  "agents",
+  "runtime_worktrees",
+  "evidence_runs",
+  "pr_uat_closeout",
+  "inbox_attention",
+  "settings_boundaries"
+];
+
+const REQUIRED_SAFETY_IDS = [
+  "runtime_hold",
+  "dependency_install_not_authorized",
+  "broker_nats_mutation_blocked",
+  "live_dispatch_blocked",
+  "owner_uat_after_edc_pr_010"
+];
+
 const $ = (id) => document.getElementById(id);
 
-function normalizeFreshness(value) {
-  return ["stale", "rebuilding", "current", "blocked"].includes(value) ? value : "stale";
+function normalizeViewId(viewId) {
+  return REQUIRED_VIEW_IDS.includes(viewId) ? viewId : REQUIRED_VIEW_IDS[0];
 }
 
-function buildSurfaceState(fixture) {
-  const displayState = fixture.display_state;
-  const freshnessCycle = fixture.stale_refresh.states;
-  const freshnessIndex = displayState.freshness_index;
-  const freshness = normalizeFreshness(freshnessCycle[freshnessIndex] || "stale");
+function byId(records) {
+  return Object.fromEntries(records.map((record) => [record.id, record]));
+}
+
+function buildShellState(fixture) {
+  const views = fixture.views ?? [];
+  const viewIds = views.map((view) => view.id);
+  for (const required of REQUIRED_VIEW_IDS) {
+    if (!viewIds.includes(required)) {
+      throw new Error(`missing workbench view: ${required}`);
+    }
+  }
+
+  for (const required of REQUIRED_SAFETY_IDS) {
+    if (!(fixture.safety_boundaries ?? []).some((item) => item.id === required)) {
+      throw new Error(`missing safety boundary: ${required}`);
+    }
+  }
 
   return {
     fixture,
-    workspaceName: displayState.workspace_name,
-    freshness,
-    freshnessCycle,
-    freshnessIndex,
-    projectSummary: {
-      acceptedSlices: displayState.project_summary.accepted_slices,
-      activeSlice: displayState.project_summary.active_slice,
-      blockedItems: displayState.project_summary.blocked_items
-    },
-    modules: displayState.modules,
-    workspaces: displayState.workspaces,
-    notes: displayState.notes,
-    serviceState: displayState.service_state,
-    syncState: displayState.sync_state
+    activeViewId: REQUIRED_VIEW_IDS[0],
+    views,
+    viewsById: byId(views)
   };
 }
 
 async function loadFixtureState() {
-  const response = await fetch("./fixtures/slice012_desktop_state.json");
+  const response = await fetch("./fixtures/edc_workbench_shell_state.json");
   if (!response.ok) {
     throw new Error(`failed to load deterministic fixture: ${response.status}`);
   }
   const fixture = await response.json();
-  if (fixture.slice_id !== "L1GOV-SLICE-012" || fixture.live_execution_invoked !== false) {
-    throw new Error("invalid Slice 012 fixture boundary");
+  if (fixture.surface !== "Nexus Agent Coding Team Workbench" || fixture.live_execution_invoked !== false) {
+    throw new Error("invalid Workbench shell fixture boundary");
   }
-  return buildSurfaceState(fixture);
+  return buildShellState(fixture);
 }
 
-function render() {
-  $("workspace-name").textContent = state.workspaceName;
-  $("accepted-slices").textContent = state.projectSummary.acceptedSlices;
-  $("active-slice").textContent = state.projectSummary.activeSlice;
-  $("blocked-items").textContent = state.projectSummary.blockedItems;
-  $("freshness-chip").textContent = state.freshness;
-  $("freshness-chip").className = `chip ${state.freshness}`;
-  $("freshness-state").textContent = state.freshness;
-  $("service-state").textContent = state.serviceState;
-  $("service-chip").textContent = `service ${state.serviceState}`;
-  $("sync-state").textContent = state.syncState;
-  $("notes-list").replaceChildren(
-    ...state.notes.map((note) => {
-      const item = document.createElement("li");
-      item.textContent = note;
+function renderAuthorityChips() {
+  const chipRoot = $("authority-chips");
+  chipRoot.replaceChildren(
+    ...state.fixture.authority_chips.map((chip) => {
+      const item = document.createElement("span");
+      item.className = `chip ${chip.state}`;
+      item.textContent = chip.label;
       return item;
     })
   );
-  renderFutureIntegrationBoundary();
 }
 
-function openWorkspacePicker() {
-  const overlay = $("workspace-overlay");
-  const list = $("workspace-list");
-  list.replaceChildren(
-    ...state.workspaces.map((workspace) => {
-      const button = document.createElement("button");
-      button.className = "workspace-option";
-      button.type = "button";
-      button.innerHTML = `<span>${workspace.label}</span><span class="chip ${workspace.freshness}">${workspace.freshness}</span>`;
-      button.addEventListener("click", () => {
-        state.workspaceName = workspace.label;
-        state.freshness = normalizeFreshness(workspace.freshness);
-        overlay.close();
-        render();
-      });
-      return button;
+function renderGlobalContext() {
+  const project = state.fixture.project;
+  $("project-name").textContent = project.name;
+  $("project-path").textContent = project.repo_path;
+  $("branch-context").textContent = project.active_branch;
+  $("worktree-context").textContent = project.active_worktree;
+  $("internal-sequence").textContent = project.current_internal_sequence;
+  $("fixture-state").textContent = state.fixture.fixture_only ? "fixture-only" : "invalid";
+  $("authority-state").textContent = state.fixture.non_authoritative ? "non-authoritative" : "invalid";
+  $("runtime-state").textContent = state.fixture.runtime_startup_allowed ? "invalid" : "runtime hold";
+  $("uat-state").textContent = `after ${state.fixture.owner_uat_after}`;
+}
+
+function renderPrMappings() {
+  $("pr-mapping-list").replaceChildren(
+    ...state.fixture.pr_mappings.map((mapping) => {
+      const item = document.createElement("li");
+      const githubLabel = mapping.github_pr_label || "TBD";
+      item.innerHTML = `<span>${mapping.internal_id}</span><strong>${githubLabel}</strong><em>${mapping.baseline_role}</em>`;
+      if (mapping.baseline_role === "superseded_prototype") {
+        item.classList.add("superseded");
+      }
+      return item;
     })
   );
-  overlay.showModal();
 }
 
-function selectModule(moduleId) {
-  const module = state.modules[moduleId] || state.modules.mission_control;
-  $("active-module-title").textContent = module.title;
-  $("active-module-summary").textContent = module.summary;
+function renderSafetyBoundaries() {
+  $("safety-list").replaceChildren(
+    ...state.fixture.safety_boundaries.map((boundary) => {
+      const item = document.createElement("li");
+      item.innerHTML = `<strong>${boundary.label}</strong><span>${boundary.detail}</span>`;
+      return item;
+    })
+  );
+}
+
+function renderBaseDecision() {
+  const decision = state.fixture.base_decision;
+  $("base-decision").textContent = `Continue from ${decision.continue_from}; foundation lineage ${decision.foundation_lineage.join(" -> ")}.`;
+  $("superseded-note").textContent = `${decision.bypass.join(" and ")} are reference-only superseded prototypes.`;
+}
+
+function renderNavigation() {
   document.querySelectorAll(".nav-button").forEach((button) => {
-    button.classList.toggle("active", button.dataset.module === moduleId);
+    const isActive = button.dataset.viewId === state.activeViewId;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-current", isActive ? "page" : "false");
   });
 }
 
-function showCommandDraftPreview() {
-  $("command-draft-preview").innerHTML = `
-    <h3>Command Draft Preview</h3>
-    <p>SubmitCommandDraft preview for Governance Service review path. No canonical mutation.</p>
-    <code>target_ref=layer1-governance, affects_state=false</code>
-  `;
+function renderActiveView() {
+  const view = state.viewsById[state.activeViewId];
+  $("view-kicker").textContent = view.implementation_pr;
+  $("view-title").textContent = view.title;
+  $("view-purpose").textContent = view.purpose;
+  $("view-owner").textContent = view.implementation_pr;
+  $("view-safety").textContent = view.safety_state.replaceAll("_", " ");
+  $("view-readiness").textContent = view.readiness_state.replaceAll("_", " ");
+  $("view-boundary").textContent = `${view.title} is ${view.readiness_state.replaceAll("_", " ")} in EDC-PR-007. Full workflow content belongs to ${view.implementation_pr}.`;
 }
 
-function showServiceRejection() {
-  $("service-outcome-copy").textContent = "REJECTED ERR_INVALID_TRANSITION: service route preview is fixture-backed only.";
-  $("service-rejection").classList.remove("blocked");
-}
-
-function showNoGoBlock() {
-  $("service-outcome-copy").textContent = "BLOCKED ERR_NO_GO_BOUNDARY: direct UI approval is blocked and must route through Monitor/HITL.";
-  $("service-rejection").classList.add("blocked");
-}
-
-function cycleStaleRefresh() {
-  state.freshnessIndex = (state.freshnessIndex + 1) % state.freshnessCycle.length;
-  state.freshness = normalizeFreshness(state.freshnessCycle[state.freshnessIndex]);
-  $("stale-copy").textContent = `Projection display state is ${state.freshness}. No canonical mutation.`;
-  render();
-}
-
-function renderFutureIntegrationBoundary() {
-  const boundary = state.fixture.future_integration_boundary.daemon_controller_bridge;
-  $("future-boundary").textContent = `${boundary}; deterministic fixture display only`;
+function selectView(viewId) {
+  state.activeViewId = normalizeViewId(viewId);
+  renderNavigation();
+  renderActiveView();
 }
 
 function bindEvents() {
-  $("workspace-picker").addEventListener("click", openWorkspacePicker);
-  $("refresh-projection").addEventListener("click", cycleStaleRefresh);
-  $("draft-command-button").addEventListener("click", showCommandDraftPreview);
-  $("show-rejection").addEventListener("click", showServiceRejection);
-  $("no-go-block").addEventListener("click", showNoGoBlock);
   document.querySelectorAll(".nav-button").forEach((button) => {
-    button.addEventListener("click", () => selectModule(button.dataset.module));
+    button.addEventListener("click", () => selectView(button.dataset.viewId));
   });
+}
+
+function render() {
+  renderAuthorityChips();
+  renderGlobalContext();
+  renderPrMappings();
+  renderSafetyBoundaries();
+  renderBaseDecision();
+  renderNavigation();
+  renderActiveView();
 }
 
 async function initialize() {
@@ -142,18 +167,16 @@ async function initialize() {
 }
 
 initialize().catch((error) => {
-  $("service-outcome-copy").textContent = `Fixture load failed: ${error.message}`;
-  $("service-rejection").classList.add("blocked");
+  $("view-title").textContent = "Workbench fixture load failed";
+  $("view-purpose").textContent = error.message;
+  $("view-readiness").textContent = "blocked";
 });
 
-window.slice012DesktopSurface = {
-  buildSurfaceState,
+window.edcWorkbenchShellSurface = {
+  buildShellState,
   loadFixtureState,
-  openWorkspacePicker,
-  selectModule,
-  showCommandDraftPreview,
-  showServiceRejection,
-  showNoGoBlock,
-  cycleStaleRefresh,
-  renderFutureIntegrationBoundary
+  normalizeViewId,
+  renderActiveView,
+  renderNavigation,
+  selectView
 };
