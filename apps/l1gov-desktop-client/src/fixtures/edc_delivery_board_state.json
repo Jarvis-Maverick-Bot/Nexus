@@ -1,0 +1,286 @@
+{
+  "read_model_id": "edc-delivery-board-mvp-2026-06-27",
+  "surface": "Nexus Agent Coding Team Delivery Board",
+  "fixture_only": true,
+  "non_authoritative": true,
+  "authority_statement": "Fixture-backed read model only; repo docs, task cards, validation evidence, GitHub PRs, and owner decisions remain authoritative.",
+  "live_execution_invoked": false,
+  "live_dispatch_allowed": false,
+  "runtime_startup_allowed": false,
+  "dependency_install_allowed": false,
+  "broker_mutation_allowed": false,
+  "canonical_mutation_allowed": false,
+  "generated_at": "2026-06-27T00:00:00Z",
+  "source_refs": [
+    "docs/codex/SPEC.md",
+    "docs/codex/SCOPE.md",
+    "docs/codex/UX_SPEC.md",
+    "docs/codex/PR_PLAN.md",
+    "nexus/governance/delivery_contracts.py",
+    "nexus/governance/handoff_records.py"
+  ],
+  "project": {
+    "name": "Nexus Agent Coding Team Delivery Console",
+    "repo_path": "D:\\Projects\\Nexus",
+    "active_branch": "codex/edc-pr-004-desktop-delivery-board",
+    "active_worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-004-desktop-delivery-board",
+    "current_internal_sequence": "EDC-PR-004",
+    "base_branch": "codex/edc-pr-003-codex-handoff-loop",
+    "mode": "fixture_read_model",
+    "sync_state": "offline fixture",
+    "review_state": "implementation fixture in progress"
+  },
+  "pr_mappings": [
+    {
+      "internal_id": "EDC-PR-001",
+      "github_pr_number": 27,
+      "github_pr_label": "#27",
+      "branch": "codex/edc-governance-desktop",
+      "status": "draft_pr_open"
+    },
+    {
+      "internal_id": "EDC-PR-002",
+      "github_pr_number": 28,
+      "github_pr_label": "#28",
+      "branch": "codex/edc-pr-002-delivery-domain-contracts",
+      "status": "draft_pr_open"
+    },
+    {
+      "internal_id": "EDC-PR-003",
+      "github_pr_number": 29,
+      "github_pr_label": "#29",
+      "branch": "codex/edc-pr-003-codex-handoff-loop",
+      "status": "draft_pr_open"
+    },
+    {
+      "internal_id": "EDC-PR-004",
+      "github_pr_number": 30,
+      "github_pr_label": "#30",
+      "branch": "codex/edc-pr-004-desktop-delivery-board",
+      "status": "draft_pr_open"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "accepted_review",
+      "label": "Accepted / Review",
+      "work_item_ids": ["EDC-PR-001", "EDC-PR-002", "EDC-PR-003"]
+    },
+    {
+      "id": "active_execution",
+      "label": "Active Execution",
+      "work_item_ids": ["EDC-PR-004"]
+    },
+    {
+      "id": "blocked_attention",
+      "label": "Blocked Attention",
+      "work_item_ids": []
+    }
+  ],
+  "work_items": [
+    {
+      "internal_id": "EDC-PR-001",
+      "title": "Planning Reset + UX Spec Alignment",
+      "status": "done",
+      "lane": "accepted_review",
+      "github_pr_number": 27,
+      "branch": "codex/edc-governance-desktop",
+      "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-governance-desktop",
+      "task_card_boundary": ["AGENTS.md", "docs/codex/**"],
+      "editable_scope": ["AGENTS.md", "docs/codex/**"],
+      "validation": {
+        "state": "present",
+        "summary": "docs-only diff and whitespace checks accepted"
+      },
+      "evidence_state": "present",
+      "owner_uat_state": "not_applicable",
+      "runtime_authorization_state": "not_required",
+      "handoff_report": "Planning review accepted; draft PR #27 open",
+      "residual_risks": ["Figma remains visual reference, not authority"],
+      "blockers": []
+    },
+    {
+      "internal_id": "EDC-PR-002",
+      "title": "Delivery Domain Contracts",
+      "status": "review",
+      "lane": "accepted_review",
+      "github_pr_number": 28,
+      "branch": "codex/edc-pr-002-delivery-domain-contracts",
+      "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-002-delivery-domain-contracts",
+      "task_card_boundary": ["nexus/governance/delivery_contracts.py", "nexus/governance/tests/**", "docs/codex/PR_PLAN.md"],
+      "editable_scope": ["nexus/governance/**", "docs/codex/PR_PLAN.md"],
+      "validation": {
+        "state": "present",
+        "summary": "delivery contract tests and governance narrow tests passed"
+      },
+      "evidence_state": "present",
+      "owner_uat_state": "not_applicable",
+      "runtime_authorization_state": "not_required",
+      "handoff_report": "Draft PR #28 open; aggregate consistency gates accepted",
+      "residual_risks": ["RunRecord lifecycle may need active/running clarification later"],
+      "blockers": []
+    },
+    {
+      "internal_id": "EDC-PR-003",
+      "title": "Codex Execution Handoff Loop",
+      "status": "review",
+      "lane": "accepted_review",
+      "github_pr_number": 29,
+      "branch": "codex/edc-pr-003-codex-handoff-loop",
+      "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-003-codex-handoff-loop",
+      "task_card_boundary": ["nexus/governance/handoff_records.py", "nexus/governance/tests/**", "docs/codex/PR_PLAN.md"],
+      "editable_scope": ["nexus/governance/**", "docs/codex/PR_PLAN.md"],
+      "validation": {
+        "state": "present",
+        "summary": "handoff records verify completion evidence gates"
+      },
+      "evidence_state": "present",
+      "owner_uat_state": "not_applicable",
+      "runtime_authorization_state": "not_required",
+      "handoff_report": "Draft PR #29 open; completion readiness gates accepted",
+      "residual_risks": ["not_run_by_scope must display as scope-exempt, not executed validation"],
+      "blockers": []
+    },
+    {
+      "internal_id": "EDC-PR-004",
+      "title": "Desktop Delivery Board MVP",
+      "status": "running",
+      "lane": "active_execution",
+      "github_pr_number": 30,
+      "branch": "codex/edc-pr-004-desktop-delivery-board",
+      "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-004-desktop-delivery-board",
+      "task_card_boundary": [
+        "apps/l1gov-desktop-client/src/index.html",
+        "apps/l1gov-desktop-client/src/main.js",
+        "apps/l1gov-desktop-client/src/styles.css",
+        "apps/l1gov-desktop-client/src/fixtures/*.json",
+        "apps/l1gov-desktop-client/scripts/verify-fixture.mjs",
+        "docs/codex/PR_PLAN.md"
+      ],
+      "editable_scope": ["apps/l1gov-desktop-client/src/**", "apps/l1gov-desktop-client/scripts/verify-fixture.mjs", "docs/codex/PR_PLAN.md"],
+      "validation": {
+        "state": "present",
+        "summary": "fixture verifier and governance tests required before review"
+      },
+      "evidence_state": "present",
+      "owner_uat_state": "not_ready",
+      "runtime_authorization_state": "hold",
+      "handoff_report": "Execution in named worktree; draft PR #30 open",
+      "residual_risks": ["Display-only board is not persistence, command routing, or owner UAT intake"],
+      "blockers": ["Owner UAT not accepted"]
+    }
+  ],
+  "agents": [
+    {
+      "id": "codex-planning",
+      "role": "Codex Planning",
+      "availability": "reviewing",
+      "current_assignment": "EDC-PR-004 planning review",
+      "allowed_actions": ["inspect repo state", "maintain docs/codex", "create task cards", "review reports"],
+      "blocked_actions": ["edit product code", "self-authorize runtime startup"]
+    },
+    {
+      "id": "codex-execution",
+      "role": "Codex Execution",
+      "availability": "assigned",
+      "current_assignment": "EDC-PR-004",
+      "allowed_actions": ["edit fixture UI", "run verifier", "run governance tests"],
+      "blocked_actions": ["tauri dev", "pnpm dev", "cargo", "broker mutation", "live dispatch"]
+    },
+    {
+      "id": "alex-owner-uat",
+      "role": "Alex Owner UAT",
+      "availability": "not_requested",
+      "current_assignment": "No owner UAT for fixture-only slice yet",
+      "allowed_actions": ["authorize startup later", "accept or reject owner UAT"],
+      "blocked_actions": ["Codex cannot claim owner acceptance"]
+    },
+    {
+      "id": "reviewer-reducer",
+      "role": "Reviewer / Reducer",
+      "availability": "available",
+      "current_assignment": "Planning cached diff review after Execution report",
+      "allowed_actions": ["compare evidence", "request rework", "recommend closeout"],
+      "blocked_actions": ["merge without owner approval", "treat fixture as canonical state"]
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "run-edc-pr-004-fixture-ui",
+      "work_item_id": "EDC-PR-004",
+      "status": "running",
+      "branch": "codex/edc-pr-004-desktop-delivery-board",
+      "worktree": "D:\\Projects\\Nexus\\.worktrees\\edc-pr-004-desktop-delivery-board",
+      "changed_files_expected": [
+        "apps/l1gov-desktop-client/src/index.html",
+        "apps/l1gov-desktop-client/src/main.js",
+        "apps/l1gov-desktop-client/src/styles.css",
+        "apps/l1gov-desktop-client/src/fixtures/edc_delivery_board_state.json",
+        "apps/l1gov-desktop-client/scripts/verify-fixture.mjs",
+        "docs/codex/PR_PLAN.md"
+      ],
+      "validation_commands": [
+        "node apps/l1gov-desktop-client/scripts/verify-fixture.mjs",
+        "python -m pytest nexus/governance/tests -q",
+        "git diff --check",
+        "git status --short --branch"
+      ],
+      "completion_report_ref": "Planning thread 019f07b2-8968-7891-bd41-aed6f25a651c"
+    }
+  ],
+  "attention_states": [
+    {
+      "id": "runtime_hold",
+      "label": "Runtime startup hold",
+      "severity": "blocked",
+      "description": "Desktop startup, Tauri, Cargo, pnpm, and runtime commands require explicit owner authorization."
+    },
+    {
+      "id": "dependency_install_not_authorized",
+      "label": "Dependency install not authorized",
+      "severity": "blocked",
+      "description": "No dependency install or package update is allowed in EDC-PR-004."
+    },
+    {
+      "id": "live_dispatch_blocked",
+      "label": "Live dispatch blocked",
+      "severity": "blocked",
+      "description": "Fixture read model cannot invoke agents, brokers, NATS, controllers, or dispatch."
+    },
+    {
+      "id": "owner_uat_not_accepted",
+      "label": "Owner UAT not accepted",
+      "severity": "hold",
+      "description": "Automated validation is separate from Alex owner acceptance."
+    },
+
+    {
+      "id": "scope_evidence_gate",
+      "label": "Scope and evidence gate",
+      "severity": "attention",
+      "description": "Changed files must stay within the task card and completion claims require verifier/test evidence."
+    }
+  ],
+  "disabled_actions": [
+    {
+      "label": "Assign agent",
+      "reason": "Fixture-only display; assignment mutations require durable task records."
+    },
+    {
+      "label": "Start runtime",
+      "reason": "Runtime startup is on hold and not authorized."
+    },
+    {
+      "label": "Merge PR",
+      "reason": "Merge approval is outside Execution authority."
+    },
+    {
+      "label": "Dispatch live agent",
+      "reason": "Live dispatch is blocked by policy for this slice."
+    },
+    {
+      "label": "Accept owner UAT",
+      "reason": "Only Alex can provide owner UAT acceptance."
+    }
+  ]
+}
