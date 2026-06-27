@@ -13,14 +13,14 @@ GitHub PR numbers are external identifiers assigned by GitHub and must be record
 
 - GitHub PR #22 is closed as superseded by this branch.
 - This branch starts from `origin/master`, not from PR #22.
-- No new GitHub PR should be opened until Alex confirms this PR plan.
+- Draft GitHub PR #27 is open for this branch after Alex confirmed this PR plan.
 
 ## PR Mapping
 
 | Internal PR | GitHub PR | Branch | Purpose | Status |
 | --- | ---: | --- | --- | --- |
 | `EDC-PR-000` | #22 | `codex/4.21-real-testproject-e2e-uat` | Superseded L1 Governance Desktop UAT attempt | Closed / superseded |
-| `EDC-PR-001` | TBD | `codex/edc-governance-desktop` | Planning reset for Agent Coding Team Delivery Console | In progress |
+| `EDC-PR-001` | #27 | `codex/edc-governance-desktop` | Planning reset for Agent Coding Team Delivery Console | Draft PR open |
 | `EDC-PR-002` | TBD | TBD | Delivery domain contracts | Planned |
 | `EDC-PR-003` | TBD | TBD | Codex execution handoff loop | Planned |
 | `EDC-PR-004` | TBD | TBD | Desktop delivery board MVP | Planned |
