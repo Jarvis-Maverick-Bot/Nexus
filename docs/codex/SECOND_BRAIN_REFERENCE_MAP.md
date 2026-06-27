@@ -1,14 +1,16 @@
-# SecondBrain Reference Map For EDC-PR-001
+# SecondBrain Reference Map For Nexus Workbench
 
 Date: 2026-06-27
-Branch: `codex/edc-governance-desktop`
-Internal PR: `EDC-PR-001`
+Branch: `codex/edc-pr-006-ux-reset-workbench`
+Internal PR: `EDC-PR-006`
 
 ## Purpose
 
-This file records the bounded Shared Docs / SecondBrain references used to shape the Nexus Agent Coding Team Delivery Console design.
+This file records the bounded Shared Docs / SecondBrain references used to shape the Nexus Agent Coding Team Workbench design.
 
 SecondBrain is curated reference memory only. It is not Nexus source authority, not a backlog, not a runtime owner, and not a reason to assign Nova/OpenClaw future Nexus planning, execution, delivery, review-ledger, or periodic-review duties.
+
+EDC-PR-006 updates this map after Alex rejected the overloaded EDC-PR-004 / GitHub PR #30 and EDC-PR-005 / GitHub PR #31 desktop prototypes. Multica and other SecondBrain inputs remain product and information-architecture references only; they do not authorize copying implementation stack, code, services, dependencies, runtime behavior, or external platform operations.
 
 ## Authority Boundary
 
@@ -82,7 +84,7 @@ These references are not copied implementation authority. They provide vocabular
 
 ## Product Design Implications
 
-For `EDC-PR-002` and later:
+For `EDC-PR-007` and later:
 
 - Work items must carry a complete current task packet.
 - Agent assignments must include role, editable scope, allowed actions, forbidden actions, stop conditions, output contract, and write-back location.
@@ -92,7 +94,8 @@ For `EDC-PR-002` and later:
 - Shared resources need lock or handoff semantics.
 - Completion reports must cite validation results or explicitly record validation gaps.
 - Desktop operator views must show authoritative delivery state, not independent shadow state.
-- External agent-platform patterns such as Multica, Trellis, and CCB are comparison inputs only; no install, code reuse, runtime adoption, or dependency change is authorized by this map.
+- External agent-platform patterns such as Multica, Trellis, and CCB are comparison inputs only; no install, code reuse, runtime adoption, dependency change, or service-stack adoption is authorized by this map.
+- The next owner UAT baseline is after EDC-PR-010, not GitHub PR #31.
 
 ## Explicit Non-Adoptions
 
