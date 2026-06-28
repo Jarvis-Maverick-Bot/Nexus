@@ -576,6 +576,15 @@ def test_workbench_fixture_contains_edc_pr_011_command_draft_projection() -> Non
     assert fixture["dispatch_candidate_projection"]
     assert fixture["handoff_preview"]
 
+    candidates = {
+        candidate["work_item_id"]: candidate
+        for candidate in fixture["dispatch_candidate_projection"]
+    }
+    assert candidates["EDC-PR-011"]["eligible"] is False
+    assert "draft_only" in candidates["EDC-PR-011"]["blocked_reasons"]
+    assert candidates["EDC-PR-011"]["agent_id"] == "agent.codex.execution"
+    assert candidates["EDC-PR-011"]["runtime_instance_id"] == "runtime.codex.edc-pr-011.local"
+
 
 def test_workbench_fixture_separates_agent_runtime_provider_instance_and_session() -> None:
     fixture = load_fixture()
@@ -650,6 +659,15 @@ def test_workbench_ui_exposes_draft_operational_controls_without_runtime_calls()
     assert "document.querySelectorAll(\".draft-action[data-command-type]\")" in main_js
     assert "button.addEventListener(\"click\", () => selectCommandDraftByType(button.dataset.commandType))" in main_js
     assert "button.setAttribute(\"aria-pressed\", selected ? \"true\" : \"false\")" in main_js
+    assert 'id="command-draft-action-notice"' in html
+    assert "renderDraftActionNotice" in main_js
+    assert "state.draftActionNotice" in main_js
+    assert "No command draft is available for the selected work item." in main_js
+    assert "state.commandDrafts[0]" not in main_js
+    assert "if (!draft) return;" not in main_js
+    assert "candidate.work_item_id === selectedDraft.work_item_id" in main_js
+    assert "button.disabled = itemDrafts.length === 0" in main_js
+    assert "button.classList.toggle(\"unavailable\", itemDrafts.length === 0)" in main_js
     assert "renderSelectedCommandDraftDetail" in main_js
     assert "renderSelectedCommandDraftDetail(selectedDraft)" in main_js
     assert "previewValidation.replaceChildren(...createTextList(preview?.validation_commands))" in main_js

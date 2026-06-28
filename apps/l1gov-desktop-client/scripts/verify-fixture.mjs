@@ -297,9 +297,15 @@ for (const draft of commandDrafts) {
   requireTrue((draft.evidence_requirements ?? []).length > 0, `${draft.draft_id} requires evidence requirements`);
 }
 requireTrue(dispatchCandidates.length >= 1, "fixture must expose dispatch candidate projection");
+const edcPr011Candidate = dispatchCandidates.find((candidate) => candidate.work_item_id === "EDC-PR-011");
+requireTrue(Boolean(edcPr011Candidate), "fixture must expose EDC-PR-011 dispatch candidate projection");
 for (const candidate of dispatchCandidates) {
   requireTrue(candidate.eligible === false, `${candidate.candidate_id} must not be dispatch eligible`);
   requireTrue((candidate.blocked_reasons ?? []).includes("draft_only"), `${candidate.candidate_id} must remain draft-only`);
+  if (candidate.work_item_id === "EDC-PR-011") {
+    requireTrue(candidate.agent_id === "agent.codex.execution", "EDC-PR-011 dispatch candidate must target Codex Execution");
+    requireTrue(candidate.runtime_instance_id === "runtime.codex.edc-pr-011.local", "EDC-PR-011 dispatch candidate must target local Codex runtime projection");
+  }
 }
 requireTrue(handoffPreviews.length >= 1, "fixture must expose handoff preview");
 for (const preview of handoffPreviews) {

@@ -490,6 +490,13 @@ button {
   gap: 8px;
 }
 
+.draft-action-notice {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .draft-action,
 .command-draft-card {
   min-height: 34px;
@@ -523,6 +530,12 @@ button {
 .draft-action:focus-visible {
   border-color: var(--blue);
   outline: 2px solid #c7dcff;
+}
+
+.draft-action:disabled,
+.draft-action.unavailable {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .projection-panel {

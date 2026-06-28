@@ -74,8 +74,7 @@ function buildShellState(fixture) {
   const selectedWorkItemId = workItemsById[fixture.selected_work_item_id]
     ? fixture.selected_work_item_id
     : workItems[0]?.internal_id;
-  const selectedCommandDraftId = commandDrafts.find((draft) => draft.work_item_id === selectedWorkItemId)?.draft_id
-    ?? commandDrafts[0]?.draft_id;
+  const selectedCommandDraftId = commandDrafts.find((draft) => draft.work_item_id === selectedWorkItemId)?.draft_id;
 
   return {
     fixture,
@@ -113,6 +112,7 @@ function buildShellState(fixture) {
     dispatchCandidatesById: byId(dispatchCandidates, "candidate_id"),
     handoffPreviews,
     handoffPreviewsById: byId(handoffPreviews, "preview_id"),
+    draftActionNotice: "Select a draft operation.",
     selectedCommandDraftId
   };
 }
@@ -297,11 +297,41 @@ function renderRecordCards(records, titleKey, linesForRecord, className) {
   });
 }
 
+function renderDraftActionNotice() {
+  const notice = $("command-draft-action-notice");
+  if (!notice) return;
+  notice.textContent = state.draftActionNotice || "Select a draft operation.";
+}
+
+function renderUnavailableProjection(targetId, titleText, message) {
+  const title = document.createElement("h3");
+  const detail = document.createElement("p");
+  title.textContent = titleText;
+  detail.textContent = message;
+  $(targetId).replaceChildren(title, detail);
+}
+
 function renderCommandDrafts() {
   const itemDrafts = state.commandDrafts.filter((draft) => draft.work_item_id === state.selectedWorkItemId);
   if (!itemDrafts.some((draft) => draft.draft_id === state.selectedCommandDraftId)) {
-    state.selectedCommandDraftId = itemDrafts[0]?.draft_id ?? state.commandDrafts[0]?.draft_id;
+    state.selectedCommandDraftId = itemDrafts[0]?.draft_id;
   }
+
+  if (itemDrafts.length === 0) {
+    const message = "No command draft is available for the selected work item.";
+    state.draftActionNotice = message;
+    const empty = document.createElement("p");
+    empty.className = "empty-state";
+    empty.textContent = message;
+    $("command-draft-list").replaceChildren(empty);
+    updateDraftActionButtons(itemDrafts);
+    renderDraftActionNotice();
+    renderSelectedCommandDraftDetail(undefined);
+    renderUnavailableProjection("dispatch-candidate-projection", "Dispatch Candidate Projection", message);
+    renderUnavailableProjection("handoff-preview", "Handoff Preview", message);
+    return;
+  }
+
   const draftButtons = itemDrafts.map((draft) => {
     const button = document.createElement("button");
     const selected = draft.draft_id === state.selectedCommandDraftId;
@@ -315,11 +345,14 @@ function renderCommandDrafts() {
   });
   $("command-draft-list").replaceChildren(...draftButtons);
 
-  updateDraftActionButtons();
+  updateDraftActionButtons(itemDrafts);
+  renderDraftActionNotice();
 
   const selectedDraft = state.commandDraftsById[state.selectedCommandDraftId] ?? itemDrafts[0];
   renderSelectedCommandDraftDetail(selectedDraft);
-  const candidate = state.dispatchCandidates.find((record) => record.work_item_id === state.selectedWorkItemId);
+  const candidate = state.dispatchCandidates.find(
+    (candidate) => candidate.work_item_id === selectedDraft.work_item_id
+  );
   const preview = selectedDraft ? state.handoffPreviewsById[selectedDraft.handoff_preview_ref] : undefined;
   const candidateTitle = document.createElement("h3");
   const candidateState = document.createElement("p");
@@ -340,7 +373,6 @@ function renderCommandDrafts() {
   previewValidation.replaceChildren(...createTextList(preview?.validation_commands));
   $("handoff-preview").replaceChildren(previewTitle, previewTarget, previewWriteback, previewValidation);
 }
-
 function renderSelectedCommandDraftDetail(selectedDraft) {
   const title = document.createElement("h3");
   const status = document.createElement("p");
@@ -354,7 +386,7 @@ function renderSelectedCommandDraftDetail(selectedDraft) {
 
   title.textContent = "Selected Command Draft";
   if (!selectedDraft) {
-    status.textContent = "No command draft selected.";
+    status.textContent = "No command draft is available for the selected work item.";
     $("selected-command-draft-detail").replaceChildren(title, status);
     return;
   }
@@ -655,17 +687,22 @@ function renderActiveView() {
 function selectWorkItem(workItemId) {
   if (!state.workItemsById[workItemId]) return;
   state.selectedWorkItemId = workItemId;
+  state.draftActionNotice = "Select a draft operation.";
   renderWorkItemsBoard();
   renderWorkItemDetail();
 }
 
 
-function updateDraftActionButtons() {
+function updateDraftActionButtons(itemDrafts = state.commandDrafts.filter((draft) => draft.work_item_id === state.selectedWorkItemId)) {
   const selectedDraft = state.commandDraftsById[state.selectedCommandDraftId];
+  const availableCommandTypes = new Set(itemDrafts.map((draft) => draft.command_type));
   document.querySelectorAll(".draft-action[data-command-type]").forEach((button) => {
     const selected = button.dataset.commandType === selectedDraft?.command_type;
+    button.disabled = itemDrafts.length === 0;
     button.classList.toggle("selected", selected);
+    button.classList.toggle("unavailable", itemDrafts.length === 0);
     button.setAttribute("aria-pressed", selected ? "true" : "false");
+    button.setAttribute("aria-disabled", availableCommandTypes.has(button.dataset.commandType) ? "false" : "true");
   });
 }
 
@@ -673,12 +710,22 @@ function selectCommandDraftByType(commandType) {
   const draft = state.commandDrafts.find(
     (candidate) => candidate.work_item_id === state.selectedWorkItemId && candidate.command_type === commandType
   );
-  if (!draft) return;
-  selectCommandDraft(draft.draft_id);
+  if (!draft) {
+    state.draftActionNotice = "No command draft is available for the selected work item.";
+    renderCommandDrafts();
+    return;
+  }
+  selectCommandDraft(draft.draft_id, `Selected: ${draft.label}`);
 }
-function selectCommandDraft(draftId) {
-  if (!state.commandDraftsById[draftId]) return;
+function selectCommandDraft(draftId, notice) {
+  const draft = state.commandDraftsById[draftId];
+  if (!draft || draft.work_item_id !== state.selectedWorkItemId) {
+    state.draftActionNotice = "No command draft is available for the selected work item.";
+    renderCommandDrafts();
+    return;
+  }
   state.selectedCommandDraftId = draftId;
+  state.draftActionNotice = notice ?? `Selected: ${draft.label}`;
   renderCommandDrafts();
 }
 function selectView(viewId) {
