@@ -24,8 +24,8 @@ REQUIRED_WORK_ITEM_IDS = (
     "EDC-PR-008",
     "EDC-PR-009",
     "EDC-PR-010",
+    "EDC-PR-011",
 )
-
 REQUIRED_AGENT_ROLES = (
     "codex_planning",
     "codex_execution",
@@ -46,8 +46,8 @@ REQUIRED_EVIDENCE_RUN_IDS = (
     "EDC-PR-008",
     "EDC-PR-009",
     "EDC-PR-010",
+    "EDC-PR-011",
 )
-
 REQUIRED_PR_STACK_IDS = (
     "EDC-PR-001",
     "EDC-PR-002",
@@ -59,8 +59,8 @@ REQUIRED_PR_STACK_IDS = (
     "EDC-PR-008",
     "EDC-PR-009",
     "EDC-PR-010",
+    "EDC-PR-011",
 )
-
 REQUIRED_ATTENTION_IDS = (
     "owner_uat_needed",
     "merge_blocked",
@@ -221,7 +221,7 @@ def test_workbench_fixture_contains_work_item_board_and_detail_records() -> None
     by_id = {item["internal_id"]: item for item in work_items}
 
     assert tuple(by_id) == REQUIRED_WORK_ITEM_IDS
-    assert fixture["selected_work_item_id"] == "EDC-PR-010"
+    assert fixture["selected_work_item_id"] == "EDC-PR-011"
 
     for item in work_items:
         assert re.fullmatch(r"EDC-PR-\d{3}", item["internal_id"])
@@ -253,6 +253,12 @@ def test_workbench_fixture_contains_work_item_board_and_detail_records() -> None
     assert by_id["EDC-PR-010"]["github_pr_number"] == 36
     assert by_id["EDC-PR-010"]["github_pr_label"] == "#36"
     assert by_id["EDC-PR-010"]["owner_uat_state"] == "awaiting_owner"
+    assert by_id["EDC-PR-011"]["github_pr_number"] is None
+    assert by_id["EDC-PR-011"]["github_pr_label"] == "TBD"
+    assert by_id["EDC-PR-011"]["branch"] == "codex/edc-pr-011-agent-runtime-command-drafts"
+    assert by_id["EDC-PR-011"]["worktree"].endswith(".worktrees\\edc-pr-011-agent-runtime-command-drafts")
+    assert by_id["EDC-PR-011"]["base_commit"] == "dd4f9b0"
+    assert by_id["EDC-PR-011"]["owner_uat_state"] == "awaiting_owner"
 
 
 def test_workbench_work_items_and_detail_have_distinct_render_targets() -> None:
@@ -458,6 +464,11 @@ def test_workbench_fixture_contains_evidence_run_records_and_gates() -> None:
     assert by_id["EDC-PR-010"]["status"] == "not_run"
     assert by_id["EDC-PR-010"]["evidence_state"] == "not_run_by_scope"
     assert by_id["EDC-PR-010"]["not_run_reason"]
+    assert by_id["EDC-PR-011"]["github_pr_number"] is None
+    assert by_id["EDC-PR-011"]["github_pr_label"] == "TBD"
+    assert by_id["EDC-PR-011"]["status"] == "not_run"
+    assert by_id["EDC-PR-011"]["evidence_state"] == "not_run_by_scope"
+    assert by_id["EDC-PR-011"]["not_run_reason"]
 
     for record in records:
         assert re.fullmatch(r"EDC-PR-\d{3}", record["internal_id"])
@@ -545,3 +556,109 @@ def test_workbench_closeout_views_have_dedicated_render_targets() -> None:
     assert '$("pr-uat-closeout-region").hidden = regionName !== "pr_uat_closeout"' in main_js
     assert '$("inbox-attention-region").hidden = regionName !== "inbox_attention"' in main_js
     assert '$("settings-boundaries-region").hidden = regionName !== "settings_boundaries"' in main_js
+
+
+def test_workbench_fixture_contains_edc_pr_011_command_draft_projection() -> None:
+    fixture = load_fixture()
+    mappings = {mapping["internal_id"]: mapping for mapping in fixture["pr_mappings"]}
+
+    assert mappings["EDC-PR-011"]["github_pr_number"] is None
+    assert mappings["EDC-PR-011"]["github_pr_label"] == "TBD"
+    assert mappings["EDC-PR-011"]["status"] == "implementation_in_review"
+    assert fixture["project"]["current_internal_sequence"] == "EDC-PR-011"
+    assert fixture["selected_work_item_id"] == "EDC-PR-011"
+
+    assert fixture["agent_definitions"]
+    assert fixture["runtime_providers"]
+    assert fixture["runtime_instances"]
+    assert fixture["run_sessions"]
+    assert fixture["command_drafts"]
+    assert fixture["dispatch_candidate_projection"]
+    assert fixture["handoff_preview"]
+
+
+def test_workbench_fixture_separates_agent_runtime_provider_instance_and_session() -> None:
+    fixture = load_fixture()
+    agent_ids = {agent["agent_id"] for agent in fixture["agent_definitions"]}
+    provider_ids = {provider["provider_id"] for provider in fixture["runtime_providers"]}
+    runtime_ids = {runtime["runtime_instance_id"] for runtime in fixture["runtime_instances"]}
+    session_ids = {session["run_session_id"] for session in fixture["run_sessions"]}
+
+    assert agent_ids.isdisjoint(provider_ids)
+    assert agent_ids.isdisjoint(runtime_ids)
+    assert agent_ids.isdisjoint(session_ids)
+    assert runtime_ids.isdisjoint(session_ids)
+
+    codex_provider = next(provider for provider in fixture["runtime_providers"] if provider["provider_family"] == "codex")
+    assert codex_provider["executable"] is False
+    openclaw = next(provider for provider in fixture["runtime_providers"] if provider["provider_family"] == "openclaw")
+    assert openclaw["executable"] is False
+    assert openclaw["blocked_reason"]
+
+
+def test_workbench_fixture_contains_safe_command_drafts_only() -> None:
+    fixture = load_fixture()
+    allowed_command_types = {
+        "evaluate_assignment_candidate",
+        "prepare_execution_handoff_draft",
+        "request_owner_uat_decision_draft",
+        "refresh_projection_draft",
+        "record_validation_evidence_draft",
+    }
+
+    for draft in fixture["command_drafts"]:
+        assert draft["command_type"] in allowed_command_types
+        assert draft["draft_only"] is True
+        assert draft["non_authoritative"] is True
+        assert draft["live_dispatch_claimed"] is False
+        assert draft["runtime_startup_claimed"] is False
+        assert draft["dependency_install_claimed"] is False
+        assert draft["broker_mutation_claimed"] is False
+        assert draft["merge_claimed"] is False
+        assert draft["owner_uat_acceptance_claimed"] is False
+        assert draft["production_readiness_claimed"] is False
+        assert draft["live_readiness_claimed"] is False
+        assert "live_dispatch" in draft["blocked_authorities"]
+        assert draft["handoff_preview_ref"]
+        assert draft["write_back_location"]
+        assert draft["evidence_requirements"]
+
+
+def test_workbench_ui_exposes_draft_operational_controls_without_runtime_calls() -> None:
+    html = read_app_file("src/index.html")
+    main_js = read_app_file("src/main.js")
+
+    for element_id in (
+        "detail-command-drafts",
+        "command-draft-list",
+        "selected-command-draft-detail",
+        "handoff-preview",
+        "dispatch-candidate-projection",
+        "agent-definition-list",
+        "runtime-provider-list",
+        "runtime-instance-list",
+        "run-session-list",
+    ):
+        assert f'id="{element_id}"' in html
+
+    assert "Evaluate assignment" in html
+    assert "Prepare handoff draft" in html
+    assert "Request owner decision draft" in html
+    assert "renderCommandDrafts" in main_js
+    assert "selectCommandDraft" in main_js
+    assert "selectCommandDraftByType" in main_js
+    assert "document.querySelectorAll(\".draft-action[data-command-type]\")" in main_js
+    assert "button.addEventListener(\"click\", () => selectCommandDraftByType(button.dataset.commandType))" in main_js
+    assert "button.setAttribute(\"aria-pressed\", selected ? \"true\" : \"false\")" in main_js
+    assert "renderSelectedCommandDraftDetail" in main_js
+    assert "renderSelectedCommandDraftDetail(selectedDraft)" in main_js
+    assert "previewValidation.replaceChildren(...createTextList(preview?.validation_commands))" in main_js
+    assert "previewBlocked" not in main_js
+    assert "selectedDraft.required_approvals" in main_js
+    assert "selectedDraft.blocked_authorities" in main_js
+    assert "selectedDraft.evidence_requirements" in main_js
+    assert "selectedDraft.target_agent_id" in main_js
+    assert "selectedDraft.target_runtime_instance_id" in main_js
+    assert "invoke(" not in main_js
+    assert "fetch(" not in main_js.replace('fetch("./fixtures/edc_workbench_shell_state.json")', "")
+    assert "WebSocket" not in main_js

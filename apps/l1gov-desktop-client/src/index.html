@@ -12,7 +12,7 @@
         <span class="mark">NX</span>
         <div>
           <h1>Nexus Agent Coding Team Workbench</h1>
-          <p>Fixture-only Evidence, PR/UAT Closeout, Inbox, and Settings read model for EDC-PR-010. Owner UAT remains manual and awaiting Alex.</p>
+          <p>Fixture-only command-draft and backend projection surface for EDC-PR-011. Draft controls are inert and non-authoritative.</p>
         </div>
       </div>
       <div id="authority-chips" class="chip-row" aria-label="Authority boundaries">
@@ -32,15 +32,15 @@
       </div>
       <div>
         <span>Branch</span>
-        <strong id="branch-context">codex/edc-pr-010-evidence-uat-closeout</strong>
+        <strong id="branch-context">codex/edc-pr-011-agent-runtime-command-drafts</strong>
       </div>
       <div>
         <span>Worktree</span>
-        <strong id="worktree-context">.worktrees\edc-pr-010-evidence-uat-closeout</strong>
+        <strong id="worktree-context">.worktrees\edc-pr-011-agent-runtime-command-drafts</strong>
       </div>
       <div>
         <span>Sequence</span>
-        <strong id="internal-sequence">EDC-PR-010</strong>
+        <strong id="internal-sequence">EDC-PR-011</strong>
       </div>
     </section>
 
@@ -81,7 +81,7 @@
               <h3 id="detail-title">Work Item Detail</h3>
               <p id="detail-summary">Selected task-card boundary and readiness state.</p>
             </div>
-            <span id="detail-pr-mapping" class="status-chip">#34</span>
+            <span id="detail-pr-mapping" class="status-chip">TBD</span>
           </div>
           <div class="detail-grid">
             <article class="panel">
@@ -126,6 +126,21 @@
               <h3>Write-back</h3>
               <p id="detail-writeback"></p>
             </article>
+            <article id="detail-command-drafts" class="panel wide command-drafts">
+              <div class="section-title">
+                <h3>Draft Operational Controls</h3>
+                <p>Draft-only selectors update fixture state only; no runtime, shell, NATS, GitHub, merge, or owner-UAT action is invoked.</p>
+              </div>
+              <div class="draft-action-row" aria-label="Draft operational controls">
+                <button type="button" class="draft-action" data-command-type="evaluate_assignment_candidate">Evaluate assignment</button>
+                <button type="button" class="draft-action" data-command-type="prepare_execution_handoff_draft">Prepare handoff draft</button>
+                <button type="button" class="draft-action" data-command-type="request_owner_uat_decision_draft">Request owner decision draft</button>
+              </div>
+              <div id="command-draft-list" class="command-draft-list" aria-label="Command draft records"></div>
+              <section id="selected-command-draft-detail" class="projection-panel selected-command-draft-detail" aria-label="Selected command draft requirements"></section>
+              <section id="dispatch-candidate-projection" class="projection-panel" aria-label="Dispatch candidate projection"></section>
+              <section id="handoff-preview" class="projection-panel" aria-label="Handoff preview"></section>
+            </article>
           </div>
         </div>
 
@@ -135,6 +150,7 @@
             <p>Roles are fixture-backed accountability records. No live assignment, dispatch, credential, or private-session action is available.</p>
           </div>
           <div id="agent-team-list" class="agent-team-list" aria-label="Agent team roles"></div>
+          <div id="agent-definition-list" class="agent-definition-list" aria-label="Agent definition records"></div>
         </div>
 
         <div id="runtime-worktrees-region" class="runtime-worktrees-region" hidden>
@@ -143,6 +159,9 @@
             <p>Project worktrees are inspection-only. Runtime startup, dependency install, broker mutation, dispatch, and cleanup remain blocked.</p>
           </div>
           <div id="runtime-worktree-list" class="runtime-worktree-list" aria-label="Runtime worktree records"></div>
+          <div id="runtime-provider-list" class="runtime-provider-list" aria-label="Runtime provider profiles"></div>
+          <div id="runtime-instance-list" class="runtime-instance-list" aria-label="Runtime instance records"></div>
+          <div id="run-session-list" class="run-session-list" aria-label="Run session records"></div>
           <section id="nats-boundary" class="nats-boundary" aria-label="NATS boundary"></section>
         </div>
 

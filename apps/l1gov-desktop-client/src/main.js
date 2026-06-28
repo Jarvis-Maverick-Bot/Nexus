@@ -63,10 +63,19 @@ function buildShellState(fixture) {
   const prStack = fixture.pr_stack ?? [];
   const inboxAttention = fixture.inbox_attention ?? [];
   const settingsBoundaries = fixture.settings_boundaries ?? [];
+  const agentDefinitions = fixture.agent_definitions ?? [];
+  const runtimeProviders = fixture.runtime_providers ?? [];
+  const runtimeInstances = fixture.runtime_instances ?? [];
+  const runSessions = fixture.run_sessions ?? [];
+  const commandDrafts = fixture.command_drafts ?? [];
+  const dispatchCandidates = fixture.dispatch_candidate_projection ?? [];
+  const handoffPreviews = fixture.handoff_preview ?? [];
   const workItemsById = byId(workItems, "internal_id");
   const selectedWorkItemId = workItemsById[fixture.selected_work_item_id]
     ? fixture.selected_work_item_id
     : workItems[0]?.internal_id;
+  const selectedCommandDraftId = commandDrafts.find((draft) => draft.work_item_id === selectedWorkItemId)?.draft_id
+    ?? commandDrafts[0]?.draft_id;
 
   return {
     fixture,
@@ -89,7 +98,22 @@ function buildShellState(fixture) {
     inboxAttention,
     inboxAttentionById: byId(inboxAttention),
     settingsBoundaries,
-    settingsBoundariesById: byId(settingsBoundaries)
+    settingsBoundariesById: byId(settingsBoundaries),
+    agentDefinitions,
+    agentDefinitionsById: byId(agentDefinitions, "agent_id"),
+    runtimeProviders,
+    runtimeProvidersById: byId(runtimeProviders, "provider_id"),
+    runtimeInstances,
+    runtimeInstancesById: byId(runtimeInstances, "runtime_instance_id"),
+    runSessions,
+    runSessionsById: byId(runSessions, "run_session_id"),
+    commandDrafts,
+    commandDraftsById: byId(commandDrafts, "draft_id"),
+    dispatchCandidates,
+    dispatchCandidatesById: byId(dispatchCandidates, "candidate_id"),
+    handoffPreviews,
+    handoffPreviewsById: byId(handoffPreviews, "preview_id"),
+    selectedCommandDraftId
   };
 }
 
@@ -253,8 +277,112 @@ function renderWorkItemDetail() {
   $("detail-validation").replaceChildren(...createTextList(item.task_card.validation_commands));
   $("detail-risk-list").replaceChildren(...createTextList(item.residual_risks));
   $("detail-blocker-list").replaceChildren(...createTextList(item.blockers));
+  renderCommandDrafts();
 }
 
+
+function renderRecordCards(records, titleKey, linesForRecord, className) {
+  return records.map((record) => {
+    const card = document.createElement("article");
+    const heading = document.createElement("h3");
+    card.className = `panel ${className}`;
+    heading.textContent = record[titleKey];
+    card.append(heading);
+    for (const line of linesForRecord(record)) {
+      const paragraph = document.createElement("p");
+      paragraph.textContent = line;
+      card.append(paragraph);
+    }
+    return card;
+  });
+}
+
+function renderCommandDrafts() {
+  const itemDrafts = state.commandDrafts.filter((draft) => draft.work_item_id === state.selectedWorkItemId);
+  if (!itemDrafts.some((draft) => draft.draft_id === state.selectedCommandDraftId)) {
+    state.selectedCommandDraftId = itemDrafts[0]?.draft_id ?? state.commandDrafts[0]?.draft_id;
+  }
+  const draftButtons = itemDrafts.map((draft) => {
+    const button = document.createElement("button");
+    const selected = draft.draft_id === state.selectedCommandDraftId;
+    button.type = "button";
+    button.className = `command-draft-card ${selected ? "selected" : ""}`;
+    button.setAttribute("data-command-draft-id", draft.draft_id);
+    button.setAttribute("aria-pressed", selected ? "true" : "false");
+    button.textContent = `${draft.label}: ${labelize(draft.command_type)} / ${draft.draft_only ? "draft-only" : "invalid"}`;
+    button.addEventListener("click", () => selectCommandDraft(draft.draft_id));
+    return button;
+  });
+  $("command-draft-list").replaceChildren(...draftButtons);
+
+  updateDraftActionButtons();
+
+  const selectedDraft = state.commandDraftsById[state.selectedCommandDraftId] ?? itemDrafts[0];
+  renderSelectedCommandDraftDetail(selectedDraft);
+  const candidate = state.dispatchCandidates.find((record) => record.work_item_id === state.selectedWorkItemId);
+  const preview = selectedDraft ? state.handoffPreviewsById[selectedDraft.handoff_preview_ref] : undefined;
+  const candidateTitle = document.createElement("h3");
+  const candidateState = document.createElement("p");
+  const candidateReason = document.createElement("p");
+  candidateTitle.textContent = "Dispatch Candidate Projection";
+  candidateState.textContent = candidate ? `Eligible: ${candidate.eligible ? "yes" : "no"}; draft only: ${(candidate.blocked_reasons ?? []).includes("draft_only") ? "yes" : "no"}.` : "No candidate projection.";
+  candidateReason.textContent = candidate ? `Reason: ${(candidate.blocked_reasons ?? []).join("; ")}` : "No dispatch authority is inferred.";
+  $("dispatch-candidate-projection").replaceChildren(candidateTitle, candidateState, candidateReason);
+
+  const previewTitle = document.createElement("h3");
+  const previewTarget = document.createElement("p");
+  const previewWriteback = document.createElement("p");
+  const previewValidation = document.createElement("ul");
+  previewTitle.textContent = "Handoff Preview";
+  previewTarget.textContent = preview ? `Target agent ${preview.target_agent_id}; runtime ${preview.target_runtime_instance_id}; task card ${preview.task_card_ref}.` : "No handoff preview selected.";
+  previewWriteback.textContent = preview ? `Write-back: ${preview.write_back_location}` : "Write-back remains Planning callback only.";
+  previewValidation.className = "compact-list";
+  previewValidation.replaceChildren(...createTextList(preview?.validation_commands));
+  $("handoff-preview").replaceChildren(previewTitle, previewTarget, previewWriteback, previewValidation);
+}
+
+function renderSelectedCommandDraftDetail(selectedDraft) {
+  const title = document.createElement("h3");
+  const status = document.createElement("p");
+  const target = document.createElement("p");
+  const approvalsTitle = document.createElement("strong");
+  const approvals = document.createElement("ul");
+  const blockedTitle = document.createElement("strong");
+  const blocked = document.createElement("ul");
+  const evidenceTitle = document.createElement("strong");
+  const evidence = document.createElement("ul");
+
+  title.textContent = "Selected Command Draft";
+  if (!selectedDraft) {
+    status.textContent = "No command draft selected.";
+    $("selected-command-draft-detail").replaceChildren(title, status);
+    return;
+  }
+
+  status.textContent = `Draft ${selectedDraft.draft_id}; command ${labelize(selectedDraft.command_type)}; draft_only ${selectedDraft.draft_only ? "true" : "false"}; non_authoritative ${selectedDraft.non_authoritative ? "true" : "false"}.`;
+  target.textContent = `Target agent ${selectedDraft.target_agent_id}; target runtime ${selectedDraft.target_runtime_instance_id}; run session ${selectedDraft.run_session_id}.`;
+  approvalsTitle.textContent = "Required approvals";
+  blockedTitle.textContent = "Blocked authorities";
+  evidenceTitle.textContent = "Evidence requirements";
+  approvals.className = "compact-list";
+  blocked.className = "compact-list";
+  evidence.className = "compact-list";
+  approvals.replaceChildren(...createTextList(selectedDraft.required_approvals.map(labelize)));
+  blocked.replaceChildren(...createTextList(selectedDraft.blocked_authorities.map(labelize)));
+  evidence.replaceChildren(...createTextList(selectedDraft.evidence_requirements.map(labelize)));
+
+  $("selected-command-draft-detail").replaceChildren(
+    title,
+    status,
+    target,
+    approvalsTitle,
+    approvals,
+    blockedTitle,
+    blocked,
+    evidenceTitle,
+    evidence
+  );
+}
 function renderAgentsView() {
   const cards = Object.values(state.agentsByRole).map((agent) => {
     const card = document.createElement("article");
@@ -284,6 +412,16 @@ function renderAgentsView() {
   });
 
   $("agent-team-list").replaceChildren(...cards);
+  $("agent-definition-list").replaceChildren(...renderRecordCards(
+    state.agentDefinitions,
+    "display_name",
+    (agent) => [
+      `Agent ID: ${agent.agent_id}; role: ${labelize(agent.role)}.`,
+      `Capability tags: ${(agent.capability_tags ?? []).map(labelize).join(", ")}.`,
+      `Authority boundaries: ${(agent.authority_boundaries ?? []).join("; ")}.`
+    ],
+    "agent-definition-card"
+  ));
 }
 
 function renderRuntimeWorktreesView() {
@@ -309,6 +447,35 @@ function renderRuntimeWorktreesView() {
   });
 
   $("runtime-worktree-list").replaceChildren(...records);
+  $("runtime-provider-list").replaceChildren(...renderRecordCards(
+    state.runtimeProviders,
+    "display_name",
+    (provider) => [
+      `Provider: ${provider.provider_id}; family: ${provider.provider_family}.`,
+      `Executable: ${provider.executable ? "yes" : "no"}; blocked reason: ${provider.blocked_reason}.`
+    ],
+    "runtime-provider-card"
+  ));
+  $("runtime-instance-list").replaceChildren(...renderRecordCards(
+    state.runtimeInstances,
+    "runtime_instance_id",
+    (runtime) => [
+      `Provider: ${runtime.provider_id}; branch: ${runtime.branch}.`,
+      `Worktree: ${runtime.worktree_path}.`,
+      `Startup ${runtime.startup_allowed ? "allowed" : "blocked"}; dependency install ${runtime.dependency_install_allowed ? "allowed" : "blocked"}; broker mutation ${runtime.broker_mutation_allowed ? "allowed" : "blocked"}; dispatch ${runtime.live_dispatch_allowed ? "allowed" : "blocked"}.`
+    ],
+    "runtime-instance-card"
+  ));
+  $("run-session-list").replaceChildren(...renderRecordCards(
+    state.runSessions,
+    "run_session_id",
+    (session) => [
+      `Work item: ${session.work_item_id}; agent: ${session.agent_id}; runtime: ${session.runtime_instance_id}.`,
+      `Session state: ${labelize(session.session_state)}; execution state: ${labelize(session.execution_state)}.`,
+      `Evidence ref: ${session.evidence_ref}.`
+    ],
+    "run-session-card"
+  ));
   renderNatsBoundary();
 }
 
@@ -492,6 +659,28 @@ function selectWorkItem(workItemId) {
   renderWorkItemDetail();
 }
 
+
+function updateDraftActionButtons() {
+  const selectedDraft = state.commandDraftsById[state.selectedCommandDraftId];
+  document.querySelectorAll(".draft-action[data-command-type]").forEach((button) => {
+    const selected = button.dataset.commandType === selectedDraft?.command_type;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", selected ? "true" : "false");
+  });
+}
+
+function selectCommandDraftByType(commandType) {
+  const draft = state.commandDrafts.find(
+    (candidate) => candidate.work_item_id === state.selectedWorkItemId && candidate.command_type === commandType
+  );
+  if (!draft) return;
+  selectCommandDraft(draft.draft_id);
+}
+function selectCommandDraft(draftId) {
+  if (!state.commandDraftsById[draftId]) return;
+  state.selectedCommandDraftId = draftId;
+  renderCommandDrafts();
+}
 function selectView(viewId) {
   state.activeViewId = normalizeViewId(viewId);
   renderNavigation();
@@ -501,6 +690,9 @@ function selectView(viewId) {
 function bindEvents() {
   document.querySelectorAll(".nav-button").forEach((button) => {
     button.addEventListener("click", () => selectView(button.dataset.viewId));
+  });
+  document.querySelectorAll(".draft-action[data-command-type]").forEach((button) => {
+    button.addEventListener("click", () => selectCommandDraftByType(button.dataset.commandType));
   });
 }
 
@@ -538,8 +730,11 @@ window.edcWorkbenchShellSurface = {
   renderPrUatCloseoutView,
   renderInboxAttentionView,
   renderSettingsBoundariesView,
+  renderCommandDrafts,
   renderWorkItemDetail,
   renderWorkItemsBoard,
   selectView,
-  selectWorkItem
+  selectWorkItem,
+  selectCommandDraft,
+  selectCommandDraftByType
 };

@@ -71,6 +71,14 @@ Purpose: inspect and review a single task card and execution report.
 
 Must show background, goal, scope, non-goals, file boundaries, acceptance criteria, validation commands, risks, write-back location, readiness checklist, assignment/run state, changed files, validation report, and explicit blocked/not-authorized actions.
 
+
+### Draft Operations / Backend Projection
+
+Purpose: make the next useful operation visible without granting live authority.
+
+The Work Item Detail view may expose draft-only controls such as Evaluate assignment, Prepare handoff draft, and Request owner decision draft. These controls select or preview deterministic command draft records in local UI state only. They must not call Tauri commands, network APIs, NATS, GitHub, shell commands, package managers, runtime startup, live dispatch, merge, or owner UAT acceptance paths.
+
+The projection must distinguish Agent Definition, Runtime Provider, Runtime Instance, and Run Session. Agent is the accountable business/member identity; Runtime Provider and Runtime Instance describe execution capability and availability; Run Session is execution state. A Codex conversation/session is not itself the Agent identity.
 ### Agents / Team
 
 Purpose: see accountable roles and assignment boundaries.
@@ -154,6 +162,7 @@ The UI must show these states explicitly rather than hiding unavailable actions:
 - `EDC-PR-008`: Work Items board/list and Work Item Detail surfaces.
 - `EDC-PR-009`: Agents, runtime, and worktree surfaces.
 - `EDC-PR-010`: Evidence/Runs, PR/UAT closeout, final startup readiness, and owner UAT preparation.
+- `EDC-PR-011`: Agent runtime command drafts and backend projection without live dispatch authority.
 
 Do not begin owner UAT before EDC-PR-010. Do not add runtime startup or live dispatch unless a future task card explicitly authorizes the named command and side-effect boundary.
 

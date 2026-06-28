@@ -33,6 +33,7 @@ GitHub PR numbers are external identifiers assigned by GitHub and must be record
 | `EDC-PR-008` | #34 | `codex/edc-pr-008-work-items-surface` | Work items board/list/detail surface | Draft PR open |
 | `EDC-PR-009` | #35 | `codex/edc-pr-009-agents-runtime-worktrees` | Agents, runtime, and worktree surface | Draft PR open |
 | `EDC-PR-010` | #36 | `codex/edc-pr-010-evidence-uat-closeout` | Evidence, PR/UAT closeout, and final UAT startup readiness | Draft PR open |
+| `EDC-PR-011` | TBD | `codex/edc-pr-011-agent-runtime-command-drafts` | Agent runtime command drafts and backend projection | Implementation in review |
 
 ## Proposed PR Sequence
 
@@ -127,6 +128,17 @@ Acceptance:
 - startup readiness can be documented for Alex, but Codex does not claim owner UAT acceptance, UAT PASS, merge approval, production readiness, or live readiness;
 - after Planning review, Alex can be notified for UAT testing.
 
+
+### EDC-PR-011: Agent Runtime Command Drafts And Backend Projection
+
+Goal: add inert operational command-draft records and desktop affordances that let a user inspect assignment evaluation, handoff preparation, and owner-decision request intent without starting runtime, dispatching, mutating brokers/NATS, installing dependencies, merging, or accepting owner UAT.
+
+Acceptance:
+
+- Agent Definition, Runtime Provider, Runtime Instance, and Run Session are modeled as separate concepts.
+- command drafts are draft-only, non-authoritative, and fail closed for live dispatch/startup/dependency/broker/merge/UAT/production/live-readiness claims.
+- Work Item Detail exposes local fixture-backed draft controls and handoff preview without invoking Tauri, shell, network APIs, NATS, GitHub, package managers, or runtime startup.
+- EDC-PR-011 remains GitHub PR TBD until Planning creates the external PR mapping.
 ## UX Implementation Mapping
 
 Use `docs/codex/UX_SPEC.md` as the durable UX reference for future task cards:
@@ -136,5 +148,6 @@ Use `docs/codex/UX_SPEC.md` as the durable UX reference for future task cards:
 - `EDC-PR-008`: Work Items board/list and Work Item Detail.
 - `EDC-PR-009`: Agents/team, runtime authorization, and worktree state.
 - `EDC-PR-010`: Evidence/Runs, PR/UAT closeout, final startup readiness, and owner UAT preparation.
+- `EDC-PR-011`: draft-only operational command intents and Agent/Runtime/Session backend projection.
 
 The recommended next Execution task after EDC-PR-006 is `EDC-PR-007: Desktop Workspace Shell And Real Navigation`.
