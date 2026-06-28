@@ -253,8 +253,8 @@ def test_workbench_fixture_contains_work_item_board_and_detail_records() -> None
     assert by_id["EDC-PR-010"]["github_pr_number"] == 36
     assert by_id["EDC-PR-010"]["github_pr_label"] == "#36"
     assert by_id["EDC-PR-010"]["owner_uat_state"] == "awaiting_owner"
-    assert by_id["EDC-PR-011"]["github_pr_number"] is None
-    assert by_id["EDC-PR-011"]["github_pr_label"] == "TBD"
+    assert by_id["EDC-PR-011"]["github_pr_number"] == 37
+    assert by_id["EDC-PR-011"]["github_pr_label"] == "#37"
     assert by_id["EDC-PR-011"]["branch"] == "codex/edc-pr-011-agent-runtime-command-drafts"
     assert by_id["EDC-PR-011"]["worktree"].endswith(".worktrees\\edc-pr-011-agent-runtime-command-drafts")
     assert by_id["EDC-PR-011"]["base_commit"] == "dd4f9b0"
@@ -464,8 +464,8 @@ def test_workbench_fixture_contains_evidence_run_records_and_gates() -> None:
     assert by_id["EDC-PR-010"]["status"] == "not_run"
     assert by_id["EDC-PR-010"]["evidence_state"] == "not_run_by_scope"
     assert by_id["EDC-PR-010"]["not_run_reason"]
-    assert by_id["EDC-PR-011"]["github_pr_number"] is None
-    assert by_id["EDC-PR-011"]["github_pr_label"] == "TBD"
+    assert by_id["EDC-PR-011"]["github_pr_number"] == 37
+    assert by_id["EDC-PR-011"]["github_pr_label"] == "#37"
     assert by_id["EDC-PR-011"]["status"] == "not_run"
     assert by_id["EDC-PR-011"]["evidence_state"] == "not_run_by_scope"
     assert by_id["EDC-PR-011"]["not_run_reason"]
@@ -562,9 +562,9 @@ def test_workbench_fixture_contains_edc_pr_011_command_draft_projection() -> Non
     fixture = load_fixture()
     mappings = {mapping["internal_id"]: mapping for mapping in fixture["pr_mappings"]}
 
-    assert mappings["EDC-PR-011"]["github_pr_number"] is None
-    assert mappings["EDC-PR-011"]["github_pr_label"] == "TBD"
-    assert mappings["EDC-PR-011"]["status"] == "implementation_in_review"
+    assert mappings["EDC-PR-011"]["github_pr_number"] == 37
+    assert mappings["EDC-PR-011"]["github_pr_label"] == "#37"
+    assert mappings["EDC-PR-011"]["status"] == "draft_pr_open"
     assert fixture["project"]["current_internal_sequence"] == "EDC-PR-011"
     assert fixture["selected_work_item_id"] == "EDC-PR-011"
 

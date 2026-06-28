@@ -98,16 +98,16 @@ for (const mapping of mappings) {
   requireTrue(String(mapping.internal_id) !== String(mapping.github_pr_number), `GitHub PR number used as internal id: ${mapping.internal_id}`);
 }
 const byId = new Map(mappings.map((mapping) => [mapping.internal_id, mapping]));
-for (const [internalId, githubNumber] of [["EDC-PR-001", 27], ["EDC-PR-002", 28], ["EDC-PR-003", 29], ["EDC-PR-004", 30], ["EDC-PR-005", 31], ["EDC-PR-006", 32], ["EDC-PR-007", 33], ["EDC-PR-008", 34], ["EDC-PR-009", 35], ["EDC-PR-010", 36]]) {
+for (const [internalId, githubNumber] of [["EDC-PR-001", 27], ["EDC-PR-002", 28], ["EDC-PR-003", 29], ["EDC-PR-004", 30], ["EDC-PR-005", 31], ["EDC-PR-006", 32], ["EDC-PR-007", 33], ["EDC-PR-008", 34], ["EDC-PR-009", 35], ["EDC-PR-010", 36], ["EDC-PR-011", 37]]) {
   const mapping = byId.get(internalId);
   requireTrue(Boolean(mapping), `missing PR mapping for ${internalId}`);
   requireTrue(mapping.github_pr_number === githubNumber, `${internalId} must map to GitHub PR #${githubNumber}`);
 }
 requireTrue(byId.get("EDC-PR-010")?.github_pr_label === "#36", "EDC-PR-010 GitHub label must be #36");
 requireTrue(byId.get("EDC-PR-010")?.status === "draft_pr_open", "EDC-PR-010 status must be draft_pr_open");
-requireTrue(byId.get("EDC-PR-011")?.github_pr_number === null, "EDC-PR-011 GitHub PR must remain TBD");
-requireTrue(byId.get("EDC-PR-011")?.github_pr_label === "TBD", "EDC-PR-011 GitHub label must be TBD");
-requireTrue(byId.get("EDC-PR-011")?.status === "implementation_in_review", "EDC-PR-011 status must be implementation_in_review");
+requireTrue(byId.get("EDC-PR-011")?.github_pr_number === 37, "EDC-PR-011 must map to GitHub PR #37");
+requireTrue(byId.get("EDC-PR-011")?.github_pr_label === "#37", "EDC-PR-011 GitHub label must be #37");
+requireTrue(byId.get("EDC-PR-011")?.status === "draft_pr_open", "EDC-PR-011 status must be draft_pr_open");
 requireTrue(byId.get("EDC-PR-004")?.baseline_role === "superseded_prototype", "EDC-PR-004/#30 must be superseded");
 requireTrue(byId.get("EDC-PR-005")?.baseline_role === "superseded_prototype", "EDC-PR-005/#31 must be superseded");
 requireTrue(!mappings.some((mapping) => mapping.baseline_role === "uat_baseline"), "no mapping may be UAT baseline in EDC-PR-010");
@@ -135,7 +135,7 @@ requireTrue(workItemsById.get("EDC-PR-010")?.github_pr_label === "#36", "EDC-PR-
 requireTrue(workItemsById.get("EDC-PR-010")?.branch === "codex/edc-pr-010-evidence-uat-closeout", "EDC-PR-010 work item branch is invalid");
 requireTrue(workItemsById.get("EDC-PR-010")?.base_commit === "68eca33", "EDC-PR-010 work item base is invalid");
 requireTrue(workItemsById.get("EDC-PR-010")?.owner_uat_state === "awaiting_owner", "EDC-PR-010 must keep owner UAT awaiting owner");
-requireTrue(workItemsById.get("EDC-PR-011")?.github_pr_number === null, "EDC-PR-011 work item must keep GitHub PR TBD");
+requireTrue(workItemsById.get("EDC-PR-011")?.github_pr_number === 37, "EDC-PR-011 work item must map to GitHub PR #37");
 requireTrue(workItemsById.get("EDC-PR-011")?.branch === "codex/edc-pr-011-agent-runtime-command-drafts", "EDC-PR-011 work item branch is invalid");
 requireTrue(workItemsById.get("EDC-PR-011")?.base_commit === "dd4f9b0", "EDC-PR-011 work item base is invalid");
 requireTrue(workItemsById.get("EDC-PR-011")?.owner_uat_state === "awaiting_owner", "EDC-PR-011 must keep owner UAT awaiting owner");
@@ -185,7 +185,7 @@ for (const record of evidenceRuns) {
   }
 }
 requireTrue(evidenceById.get("EDC-PR-010")?.github_pr_number === 36, "EDC-PR-010 evidence must map to GitHub PR #36");
-requireTrue(evidenceById.get("EDC-PR-011")?.github_pr_number === null, "EDC-PR-011 evidence must keep GitHub PR TBD");
+requireTrue(evidenceById.get("EDC-PR-011")?.github_pr_number === 37, "EDC-PR-011 evidence must map to GitHub PR #37");
 
 const prStackById = new Map(prStack.map((record) => [record.internal_id, record]));
 requireTrue(prStack.length === requiredPrStack.length, "fixture must expose required PR stack records only");
@@ -200,8 +200,8 @@ requireTrue(prStackById.get("EDC-PR-004")?.baseline_role === "superseded_prototy
 requireTrue(prStackById.get("EDC-PR-005")?.baseline_role === "superseded_prototype", "EDC-PR-005 must remain superseded");
 requireTrue(prStackById.get("EDC-PR-010")?.github_pr_number === 36, "EDC-PR-010 PR stack must map to GitHub PR #36");
 requireTrue(prStackById.get("EDC-PR-010")?.status === "draft_pr_open", "EDC-PR-010 PR stack status must be draft_pr_open");
-requireTrue(prStackById.get("EDC-PR-011")?.github_pr_number === null, "EDC-PR-011 PR stack must keep GitHub PR TBD");
-requireTrue(prStackById.get("EDC-PR-011")?.status === "implementation_in_review", "EDC-PR-011 PR stack status must be implementation_in_review");
+requireTrue(prStackById.get("EDC-PR-011")?.github_pr_number === 37, "EDC-PR-011 PR stack must map to GitHub PR #37");
+requireTrue(prStackById.get("EDC-PR-011")?.status === "draft_pr_open", "EDC-PR-011 PR stack status must be draft_pr_open");
 requireTrue(!prStack.some((record) => record.baseline_role === "uat_baseline"), "PR stack must not claim UAT baseline");
 
 const owner = fixture.owner_uat_decision;
