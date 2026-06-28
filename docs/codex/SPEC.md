@@ -81,6 +81,14 @@ Implementation task cards should reference these docs rather than reviving the r
 - Inbox/Attention surfaces blocked work, stale evidence, missing owner UAT, runtime hold, dependency install not authorized, live dispatch blocked, broker mutation blocked, missing reducer, and scope mismatches.
 - Attention state should drive review and rework without implying Codex can self-authorize unsafe actions.
 
+
+### 8. Command Drafts And Backend Projection
+
+EDC-PR-011 adds a bounded operational projection layer. The Workbench may show draft-only commands such as `evaluate_assignment_candidate`, `prepare_execution_handoff_draft`, `request_owner_uat_decision_draft`, `refresh_projection_draft`, and `record_validation_evidence_draft`.
+
+These drafts are validated data records, not executable authority. Validators must reject live dispatch, runtime startup, dependency installation, broker/NATS mutation, PR merge, owner UAT acceptance, production readiness, live readiness, missing handoff/write-back fields, and EDC/GitHub PR identifier mixing.
+
+The domain model keeps `AgentDefinitionRecord`, `RuntimeProviderProfile`, `RuntimeInstanceRecord`, and `RunSessionRecord` separate. A Codex session or run may be execution state for an agent, but it is not the Agent identity.
 ## Non-Functional Requirements
 
 - Local-first and reviewable before automation-first.

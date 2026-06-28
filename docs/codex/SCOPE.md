@@ -90,3 +90,10 @@ The next owner UAT checkpoint is after EDC-PR-010. Codex local testing is not ow
 Shared Docs can provide historical governance/design/evidence context. SecondBrain can provide curated reference patterns. Neither creates implementation scope by itself.
 
 Multica remains an IA/product reference only. It does not authorize dependency installation, code copying, runtime adoption, service architecture changes, or external platform integration.
+## EDC-PR-011 Operational Boundary
+
+EDC-PR-011 is in scope only for safe command drafts and backend projection. It may model `AgentDefinitionRecord`, `RuntimeProviderProfile`, `RuntimeInstanceRecord`, `RunSessionRecord`, and `OperationalCommandDraft` as durable non-secret state.
+
+Allowed operational intents are inert drafts such as assignment evaluation, Planning-to-Execution handoff preparation, owner decision request preparation, projection refresh, and validation evidence recording. They must not invoke live dispatch, runtime startup, dependency installation, broker/NATS mutation, GitHub mutation, merge, owner UAT acceptance, production readiness, or live readiness.
+
+Agent identity is separate from runtime provider, runtime instance, and run session state. A Codex conversation/session is not the business Agent identity.

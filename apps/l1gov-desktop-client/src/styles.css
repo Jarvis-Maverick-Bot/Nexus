@@ -474,3 +474,84 @@ button {
   border-color: #f0c2bd;
   background: #fff1ef;
 }
+.command-drafts,
+.projection-panel,
+.agent-definition-card,
+.runtime-provider-card,
+.runtime-instance-card,
+.run-session-card {
+  display: grid;
+  gap: 8px;
+}
+
+.draft-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.draft-action-notice {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.draft-action,
+.command-draft-card {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-muted);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.command-draft-list,
+.agent-definition-list,
+.runtime-provider-list,
+.runtime-instance-list,
+.run-session-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.command-draft-card {
+  width: 100%;
+  text-align: left;
+}
+
+.draft-action.selected,
+.command-draft-card.selected,
+.command-draft-card:focus-visible,
+.draft-action:focus-visible {
+  border-color: var(--blue);
+  outline: 2px solid #c7dcff;
+}
+
+.draft-action:disabled,
+.draft-action.unavailable {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.projection-panel {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+@media (max-width: 1120px) {
+  .command-draft-list,
+  .agent-definition-list,
+  .runtime-provider-list,
+  .runtime-instance-list,
+  .run-session-list {
+    grid-template-columns: 1fr;
+  }
+}
